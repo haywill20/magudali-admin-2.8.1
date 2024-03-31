@@ -1,0 +1,26 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "eShop.multivendor.customer",
+      "sha256_cert_fingerprints": [
+        "EC:51:47:B2:9F:17:D6:C9:39:A5:B9:10:00:38:C3:C0:9C:1F:03:D6:DD:7D:09:49:65:36:B7:34:DA:98:6A:F9"
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "eShop.multivendor.customer",
+      "sha256_cert_fingerprints": [
+        "E1:B1:93:4D:94:7F:3B:90:B3:5B:B3:62:1C:C7:E3:D9:30:90:12:B3:F0:FD:9D:B4:EB:CF:1B:17:4F:7D:B4:E1"
+      ]
+    }
+  }
+]
