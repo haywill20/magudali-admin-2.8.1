@@ -758,15 +758,15 @@ Defined Methods:-
                 if ($_POST['status'] == 'received') {
                     $type = ['type' => "customer_order_received"];
                 } elseif ($_POST['status'] == 'processed') {
-                    $type = ['type' => "customer_order_processed"];
+                    $type = ['type' => "PROCESADO"];
                 } elseif ($_POST['status'] == 'shipped') {
-                    $type = ['type' => "customer_order_shipped"];
+                    $type = ['type' => "ENVIADO"];
                 } elseif ($_POST['status'] == 'delivered') {
-                    $type = ['type' => "customer_order_delivered"];
+                    $type = ['type' => "ENTREGADO"];
                 } elseif ($_POST['status'] == 'cancelled') {
-                    $type = ['type' => "customer_order_cancelled"];
+                    $type = ['type' => "CANCELADO"];
                 } elseif ($_POST['status'] == 'returned') {
-                    $type = ['type' => "customer_order_returned"];
+                    $type = ['type' => "DEVUELTO"];
                 }
                 $custom_notification = fetch_details('custom_notifications', $type, '');
                 $hashtag_cutomer_name = '< cutomer_name >';
@@ -776,9 +776,9 @@ Defined Methods:-
                 $hashtag = html_entity_decode($string);
                 $data = str_replace(array($hashtag_cutomer_name, $hashtag_order_id, $hashtag_application_name), array($user_res[0]['username'], $order_items[0]['order_id'], $app_name), $hashtag);
                 $message = output_escaping(trim($data, '"'));
-                $customer_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $user_res[0]['username'] . 'Order status updated to' . $_POST['val'] . ' for order ID #' . $order_items[0]['order_id'] . ' please take note of it! Thank you. Regards ' . $app_name . '';
+                $customer_msg = (!empty($custom_notification)) ? $message :  'Hola ' . $user_res[0]['username'] . ' el estado del tu pedido fue actualizado a: ' . $type['type'] . ', para el pedido con ID #' . $order_items[0]['order_id'];
                 $fcmMsg = array(
-                    'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
+                    'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Estado del pedido actualizado",
                     'body' => $customer_msg,
                     'type' => "order",
                 );
