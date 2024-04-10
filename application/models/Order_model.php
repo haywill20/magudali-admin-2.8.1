@@ -548,8 +548,8 @@ class Order_model extends CI_Model
             $data2 = str_replace($hashtag_application_name, $system_settings['app_name'], $hashtag);
             $message = output_escaping(trim($data2, '"'));
 
-            $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'New order placed ID #' . $last_order_id;
-            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
+            $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'Tienes un nuevo pedido ID #' . $last_order_id;
+            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'Hola ' . $system_settings['app_name'] . ' porfavor procesa el nuevo pedido con ID #' . $last_order_id;
 
             if (trim(strtolower($data['payment_method'])) != 'paypal' || trim(strtolower($data['payment_method'])) != 'stripe') {
                 $overall_order_data = array(
