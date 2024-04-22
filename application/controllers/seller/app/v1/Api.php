@@ -593,17 +593,17 @@ Defined Methods:-
                     if (isset($user_res[0]) && !empty($user_res[0])) {
                         $current_delivery_boy = array_column($current_delivery_boys, "delivery_boy_id");
                         if ($_POST['status'] == 'received') {
-                            $type = ['type' => "customer_order_received"];
+                            $type = ['type' => "RECIBIDO"];
                         } elseif ($_POST['status'] == 'processed') {
-                            $type = ['type' => "customer_order_processed"];
-                        } elseif ($_POST['status'] == 'shipped') {
-                            $type = ['type' => "customer_order_shipped"];
+                            $type = ['type' => "PROCESADO"];
+                         } elseif ($_POST['status'] == 'shipped') {
+                            $type = ['type' => "ENVIADO"];
                         } elseif ($_POST['status'] == 'delivered') {
-                            $type = ['type' => "customer_order_delivered"];
+                            $type = ['type' => "ENTREGADO"];
                         } elseif ($_POST['status'] == 'cancelled') {
-                            $type = ['type' => "customer_order_cancelled"];
+                            $type = ['type' => "CANCELADO"];
                         } elseif ($_POST['status'] == 'returned') {
-                            $type = ['type' => "customer_order_returned"];
+                            $type = ['type' => "DEVUELTO"];
                         }
                         $custom_notification = fetch_details('custom_notifications', $type, '');
 
@@ -668,13 +668,64 @@ Defined Methods:-
                                 $hashtag = html_entity_decode($string);
                                 $data = str_replace(array($hashtag_cutomer_name, $hashtag_order_id, $hashtag_application_name), array($user_res[0]['username'], $order_items[0]['order_id'], $app_name), $hashtag);
                                 $message = output_escaping(trim($data, '"'));
-                                $customer_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $user_res[0]['username'] . 'Order status updated to' . $_POST['val'] . ' for order ID #' . $order_items[0]['order_id'] . ' assigned to you please take note of it! Thank you. Regards ' . $app_name . '';
-                                $fcmMsg = array(
-                                    'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "You have new order to deliver",
-                                    'body' => $customer_msg,
-                                    'type' => "order",
-                                    'order_id' => $order_items[0]['order_id'],
-                                );
+
+
+                                switch($_POST['status']){
+                                    case 'received':
+                                        $customer_msg = (!empty($custom_notification)) ? $message :  'Hola ' . $user_res[0]['username'] . ', ! Hay un nuevo pedido listo para entrega con ID #' . $order_items[0]['order_id'] . ' Por favor, Mira el pedido y procesalo ¡Gracias por tu trabajo! 😎. El estado del pedido es: '. $type['type'];
+                                        $fcmMsg = array(
+                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Nuevo pedido recibido",
+                                            'body' => $customer_msg,
+                                            'type' => "order",
+                                            'order_id' => $order_items[0]['order_id'],
+                                        );
+                                    break;
+                                    case 'processed':
+                                        $customer_msg = (!empty($custom_notification)) ? $message :  'Hola ' . $user_res[0]['username'] . ', ! Hay un nuevo pedido listo para entrega con ID #' . $order_items[0]['order_id'] . ' Por favor, Mira el pedido y procesalo ¡Gracias por tu trabajo! 😎. El estado del pedido es:' . $type['type'];
+                                        $fcmMsg = array(
+                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Nuevo pedido recibido",
+                                            'body' => $customer_msg,
+                                            'type' => "order",
+                                            'order_id' => $order_items[0]['order_id'],
+                                        );
+                                    break;
+                                    case 'shipped':
+                                        $customer_msg = (!empty($custom_notification)) ? $message :  'Hola ' . $user_res[0]['username'] . ', hemos actualizado el estado del pedido con ID #' . $order_items[0]['order_id'] . ' a: ' . $type['type'] . ' ¡Buena suerte en tu entrega! 😁👍';
+                                        $fcmMsg = array(
+                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Pedido enviado",
+                                            'body' => $customer_msg,
+                                            'type' => "order",
+                                            'order_id' => $order_items[0]['order_id'],
+                                        );
+                                    break;
+                                    case 'delivered':
+                                        $customer_msg = (!empty($custom_notification)) ? $message :  'Hola ' . $user_res[0]['username'] . ', hemos actualizado el estado de tu pedido con ID #' . $order_items[0]['order_id'] . ' a: ' . $type['type'] . " ¡Has realizado una excelente entrega! 😁🎉";
+                                        $fcmMsg = array(
+                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Pedido entregado",
+                                            'body' => $customer_msg,
+                                            'type' => "order",
+                                            'order_id' => $order_items[0]['order_id'],
+                                        );
+                                    break;
+                                    case 'cancelled':
+                                        $customer_msg = (!empty($custom_notification)) ? $message :  'Hola ' . $user_res[0]['username'] . ', hemos actualizado el estado de tu pedido con ID #' . $order_items[0]['order_id'] . ' a: ' . $type['type'] . " El cliente ha cancelado el pedido 😞, porfavor devuelvelo al comerciante ";
+                                        $fcmMsg = array(
+                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Pedido cancelado",
+                                            'body' => $customer_msg,
+                                            'type' => "order",
+                                            'order_id' => $order_items[0]['order_id'],
+                                        );
+                                    break;
+                                    case 'returned':
+                                        $customer_msg = (!empty($custom_notification)) ? $message :  'Hola ' . $user_res[0]['username'] . ', hemos actualizado el estado de tu pedido con ID #' . $order_items[0]['order_id'] . ' a: ' . $type['type'] . " El cliente ha devuelto el pedido 😞, porfavor devuelvelo al comerciante";
+                                        $fcmMsg = array(
+                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Pedido retornado",
+                                            'body' => $customer_msg,
+                                            'type' => "order",
+                                            'order_id' => $order_items[0]['order_id'],
+                                        );
+                                    break;
+                                }
                                 notify_event(
                                     'delivery_boy_order_deliver',
                                     ["delivery_boy" => [$user_res[0]['email']]],
