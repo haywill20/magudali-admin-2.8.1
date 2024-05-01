@@ -148,7 +148,7 @@ function fetch_details($table, $where = NULL, $fields = '*', $limit = '', $offse
     if (!empty($order) && !empty($sort)) {
         $t->db->order_by($sort, $order);
     }
-
+    
     $res = $t->db->get($table)->result_array();
     return $res;
 }

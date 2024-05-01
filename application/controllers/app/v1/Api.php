@@ -299,6 +299,43 @@ Defined Methods:-
             print_r(json_encode($result));
         }
     }
+    
+    public function get_zipcode_by_city_id_area()
+    {
+        /*  id:'57' 
+                limit:25            // { default - 25 } optional
+                offset:0            // { default - 0 } optional
+                sort:               // { a.name / a.id } optional
+                order:DESC/ASC      // { default - ASC } optional
+                search:value        // {optional} 
+            */
+
+        if (!$this->verify_token()) {
+            return false;
+        }
+
+        $this->form_validation->set_rules('id', 'City Id', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('sort', 'sort', 'trim|xss_clean');
+        $this->form_validation->set_rules('limit', 'limit', 'trim|numeric|xss_clean');
+        $this->form_validation->set_rules('search', 'Search keyword', 'trim|xss_clean');
+        if (!$this->form_validation->run()) {
+            $this->response['error'] = true;
+            $this->response['message'] = strip_tags(validation_errors());
+            $this->response['data'] = array();
+            print_r(json_encode($this->response));
+            return;
+        } else {
+            $limit = (isset($_POST['limit']) && !empty(trim($_POST['limit']))) ? $this->input->post('limit', true) : 25;
+            $offset = (isset($_POST['offset']) && !empty(trim($_POST['offset']))) ? $this->input->post('offset', true) : 0;
+            $sort = (isset($_POST['sort']) && !empty(trim($_POST['sort']))) ? $this->input->post('sort', true) : 'a.name';
+            $order = (isset($_POST['order']) && !empty(trim($_POST['order']))) ? $this->input->post('order', true) : 'ASC';
+            $search = (isset($_POST['search']) && !empty(trim($_POST['search']))) ? $this->input->post('search', true) : "";
+            $id = $this->input->post('id', true);
+
+            $result = $this->Area_model->get_area_name_by_city($id, $sort, $order, $search, $limit, $offset);
+            print_r(json_encode($result));
+        }
+    }
 
     //3.get_cities
     public function get_cities()
