@@ -591,7 +591,8 @@ class Order_model extends CI_Model
                         'title' => $fcm_admin_subject,
                         'body' => $fcm_admin_msg,
                         'type' => "place_order",
-                        'content_available' => true
+                        'content_available' => true,
+                        'channel_id' => 'channel_id_test_8'
                     );
                     if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
                         send_notification($fcmMsg, $registrationIDs_chunks);
