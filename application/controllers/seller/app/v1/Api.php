@@ -2923,6 +2923,53 @@ Defined Methods:-
         }
     }
 
+    public function get_delivery_boys_active()
+    {
+        /*
+            seller_id:1255
+            id: 1001                // { optional}
+            search : Search keyword // { optional }
+            limit:25                // { default - 25 } optional
+            offset:0                // { default - 0 } optional
+            sort: id/username/email/mobile/area_name/city_name/date_created // { default - id } optional
+            order:DESC/ASC          // { default - DESC } optional
+        */
+        if (!$this->verify_token()) {
+            return false;
+        }
+
+        $this->form_validation->set_rules('id', 'ID', 'trim|numeric|xss_clean');
+        $this->form_validation->set_rules('seller_id', 'Seller ID', 'trim|required|numeric|xss_clean');
+        $this->form_validation->set_rules('search', 'Search keyword', 'trim|xss_clean');
+        $this->form_validation->set_rules('sort', 'sort', 'trim|xss_clean');
+        $this->form_validation->set_rules('limit', 'limit', 'trim|numeric|xss_clean');
+        $this->form_validation->set_rules('offset', 'offset', 'trim|numeric|xss_clean');
+        $this->form_validation->set_rules('order', 'order', 'trim|xss_clean');
+        if (!$this->form_validation->run()) {
+            $this->response['error'] = true;
+            $this->response['message'] = strip_tags(validation_errors());
+            $this->response['data'] = array();
+            echo json_encode($this->response);
+            return;
+        } else {
+            if (get_seller_permission($this->input->post('seller_id', true), 'assign_delivery_boy') == FALSE) {
+                $this->response['error'] = true;
+                $this->response['message'] = "You do not have permission to assign the delivery boy to orders.";
+                $this->response['data'] = array();
+                echo json_encode($this->response);
+                return;
+            }
+
+            $id = (isset($_POST['id']) && is_numeric($_POST['id']) && !empty(trim($_POST['id']))) ? $this->input->post('id', true) : "";
+            $search = (isset($_POST['search']) && !empty(trim($_POST['search']))) ? $this->input->post('search', true) : "";
+            $limit = (isset($_POST['limit']) && is_numeric($_POST['limit']) && !empty(trim($_POST['limit']))) ? $this->input->post('limit', true) : 25;
+            $offset = (isset($_POST['offset']) && is_numeric($_POST['offset']) && !empty(trim($_POST['offset']))) ? $this->input->post('offset', true) : 0;
+            $order = (isset($_POST['order']) && !empty(trim($_POST['order']))) ? $_POST['order'] : 'DESC';
+            $sort = (isset($_POST['sort']) && !empty(trim($_POST['sort']))) ? $_POST['sort'] : 'id';
+            $this->delivery_boy_model->get_delivery_boys($id, $search, $offset, $limit, $sort, $order);
+        }
+    }
+
     // register
 
     /* name:test 
