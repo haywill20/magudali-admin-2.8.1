@@ -215,6 +215,7 @@ class Delivery_boy_model extends CI_Model
                 $tempRow['street'] = $row['street'];
                 $tempRow['status'] = $row['active'];
                 $tempRow['date'] = $row['created_at'];
+                $tempRow['disable'] = $row['status'];
 
                 $rows[] = $tempRow;
             }
@@ -224,6 +225,89 @@ class Delivery_boy_model extends CI_Model
         }
         print_r(json_encode($bulkData));
     }
+
+    public function get_delivery_boys_active($id, $search, $offset, $limit, $sort, $order)
+{
+    $multipleWhere = '';
+    $where['ug.group_id'] = 3;
+    $where['u.status !='] = 0; // Excluir los que tienen estado 0
+    
+    if (!empty($search)) {
+        $multipleWhere = [
+            '`u.id`' => $search, '`u.username`' => $search, '`u.email`' => $search, '`u.mobile`' => $search, '`c.name`' => $search, '`a.name`' => $search, '`u.street`' => $search
+        ];
+    }
+    if (!empty($id)) {
+        $where['u.id'] = $id;
+    }
+
+    $count_res = $this->db->select(' COUNT(u.id) as `total` ,a.name as area_name,c.name as city_name')->join('cities c', 'u.city=c.id', 'left')->join('areas a', 'u.area=a.id', 'left');
+
+    if (isset($multipleWhere) && !empty($multipleWhere)) {
+        $count_res->group_start();
+        $count_res->or_like($multipleWhere);
+        $count_res->group_end();
+    }
+    if (isset($where) && !empty($where)) {
+        $count_res->where($where);
+    }
+    $count_res->join('`users_groups` `ug`', '`u`.`id` = `ug`.`user_id`');
+
+    $cat_count = $count_res->get('users u')->result_array();
+
+    $total = 0;
+    foreach ($cat_count as $row) {
+        $total = $row['total'];
+    }
+
+    $search_res = $this->db->select(' u.*,a.name as area_name,c.name as city_name')->join('cities c', 'u.city=c.id', 'left')->join('areas a', 'u.area=a.id', 'left');
+    if (isset($multipleWhere) && !empty($multipleWhere)) {
+        $search_res->group_start();
+        $search_res->or_like($multipleWhere);
+        $search_res->group_end();
+    }
+    if (isset($where) && !empty($where)) {
+        $search_res->where($where);
+    }
+
+    $search_res->join('`users_groups` `ug`', '`u`.`id` = `ug`.`user_id`');
+
+    $cat_search_res = $search_res->order_by($sort, $order)->limit($limit, $offset)->get('users u')->result_array();
+    $rows = array();
+    $tempRow = array();
+    $bulkData = array();
+    $bulkData['error'] = (empty($cat_search_res)) ? true : false;
+    $bulkData['message'] = (empty($cat_search_res)) ? 'Delivery(s) does not exist' : 'Delivery boys retrieved successfully';
+    $bulkData['total'] = (empty($cat_search_res)) ? 0 : $total;
+    if (!empty($cat_search_res)) {
+        foreach ($cat_search_res as $row) {
+            $row = output_escaping($row);
+            $tempRow['id'] = $row['id'];
+            $tempRow['name'] = $row['username'];
+            $tempRow['mobile'] = $row['mobile'];
+            $tempRow['email'] = $row['email'];
+            $tempRow['balance'] = $row['balance'];
+            $tempRow['city'] = $row['city_name'];
+            $tempRow['image'] = isset($row['image']) && $row['image'] != '' ? base_url(USER_IMG_PATH . '/' . $row['image']) : '';
+            if (empty($row['image']) || file_exists(FCPATH . USER_IMG_PATH . $row['image']) == FALSE) {
+                $tempRow['image'] = base_url() . NO_IMAGE;
+            } else {
+                $tempRow['image'] = base_url() . USER_IMG_PATH . $row['image'];
+            }
+            $tempRow['area'] = $row['area_name'];
+            $tempRow['street'] = $row['street'];
+            $tempRow['status'] = $row['active'];
+            $tempRow['date'] = $row['created_at'];
+            $tempRow['disable'] = $row['status'];
+
+            $rows[] = $tempRow;
+        }
+        $bulkData['data'] = $rows;
+    } else {
+        $bulkData['data'] = [];
+    }
+    print_r(json_encode($bulkData));
+}
 
     function get_cash_collection_list($user_id = '')
     {
