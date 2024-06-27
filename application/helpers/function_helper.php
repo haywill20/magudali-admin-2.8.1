@@ -1073,7 +1073,13 @@ function get_attribute_values_by_pid($id)
 {
     $t = &get_instance();
     $swatche_type = $swatche_values1 =  array();
-    $attribute_values = $t->db->select(" group_concat(`av`.`id` ORDER BY `av`.`id` ASC) as ids,group_concat(' ',`av`.`value`) as value ,`a`.`name` as attr_name, a.name, GROUP_CONCAT(av.swatche_type ORDER BY av.id ASC ) as swatche_type , GROUP_CONCAT(av.swatche_value  ORDER BY av.id ASC) as swatche_value")
+    $attribute_values = $t->db->select("
+    group_concat(`av`.`id` ORDER BY `av`.`id` ASC) as ids,
+    group_concat(' ',`av`.`value` ORDER BY `av`.`id` ASC) as value ,
+    `a`.`name` as attr_name, a.name,
+    GROUP_CONCAT(av.swatche_type ORDER BY av.id ASC ) as swatche_type ,
+    GROUP_CONCAT(av.swatche_value ORDER BY av.id ASC) as swatche_value
+")
         ->join('attribute_values av ', 'FIND_IN_SET(av.id, pa.attribute_value_ids ) > 0', 'inner')
         ->join('attributes a', 'a.id = av.attribute_id', 'inner')
         ->where('pa.product_id', $id)->group_by('`a`.`name`')->get('product_attributes pa')->result_array();
