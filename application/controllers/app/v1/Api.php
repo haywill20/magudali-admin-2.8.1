@@ -638,15 +638,24 @@ Defined Methods:-
         if (!$this->verify_token()) {
             return false;
         }
+        
+        // Obtener los datos de sliders
         $res = fetch_details('sliders', '');
+    
+        // Función para comparar por el campo 'id' de manera descendente
+        usort($res, function($a, $b) {
+            return $b['id'] - $a['id'];
+        });
+    
+        // Procesamiento adicional si es necesario (como en tu código original)
+    
         $i = 0;
         foreach ($res as $row) {
-
             if ($res[$i]['link'] == null || empty($res[$i]['link'])) {
                 $res[$i]['link'] = "";
             }
             $res[$i]['image'] = base_url($res[$i]['image']);
-
+    
             if (strtolower($res[$i]['type']) == 'categories') {
                 $id = (!empty($res[$i]['type_id']) && isset($res[$i]['type_id'])) ? $res[$i]['type_id'] : '';
                 $cat_res = $this->category_model->get_categories($id);
@@ -658,13 +667,18 @@ Defined Methods:-
             } else {
                 $res[$i]['data'] = [];
             }
-
+    
             $i++;
         }
-        $this->response['error'] = false;
-        $this->response['data'] = $res;
-        print_r(json_encode($this->response));
-    }
+
+    // Preparar la respuesta final
+    $this->response['error'] = false;
+    $this->response['data'] = $res;
+
+    // Imprimir la respuesta como JSON
+    print_r(json_encode($this->response));
+}
+
 
     //7.validate_promo_code
     public function validate_promo_code()
