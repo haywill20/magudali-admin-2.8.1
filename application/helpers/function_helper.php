@@ -4416,6 +4416,9 @@ function process_refund_old($id, $status, $type = 'order_items')
 function get_sliders($id = '', $type = '', $type_id = '')
 {
     $ci = &get_instance();
+
+    // Construir la consulta con filtros y ordenamiento por 'id' de mayor a menor
+    $ci->db->from('sliders');
     if (!empty($id)) {
         $ci->db->where('id', $id);
     }
@@ -4425,9 +4428,14 @@ function get_sliders($id = '', $type = '', $type_id = '')
     if (!empty($type_id)) {
         $ci->db->where('type_id', $type_id);
     }
-    $res = $ci->db->get('sliders')->result_array();
-    $res = array_map(function ($d) {
-        $ci = &get_instance();
+    $ci->db->order_by('id', 'DESC'); // Ordenar por 'id' de mayor a menor
+    $query = $ci->db->get();
+
+    // Obtener los resultados como un array de arrays
+    $res = $query->result_array();
+
+    // Procesar los resultados para agregar los enlaces según el tipo de slider (opcional)
+    foreach ($res as &$d) {
         $d['link'] = '';
         if (!empty($d['type'])) {
             if ($d['type'] == "categories") {
@@ -4442,11 +4450,10 @@ function get_sliders($id = '', $type = '', $type_id = '')
                 }
             }
         }
-        return $d;
-    }, $res);
+    }
+
     return $res;
 }
-
 function get_offers($id = '', $type = '', $type_id = '')
 {
     $ci = &get_instance();
