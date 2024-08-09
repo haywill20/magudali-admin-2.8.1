@@ -1106,6 +1106,8 @@ function get_attribute_values_by_pid($id)
     return $attribute_values;
 }
 
+
+
 function get_attribute_values_by_id($id)
 {
     $t = &get_instance();
@@ -4454,6 +4456,8 @@ function get_sliders($id = '', $type = '', $type_id = '')
 
     return $res;
 }
+
+
 function get_offers($id = '', $type = '', $type_id = '')
 {
     $ci = &get_instance();

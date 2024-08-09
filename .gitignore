@@ -1,0 +1,3 @@
+# Ignorar todos los archivos y subdirectorios dentro de la carpeta `uploads`
+uploads/
+

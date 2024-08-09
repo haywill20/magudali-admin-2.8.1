@@ -2922,7 +2922,7 @@ Defined Methods:-
             $this->delivery_boy_model->get_delivery_boys($id, $search, $offset, $limit, $sort, $order);
         }
     }
-
+    
     public function get_delivery_boys_active()
     {
         /*
@@ -2966,7 +2966,7 @@ Defined Methods:-
             $offset = (isset($_POST['offset']) && is_numeric($_POST['offset']) && !empty(trim($_POST['offset']))) ? $this->input->post('offset', true) : 0;
             $order = (isset($_POST['order']) && !empty(trim($_POST['order']))) ? $_POST['order'] : 'DESC';
             $sort = (isset($_POST['sort']) && !empty(trim($_POST['sort']))) ? $_POST['sort'] : 'id';
-            $this->delivery_boy_model->get_delivery_boys($id, $search, $offset, $limit, $sort, $order);
+            $this->delivery_boy_model->get_delivery_boys_active($id, $search, $offset, $limit, $sort, $order);
         }
     }
 

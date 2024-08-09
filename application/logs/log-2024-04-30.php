@@ -3136,3 +3136,462 @@ ERROR - 2024-04-30 18:36:29 --> Severity: Warning --> Trying to access array off
 ERROR - 2024-04-30 18:36:29 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
 ERROR - 2024-04-30 18:36:29 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
 ERROR - 2024-04-30 18:36:29 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "become_a_seller"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "shipping_policy"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "return_policy"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "enter_valid_number"
+ERROR - 2024-04-30 18:46:00 --> Could not find the language line "compare"
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:50:58 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:53:27 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:14 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT COUNT(u.id) as `total`
+FROM `users` `u`
+JOIN `users_groups` `ug` ON `ug`.`user_id` = `u`.`id`
+JOIN `seller_data` `sd` ON `sd`.`user_id` = `u`.`id`
+WHERE `status` = 1
+AND `u`.`active` = 1
+AND `ug`.`group_id` = '4'
+ERROR - 2024-04-30 18:59:14 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT `u`.*, `sd`.*
+FROM `users` `u`
+JOIN `users_groups` `ug` ON `ug`.`user_id` = `u`.`id`
+JOIN `seller_data` `sd` ON `sd`.`user_id` = `u`.`id`
+WHERE `status` = '2'
+AND `u`.`active` = 1
+AND `ug`.`group_id` = '4'
+ORDER BY `sd`.`id` DESC
+ LIMIT 10
+ERROR - 2024-04-30 18:59:14 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT `u`.*, `sd`.*
+FROM `users` `u`
+JOIN `users_groups` `ug` ON `ug`.`user_id` = `u`.`id`
+JOIN `seller_data` `sd` ON `sd`.`user_id` = `u`.`id`
+WHERE `status` = '0'
+AND `u`.`active` = 1
+AND `ug`.`group_id` = '4'
+ORDER BY `sd`.`id` DESC
+ LIMIT 10
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 18:59:18 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:00:09 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Undefined variable $fetched_data /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:02:21 --> Severity: Warning --> Trying to access array offset on value of type null /home/maguinev/public_html/application/views/admin/pages/tables/manage-notifications.php 87
+ERROR - 2024-04-30 19:03:44 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT COUNT(u.id) as `total`
+FROM `users` `u`
+JOIN `users_groups` `ug` ON `ug`.`user_id` = `u`.`id`
+JOIN `seller_data` `sd` ON `sd`.`user_id` = `u`.`id`
+WHERE `status` = 1
+AND `u`.`active` = 1
+AND `ug`.`group_id` = '4'
+ERROR - 2024-04-30 19:03:44 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT `u`.*, `sd`.*
+FROM `users` `u`
+JOIN `users_groups` `ug` ON `ug`.`user_id` = `u`.`id`
+JOIN `seller_data` `sd` ON `sd`.`user_id` = `u`.`id`
+WHERE `status` = '0'
+AND `u`.`active` = 1
+AND `ug`.`group_id` = '4'
+ORDER BY `sd`.`id` DESC
+ LIMIT 10
+ERROR - 2024-04-30 19:03:44 --> Query error: Column 'status' in where clause is ambiguous - Invalid query: SELECT `u`.*, `sd`.*
+FROM `users` `u`
+JOIN `users_groups` `ug` ON `ug`.`user_id` = `u`.`id`
+JOIN `seller_data` `sd` ON `sd`.`user_id` = `u`.`id`
+WHERE `status` = '2'
+AND `u`.`active` = 1
+AND `ug`.`group_id` = '4'
+ORDER BY `sd`.`id` DESC
+ LIMIT 10
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "become_a_seller"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "shipping_policy"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "return_policy"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "enter_valid_number"
+ERROR - 2024-04-30 21:03:02 --> Could not find the language line "compare"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "become_a_seller"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "shipping_policy"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "return_policy"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "enter_valid_number"
+ERROR - 2024-04-30 21:39:05 --> Could not find the language line "compare"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "section"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "section"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "brands"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "categories"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "attributes"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "brands"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "categories"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "become_a_seller"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "shipping_policy"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "return_policy"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "enter_valid_number"
+ERROR - 2024-04-30 21:40:46 --> Could not find the language line "compare"
+ERROR - 2024-04-30 22:11:00 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "product"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "check_availability"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "seller"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "tags"
+ERROR - 2024-04-30 22:25:07 --> Severity: Warning --> Undefined array key "user_id" /home/maguinev/public_html/application/views/front-end/classic/pages/product-page.php 558
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "description"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "become_a_seller"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "shipping_policy"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "return_policy"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "enter_valid_number"
+ERROR - 2024-04-30 22:25:07 --> Could not find the language line "compare"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "become_a_seller"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "shipping_policy"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "return_policy"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "enter_valid_number"
+ERROR - 2024-04-30 22:47:22 --> Could not find the language line "compare"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "become_a_seller"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "shipping_policy"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "return_policy"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "enter_valid_number"
+ERROR - 2024-04-30 23:18:11 --> Could not find the language line "compare"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "open_nav"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "sellers"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "blogs"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "become_a_seller"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "shipping_policy"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "return_policy"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "enter_valid_number"
+ERROR - 2024-04-30 23:48:43 --> Could not find the language line "compare"

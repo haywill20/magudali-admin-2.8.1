@@ -225,7 +225,7 @@ class Delivery_boy_model extends CI_Model
         }
         print_r(json_encode($bulkData));
     }
-
+    
     public function get_delivery_boys_active($id, $search, $offset, $limit, $sort, $order)
 {
     $multipleWhere = '';
@@ -308,6 +308,7 @@ class Delivery_boy_model extends CI_Model
     }
     print_r(json_encode($bulkData));
 }
+
 
     function get_cash_collection_list($user_id = '')
     {
