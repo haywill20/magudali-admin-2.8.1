@@ -175,13 +175,14 @@ class MyConfig
 
     function language()
     {
+        $config =& get_config();
         $ci = &get_instance();
         $ci->load->helper(['language']);
         $siteLang = $ci->input->cookie('language', TRUE);
         if ($siteLang) {
             $ci->lang->load('web_labels_lang', $siteLang);
         } else {
-            $ci->lang->load('web_labels_lang', 'english');
+            $ci->lang->load('web_labels_lang', $config['language']);
         }
     }
 
