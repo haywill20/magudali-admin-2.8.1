@@ -1,6 +1,23 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 
+//Login web seller tags
+$lang['login'] = "Iniciar Sesión";
+$lang['login_details'] = "Ingrese los datos de su cuenta";
+$lang['login_mobile_label'] = "Teléfono";
+$lang['login_mobile_placeholder'] = "Ingrese su número de teléfono";
+$lang['login_password_label'] = "Contraseña";
+$lang['login_password_placeholder'] = "Ingrese su contraseña";
+$lang['login_forgot_password'] = "Olvidé Mi Contraseña";
+$lang['login_remember_me'] = "Recordar";
+$lang['login_already_have_account'] = "¿Ya tienes cuenta de usuario en";
+$lang['login_no_account'] = "¿No tienes ninguna cuenta?";
+
+
+
+
+
+
 $lang['language_id'] = "8";
 $lang['menu'] = "Menu";
 $lang['products'] = "Productos";
@@ -8,7 +25,6 @@ $lang['my_account'] = "Mi Cuenta";
 $lang['my_orders'] = "Mis Pedidos";
 $lang['favorite'] = "Favoritos";
 $lang['sellers'] = "Vendedores";
-$lang['login'] = "Iniciar Sesión ";
 $lang['register'] = "Registrar";
 $lang['about_us'] = "Nosotros";
 $lang['contact_us'] = "Contáctenos";
@@ -134,7 +150,7 @@ $lang['follow_us'] = "Seguir";
 $lang['find_us'] = "Encuéntranos";
 $lang['call_us'] = "Llámanos";
 $lang['mail_us'] = "Envíanos Un Correo";
-$lang['forgot_password'] = "Olvidé Mi Contraseña";
+
 $lang['see_all'] = "Ver Todo";
 $lang['sort_by'] = "Ordenar Por";
 $lang['show'] = "Mostrar";
