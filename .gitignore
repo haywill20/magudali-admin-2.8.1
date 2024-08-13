@@ -1,3 +1,5 @@
 # Ignorar todos los archivos y subdirectorios dentro de la carpeta `uploads`
 uploads/
 
+#Esto ignorará todos los archivos en el directorio logs.
+application/logs/
