@@ -13,7 +13,48 @@ $lang['login_remember_me'] = "Recordar";
 $lang['login_already_have_account'] = "¿Ya tienes cuenta de usuario en";
 $lang['login_no_account'] = "¿No tienes ninguna cuenta?";
 
-
+//Seller registration form
+$lang['seller_registration_title_personal_detail_label'] = "Registro de Vendedor";
+$lang['seller_registration_personal_details_label'] = "Datos personales";
+$lang['seller_registration_name_label'] = "Nombre";
+$lang['seller_registration_name_placeholder'] = "Ingrese su nombre";
+$lang['seller_registration_mobile_label'] = "Teléfono";
+$lang['seller_registration_mobile_placeholder'] = "Ingrese su numero de teléfono";
+$lang['seller_registration_correo_label'] = "Correo";
+$lang['seller_registration_correo_placeholder'] = "Ingrese su correo eléctronico";
+$lang['seller_registration_password_label'] = "Contraseña";
+$lang['seller_registration_password_placeholder'] = "Ingrese su Contraseña";
+$lang['seller_registration_confirm_password_label'] = "Confirme su contraseña";
+$lang['seller_registration_confirm_password_placeholder'] = "Ingrese su contraseña nuevamente";
+$lang['seller_registration_address_label'] = "Dirección";
+$lang['seller_registration_address_placeholder'] = "Ingrese dirección de su negocio";
+$lang['seller_registration_address_proof_label'] = "Comprobante de Dirección";
+$lang['seller_registration_authorized_signature_label'] = "Firma autorizada";
+$lang['seller_registration_national_identity_card_label'] = "Documento de identidad";
+$lang['seller_registration_title_store_detail_label'] = "Detalles del negocio";
+$lang['seller_registration_name_store_label'] = "Nombre del comercio";
+$lang['seller_registration_name_store_placeholder'] = "Ingrese el nombre del comercio";
+$lang['seller_registration_logo_label'] = "Logo";
+$lang['seller_registration_url_label'] = "Link";
+$lang['seller_registration_url_placeholder'] = "Ingrese el link de su web";
+$lang['seller_registration_description_label'] = "Descripción";
+$lang['seller_registration_description_placeholder'] = "ingrese la descripción de su comercio";
+$lang['seller_registration_title_store_tax_details_label'] = "Datos Legales";
+$lang['seller_registration_Tax_name_label'] = "Nombre legal";
+$lang['seller_registration_Tax_name_placeholder'] = "Ingrese nombre legal de su sociedad o negocio";
+$lang['seller_registration_tax_number_label'] = "Numero Ruc";
+$lang['seller_registration_Tax_number_placeholder'] = "Ingrese su numero Ruc o su Cedula";
+$lang['seller_registration_Tax_name_placeholder'] = "Ingrese nombre legal de su sociedad o negocio";
+$lang['seller_registration_title_bank_details_label'] = "Datos Bancarios";
+$lang['seller_registration_account_number_label'] = "Numero de Cuenta";
+$lang['seller_registration_account_number_placeholder'] = "Ingrese su número de cuenta bancaria";
+$lang['seller_registration_account_name_label'] = "Propietario de la cuenta";
+$lang['seller_registration_account_name_placeholder'] = "Ingrese el nombre del propietario de la cuenta";
+$lang['seller_registration_bank_code_label'] = "Código Swift";
+$lang['seller_registration_bank_code_placeholder'] = "Ingrese código Swift del banco";
+$lang['seller_registration_bank_name_label'] = "Nombre del banco";
+$lang['seller_registration_bank_name_placeholder'] = "Ingrese el nombre de su banco";
+$lang['seller_registration_button_submit_label'] = "Enviar solicitud";
 
 
 
