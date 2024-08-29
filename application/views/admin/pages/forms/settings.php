@@ -173,28 +173,37 @@
                                         </div>
                                     </div>
                                     <?php $d_none = isset($settings['area_wise_delivery_charge']) && $settings['area_wise_delivery_charge'] == '1' ? 'd-none' : '' ?>
-                                    <div class="form-group col-md-4 delivery_charge <?= $d_none ?>">
-                                        <label for="delivery_charge">Minimum delivery charge. (<?= $currency ?>) <span
-                                                class='text-danger text-xs'>*</span></label>
-                                        <input type="number" class="form-control" name="delivery_charge"
-                                            value="<?= (isset($settings['delivery_charge'])) ? $settings['delivery_charge'] : '' ?>"
+                                    <div class="form-group col-md-6 delivery_charge <?= $d_none ?>">
+                                        <label for="minimum_delivery_charge">Minimum delivery charge. (<?= $currency ?>)
+                                            <span class='text-danger text-xs'>*</span></label>
+                                        <input type="number" class="form-control" name="minimum_delivery_charge"
+                                            value="<?= (isset($settings['minimum_delivery_charge'])) ? $settings['minimum_delivery_charge'] : '' ?>"
                                             placeholder='Minimum delivery charge' min='0' />
                                     </div>
-                                    <div class="form-group col-md-4 min_amount <?= $d_none ?>">
-                                        <label for="min_amount">Price per kilometer (<?= $currency ?>)
+                                    <div class="form-group col-md-6 delivery_charge <?= $d_none ?>">
+                                        <label for="max_kilometers">Maximum kilometers for minimum charge
+                                            (<?= $currency ?>)
+                                            <span class='text-danger text-xs'>*</span>
+                                        </label>
+                                        <input type="number" class="form-control" name="max_kilometers"
+                                            value="<?= (isset($settings['max_kilometers'])) ? $settings['max_kilometers'] : ''  ?>"
+                                            placeholder='Maximum kilometers for minimum charge' min='0' />
+                                    </div>
+                                    <div class="form-group col-md-6 delivery_charge <?= $d_none ?>">
+                                        <label for="kilometer_price">Price per kilometer (<?= $currency ?>)
+                                            <span class='text-danger text-xs'>*</span>
+                                        </label>
+                                        <input type="number" class="form-control" name="kilometer_price"
+                                            value="<?= (isset($settings['kilometer_price'])) ? $settings['kilometer_price'] : ''  ?>"
+                                            placeholder='Price per kilometer' min='0' />
+                                    </div>
+                                    <div class="form-group col-md-6 min_amount <?= $d_none ?>">
+                                        <label for="min_amount">Minimum order for free delivery (<?= $currency ?>)
                                             <span class='text-danger text-xs'>*</span>
                                         </label>
                                         <input type="number" class="form-control" name="min_amount"
                                             value="<?= (isset($settings['min_amount'])) ? $settings['min_amount'] : ''  ?>"
                                             placeholder='Price per kilometer' min='0' />
-                                    </div>
-                                    <div class="form-group col-md-4 min_amount <?= $d_none ?>">
-                                        <label for="min_amount">Maximum kilometers <small>(for minimum charge)</small>
-                                            <span class='text-danger text-xs'>*</span>
-                                        </label>
-                                        <input type="number" class="form-control" name="min_amount"
-                                            value="<?= (isset($settings['min_amount'])) ? $settings['min_amount'] : ''  ?>"
-                                            placeholder='Maximum kilometers for minimum charge' min='0' />
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label class="system_timezone" for="system_timezone">System Timezone <span
