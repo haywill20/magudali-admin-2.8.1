@@ -1782,14 +1782,11 @@ function get_cart_total($user_id, $product_variant_id = false, $is_saved_for_lat
     $t->db->join('product_variants pv', 'pv.id=c.product_variant_id');
     $t->db->join('products p ', 'pv.product_id=p.id');
     $t->db->join('seller_data sd ', 'sd.user_id=p.seller_id');
-    $t->db->join('`taxes` tax', 'tax.id = p.tax', 'LEFT');
+    $t->db->join('taxes tax', 'tax.id = p.tax', 'LEFT');
     $t->db->join('categories ctg', 'p.category_id = ctg.id', 'left');
     $t->db->where(['p.status' => '1', 'pv.status' => 1, 'sd.status' => 1]);
     $t->db->group_by('c.id')->order_by('c.id', "DESC");
     $data = $t->db->get('cart c')->result_array();
-    //     echo "<pre>";
-    // print_r($data);
-    // die;
 
     $total = array();
     $variant_id = array();
@@ -1798,31 +1795,32 @@ function get_cart_total($user_id, $product_variant_id = false, $is_saved_for_lat
     $amount = array();
     $cod_allowed = 1;
     $download_allowed = array();
+    
     for ($i = 0; $i < count($data); $i++) {
-
         $tax_title = (isset($data[$i]['tax_title']) && !empty($data[$i]['tax_title'])) ? $data[$i]['tax_title'] : '';
         $is_attachment_required = (isset($data[$i]['is_attachment_required']) && !empty($data[$i]['is_attachment_required'])) ? $data[$i]['is_attachment_required'] : '0';
         $prctg = (isset($data[$i]['tax_percentage']) && intval($data[$i]['tax_percentage']) > 0 && $data[$i]['tax_percentage'] != null) ? $data[$i]['tax_percentage'] : '0';
         $data[$i]['item_tax_percentage'] = $prctg;
         $data[$i]['tax_title'] = $tax_title;
+        
         if ((isset($data[$i]['is_prices_inclusive_tax']) && $data[$i]['is_prices_inclusive_tax'] == 0) || (!isset($data[$i]['is_prices_inclusive_tax'])) && $prctg > 0) {
             $price_tax_amount = $data[$i]['price'] * ($prctg / 100);
             $special_price_tax_amount = $data[$i]['special_price'] * ($prctg / 100);
         } else {
-            // $price_tax_amount  = $data[$i]['price'] - ($data[$i]['price'] * (100 / (100 + $prctg)));
-            // $special_price_tax_amount  = $data[$i]['special_price'] - ($data[$i]['special_price'] * (100 / (100 + $prctg)));
             $price_tax_amount = 0;
             $special_price_tax_amount = 0;
         }
         $data[$i]['image_sm'] = get_image_url($data[$i]['image'], 'thumb', 'sm');
         $data[$i]['image_md'] = get_image_url($data[$i]['image'], 'thumb', 'md');
         $data[$i]['image'] = get_image_url($data[$i]['image']);
+        
         if ($data[$i]['cod_allowed'] == 0) {
             $cod_allowed = 0;
         }
+        
         $variant_id[$i] = $data[$i]['id'];
         $quantity[$i] = intval($data[$i]['qty']);
-
+        
         if (floatval($data[$i]['special_price']) > 0) {
             $total[$i] = floatval($data[$i]['special_price'] + $special_price_tax_amount) * $data[$i]['qty'];
         } else {
@@ -1830,42 +1828,43 @@ function get_cart_total($user_id, $product_variant_id = false, $is_saved_for_lat
         }
         $data[$i]['special_price'] = $data[$i]['special_price'] + $special_price_tax_amount;
         $data[$i]['price'] = $data[$i]['price'] + $price_tax_amount;
-
+        
         $price = isset($data[$i]['special_price']) && !empty($data[$i]['special_price']) && $data[$i]['special_price'] > 0 ? $data[$i]['special_price'] : $data[$i]['price'];
-
+        
         if (isset($data[$i]['is_prices_inclusive_tax']) && $data[$i]['is_prices_inclusive_tax'] == 1) {
-            $tax_amount  = $price - ($price * (100 / (100 + $prctg)));
+            $tax_amount = $price - ($price * (100 / (100 + $prctg)));
         } else {
             $tax_amount = $price * ($prctg / 100);
         }
         $data[$i]['tax_amount'] = number_format($tax_amount, 2);
-
+        
         $percentage[$i] = (isset($data[$i]['tax_percentage']) && floatval($data[$i]['tax_percentage']) > 0) ? $data[$i]['tax_percentage'] : 0;
-
+        
         if ($percentage[$i] != NUll && $percentage[$i] > 0) {
             $amount[$i] = (!empty($special_price_tax_amount)) ? number_format($special_price_tax_amount, 2) : number_format($price_tax_amount, 2);
         } else {
             $amount[$i] = 0;
             $percentage[$i] = 0;
         }
-
+        
         $data[$i]['product_variants'] = get_variants_values_by_id($data[$i]['id']);
         array_push($download_allowed, $data[$i]['download_allowed']);
     }
+    
     $total = array_sum($total);
-
+    
     $system_settings = get_settings('system_settings', true);
     $address = fetch_details('addresses', ['id' => $address_id], ['area_id', 'area', 'pincode']);
     $delivery_charge = $system_settings['delivery_charge'];
     $zipcode_id = fetch_details('zipcodes', ['zipcode' => $address[0]['pincode']], 'id')[0];
+    
     if (!empty($address_id)) {
         $tmpRow['is_deliverable'] = (!empty($zipcode_id['id']) && $zipcode_id['id'] > 0) ?
             is_product_delivarable('zipcode', $zipcode_id['id'], $data[0]['product_id'])
             : false;
         $tmpRow['delivery_by'] = ($tmpRow['is_deliverable']) ? "local" : "standard_shipping";
-
+        
         if (isset($tmpRow['delivery_by']) && $tmpRow['delivery_by'] == 'standard_shipping') {
-
             $parcels = make_shipping_parcels($data);
             $parcels_details = check_parcels_deliveriblity($parcels, $address[0]['pincode']);
             $delivery_charge = $parcels_details['delivery_charge_without_cod'];
@@ -1873,12 +1872,17 @@ function get_cart_total($user_id, $product_variant_id = false, $is_saved_for_lat
             $delivery_charge = get_delivery_charge($address_id, $total);
         }
     }
-
-    $delivery_charge = isset($data[0]['type']) && $data[0]['type'] == 'digital_product' ? 0 :  $delivery_charge;
+    
+    $delivery_charge = isset($data[0]['type']) && $data[0]['type'] == 'digital_product' ? 0 : $delivery_charge;
     $delivery_charge = str_replace(",", "", $delivery_charge);
+    $delivery_charge = is_numeric($delivery_charge) ? (float)$delivery_charge : 0;
+    
     $overall_amt = 0;
     $tax_amount = array_sum($amount);
+    
+    $total = is_numeric($total) ? (float)$total : 0;
     $overall_amt = $total + $delivery_charge;
+    
     $data[0]['is_cod_allowed'] = $cod_allowed;
     $data['sub_total'] = strval($total);
     $data['quantity'] = strval(array_sum($quantity));
@@ -1891,8 +1895,10 @@ function get_cart_total($user_id, $product_variant_id = false, $is_saved_for_lat
     $data['amount_inclusive_tax'] = strval($overall_amt + $tax_amount);
     $data['is_attachment_required'] = $is_attachment_required;
     $data['download_allowed'] = $download_allowed;
+    
     return $data;
 }
+
 function get_frontend_categories_html()
 {
     $t = &get_instance();
