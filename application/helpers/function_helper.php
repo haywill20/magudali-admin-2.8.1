@@ -1,8 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-// require_once FCPATH . 'vendor/autoload.php';
 
-use Google\Client;
 /*
 	1. create_unique_slug($string,$table,$field='slug',$key=NULL,$value=NULL)
 	2. ($type = 'store_settings', $is_json = false)
@@ -150,37 +148,31 @@ function fetch_details($table, $where = NULL, $fields = '*', $limit = '', $offse
     if (!empty($order) && !empty($sort)) {
         $t->db->order_by($sort, $order);
     }
-    // echo $t->db->last_query();
-    // return false;
+    
     $res = $t->db->get($table)->result_array();
     return $res;
 }
-// Function to convert image to PNG
-function convert_to_png($source)
-{
-    $image = imagecreatefromstring(file_get_contents($source));
-    if ($image !== false) {
-        $png_image_path = tempnam(sys_get_temp_dir(), 'converted_image_') . '.png';
-        imagealphablending($image, true);
-        imagesavealpha($image, true);
-        if (imagepng($image, $png_image_path)) {
-            return $png_image_path;
-        }
-    }
-    return false;
-}
 
-
-function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id = NULL, $limit = NULL, $offset = NULL, $sort = NULL, $order = NULL, $return_count = NULL, $is_deliverable = NULL, $seller_id = NULL, $is_detailed_data = 0)
+function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id = NULL, $limit = NULL, $offset = NULL, $sort = NULL, $order = NULL, $return_count = NULL, $is_deliverable = NULL, $seller_id = NULL)
 {
 
     $settings = get_settings('system_settings', true);
     $low_stock_limit = isset($settings['low_stock_limit']) ? $settings['low_stock_limit'] : 5;
     $t = &get_instance();
-// print_r($low_stock_limit);
 
     if ($sort == 'pv.price' && !empty($sort) && $sort != NULL) {
-        $t->db->order_by("IF( pv.special_price > 0 , pv.special_price , pv.price )" . $order, False);
+
+        // $t->db->order_by("IF( pv.special_price > 0 , pv.special_price , pv.price )" . $order, False);
+        $t->db->order_by("IF(pv.special_price > 0,
+             IF(p.is_prices_inclusive_tax = 1,
+                  pv.special_price,
+                  pv.special_price + ((pv.special_price * p.tax )/100)
+             ),
+            IF(p.is_prices_inclusive_tax = 1,
+                 pv.price,
+                 pv.price  + ((pv.price * p.tax )/100)
+            )
+               ) " . $order, false);
     }
 
 
@@ -192,9 +184,9 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
 
     $discount_filter_data = (isset($filter['discount']) && !empty($filter['discount'])) ? ' pv.*,( if(pv.special_price > 0,( (pv.price-pv.special_price)/pv.price)*100,0)) as cal_discount_percentage, ' : '';
 
-    $t->db->select($discount_filter_data . 'count(p.id) as sales, p.stock_type ,
+    $t->db->select($discount_filter_data . ' (select count(id)  from products where products.category_id=c.id ) as total,count(p.id) as sales, p.stock_type ,
      p.is_prices_inclusive_tax, p.type ,GROUP_CONCAT(DISTINCT(pa.attribute_value_ids)) as attr_value_ids,sd.rating as seller_rating,sd.slug as seller_slug,sd.no_of_ratings as seller_no_of_ratings,sd.logo as seller_profile, sd.store_name as store_name,sd.store_description, p.seller_id, u.username as seller_name,
-     p.id,p.stock,pv.stock as product_variant_stock,p.name,p.category_id, p.attribute_order,p.short_description,p.slug,p.description,p.extra_description,p.total_allowed_quantity,p.status,p.deliverable_type,p.is_attachment_required,p.deliverable_zipcodes,p.deliverable_cities,p.deliverable_city_type,p.minimum_order_quantity,p.sku,
+     p.id,p.stock,p.name,p.category_id,p.short_description,p.slug,p.description,p.extra_description,p.total_allowed_quantity,p.status,p.deliverable_type,p.is_attachment_required,p.deliverable_zipcodes,p.minimum_order_quantity,p.sku,
      p.quantity_step_size,p.cod_allowed,p.row_order,p.rating,p.no_of_ratings,p.image,p.is_returnable,p.is_cancelable,p.cancelable_till,p.indicator,p.other_images, 
      p.video_type, p.video, p.tags, p.warranty_period, p.guarantee_period, p.made_in,p.hsn_code,p.download_allowed,p.download_type,p.download_link,p.pickup_location,p.brand,p.availability, p.slug as product_slug, b.slug as brand_slug,c.name as category_name,tax.percentage as tax_percentage ,tax.id as tax_id ')
         ->join(" categories c", "p.category_id=c.id ", 'LEFT')
@@ -207,8 +199,7 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
 
 
     if (isset($filter['show_only_stock_product']) && $filter['show_only_stock_product'] == 1) {
-        $t->db->where('(p.stock_type != "" or pv.stock != "")');
-        // $t->db->where('(p.stock != "" or pv.stock != "")');
+        $t->db->where('(p.stock != "" or pv.stock != "")');
     }
 
     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'most_selling_products') {
@@ -240,15 +231,6 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $t->db->where('p.availability =', '1');
             $t->db->or_where('pv.stock <=', $low_stock_limit);
             $t->db->where('pv.availability =', '1');
-            $t->db->group_End();
-        } else if ($flag == 'sold') {
-            $t->db->group_Start();
-            $where1 = "p.stock_type is  NOT NULL";
-            $t->db->where($where1);
-            $t->db->where('p.stock ', '0');
-            $t->db->where('p.availability ', '0');
-            $t->db->or_where('pv.stock ', '0');
-            $t->db->where('pv.availability ', '0');
             $t->db->group_End();
         } else {
             $t->db->group_Start();
@@ -299,8 +281,8 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
     }
 
 
-    /* https://stackoverflow.com/questions/5015403/mysql-find-in-set-with-multiple-search-string */
     if (isset($filter) && !empty($filter['attribute_value_ids'])) {
+        /* https://stackoverflow.com/questions/5015403/mysql-find-in-set-with-multiple-search-string */
         $str = str_replace(',', '|', $filter['attribute_value_ids']); //str_replace(find,replace,string,count)
         $t->db->where('CONCAT(",", pa.attribute_value_ids , ",") REGEXP ",(' . $str . ')," !=', 0, false);
     }
@@ -315,22 +297,6 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
         } else {
             $where['p.category_id'] = $category_id;
         }
-    }
-
-    if (isset($filter['zipcode_id']) && !empty($filter['zipcode_id'])) {
-        $zipcode_id = $filter['zipcode_id'];
-        $where2 = "((deliverable_type='2' and FIND_IN_SET('$zipcode_id', deliverable_zipcodes)) or deliverable_type = '1') OR (deliverable_type='3' and NOT FIND_IN_SET('$zipcode_id', deliverable_zipcodes)) ";
-        $t->db->group_Start();
-        $t->db->where($where2);
-        $t->db->group_End();
-    }
-
-    if (isset($filter['city_id']) && !empty($filter['city_id'])) {
-        $city_id = $filter['city_id'];
-        $where2 = "((deliverable_city_type='2' and FIND_IN_SET('$city_id', deliverable_cities)) or deliverable_city_type = '1') OR (deliverable_city_type='3' and NOT FIND_IN_SET('$city_id', deliverable_cities)) ";
-        $t->db->group_Start();
-        $t->db->where($where2);
-        $t->db->group_End();
     }
 
     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'products_on_sale') {
@@ -407,17 +373,11 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
     }
 
 
-
     if (!empty($return_count)) {
         return $t->db->count_all_results('products p');
     } else {
         $product = $t->db->get('products p')->result_array();
-        // echo $t->db->last_query();
-        // return false;
     }
-    // echo $t->db->last_query();
-
-
 
     $count = isset($filter) && !empty($filter['flag']) ? 'count(DISTINCT(p.id))' : 'count(DISTINCT(p.id))';
     $discount_filter = (isset($filter['discount']) && !empty($filter['discount'])) ? ' , GROUP_CONCAT( IF( ( IF( pv.special_price > 0, ((pv.price - pv.special_price) / pv.price) * 100, 0 ) ) > ' . $filter['discount'] . ', ( IF( pv.special_price > 0, ((pv.price - pv.special_price) / pv.price) * 100, 0 ) ), 0 ) ) AS cal_discount_percentage ' : '';
@@ -451,16 +411,7 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $t->db->or_where('pv.stock <=', $low_stock_limit);
             $t->db->where('pv.availability =', '1');
             $t->db->group_End();
-        } else if ($flag == 'sold') {
-            $t->db->group_Start();
-            $where1 = "p.stock_type is  NOT NULL";
-            $t->db->where($where1);
-            $t->db->where('p.stock ', '0');
-            $t->db->where('p.availability ', '0');
-            $t->db->or_where('pv.stock ', '0');
-            $t->db->where('pv.availability ', '0');
-            $t->db->group_End();
-        }else {
+        } else {
             $t->db->group_Start();
             $t->db->or_where('p.availability ', '0');
             $t->db->or_where('pv.availability ', '0');
@@ -469,8 +420,6 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $t->db->group_End();
         }
     }
-
-    // echo $t->db->last_query();
 
     if (isset($filter) && !empty($filter['tags'])) {
         $tags = explode(",", $filter['tags']);
@@ -489,21 +438,6 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
         $t->db->where('p.brand', trim($filter['brand']));
     }
 
-    if (isset($filter['min_price']) && $filter['min_price'] > 0) {
-        $min_price = $filter['min_price'];
-        $where_min = "if( pv.special_price > 0 , pv.special_price , pv.price ) >=$min_price";
-        $t->db->group_Start();
-        $t->db->where($where_min);
-        $t->db->group_End();
-    }
-    if (isset($filter['max_price']) && $filter['max_price'] > 0 && isset($filter['min_price']) && $filter['min_price'] > 0) {
-        $max_price = $filter['max_price'];
-        $where_max = "if( pv.special_price > 0 , pv.special_price , pv.price ) <=$max_price";
-        $t->db->group_Start();
-        $t->db->where($where_max);
-        $t->db->group_End();
-    }
-
     if (isset($filter) && !empty($filter['attribute_value_ids'])) {
         $str = str_replace(',', '|', $filter['attribute_value_ids']); // Ids should be in string and comma separated 
         $product_count->where('CONCAT(",", pa.attribute_value_ids, ",") REGEXP ",(' . $str . ')," !=', 0, false);
@@ -517,22 +451,6 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $product_count->or_where_in('c.parent_id', $category_id);
             $product_count->where($where);
         }
-    }
-
-    if (isset($filter['zipcode_id']) && !empty($filter['zipcode_id'])) {
-        $zipcode_id = $filter['zipcode_id'];
-        $where2 = "((deliverable_type='2' and FIND_IN_SET('$zipcode_id', deliverable_zipcodes)) or deliverable_type = '1') OR (deliverable_type='3' and NOT FIND_IN_SET('$zipcode_id', deliverable_zipcodes)) ";
-        $t->db->group_Start();
-        $t->db->where($where2);
-        $t->db->group_End();
-    }
-
-    if (isset($filter['city_id']) && !empty($filter['city_id'])) {
-        $city_id = $filter['city_id'];
-        $where2 = "((deliverable_city_type='2' and FIND_IN_SET('$city_id', deliverable_cities)) or deliverable_city_type = '1') OR (deliverable_city_type='3' and NOT FIND_IN_SET('$city_id', deliverable_cities)) ";
-        $t->db->group_Start();
-        $t->db->where($where2);
-        $t->db->group_End();
     }
 
     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'products_on_sale') {
@@ -563,39 +481,30 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
     }
 
     $count_res = $product_count->get('products p')->result_array();
-    // print_r($count_res);
-    // echo $t->db->last_query();
+
     // return;
     $attribute_values_ids = array();
     $temp = [];
-    $prices = get_price();
-    $min_price = $prices['min'];
-    $max_price = $prices['max'];
+    $min_price = get_price('min');
+    $max_price = get_price('max');
 
-    //     echo "<pre>";
-    //     print_r($product);
-    // die;
+
+
     if (!empty($product)) {
 
         $t->load->model('rating_model');
         for ($i = 0; $i < count($product); $i++) {
-            if (($is_detailed_data != null && $is_detailed_data == 1)) {
-                $rating = $t->rating_model->fetch_rating($product[$i]['id'], '', 8, 0, 'pr.id', 'desc', '', 1);
-                $product[$i]['review_images'] = (!empty($rating)) ? [$rating] : array();
-                $product[$i]['attributes'] = get_attribute_values_by_pid($product[$i]['id']);
-            }
+
+            $rating = $t->rating_model->fetch_rating($product[$i]['id'], '', 8, 0, 'pr.id', 'desc', '', 1);
+            $product[$i]['review_images'] = (!empty($rating)) ? [$rating] : array();
 
             $product[$i]['tax_percentage'] = (isset($product[$i]['tax_percentage']) && intval($product[$i]['tax_percentage']) > 0) ? $product[$i]['tax_percentage'] : '0';
             $product[$i]['tax_id'] = ((isset($product[$i]['tax_id']) && intval($product[$i]['tax_id']) > 0) && $product[$i]['tax_id'] != "") ? $product[$i]['tax_id'] : '0';
-
-
+            $product[$i]['attributes'] = get_attribute_values_by_pid($product[$i]['id']);
             $product[$i]['variants'] = get_variants_values_by_pid($product[$i]['id']);
-            // echo "<pre>";
-            // print_r($product[$i]['variants']);
-            // die;
-            // $variants =   get_variants_values_by_pid($product[$i]['id']);
+            $variants =   get_variants_values_by_pid($product[$i]['id']);
             $total_stock = 0;
-            foreach ($product[$i]['variants'] as $variant) {
+            foreach ($variants as $variant) {
                 $stock = (isset($variant['stock']) && !empty($variant['stock'])) ? $variant['stock'] : 0;
                 $total_stock  += $stock;
                 $product[$i]['total_stock'] = isset($total_stock) && !empty($total_stock) ? $total_stock : '';
@@ -604,14 +513,9 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $product[$i]['stock_type'] = isset($product[$i]['stock_type']) && ($product[$i]['stock_type'] != '') ? $product[$i]['stock_type'] : '';
             $product[$i]['stock'] = isset($product[$i]['stock']) && !empty($product[$i]['stock']) ? $product[$i]['stock'] : '';
             $product[$i]['relative_path'] = isset($product[$i]['image']) && !empty($product[$i]['image']) ? $product[$i]['image'] : '';
-
-            if (($is_detailed_data != null && $is_detailed_data == 1)) {
-
-                $product[$i]['other_images_relative_path'] = isset($product[$i]['other_images']) && !empty($product[$i]['other_images']) ? json_decode($product[$i]['other_images']) : [];
-                $product[$i]['video_relative_path'] = (isset($product[$i]['video']) && (!empty($product[$i]['video']))) ? $product[$i]['video'] : "";
-                $product[$i]['video_type'] = isset($product[$i]['video_type']) && !empty($product[$i]['video_type']) ? $product[$i]['video_type'] : '';
-            }
-
+            $product[$i]['other_images_relative_path'] = isset($product[$i]['other_images']) && !empty($product[$i]['other_images']) ? json_decode($product[$i]['other_images']) : [];
+            $product[$i]['video_relative_path'] = (isset($product[$i]['video']) && (!empty($product[$i]['video']))) ? $product[$i]['video'] : "";
+            $product[$i]['video_type'] = isset($product[$i]['video_type']) && !empty($product[$i]['video_type']) ? $product[$i]['video_type'] : '';
             $product[$i]['attr_value_ids'] = isset($product[$i]['attr_value_ids']) && !empty($product[$i]['attr_value_ids']) ? $product[$i]['attr_value_ids'] : '';
             $product[$i]['made_in'] = isset($product[$i]['made_in']) && !empty($product[$i]['made_in']) ? $product[$i]['made_in'] : '';
             $product[$i]['hsn_code'] = isset($product[$i]['hsn_code']) && !empty($product[$i]['hsn_code']) ? $product[$i]['hsn_code'] : '';
@@ -629,14 +533,11 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $product[$i]['download_type'] = isset($product[$i]['download_type']) && !empty($product[$i]['download_type']) ? $product[$i]['download_type'] : '';
             $product[$i]['download_link'] = isset($product[$i]['download_link']) && !empty($product[$i]['download_link']) ? $product[$i]['download_link'] : '';
             $product[$i]['status'] = isset($product[$i]['status']) && !empty($product[$i]['status']) ? $product[$i]['status'] : '';
-
-            if (($is_detailed_data != null && $is_detailed_data == 1)) {
-                $total_product = $t->db->query("select count(id) as total  from products where products.seller_id=" . $product[$i]['seller_id'] . " AND products.status='1'")->result_array();
-                $product[$i]['total_product'] = ($total_product[0]['total']);
-            }
+            $total_product = $t->db->query("select count(id) as total  from products where products.seller_id=" . $product[$i]['seller_id'] . " AND products.status='1'")->result_array();
 
             /* outputing escaped data */
             $product[$i]['name'] = output_escaping($product[$i]['name']);
+            $product[$i]['total_product'] = ($total_product[0]['total']);
             $product[$i]['store_name'] = output_escaping($product[$i]['store_name']);
             $product[$i]['seller_rating'] = (isset($product[$i]['seller_rating']) && !empty($product[$i]['seller_rating'])) ? output_escaping(number_format($product[$i]['seller_rating'], 1)) : 0;
             $product[$i]['store_description'] = (isset($product[$i]['store_description']) && !empty($product[$i]['store_description'])) ? output_escaping($product[$i]['store_description']) : "";
@@ -645,15 +546,10 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $product[$i]['short_description'] = output_escaping($product[$i]['short_description']);
             $product[$i]['description'] = (isset($product[$i]['description']) && !empty($product[$i]['description'])) ? output_escaping($product[$i]['description']) : "";
             $product[$i]['extra_description'] = (isset($product[$i]['extra_description']) && !empty($product[$i]['extra_description']) && $product[$i]['extra_description'] != 'NULL') ? output_escaping($product[$i]['extra_description']) : "";
-            $product[$i]['pickup_location'] = (isset($product[$i]['pickup_location']) && !empty($product[$i]['pickup_location']) && $product[$i]['pickup_location']) != '' ? $product[$i]['pickup_location'] : '';
+            $product[$i]['pickup_location'] = (isset($product[$i]['pickup_location']) && !empty($product[$i]['pickup_location']) && $product[$i]['pickup_location']) != 'NULL' ? $product[$i]['pickup_location'] : '';
 
             $product[$i]['seller_slug'] = isset($product[$i]['seller_slug']) && !empty($product[$i]['seller_slug']) ? output_escaping($product[$i]['seller_slug']) : "";
-            $product[$i]['deliverable_type'] = isset($product[$i]['deliverable_type']) && !empty($product[$i]['deliverable_type']) ? output_escaping($product[$i]['deliverable_type']) : '';
-
-            //end
-            $product[$i]['deliverable_city_type'] = isset($product[$i]['deliverable_city_type']) && !empty($product[$i]['deliverable_city_type']) ? output_escaping($product[$i]['deliverable_city_type']) : '';
-
-
+            $product[$i]['deliverable_type'] = $product[$i]['deliverable_type'];
             $product[$i]['deliverable_zipcodes_ids'] = output_escaping($product[$i]['deliverable_zipcodes']);
             if (isset($filter['discount']) && !empty($filter['discount']) && $filter['discount'] != "") {
                 $product[$i]['cal_discount_percentage'] = output_escaping(number_format($product[$i]['cal_discount_percentage'], 2));
@@ -665,34 +561,25 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $product[$i]['rating'] = output_escaping(number_format($product[$i]['rating'], 2));
             $product[$i]['availability'] = isset($product[$i]['availability']) && ($product[$i]['availability'] != "") ? $product[$i]['availability'] : '';
             $product[$i]['sku'] = isset($product[$i]['sku']) && ($product[$i]['sku'] != "") ? $product[$i]['sku'] : '';
-            $product[$i]['category_name'] = (isset($product[$i]['category_name']) && !empty($product[$i]['category_name'])) ? output_escaping($product[$i]['category_name']) : '';
-            $product[$i]['attribute_order'] = (isset($product[$i]['attribute_order']) && !empty($product[$i]['attribute_order'])) ? output_escaping($product[$i]['attribute_order']) : '';
 
             /* getting zipcodes from ids */
-            if ($product[$i]['deliverable_city_type'] != NONE && $product[$i]['deliverable_city_type'] != ALL) {
-                $cities = array();
-                $city_ids = explode(",", $product[$i]['deliverable_cities'] ?? '');
-                $t->db->select('id,name');
-                $t->db->where_in('id', $city_ids);
-                $cities = $t->db->get('cities')->result_array();
-                $deliverableCities = array();
-                foreach ($cities as $city) {
-                    $deliverableCities[] = array(
-                        'id' => $city['id'],
-                        'name' => $city['name']
-                    );
-                }
-                // $product[$i]['deliverable_cities'] = isset($product[$i]['deliverable_cities']) && !empty($product[$i]['deliverable_cities']) ? output_escaping(implode(",", $deliverableCities)) : '';
-                $product[$i]['deliverable_cities'] = isset($product[$i]['deliverable_cities']) && !empty($product[$i]['deliverable_cities']) ? $deliverableCities : '';
+            if ($product[$i]['deliverable_type'] != NONE && $product[$i]['deliverable_type'] != ALL) {
+                $zipcodes = array();
+                $zipcode_ids = explode(",", $product[$i]['deliverable_zipcodes_ids']);
+                // $t->db->select('zipcode');
+                // $t->db->where_in('id', $zipcode_ids);
+                // $zipcodes = $t->db->get('zipcodes')->result_array();
+                $zipcodes = array_column($zipcodes, "zipcode");
+                $product[$i]['deliverable_zipcodes'] = implode(",", $zipcode_ids);
             } else {
-                $product[$i]['deliverable_cities'] = '';
+                $product[$i]['deliverable_zipcodes'] = '';
             }
-
+            $product[$i]['category_name'] = (isset($product[$i]['category_name']) && !empty($product[$i]['category_name'])) ? output_escaping($product[$i]['category_name']) : '';
             /* check product delivrable or not */
             if ($is_deliverable != NULL) {
                 $zipcode = fetch_details('zipcodes', ['zipcode' => $is_deliverable], 'id');
                 if (!empty($zipcode)) {
-                    $product[$i]['is_deliverable'] = is_product_delivarable($type = 'zipcode', $zipcode[0]['id'], $product[$i]['id']);
+                    $product[$i]['is_deliverable'] = is_product_delivarable($type = 'zipcode', $zipcode[0]['id'], $product[$i]['id'],);
                 } else {
                     $product[$i]['is_deliverable'] = false;
                 }
@@ -704,17 +591,16 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
                 $product[$i]['is_deliverable'] = true;
             }
 
+
             $product[$i]['tags'] = (!empty($product[$i]['tags'])) ? explode(",", $product[$i]['tags']) : [];
+
             $product[$i]['video'] = (isset($product[$i]['video_type']) && (!empty($product[$i]['video_type']) || $product[$i]['video_type'] != NULL)) ? (($product[$i]['video_type'] == 'youtube' || $product[$i]['video_type'] == 'vimeo') ? $product[$i]['video'] : base_url($product[$i]['video'])) : "";
             $product[$i]['minimum_order_quantity'] = isset($product[$i]['minimum_order_quantity']) && (!empty($product[$i]['minimum_order_quantity'])) ? $product[$i]['minimum_order_quantity'] : 1;
             $product[$i]['quantity_step_size'] = isset($product[$i]['quantity_step_size']) && (!empty($product[$i]['quantity_step_size'])) ? $product[$i]['quantity_step_size'] : 1;
-
             if (!empty($product[$i]['variants'])) {
                 $count_stock = array();
                 $is_purchased_count = array();
-
                 for ($k = 0; $k < count($product[$i]['variants']); $k++) {
-                    // if (($is_detailed_data != null && $is_detailed_data == 1)) {
 
                     $variant_other_images = $variant_other_images_sm = $variant_other_images_md = json_decode((string)$product[$i]['variants'][$k]['images'], 1);
 
@@ -747,8 +633,6 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
                         $product[$i]['variants'][$k]['images_sm'] = array();
                         $product[$i]['variants'][$k]['variant_relative_path'] = array();
                     }
-                    // }
-
                     $product[$i]['variants'][$k]['swatche_type'] = (!empty($product[$i]['variants'][$k]['swatche_type'])) ? $product[$i]['variants'][$k]['swatche_type'] : "0";
                     $product[$i]['variants'][$k]['swatche_value'] = (!empty($product[$i]['variants'][$k]['swatche_value'])) ? $product[$i]['variants'][$k]['swatche_value'] : "0";
                     if (($product[$i]['stock_type'] == 0  || $product[$i]['stock_type'] == null)) {
@@ -774,33 +658,22 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
                         $product[$i]['variants'][$k]['price'] =  strval($product[$i]['variants'][$k]['price']);
                         $product[$i]['variants'][$k]['special_price'] =  strval($product[$i]['variants'][$k]['special_price']);
                     }
-                    if (isset($user_id) && $user_id != NULL && $is_detailed_data != '' && $is_detailed_data == 1) {
+                    if (isset($user_id) && $user_id != NULL) {
                         $user_cart_data = $t->db->select('qty as cart_count')->where(['product_variant_id' => $product[$i]['variants'][$k]['id'], 'user_id' => $user_id, 'is_saved_for_later' => 0])->get('cart')->result_array();
                         if (!empty($user_cart_data)) {
                             $product[$i]['variants'][$k]['cart_count'] = $user_cart_data[0]['cart_count'];
                         } else {
                             $product[$i]['variants'][$k]['cart_count'] = "0";
                         }
-                        $is_purchased = $t->db->where(['oi.product_variant_id' => $product[$i]['variants'][$k]['id'], 'oi.user_id' => $user_id])->order_by('oi.id', 'DESC')->get('order_items oi')->result_array();
+                        $is_purchased = $t->db->where(['oi.product_variant_id' => $product[$i]['variants'][$k]['id'], 'oi.user_id' => $user_id])->order_by('oi.id', 'DESC')->limit(1)->get('order_items oi')->result_array();
 
-                        foreach ($is_purchased as $item) {
-                            if (strtolower($item['active_status']) == 'delivered') {
-                                array_push($is_purchased_count, 1);
-                                $product[$i]['variants'][$k]['is_purchased'] = 1;
-                                // If any item meets the condition, set the flag and break out of the loop
-                            } else {
-                                array_push($is_purchased_count, 0);
-                                $product[$i]['variants'][$k]['is_purchased'] = 0;
-                            }
+                        if (!empty($is_purchased) && strtolower($is_purchased[0]['active_status']) == 'delivered') {
+                            array_push($is_purchased_count, 1);
+                            $product[$i]['variants'][$k]['is_purchased'] = 1;
+                        } else {
+                            array_push($is_purchased_count, 0);
+                            $product[$i]['variants'][$k]['is_purchased'] = 0;
                         }
-
-                        // if (!empty($is_purchased) && strtolower($is_purchased[0]['active_status']) == 'delivered') {
-                        //     array_push($is_purchased_count, 1);
-                        //     $product[$i]['variants'][$k]['is_purchased'] = 1;
-                        // } else {
-                        //     array_push($is_purchased_count, 0);
-                        //     $product[$i]['variants'][$k]['is_purchased'] = 0;
-                        // }
 
                         $user_rating = $t->db->select('rating,comment')->where(['user_id' => $user_id, 'product_id' => $product[$i]['id']])->get('product_rating')->result_array();
                         if (!empty($user_rating)) {
@@ -813,20 +686,19 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
                 }
             }
 
-            if (($is_detailed_data != null && $is_detailed_data == 1)) {
+            $is_purchased_count = array_count_values($is_purchased_count);
+            $is_purchased_count = array_keys($is_purchased_count);
+            $product[$i]['is_purchased'] = (isset($is_purchased) && array_sum($is_purchased_count) == 1) ? true : false;
 
-                $is_purchased_count = array_count_values($is_purchased_count);
-                $is_purchased_count = array_keys($is_purchased_count);
-                $product[$i]['is_purchased'] = (isset($is_purchased) && array_sum($is_purchased_count) == 1) ? true : false;
-                if (($product[$i]['stock_type'] != null && !empty($product[$i]['stock_type']))) {
+            if (($product[$i]['stock_type'] != null && !empty($product[$i]['stock_type']))) {
 
-                    //Case 2 & 3 : Product level(variable product) ||  Variant level(variable product)
-                    if ($product[$i]['stock_type'] == 1 || $product[$i]['stock_type'] == 2) {
-                        $counts = array_count_values($count_stock);
-                        $counts = array_keys($counts);
-                        if (isset($counts)) {
-                            $product[$i]['availability'] = array_sum($counts);
-                        }
+
+                //Case 2 & 3 : Product level(variable product) ||  Variant level(variable product)
+                if ($product[$i]['stock_type'] == 1 || $product[$i]['stock_type'] == 2) {
+                    $counts = array_count_values($count_stock);
+                    $counts = array_keys($counts);
+                    if (isset($counts)) {
+                        $product[$i]['availability'] = array_sum($counts);
                     }
                 }
             }
@@ -885,30 +757,23 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
                 $product[$i]['extra_description'] = !empty($product[$i]['extra_description']) && $product[$i]['extra_description'] != null ? output_escaping(str_replace('\r\n', '&#13;&#10;', (string)$product[$i]['extra_description'])) : "";
                 $n++;
             }
+            $variant_attributes = [];
+            $attributes_array = explode(',', $product[$i]['variants'][0]['attr_name']);
 
-            if (($is_detailed_data != null && $is_detailed_data == 1)) {
-
-                $variant_attributes = [];
-                $attributes_array = explode(',', $product[$i]['variants'][0]['attr_name']);
-                // echo "<pre>";
-                // print_r($product[$i]['variants']);
-                // die;
-                foreach ($attributes_array as $attribute) {
-                    $attribute = trim($attribute);
-                    $key = array_search($attribute, array_column($product[$i]['attributes'], 'name'), false);
-                    if (($key === 0 || !empty($key)) && isset($product[0]['attributes'][$key])) {
-                        $variant_attributes[$key]['ids'] = $product[0]['attributes'][$key]['ids'];
-                        $variant_attributes[$key]['values'] = $product[0]['attributes'][$key]['value'];
-                        $variant_attributes[$key]['swatche_type'] = $product[0]['attributes'][$key]['swatche_type'];
-                        $variant_attributes[$key]['swatche_value'] = $product[0]['attributes'][$key]['swatche_value'];
-                        $variant_attributes[$key]['attr_name'] = $attribute;
-                    }
+            foreach ($attributes_array as $attribute) {
+                $attribute = trim($attribute);
+                $key = array_search($attribute, array_column($product[$i]['attributes'], 'name'), false);
+                if (($key === 0 || !empty($key)) && isset($product[0]['attributes'][$key])) {
+                    $variant_attributes[$key]['ids'] = $product[0]['attributes'][$key]['ids'];
+                    $variant_attributes[$key]['values'] = $product[0]['attributes'][$key]['value'];
+                    $variant_attributes[$key]['swatche_type'] = $product[0]['attributes'][$key]['swatche_type'];
+                    $variant_attributes[$key]['swatche_value'] = $product[0]['attributes'][$key]['swatche_value'];
+                    $variant_attributes[$key]['attr_name'] = $attribute;
                 }
-                $product[$i]['variant_attributes'] = $variant_attributes;
             }
+            $product[$i]['variant_attributes'] = $variant_attributes;
         }
 
-        // print_r($count_res);
         if (isset($count_res[0]['cal_discount_percentage'])) {
             $dicounted_total = array_values(array_filter(explode(',', $count_res[0]['cal_discount_percentage'])));
         } else {
@@ -920,6 +785,7 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
         $attribute_values_ids = implode(",", $attribute_values_ids);
         $attr_value_ids = array_filter(array_unique(explode(',', $attribute_values_ids)));
     }
+
     $response['min_price'] = $min_price;
     $response['max_price'] = $max_price;
     $response['product'] = $product;
@@ -930,746 +796,8 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
     } else {
         $response['filters'] = [];
     }
-    // print_r($response['filters']);
-    // echo "<pre>";
-    // print_r($response);
-    // die;
     return $response;
 }
-
-// function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id = NULL, $limit = NULL, $offset = NULL, $sort = NULL, $order = NULL, $return_count = NULL, $is_deliverable = NULL, $seller_id = NULL)
-// {
-
-//     $settings = get_settings('system_settings', true);
-//     $low_stock_limit = isset($settings['low_stock_limit']) ? $settings['low_stock_limit'] : 5;
-//     $t = &get_instance();
-
-//     // if ($sort == 'pv.price' && !empty($sort) && $sort != NULL) {
-//     //     // echo "here";
-//     //     // $t->db->order_by("IF( pv.special_price > 0 , pv.special_price , pv.price )" . $order, False);
-//     //     $t->db->order_by("IF(pv.special_price > 0,
-//     //          IF(p.is_prices_inclusive_tax = 1,
-//     //               pv.special_price,
-//     //               pv.special_price + ((pv.special_price * p.tax )/100)
-//     //          ),
-//     //         IF(p.is_prices_inclusive_tax = 1,
-//     //              pv.price,
-//     //              pv.price  + ((pv.price * p.tax )/100)
-//     //         )
-//     //            ) " . $order, false);
-//     // }
-
-//     if ($sort == 'pv.price' && !empty($sort) && $sort != NULL) {
-//         $t->db->order_by("IF( pv.special_price > 0 , pv.special_price , pv.price )" . $order, False);
-//     }
-
-
-//     if (isset($filter['show_only_active_products']) && $filter['show_only_active_products'] == 0) {
-//         $where = [];
-//     } else {
-//         $where = ['p.status' => '1', 'pv.status' => 1, 'sd.status' => 1];
-//     }
-
-//     $discount_filter_data = (isset($filter['discount']) && !empty($filter['discount'])) ? ' pv.*,( if(pv.special_price > 0,( (pv.price-pv.special_price)/pv.price)*100,0)) as cal_discount_percentage, ' : '';
-
-//     $t->db->select($discount_filter_data . ' (select count(id)  from products where products.category_id=c.id ) as total,count(p.id) as sales, p.stock_type ,
-//      p.is_prices_inclusive_tax, p.type ,GROUP_CONCAT(DISTINCT(pa.attribute_value_ids)) as attr_value_ids,sd.rating as seller_rating,sd.slug as seller_slug,sd.no_of_ratings as seller_no_of_ratings,sd.logo as seller_profile, sd.store_name as store_name,sd.store_description, p.seller_id, u.username as seller_name,
-//      p.id,p.stock,p.name,p.category_id,p.short_description,p.slug,p.description,p.extra_description,p.total_allowed_quantity,p.status,p.deliverable_type,p.is_attachment_required,p.deliverable_zipcodes,p.deliverable_cities,p.deliverable_city_type,p.minimum_order_quantity,p.sku,
-//      p.quantity_step_size,p.cod_allowed,p.row_order,p.rating,p.no_of_ratings,p.image,p.is_returnable,p.is_cancelable,p.cancelable_till,p.indicator,p.other_images, 
-//      p.video_type, p.video, p.tags, p.warranty_period, p.guarantee_period, p.made_in,p.hsn_code,p.download_allowed,p.download_type,p.download_link,p.pickup_location,p.brand,p.availability, p.slug as product_slug, b.slug as brand_slug,c.name as category_name,tax.percentage as tax_percentage ,tax.id as tax_id ')
-//         ->join(" categories c", "p.category_id=c.id ", 'LEFT')
-//         ->join(" brands b", "p.brand=b.name", 'LEFT')
-//         ->join(" seller_data sd", "p.seller_id=sd.user_id ", 'LEFT')
-//         ->join(" users u", "p.seller_id=u.id", 'LEFT')
-//         ->join('`product_variants` pv', 'p.id = pv.product_id', 'LEFT')
-//         ->join('`taxes` tax', 'tax.id = p.tax', 'LEFT')
-//         ->join('`product_attributes` pa', ' pa.product_id = p.id ', 'LEFT');
-
-
-//     if (isset($filter['show_only_stock_product']) && $filter['show_only_stock_product'] == 1) {
-//         $t->db->where('(p.stock_type != "" or pv.stock != "")');
-//         // $t->db->where('(p.stock != "" or pv.stock != "")');
-//     }
-
-//     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'most_selling_products') {
-//         $t->db->join('`order_items` oi', 'oi.product_variant_id = pv.id', 'LEFT');
-//         $sort = 'count(p.id)';
-//         $order = 'DESC';
-//     }
-
-//     if (isset($filter) && !empty($filter['search'])) {
-//         $tags = explode(" ", $filter['search']);
-//         $t->db->group_Start();
-//         foreach ($tags as $i => $tag) {
-//             if ($i == 0) {
-//                 $t->db->like('p.tags', trim($tag));
-//             } else {
-//                 $t->db->or_like('p.tags', trim($tag));
-//             }
-//         }
-//         $t->db->or_like('p.name', trim($filter['search']));
-//         $t->db->group_end();
-//     }
-//     if (isset($filter) && !empty($filter['flag']) && $filter['flag'] != "null" && $filter['flag'] != "") {
-//         $flag = $filter['flag'];
-//         if ($flag == 'low') {
-//             $t->db->group_Start();
-//             $where1 = "p.stock_type is  NOT NULL";
-//             $t->db->where($where1);
-//             $t->db->where('p.stock <=', $low_stock_limit);
-//             $t->db->where('p.availability =', '1');
-//             $t->db->or_where('pv.stock <=', $low_stock_limit);
-//             $t->db->where('pv.availability =', '1');
-//             $t->db->group_End();
-//         } else {
-//             $t->db->group_Start();
-//             $t->db->or_where('p.availability ', '0');
-//             $t->db->or_where('pv.availability ', '0');
-//             $t->db->where('p.stock ', '0');
-//             $t->db->or_where('pv.stock ', '0');
-//             $t->db->group_End();
-//         }
-//     }
-//     if (isset($filter['min_price']) && $filter['min_price'] > 0) {
-//         $min_price = $filter['min_price'];
-//         $where_min = "if( pv.special_price > 0 , pv.special_price , pv.price ) >=$min_price";
-//         $t->db->group_Start();
-//         $t->db->where($where_min);
-//         $t->db->group_End();
-//     }
-//     if (isset($filter['max_price']) && $filter['max_price'] > 0 && isset($filter['min_price']) && $filter['min_price'] > 0) {
-//         $max_price = $filter['max_price'];
-//         $where_max = "if( pv.special_price > 0 , pv.special_price , pv.price ) <=$max_price";
-//         $t->db->group_Start();
-//         $t->db->where($where_max);
-//         $t->db->group_End();
-//     }
-
-//     if (isset($filter) && !empty($filter['tags'])) {
-//         $tags = explode(",", $filter['tags']);
-//         $t->db->group_Start();
-//         foreach ($tags as $i => $tag) {
-//             if ($i == 0) {
-//                 $t->db->like('p.tags', trim($tag));
-//             } else {
-//                 $t->db->or_like('p.tags', trim($tag));
-//             }
-//         }
-//         $t->db->group_end();
-//     }
-
-//     if (isset($filter) && !empty($filter['brand'])) {
-//         $t->db->where('p.brand', trim($filter['brand']));
-//     }
-
-//     if (isset($filter) && !empty($filter['slug'])) {
-//         $where['p.slug'] = $filter['slug'];
-//     }
-//     if (isset($seller_id) && !empty($seller_id) && $seller_id != "") {
-//         $where['p.seller_id'] = $seller_id;
-//     }
-
-
-//     if (isset($filter) && !empty($filter['attribute_value_ids'])) {
-//         /* https://stackoverflow.com/questions/5015403/mysql-find-in-set-with-multiple-search-string */
-//         $str = str_replace(',', '|', $filter['attribute_value_ids']); //str_replace(find,replace,string,count)
-//         $t->db->where('CONCAT(",", pa.attribute_value_ids , ",") REGEXP ",(' . $str . ')," !=', 0, false);
-//     }
-
-//     if (isset($category_id) && !empty($category_id)) {
-//         if (is_array($category_id) && !empty($category_id)) {
-//             $t->db->group_Start();
-//             $t->db->where_in('p.category_id', $category_id);
-//             $t->db->or_where_in('c.parent_id', $category_id);
-//             $t->db->group_End();
-//             $t->db->where($where);
-//         } else {
-//             $where['p.category_id'] = $category_id;
-//         }
-//     }
-
-//     if (isset($filter['zipcode_id']) && !empty($filter['zipcode_id'])) {
-//         $zipcode_id = $filter['zipcode_id'];
-//         $where2 = "((deliverable_type='2' and FIND_IN_SET('$zipcode_id', deliverable_zipcodes)) or deliverable_type = '1') OR (deliverable_type='3' and NOT FIND_IN_SET('$zipcode_id', deliverable_zipcodes)) ";
-//         $t->db->group_Start();
-//         $t->db->where($where2);
-//         $t->db->group_End();
-//     }
-
-//     if (isset($filter['city_id']) && !empty($filter['city_id'])) {
-//         $city_id = $filter['city_id'];
-//         $where2 = "((deliverable_city_type='2' and FIND_IN_SET('$city_id', deliverable_cities)) or deliverable_city_type = '1') OR (deliverable_city_type='3' and NOT FIND_IN_SET('$city_id', deliverable_cities)) ";
-//         $t->db->group_Start();
-//         $t->db->where($where2);
-//         $t->db->group_End();
-//     }
-
-//     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'products_on_sale') {
-//         $t->db->where('pv.special_price >', '0');
-//     }
-
-//     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'top_rated_products') {
-//         $sort = null;
-//         $order = null;
-//         $t->db->order_by("p.rating", "desc");
-//         $t->db->order_by("p.no_of_ratings", "desc");
-//         $where = ['p.no_of_ratings > ' => 0];
-//     }
-
-
-
-//     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'top_rated_product_including_all_products') {
-//         $sort = null;
-//         $order = null;
-//         $t->db->order_by("p.rating", "desc");
-//         $t->db->order_by("p.no_of_ratings", "desc");
-//     }
-
-//     if (isset($filter) && !empty($filter['product_type']) && $filter['product_type'] == 'new_added_products') {
-//         $sort = 'p.id';
-//         $order = 'desc';
-//     }
-
-//     if (isset($filter) && !empty($filter['product_variant_ids'])) {
-//         if (is_array($filter['product_variant_ids'])) {
-//             $t->db->where_in('pv.id', $filter['product_variant_ids']);
-//         }
-//     }
-
-//     if (isset($id) && !empty($id) && $id != null) {
-//         if (is_array($id) && !empty($id)) {
-//             $t->db->where_in('p.id', $id);
-//             $t->db->where($where);
-//         } else {
-//             if (isset($filter) && !empty($filter['is_similar_products']) && $filter['is_similar_products'] == '1') {
-//                 $where[' p.id != '] = $id;
-//             } else {
-//                 $where['p.id'] = $id;
-//             }
-//             $t->db->where($where);
-//         }
-//     } else {
-//         $t->db->where($where);
-//     }
-//     if (!isset($filter['flag']) && empty($filter['flag'])) {
-//         $t->db->group_Start();
-//         $t->db->or_where('c.status', '1');
-//         $t->db->or_where('c.status', '0');
-//         $t->db->group_End();
-//     }
-//     if (isset($filter['discount']) && !empty($filter['discount']) && $filter['discount'] != "") {
-//         $discount_pr = $filter['discount'];
-//         $t->db->group_by('p.id')->having("cal_discount_percentage  <= " . $discount_pr, null, false)->having("cal_discount_percentage  > 0 ", null, false);
-//     } else {
-//         $t->db->group_by('p.id');
-//     }
-
-
-//     if ($limit != null || $offset != null) {
-//         $t->db->limit($limit, $offset);
-//     }
-//     if (isset($filter['discount']) && !empty($filter['discount']) && $filter['discount'] != "") {
-//         $t->db->order_by('cal_discount_percentage', 'DESC');
-//     } else {
-//         if ($sort != null || $order != null && $sort != 'pv.price') {
-//             $t->db->order_by($sort, $order);
-//         }
-//         $t->db->order_by('p.row_order', 'ASC');
-//     }
-
-
-
-//     if (!empty($return_count)) {
-//         return $t->db->count_all_results('products p');
-//     } else {
-//         $product = $t->db->get('products p')->result_array();
-//         // echo $t->db->last_query();
-//         // return false;
-//     }
-
-
-
-//     $count = isset($filter) && !empty($filter['flag']) ? 'count(DISTINCT(p.id))' : 'count(DISTINCT(p.id))';
-//     $discount_filter = (isset($filter['discount']) && !empty($filter['discount'])) ? ' , GROUP_CONCAT( IF( ( IF( pv.special_price > 0, ((pv.price - pv.special_price) / pv.price) * 100, 0 ) ) > ' . $filter['discount'] . ', ( IF( pv.special_price > 0, ((pv.price - pv.special_price) / pv.price) * 100, 0 ) ), 0 ) ) AS cal_discount_percentage ' : '';
-//     $product_count = $t->db->select('count(DISTINCT(p.id)) as total , GROUP_CONCAT(pa.attribute_value_ids) as attr_value_ids' . $discount_filter)
-//         ->join(" categories c", "p.category_id=c.id ", 'LEFT')
-//         ->join(" seller_data sd", "p.seller_id=sd.user_id ")
-//         ->join('`product_variants` pv', 'p.id = pv.product_id', 'LEFT')
-//         ->join('`product_attributes` pa', ' pa.product_id = p.id ', 'LEFT');
-
-//     if (isset($filter) && !empty($filter['search'])) {
-//         $tags = explode(" ", $filter['search']);
-//         $t->db->group_Start();
-//         foreach ($tags as $i => $tag) {
-//             if ($i == 0) {
-//                 $t->db->like('p.tags', trim($tag));
-//             } else {
-//                 $t->db->or_like('p.tags', trim($tag));
-//             }
-//         }
-//         $product_count->or_like('p.name', $filter['search']);
-//         $t->db->group_End();
-//     }
-//     if (isset($filter) && !empty($filter['flag'])) {
-//         $flag = $filter['flag'];
-//         if ($flag == 'low') {
-//             $t->db->group_Start();
-//             $where1 = "p.stock_type is  NOT NULL";
-//             $t->db->where($where1);
-//             $t->db->where('p.stock <=', $low_stock_limit);
-//             $t->db->where('p.availability =', '1');
-//             $t->db->or_where('pv.stock <=', $low_stock_limit);
-//             $t->db->where('pv.availability =', '1');
-//             $t->db->group_End();
-//         } else {
-//             $t->db->group_Start();
-//             $t->db->or_where('p.availability ', '0');
-//             $t->db->or_where('pv.availability ', '0');
-//             $t->db->where('p.stock ', '0');
-//             $t->db->or_where('pv.stock ', '0');
-//             $t->db->group_End();
-//         }
-//     }
-
-//     if (isset($filter) && !empty($filter['tags'])) {
-//         $tags = explode(",", $filter['tags']);
-//         $t->db->group_Start();
-//         foreach ($tags as $i => $tag) {
-//             if ($i == 0) {
-//                 $t->db->like('p.tags', trim($tag));
-//             } else {
-//                 $t->db->or_like('p.tags', trim($tag));
-//             }
-//         }
-//         $t->db->group_End();
-//     }
-
-//     if (isset($filter) && !empty($filter['brand'])) {
-//         $t->db->where('p.brand', trim($filter['brand']));
-//     }
-
-//     if (isset($filter['min_price']) && $filter['min_price'] > 0) {
-//         $min_price = $filter['min_price'];
-//         $where_min = "if( pv.special_price > 0 , pv.special_price , pv.price ) >=$min_price";
-//         $t->db->group_Start();
-//         $t->db->where($where_min);
-//         $t->db->group_End();
-//     }
-//     if (isset($filter['max_price']) && $filter['max_price'] > 0 && isset($filter['min_price']) && $filter['min_price'] > 0) {
-//         $max_price = $filter['max_price'];
-//         $where_max = "if( pv.special_price > 0 , pv.special_price , pv.price ) <=$max_price";
-//         $t->db->group_Start();
-//         $t->db->where($where_max);
-//         $t->db->group_End();
-//     }
-
-//     if (isset($filter) && !empty($filter['attribute_value_ids'])) {
-//         $str = str_replace(',', '|', $filter['attribute_value_ids']); // Ids should be in string and comma separated 
-//         $product_count->where('CONCAT(",", pa.attribute_value_ids, ",") REGEXP ",(' . $str . ')," !=', 0, false);
-//     }
-//     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'most_selling_products') {
-//         $product_count->join('`order_items` oi', 'oi.product_variant_id = pv.id', 'LEFT');
-//     }
-//     if (isset($category_id) && !empty($category_id)) {
-//         if (is_array($category_id) && !empty($category_id)) {
-//             $product_count->where_in('p.category_id', $category_id);
-//             $product_count->or_where_in('c.parent_id', $category_id);
-//             $product_count->where($where);
-//         }
-//     }
-
-//     if (isset($filter['zipcode_id']) && !empty($filter['zipcode_id'])) {
-//         $zipcode_id = $filter['zipcode_id'];
-//         $where2 = "((deliverable_type='2' and FIND_IN_SET('$zipcode_id', deliverable_zipcodes)) or deliverable_type = '1') OR (deliverable_type='3' and NOT FIND_IN_SET('$zipcode_id', deliverable_zipcodes)) ";
-//         $t->db->group_Start();
-//         $t->db->where($where2);
-//         $t->db->group_End();
-//     }
-
-//     if (isset($filter['city_id']) && !empty($filter['city_id'])) {
-//         $city_id = $filter['city_id'];
-//         $where2 = "((deliverable_city_type='2' and FIND_IN_SET('$city_id', deliverable_cities)) or deliverable_city_type = '1') OR (deliverable_city_type='3' and NOT FIND_IN_SET('$city_id', deliverable_cities)) ";
-//         $t->db->group_Start();
-//         $t->db->where($where2);
-//         $t->db->group_End();
-//     }
-
-//     if (isset($filter) && !empty($filter['product_type']) && strtolower($filter['product_type']) == 'products_on_sale') {
-//         $product_count->where('pv.special_price >=', '0');
-//     }
-//     if (isset($id) && !empty($id) && $id != null) {
-//         if (is_array($id) && !empty($id)) {
-//             $product_count->where_in('p.id', $id);
-//         }
-//     }
-//     if (isset($seller_id) && !empty($seller_id) && $seller_id != "") {
-//         $where['p.seller_id'] = $seller_id;
-//     }
-//     if (isset($seller_id) && !empty($seller_id) && $seller_id != "") {
-//         if (isset($filter['show_only_stock_product']) && $filter['show_only_stock_product'] == 1) {
-//             $t->db->where('(p.stock != "" or pv.stock != "")');
-//         }
-//     }
-//     if (isset($filter['show_only_stock_product']) && $filter['show_only_stock_product'] == 1) {
-//         $t->db->where('(p.stock != "" or pv.stock != "")');
-//     }
-//     $product_count->where($where);
-//     if (!isset($filter['flag']) && empty($filter['flag'])) {
-//         $product_count->group_Start();
-//         $product_count->or_where('c.status', '1');
-//         $product_count->or_where('c.status', '0');
-//         $product_count->group_End();
-//     }
-
-//     $count_res = $product_count->get('products p')->result_array();
-
-//     // return;
-//     $attribute_values_ids = array();
-//     $temp = [];
-//     $min_price = get_price('min');
-//     $max_price = get_price('max');
-
-//     // print_r($product);
-
-//     if (!empty($product)) {
-
-//         $t->load->model('rating_model');
-//         for ($i = 0; $i < count($product); $i++) {
-
-//             $rating = $t->rating_model->fetch_rating($product[$i]['id'], '', 8, 0, 'pr.id', 'desc', '', 1);
-//             $product[$i]['review_images'] = (!empty($rating)) ? [$rating] : array();
-
-//             $product[$i]['tax_percentage'] = (isset($product[$i]['tax_percentage']) && intval($product[$i]['tax_percentage']) > 0) ? $product[$i]['tax_percentage'] : '0';
-//             $product[$i]['tax_id'] = ((isset($product[$i]['tax_id']) && intval($product[$i]['tax_id']) > 0) && $product[$i]['tax_id'] != "") ? $product[$i]['tax_id'] : '0';
-//             $product[$i]['attributes'] = get_attribute_values_by_pid($product[$i]['id']);
-//             // print_r($product[$i]['attributes']);
-//             // die;
-//             $product[$i]['variants'] = get_variants_values_by_pid($product[$i]['id']);
-//             $variants =   get_variants_values_by_pid($product[$i]['id']);
-//             $total_stock = 0;
-//             foreach ($variants as $variant) {
-//                 $stock = (isset($variant['stock']) && !empty($variant['stock'])) ? $variant['stock'] : 0;
-//                 $total_stock  += $stock;
-//                 $product[$i]['total_stock'] = isset($total_stock) && !empty($total_stock) ? $total_stock : '';
-//             }
-//             $product[$i]['min_max_price'] = get_min_max_price_of_product($product[$i]['id']);
-//             $product[$i]['stock_type'] = isset($product[$i]['stock_type']) && ($product[$i]['stock_type'] != '') ? $product[$i]['stock_type'] : '';
-//             $product[$i]['stock'] = isset($product[$i]['stock']) && !empty($product[$i]['stock']) ? $product[$i]['stock'] : '';
-//             $product[$i]['relative_path'] = isset($product[$i]['image']) && !empty($product[$i]['image']) ? $product[$i]['image'] : '';
-//             $product[$i]['other_images_relative_path'] = isset($product[$i]['other_images']) && !empty($product[$i]['other_images']) ? json_decode($product[$i]['other_images']) : [];
-//             $product[$i]['video_relative_path'] = (isset($product[$i]['video']) && (!empty($product[$i]['video']))) ? $product[$i]['video'] : "";
-//             $product[$i]['video_type'] = isset($product[$i]['video_type']) && !empty($product[$i]['video_type']) ? $product[$i]['video_type'] : '';
-//             $product[$i]['attr_value_ids'] = isset($product[$i]['attr_value_ids']) && !empty($product[$i]['attr_value_ids']) ? $product[$i]['attr_value_ids'] : '';
-//             $product[$i]['made_in'] = isset($product[$i]['made_in']) && !empty($product[$i]['made_in']) ? $product[$i]['made_in'] : '';
-//             $product[$i]['hsn_code'] = isset($product[$i]['hsn_code']) && !empty($product[$i]['hsn_code']) ? $product[$i]['hsn_code'] : '';
-//             $product[$i]['brand'] = isset($product[$i]['brand']) && !empty($product[$i]['brand']) ? $product[$i]['brand'] : '';
-
-
-//             // echo "<pre>";
-//             // print_r($product[$i]);
-//             // die;
-
-//             $product[$i]['warranty_period'] = isset($product[$i]['warranty_period']) && !empty($product[$i]['warranty_period']) ? $product[$i]['warranty_period'] : '';
-//             $product[$i]['guarantee_period'] = isset($product[$i]['guarantee_period']) && !empty($product[$i]['guarantee_period']) ? $product[$i]['guarantee_period'] : '';
-//             $product[$i]['total_allowed_quantity'] = isset($product[$i]['total_allowed_quantity']) && !empty($product[$i]['total_allowed_quantity']) ? $product[$i]['total_allowed_quantity'] : '';
-//             $product[$i]['download_allowed'] = isset($product[$i]['download_allowed']) && !empty($product[$i]['download_allowed']) ? $product[$i]['download_allowed'] : '';
-//             $product[$i]['download_type'] = isset($product[$i]['download_type']) && !empty($product[$i]['download_type']) ? $product[$i]['download_type'] : '';
-//             $product[$i]['download_link'] = isset($product[$i]['download_link']) && !empty($product[$i]['download_link']) ? $product[$i]['download_link'] : '';
-//             $product[$i]['status'] = isset($product[$i]['status']) && !empty($product[$i]['status']) ? $product[$i]['status'] : '';
-//             $total_product = $t->db->query("select count(id) as total  from products where products.seller_id=" . $product[$i]['seller_id'] . " AND products.status='1'")->result_array();
-
-//             /* outputing escaped data */
-//             $product[$i]['name'] = output_escaping($product[$i]['name']);
-//             $product[$i]['total_product'] = ($total_product[0]['total']);
-//             $product[$i]['store_name'] = output_escaping($product[$i]['store_name']);
-//             $product[$i]['seller_rating'] = (isset($product[$i]['seller_rating']) && !empty($product[$i]['seller_rating'])) ? output_escaping(number_format($product[$i]['seller_rating'], 1)) : 0;
-//             $product[$i]['store_description'] = (isset($product[$i]['store_description']) && !empty($product[$i]['store_description'])) ? output_escaping($product[$i]['store_description']) : "";
-//             $product[$i]['seller_profile'] = output_escaping(base_url() . $product[$i]['seller_profile']);
-//             $product[$i]['seller_name'] = output_escaping($product[$i]['seller_name']);
-//             $product[$i]['short_description'] = output_escaping($product[$i]['short_description']);
-//             $product[$i]['description'] = (isset($product[$i]['description']) && !empty($product[$i]['description'])) ? output_escaping($product[$i]['description']) : "";
-//             $product[$i]['extra_description'] = (isset($product[$i]['extra_description']) && !empty($product[$i]['extra_description']) && $product[$i]['extra_description'] != 'NULL') ? output_escaping($product[$i]['extra_description']) : "";
-//             $product[$i]['pickup_location'] = (isset($product[$i]['pickup_location']) && !empty($product[$i]['pickup_location']) && $product[$i]['pickup_location']) != '' ? $product[$i]['pickup_location'] : '';
-//             // print_r($product[$i]['pickup_location']);
-//             // die;
-//             $product[$i]['seller_slug'] = isset($product[$i]['seller_slug']) && !empty($product[$i]['seller_slug']) ? output_escaping($product[$i]['seller_slug']) : "";
-//             $product[$i]['deliverable_type'] = isset($product[$i]['deliverable_type']) && !empty($product[$i]['deliverable_type']) ? output_escaping($product[$i]['deliverable_type']) : '';
-
-//             //end
-//             $product[$i]['deliverable_city_type'] = isset($product[$i]['deliverable_city_type']) && !empty($product[$i]['deliverable_city_type']) ? output_escaping($product[$i]['deliverable_city_type']) : '';
-
-
-//             $product[$i]['deliverable_zipcodes_ids'] = output_escaping($product[$i]['deliverable_zipcodes']);
-//             if (isset($filter['discount']) && !empty($filter['discount']) && $filter['discount'] != "") {
-//                 $product[$i]['cal_discount_percentage'] = output_escaping(number_format($product[$i]['cal_discount_percentage'], 2));
-//             }
-//             $product[$i]['cancelable_till'] = isset($product[$i]['cancelable_till']) && !empty($product[$i]['cancelable_till']) ? $product[$i]['cancelable_till'] : '';
-//             $product[$i]['is_attachment_required'] = isset($product[$i]['is_attachment_required']) && !empty($product[$i]['is_attachment_required']) ? $product[$i]['is_attachment_required'] : '0';
-//             $product[$i]['indicator'] = isset($product[$i]['indicator']) && !empty($product[$i]['indicator']) ? $product[$i]['indicator'] : '0';
-//             $product[$i]['deliverable_zipcodes_ids'] = isset($product[$i]['deliverable_zipcodes_ids']) && !empty($product[$i]['deliverable_zipcodes_ids']) ? $product[$i]['deliverable_zipcodes_ids'] : '';
-//             $product[$i]['rating'] = output_escaping(number_format($product[$i]['rating'], 2));
-//             $product[$i]['availability'] = isset($product[$i]['availability']) && ($product[$i]['availability'] != "") ? $product[$i]['availability'] : '';
-//             $product[$i]['sku'] = isset($product[$i]['sku']) && ($product[$i]['sku'] != "") ? $product[$i]['sku'] : '';
-//             // print_r($product[$i]);
-//             /* getting zipcodes from ids */
-//             if ($product[$i]['deliverable_city_type'] != NONE && $product[$i]['deliverable_city_type'] != ALL) {
-//                 $cities = array();
-//                 $city_ids = explode(",", $product[$i]['deliverable_cities'] ?? '');
-//                 $t->db->select('id,name');
-//                 $t->db->where_in('id', $city_ids);
-//                 $cities = $t->db->get('cities')->result_array();
-//                 // print_r($cities);
-//                 // $cities = array_column($cities, "name");
-//                 // Transform $cities array into the desired format
-//                 $deliverableCities = array();
-//                 foreach ($cities as $city) {
-//                     $deliverableCities[] = array(
-//                         'id' => $city['id'],
-//                         'name' => $city['name']
-//                     );
-//                 }
-//                 // $product[$i]['deliverable_cities'] = isset($product[$i]['deliverable_cities']) && !empty($product[$i]['deliverable_cities']) ? output_escaping(implode(",", $deliverableCities)) : '';
-//                 $product[$i]['deliverable_cities'] = isset($product[$i]['deliverable_cities']) && !empty($product[$i]['deliverable_cities']) ? $deliverableCities : '';
-//             } else {
-//                 $product[$i]['deliverable_cities'] = '';
-//             }
-//             $product[$i]['category_name'] = (isset($product[$i]['category_name']) && !empty($product[$i]['category_name'])) ? output_escaping($product[$i]['category_name']) : '';
-//             /* check product delivrable or not */
-//             if ($is_deliverable != NULL) {
-//                 $zipcode = fetch_details('zipcodes', ['zipcode' => $is_deliverable], 'id');
-//                 if (!empty($zipcode)) {
-//                     $product[$i]['is_deliverable'] = is_product_delivarable($type = 'zipcode', $zipcode[0]['id'], $product[$i]['id']);
-//                 } else {
-//                     $product[$i]['is_deliverable'] = false;
-//                 }
-//             } else {
-//                 $product[$i]['is_deliverable'] = false;
-//             }
-
-//             if ($product[$i]['deliverable_type'] == 1) {
-//                 $product[$i]['is_deliverable'] = true;
-//             }
-
-
-//             $product[$i]['tags'] = (!empty($product[$i]['tags'])) ? explode(",", $product[$i]['tags']) : [];
-
-//             $product[$i]['video'] = (isset($product[$i]['video_type']) && (!empty($product[$i]['video_type']) || $product[$i]['video_type'] != NULL)) ? (($product[$i]['video_type'] == 'youtube' || $product[$i]['video_type'] == 'vimeo') ? $product[$i]['video'] : base_url($product[$i]['video'])) : "";
-//             $product[$i]['minimum_order_quantity'] = isset($product[$i]['minimum_order_quantity']) && (!empty($product[$i]['minimum_order_quantity'])) ? $product[$i]['minimum_order_quantity'] : 1;
-//             $product[$i]['quantity_step_size'] = isset($product[$i]['quantity_step_size']) && (!empty($product[$i]['quantity_step_size'])) ? $product[$i]['quantity_step_size'] : 1;
-//             if (!empty($product[$i]['variants'])) {
-//                 $count_stock = array();
-//                 $is_purchased_count = array();
-//                 for ($k = 0; $k < count($product[$i]['variants']); $k++) {
-
-//                     $variant_other_images = $variant_other_images_sm = $variant_other_images_md = json_decode((string)$product[$i]['variants'][$k]['images'], 1);
-
-//                     if (!empty($variant_other_images[0]) && isset($variant_other_images[0])) {
-
-//                         $product[$i]['variants'][$k]['variant_relative_path'] = isset($product[$i]['variants'][$k]['images']) && !empty($product[$i]['variants'][$k]['images']) ? json_decode($product[$i]['variants'][$k]['images']) : [];
-//                         $counter = 0;
-//                         foreach ($variant_other_images_md as $row) {
-//                             $variant_other_images_md[$counter] = get_image_url($variant_other_images_md[$counter], 'thumb', 'md');
-//                             $counter++;
-//                         }
-//                         $product[$i]['variants'][$k]['images_md'] = isset($variant_other_images_md) && !empty($variant_other_images_md) ? $variant_other_images_md : "";
-
-//                         $counter = 0;
-//                         foreach ($variant_other_images_sm as $row) {
-//                             $variant_other_images_sm[$counter] = get_image_url($variant_other_images_sm[$counter], 'thumb', 'sm');
-//                             $counter++;
-//                         }
-//                         $product[$i]['variants'][$k]['images_sm'] = $variant_other_images_sm;
-
-//                         $counter = 0;
-//                         foreach ($variant_other_images as $row) {
-//                             $variant_other_images[$counter] = get_image_url($variant_other_images[$counter]);
-//                             $counter++;
-//                         }
-//                         $product[$i]['variants'][$k]['images'] = isset($variant_other_images) && !empty($variant_other_images) ? $variant_other_images : "";
-//                     } else {
-//                         $product[$i]['variants'][$k]['images'] = array();
-//                         $product[$i]['variants'][$k]['images_md'] = array();
-//                         $product[$i]['variants'][$k]['images_sm'] = array();
-//                         $product[$i]['variants'][$k]['variant_relative_path'] = array();
-//                     }
-//                     $product[$i]['variants'][$k]['swatche_type'] = (!empty($product[$i]['variants'][$k]['swatche_type'])) ? $product[$i]['variants'][$k]['swatche_type'] : "0";
-//                     $product[$i]['variants'][$k]['swatche_value'] = (!empty($product[$i]['variants'][$k]['swatche_value'])) ? $product[$i]['variants'][$k]['swatche_value'] : "0";
-//                     if (($product[$i]['stock_type'] == 0  || $product[$i]['stock_type'] == null)) {
-//                         if ($product[$i]['availability'] != null) {
-//                             $product[$i]['variants'][$k]['availability'] = $product[$i]['availability'];
-//                         }
-//                     } else {
-//                         $product[$i]['variants'][$k]['availability'] = ($product[$i]['variants'][$k]['availability'] != null) ? $product[$i]['variants'][$k]['availability'] : 1;
-//                         array_push($count_stock, $product[$i]['variants'][$k]['availability']);
-//                     }
-//                     if (($product[$i]['stock_type'] == 0)) {
-//                         $product[$i]['variants'][$k]['stock'] = isset($product[$i]['variants'][$k]['stock']) && !empty($product[$i]['variants'][$k]['stock']) ? get_stock($product[$i]['id'], 'product') : '';
-//                     } else {
-//                         $product[$i]['variants'][$k]['stock'] = isset($product[$i]['variants'][$k]['stock']) && !empty($product[$i]['variants'][$k]['stock']) ? get_stock($product[$i]['variants'][$k]['id'], 'variant') : '';
-//                     }
-//                     $percentage = (isset($product[$i]['tax_percentage']) && intval($product[$i]['tax_percentage']) > 0 && $product[$i]['tax_percentage'] != null) ? $product[$i]['tax_percentage'] : '0';
-//                     if ((isset($product[$i]['is_prices_inclusive_tax']) && $product[$i]['is_prices_inclusive_tax'] == 0) || (!isset($product[$i]['is_prices_inclusive_tax'])) && $percentage > 0) {
-//                         $price_tax_amount = $product[$i]['variants'][$k]['price'] * ($percentage / 100);
-//                         $product[$i]['variants'][$k]['price'] =  strval($product[$i]['variants'][$k]['price'] + $price_tax_amount);
-//                         $special_price_tax_amount = $product[$i]['variants'][$k]['special_price'] * ($percentage / 100);
-//                         $product[$i]['variants'][$k]['special_price'] =  strval($product[$i]['variants'][$k]['special_price'] + $special_price_tax_amount);
-//                     } else {
-//                         $product[$i]['variants'][$k]['price'] =  strval($product[$i]['variants'][$k]['price']);
-//                         $product[$i]['variants'][$k]['special_price'] =  strval($product[$i]['variants'][$k]['special_price']);
-//                     }
-//                     if (isset($user_id) && $user_id != NULL) {
-//                         $user_cart_data = $t->db->select('qty as cart_count')->where(['product_variant_id' => $product[$i]['variants'][$k]['id'], 'user_id' => $user_id, 'is_saved_for_later' => 0])->get('cart')->result_array();
-//                         if (!empty($user_cart_data)) {
-//                             $product[$i]['variants'][$k]['cart_count'] = $user_cart_data[0]['cart_count'];
-//                         } else {
-//                             $product[$i]['variants'][$k]['cart_count'] = "0";
-//                         }
-//                         $is_purchased = $t->db->where(['oi.product_variant_id' => $product[$i]['variants'][$k]['id'], 'oi.user_id' => $user_id])->order_by('oi.id', 'DESC')->get('order_items oi')->result_array();
-
-//                         foreach ($is_purchased as $item) {
-//                             if (strtolower($item['active_status']) == 'delivered') {
-//                                 array_push($is_purchased_count, 1);
-//                                 $product[$i]['variants'][$k]['is_purchased'] = 1;
-//                                 // If any item meets the condition, set the flag and break out of the loop
-//                             } else {
-//                                 array_push($is_purchased_count, 0);
-//                                 $product[$i]['variants'][$k]['is_purchased'] = 0;
-//                             }
-//                         }
-
-//                         // if (!empty($is_purchased) && strtolower($is_purchased[0]['active_status']) == 'delivered') {
-//                         //     array_push($is_purchased_count, 1);
-//                         //     $product[$i]['variants'][$k]['is_purchased'] = 1;
-//                         // } else {
-//                         //     array_push($is_purchased_count, 0);
-//                         //     $product[$i]['variants'][$k]['is_purchased'] = 0;
-//                         // }
-
-//                         $user_rating = $t->db->select('rating,comment')->where(['user_id' => $user_id, 'product_id' => $product[$i]['id']])->get('product_rating')->result_array();
-//                         if (!empty($user_rating)) {
-//                             $product[$i]['user']['user_rating'] =   (isset($product[$i]['user']['user_rating']) && (!empty($product[$i]['user']['user_rating']))) ? $user_rating[0]['rating'] : '';
-//                             $product[$i]['user']['user_comment'] =   (isset($product[$i]['user']['user_comment']) && (!empty($product[$i]['user']['user_comment']))) ? $user_rating[0]['user_comment'] : '';
-//                         }
-//                     } else {
-//                         $product[$i]['variants'][$k]['cart_count'] = "0";
-//                     }
-//                 }
-//             }
-
-//             $is_purchased_count = array_count_values($is_purchased_count);
-//             $is_purchased_count = array_keys($is_purchased_count);
-//             $product[$i]['is_purchased'] = (isset($is_purchased) && array_sum($is_purchased_count) == 1) ? true : false;
-
-//             if (($product[$i]['stock_type'] != null && !empty($product[$i]['stock_type']))) {
-
-
-//                 //Case 2 & 3 : Product level(variable product) ||  Variant level(variable product)
-//                 if ($product[$i]['stock_type'] == 1 || $product[$i]['stock_type'] == 2) {
-//                     $counts = array_count_values($count_stock);
-//                     $counts = array_keys($counts);
-//                     if (isset($counts)) {
-//                         $product[$i]['availability'] = array_sum($counts);
-//                     }
-//                 }
-//             }
-
-//             if (isset($user_id) && $user_id != null) {
-//                 $fav = $t->db->where(['product_id' => $product[$i]['id'], 'user_id' => $user_id])->get('favorites')->num_rows();
-//                 $product[$i]['is_favorite'] = $fav;
-//             } else {
-//                 $product[$i]['is_favorite'] = '0';
-//             }
-
-//             $product[$i]['image_md'] = get_image_url($product[$i]['image'], 'thumb', 'md');
-//             $product[$i]['image_sm'] = get_image_url($product[$i]['image'], 'thumb', 'sm');
-//             $product[$i]['image'] = get_image_url($product[$i]['image']);
-//             $other_images = $other_images_sm =  $other_images_md = json_decode($product[$i]['other_images'], 1);
-
-//             if (!empty($other_images)) {
-
-//                 $k = 0;
-//                 foreach ($other_images_md as $row) {
-//                     $other_images_md[$k] = get_image_url($row, 'thumb', 'md');
-//                     $k++;
-//                 }
-//                 $other_images_md = (array) $other_images_md;
-//                 $other_images_md = array_values($other_images_md);
-//                 $product[$i]['other_images_md'] = $other_images_md;
-
-//                 $k = 0;
-//                 foreach ($other_images_sm as $row) {
-//                     $other_images_sm[$k] = get_image_url($row, 'thumb', 'sm');
-//                     $k++;
-//                 }
-//                 $other_images_sm = (array) $other_images_sm;
-//                 $other_images_sm = array_values($other_images_sm);
-//                 $product[$i]['other_images_sm'] = $other_images_sm;
-
-//                 $k = 0;
-//                 foreach ($other_images as $row) {
-//                     $other_images[$k] = get_image_url($row);
-//                     $k++;
-//                 }
-//                 $other_images = (array) $other_images;
-//                 $other_images = array_values($other_images);
-//                 $product[$i]['other_images'] = $other_images;
-//             } else {
-//                 $product[$i]['other_images'] = array();
-//                 $product[$i]['other_images_sm'] = array();
-//                 $product[$i]['other_images_md'] = array();
-//             }
-//             $tags_to_strip = array("table", "<th>", "<td>");
-//             $replace_with = array("", "h3", "p");
-//             $n = 0;
-//             foreach ($tags_to_strip as $tag) {
-//                 // $product[$i]['description'] = output_escaping(str_replace('\r\n', '&#13;&#10;', (string)$product[$i]['description']));
-//                 $product[$i]['description'] = !empty($product[$i]['description']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', (string)$product[$i]['description'])) : "";
-//                 $product[$i]['extra_description'] = !empty($product[$i]['extra_description']) && $product[$i]['extra_description'] != null ? output_escaping(str_replace('\r\n', '&#13;&#10;', (string)$product[$i]['extra_description'])) : "";
-//                 $n++;
-//             }
-//             $variant_attributes = [];
-//             $attributes_array = explode(',', $product[$i]['variants'][0]['attr_name']);
-
-//             foreach ($attributes_array as $attribute) {
-//                 $attribute = trim($attribute);
-//                 $key = array_search($attribute, array_column($product[$i]['attributes'], 'name'), false);
-//                 if (($key === 0 || !empty($key)) && isset($product[0]['attributes'][$key])) {
-//                     $variant_attributes[$key]['ids'] = $product[0]['attributes'][$key]['ids'];
-//                     $variant_attributes[$key]['values'] = $product[0]['attributes'][$key]['value'];
-//                     $variant_attributes[$key]['swatche_type'] = $product[0]['attributes'][$key]['swatche_type'];
-//                     $variant_attributes[$key]['swatche_value'] = $product[0]['attributes'][$key]['swatche_value'];
-//                     $variant_attributes[$key]['attr_name'] = $attribute;
-//                 }
-//             }
-//             $product[$i]['variant_attributes'] = $variant_attributes;
-//         }
-//         // print_r($count_res);
-//         if (isset($count_res[0]['cal_discount_percentage'])) {
-//             $dicounted_total = array_values(array_filter(explode(',', $count_res[0]['cal_discount_percentage'])));
-//         } else {
-//             $dicounted_total = 0;
-//         }
-//         $response['total'] = (isset($filter) && !empty($filter['discount'])) ? count($dicounted_total) : $count_res[0]['total'];
-
-//         array_push($attribute_values_ids, $count_res[0]['attr_value_ids']);
-//         $attribute_values_ids = implode(",", $attribute_values_ids);
-//         $attr_value_ids = array_filter(array_unique(explode(',', $attribute_values_ids)));
-//     }
-//     $response['min_price'] = $min_price;
-//     $response['max_price'] = $max_price;
-//     $response['product'] = $product;
-//     if (isset($filter) && $filter != null) {
-//         if (!empty($attr_value_ids)) {
-//             $response['filters'] = get_attribute_values_by_id($attr_value_ids);
-//         }
-//     } else {
-//         $response['filters'] = [];
-//     }
-//     // print_r($response['filters']);
-//     // print_r($response);
-//     // die;
-//     return $response;
-// }
 
 function update_details($set, $where, $table, $escape = true)
 {
@@ -1838,7 +966,7 @@ function validate_promo_code($promo_code, $user_id, $final_total)
 }
 
 //update_wallet_balance
-function update_wallet_balance($operation, $user_id, $amount, $message = "Balance Debited", $order_item_id = "", $is_refund = 0, $transaction_type = 'wallet', $status = '')
+function update_wallet_balance($operation, $user_id, $amount, $message = "Balance Debited", $order_item_id = "", $is_refund = 0, $transaction_type = 'wallet')
 {
 
     $t = &get_instance();
@@ -1868,7 +996,6 @@ function update_wallet_balance($operation, $user_id, $amount, $message = "Balanc
                 'message' => $message,
                 'order_item_id' => $order_item_id,
                 'is_refund' => $is_refund,
-                'status' => (isset($status) && !empty($status)) ? $status : 'success',
             ];
             $payment_data =  fetch_details('transactions', ['order_item_id' => $order_item_id], 'type');
             if ($operation == 'debit') {
@@ -1907,87 +1034,12 @@ function update_wallet_balance($operation, $user_id, $amount, $message = "Balanc
     return $response;
 }
 
-function get_token()
-{
-    $file_name = get_settings("service_account_file");
-
-    // $file_path = FCPATH . $file_name;
-    $privateKeyFile = FCPATH . $file_name;
-    $scope = 'https://www.googleapis.com/auth/firebase.messaging';
-
-    // Read the private key file
-    $privateKey = file_get_contents($privateKeyFile);
-    $privateKeyData = json_decode($privateKey, true);
-
-    // Get the private key and client email from the JSON data
-    $privateKeyPem = $privateKeyData['private_key'];
-    $clientEmail = $privateKeyData['client_email'];
-
-    // Create a JSON Web Token (JWT)
-    $header = [
-        'alg' => 'RS256',
-        'typ' => 'JWT'
-    ];
-    $payload = [
-        'iss' => $clientEmail,
-        'scope' => $scope,
-        'aud' => 'https://oauth2.googleapis.com/token',
-        'exp' => time() + 3600,
-        'iat' => time()
-    ];
-
-    $headerEncoded = base64_encode(json_encode($header));
-    $payloadEncoded = base64_encode(json_encode($payload));
-
-    $dataEncoded = $headerEncoded . '.' . $payloadEncoded;
-
-    // Sign the JWT with the private key
-    openssl_sign($dataEncoded, $signature, $privateKeyPem, 'SHA256');
-    $signatureEncoded = base64_encode($signature);
-
-    $jwtEncoded = $dataEncoded . '.' . $signatureEncoded;
-
-    // Exchange the JWT for an access token
-    $postData = http_build_query([
-        'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        'assertion' => $jwtEncoded
-    ]);
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://oauth2.googleapis.com/token');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    $responseData = json_decode($response, true);
-    $accessToken = $responseData['access_token'];
-
-    return $accessToken;
-}
-
-function getAccessToken()
-{
-    $file_name = get_settings("service_account_file");
-
-    $file_path = FCPATH . $file_name;
-    // Initialize the Google Client
-    $client = new Client();
-    $client->setAuthConfig($file_path);
-    $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
-    // Fetch the access token
-    $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
-    return $accessToken;
-}
-
 function send_notification($fcmMsg, $registrationIDs_chunks, $customBodyFields = [], $title = "test title", $message = "test message", $type = "test type")
 {
     // print_R($customBodyFields);
     // print_R($registrationIDs_chunks);
 
-    $project_id = get_settings("firebase_project_id");
+    $project_id = 'maguali-2734d';
 
     $url = 'https://fcm.googleapis.com/v1/projects/' . $project_id . '/messages:send';
     // $access_token = getAccessToken();
@@ -2100,25 +1152,26 @@ function send_notification($fcmMsg, $registrationIDs_chunks, $customBodyFields =
     // print_r($result);
     return $fcmFields;
 }
-
 function get_attribute_values_by_pid($id)
 {
     $t = &get_instance();
     $swatche_type = $swatche_values1 =  array();
-    $attribute_values = $t->db->select(" group_concat(`av`.`id` ORDER BY `av`.`id` ASC) as ids,group_concat(' ', `av`.`value`  ORDER BY `av`.`id` ASC ) as value ,`a`.`name` as attr_name, a.name, GROUP_CONCAT(av.swatche_type ORDER BY av.id ASC ) as swatche_type , GROUP_CONCAT(av.swatche_value  ORDER BY av.id ASC) as swatche_value")
+    $attribute_values = $t->db->select("
+    group_concat(`av`.`id` ORDER BY `av`.`id` ASC) as ids,
+    group_concat(' ',`av`.`value` ORDER BY `av`.`id` ASC) as value ,
+    `a`.`name` as attr_name, a.name,
+    GROUP_CONCAT(av.swatche_type ORDER BY av.id ASC ) as swatche_type ,
+    GROUP_CONCAT(av.swatche_value ORDER BY av.id ASC) as swatche_value
+")
         ->join('attribute_values av ', 'FIND_IN_SET(av.id, pa.attribute_value_ids ) > 0', 'inner')
         ->join('attributes a', 'a.id = av.attribute_id', 'inner')
         ->where('pa.product_id', $id)->group_by('`a`.`name`')->get('product_attributes pa')->result_array();
     if (!empty($attribute_values)) {
-        // echo "<pre>";
         for ($i = 0; $i < count($attribute_values); $i++) {
             $swatche_type = array();
             $swatche_values1 = array();
-            $swatche_type =  (isset($attribute_values[$i]['swatche_type']) && !empty($attribute_values[$i]['swatche_type'])) ? explode(",", $attribute_values[$i]['swatche_type']) : [];
-            $swatche_values =  (isset($attribute_values[$i]['swatche_value']) && !empty($attribute_values[$i]['swatche_value'])) ? explode(",", $attribute_values[$i]['swatche_value']) : [];
-            // print_r($swatche_values);
-            // die;
-            // $swatche_values =  explode(",", $attribute_values[$i]['swatche_value']);
+            $swatche_type =  explode(",", $attribute_values[$i]['swatche_type']);
+            $swatche_values =  explode(",", $attribute_values[$i]['swatche_value']);
             for ($j = 0; $j < count($swatche_type); $j++) {
                 if ($swatche_type[$j] == "2") {
                     $swatche_values1[$j]  = get_image_url($swatche_values[$j], 'thumb', 'sm');
@@ -2135,6 +1188,8 @@ function get_attribute_values_by_pid($id)
     }
     return $attribute_values;
 }
+
+
 
 function get_attribute_values_by_id($id)
 {
@@ -2165,8 +1220,6 @@ function get_attribute_values_by_id($id)
             $attribute_values[$i] = output_escaping($attribute_values[$i]);
         }
     }
-    // print_r($attribute_values);
-    // die;
     return $attribute_values;
 }
 
@@ -2184,7 +1237,7 @@ function get_variants_values_by_pid($id, $status = [1])
                 $swatche_type = array();
                 $swatche_values1 = array();
                 $swatche_type =  explode(",", $varaint_values[$i]['swatche_type']);
-                $swatche_values =  explode(",", (string)$varaint_values[$i]['swatche_value']);
+                $swatche_values =  explode(",", $varaint_values[$i]['swatche_value']);
 
                 for ($j = 0; $j < count($swatche_type); $j++) {
                     if ($swatche_type[$j] == "2") {
@@ -2795,20 +1848,7 @@ function get_subcategory_option_html($subcategories, $selected_vals)
 function get_cart_total($user_id, $product_variant_id = false, $is_saved_for_later = '0', $address_id = '')
 {
     $t = &get_instance();
-    $t->db->select('(select sum(c.qty)  from cart c 
-    join product_variants pv on c.product_variant_id=pv.id 
-    join products p on p.id=pv.product_id 
-    join seller_data sd on sd.user_id=p.seller_id  where c.user_id="' . $user_id . '" 
-    and qty >= 0  and  is_saved_for_later = "' . $is_saved_for_later . '" 
-    and p.status=1 AND pv.status=1 AND sd.status=1) as total_items,
-    (select count(c.id) from cart c 
-    join product_variants pv on c.product_variant_id=pv.id 
-    join products p on p.id=pv.product_id 
-    join seller_data sd on sd.user_id=p.seller_id where c.user_id="' . $user_id . '" and qty>=0 and  is_saved_for_later = "' . $is_saved_for_later . '" 
-    and p.status=1 AND pv.status=1 AND sd.status=1) as cart_count,
-    `c`.qty,c.is_saved_for_later,p.is_prices_inclusive_tax,p.cod_allowed,p.type,p.download_allowed,p.minimum_order_quantity,p.slug,p.quantity_step_size,
-    p.total_allowed_quantity, p.name, p.image, p.stock as product_stock,p.seller_id as product_seller_id, p.is_attachment_required, p.availability as product_availability, 
-    p.short_description,p.pickup_location,p.is_prices_inclusive_tax, pv.weight,`c`.user_id,pv.*,tax.percentage as tax_percentage,tax.title as tax_title');
+    $t->db->select('(select sum(c.qty)  from cart c join product_variants pv on c.product_variant_id=pv.id join products p on p.id=pv.product_id join seller_data sd on sd.user_id=p.seller_id  where c.user_id="' . $user_id . '" and qty >= 0  and  is_saved_for_later = "' . $is_saved_for_later . '" and p.status=1 AND pv.status=1 AND sd.status=1) as total_items,(select count(c.id) from cart c join product_variants pv on c.product_variant_id=pv.id join products p on p.id=pv.product_id join seller_data sd on sd.user_id=p.seller_id where c.user_id="' . $user_id . '" and qty>=0 and  is_saved_for_later = "' . $is_saved_for_later . '" and p.status=1 AND pv.status=1 AND sd.status=1) as cart_count,`c`.qty,c.is_saved_for_later,p.is_prices_inclusive_tax,p.cod_allowed,p.type,p.download_allowed,p.minimum_order_quantity,p.slug,p.quantity_step_size,p.total_allowed_quantity, p.name, p.image, p.stock as product_stock,p.is_attachment_required, p.availability as product_availability, p.short_description,p.pickup_location,p.is_prices_inclusive_tax, pv.weight,`c`.user_id,pv.*,tax.percentage as tax_percentage,tax.title as tax_title');
 
     if ($product_variant_id == true) {
         $t->db->where(['c.product_variant_id' => $product_variant_id, 'c.user_id' => $user_id, 'c.qty !=' => '0']);
@@ -2898,65 +1938,25 @@ function get_cart_total($user_id, $product_variant_id = false, $is_saved_for_lat
     $total = array_sum($total);
 
     $system_settings = get_settings('system_settings', true);
-    $shipping_settings = get_settings('shipping_method', true);
     $address = fetch_details('addresses', ['id' => $address_id], ['area_id', 'area', 'pincode']);
     $delivery_charge = $system_settings['delivery_charge'];
     $zipcode_id = fetch_details('zipcodes', ['zipcode' => $address[0]['pincode']], 'id')[0];
-    $zipcode_data = fetch_details('zipcodes', ['zipcode' => $address[0]['pincode']], 'id,delivery_charges,minimum_free_delivery_order_amount')[0];
-    // print_R($zipcode_data);
-    $city_id = fetch_details('cities', ['id' => $address[0]['city_id']], 'id');
-
-    if ((isset($system_settings['area_wise_delivery_charge']) && !empty($system_settings['area_wise_delivery_charge']))) {
-        $delivery_charge = isset($zipcode_data[0]['delivery_charges']) && !empty($zipcode_data[0]['delivery_charges']) ? $zipcode_data[0]['delivery_charges'] : 0;
-    }
-
-
     if (!empty($address_id)) {
-        // print_r(get_delivery_charge($address_id, $total));
-        if ($city_id > 0) {
-            // print_r("in if ");
-            $tmpRow['is_deliverable'] = (!empty($city_id) && $city_id > 0) ?
-                is_product_delivarable('city', $city_id, $data[0]['product_id'])
-                : false;
-        } else {
-            if (isset($shipping_settings['local_shipping_method']) && $shipping_settings['local_shipping_method'] == 1) {
-                $tmpRow['is_deliverable'] = (!empty($zipcode_id) && $zipcode_id > 0) ?
-                    is_product_delivarable('zipcode', $zipcode_id, $data[0]['product_id'])
-                    : false;
-            }
-        }
-
-        // $tmpRow['is_deliverable'] = (!empty($zipcode_id['id']) && $zipcode_id['id'] > 0) ?
-        //     is_product_delivarable('zipcode', $zipcode_id['id'], $data[0]['product_id'])
-        //     : false;
+        $tmpRow['is_deliverable'] = (!empty($zipcode_id['id']) && $zipcode_id['id'] > 0) ?
+            is_product_delivarable('zipcode', $zipcode_id['id'], $data[0]['product_id'])
+            : false;
         $tmpRow['delivery_by'] = ($tmpRow['is_deliverable']) ? "local" : "standard_shipping";
-        if (isset($shipping_settings['shiprocket_shipping_method']) && $shipping_settings['shiprocket_shipping_method'] == 1) {
-            if (!$tmpRow['is_deliverable'] && $data[0]['pickup_location'] != "") {
-                // print_R("in if");
-                if (isset($tmpRow['delivery_by']) && $tmpRow['delivery_by'] == 'standard_shipping') {
 
+        if (isset($tmpRow['delivery_by']) && $tmpRow['delivery_by'] == 'standard_shipping') {
 
-                    $parcels = make_shipping_parcels($data);
-                    $parcels_details = check_parcels_deliveriblity($parcels, $address[0]['pincode']);
-                    if (isset($shipping_settings['standard_shipping_free_delivery']) && isset($shipping_settings['minimum_free_delivery_order_amount'])) {
-                        if ($total >= $shipping_settings['minimum_free_delivery_order_amount'] && $shipping_settings['standard_shipping_free_delivery'] == 1) {
-                            $delivery_charge = 0;
-                        } else {
-                            $delivery_charge = $parcels_details['delivery_charge_without_cod'];
-                        }
-                    } else {
-                        $delivery_charge = $parcels_details['delivery_charge_without_cod'];
-                    }
-                    // print_R($delivery_charge);
-                }
-            }
-        }
-        if (isset($shipping_settings['local_shipping_method']) && $shipping_settings['local_shipping_method'] == 1) {
+            $parcels = make_shipping_parcels($data);
+            $parcels_details = check_parcels_deliveriblity($parcels, $address[0]['pincode']);
+            $delivery_charge = $parcels_details['delivery_charge_without_cod'];
+        } else {
             $delivery_charge = get_delivery_charge($address_id, $total);
         }
     }
-    // $delivery_charge = get_delivery_charge($address_id, $total);
-    // print_R($delivery_charge);
+
     $delivery_charge = isset($data[0]['type']) && $data[0]['type'] == 'digital_product' ? 0 :  $delivery_charge;
     $delivery_charge = str_replace(",", "", $delivery_charge);
     $overall_amt = 0;
@@ -3030,7 +2030,7 @@ function resize_image($image_data, $source_path, $id = false)
         $t = &get_instance();
 
         $image_type = ['thumb', 'cropped'];
-        $image_size = ['md' => array('width' => 800, 'height' => 800), 'sm' => array('width' => 350, 'height' => 350)];
+        $image_size = ['md' => array('width' => 800, 'height' => 800), 'sm' => array('width' => 450, 'height' => 450)];
         $target_path = $source_path; // Target path will be under source path
         $image_name = $image_data['file_name']; // original image's name    
         $w = $image_data['image_width']; // original image's width    
@@ -3038,25 +2038,25 @@ function resize_image($image_data, $source_path, $id = false)
 
         $t->load->library('image_lib');
 
-        // if ($id != false && is_numeric($id)) {
-        //     // Resize the original images            
-        //     $config['maintain_ratio'] = true;
-        //     $config['create_thumb'] = FALSE;
-        //     $config['source_image'] =  $source_path . $image_name;
-        //     $config['new_image'] = $target_path . $image_name;
-        //     $config['quality'] = '90%';
-        //     $config['width'] = $w - 1;
-        //     $config['height'] = $h - 1;
-        //     $t->image_lib->initialize($config);
-        //     if ($t->image_lib->resize()) {
+        if ($id != false && is_numeric($id)) {
+            // Resize the original images            
+            $config['maintain_ratio'] = true;
+            $config['create_thumb'] = FALSE;
+            $config['source_image'] =  $source_path . $image_name;
+            $config['new_image'] = $target_path . $image_name;
+            $config['quality'] = '80%';
+            $config['width'] = $w - 1;
+            $config['height'] = $h - 1;
+            $t->image_lib->initialize($config);
+            if ($t->image_lib->resize()) {
 
-        //         $size = filesize($config['new_image']);
-        //         update_details(['size' => $size], ['id' => $id], 'media');
-        //     } else {
-        //         return $t->image_lib->display_errors();
-        //     }
-        //     $t->image_lib->clear();
-        // }
+                $size = filesize($config['new_image']);
+                update_details(['size' => $size], ['id' => $id], 'media');
+            } else {
+                return $t->image_lib->display_errors();
+            }
+            $t->image_lib->clear();
+        }
 
         for ($i = 0; $i < count($image_type); $i++) {
 
@@ -3271,7 +2271,7 @@ function send_digital_product_mail($to, $subject, $message, $attachment)
     return $response;
 }
 
-function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delivery_boy_id = NULL, $limit = NULL, $offset = NULL, $sort = NULL, $order = NULL, $download_invoice = false, $start_date = null, $end_date = null, $search = null, $city_id = null, $area_id = null, $seller_id = null, $order_type = '', $from_seller = false, $draftFilter = 1)
+function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delivery_boy_id = NULL, $limit = NULL, $offset = NULL, $sort = NULL, $order = NULL, $download_invoice = false, $start_date = null, $end_date = null, $search = null, $city_id = null, $area_id = null, $seller_id = null, $order_type = '', $from_seller = false)
 {
 
     $t = &get_instance();
@@ -3356,23 +2356,19 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
     $count_res->order_by($sort, $order);
 
     $order_count = $count_res->get('`orders` o')->result_array();
-    // echo $t->db->last_query();
+
     $total = "0";
     foreach ($order_count as $row) {
         $total = $row['total'];
     }
 
-    $search_res = $t->db->select(' o.*, u.username,u.country_code, u.email as email, p.name,p.type,p.download_allowed,p.pickup_location,a.name as order_recipient_person,pv.special_price,pv.price,oc.delivery_charge as seller_delivery_charge,oc.promo_discount as seller_promo_dicount')
+    $search_res = $t->db->select(' o.*, u.username,u.country_code, p.name,p.type,p.download_allowed,p.pickup_location,a.name as order_recipient_person,pv.special_price,pv.price,oc.delivery_charge as seller_delivery_charge,oc.promo_discount as seller_promo_dicount')
         ->join(' `users` u', 'u.id= o.user_id', 'left')
         ->join(' `order_items` oi', 'o.id= oi.order_id', 'left')
         ->join('product_variants pv', 'pv.id=oi.product_variant_id', 'left')
         ->join('addresses a', 'a.id=o.address_id', 'left')
         ->join('order_charges oc', 'o.id=oc.order_id', 'left')
         ->join('products p', 'pv.product_id=p.id', 'left');
-    if ($draftFilter == 1) {
-        $t->db->where("oi.active_status != 'draft'");
-        // $t->db->where("o.status != 'draft'");
-    }
 
     // if (isset($seller_id) && $seller_id != null) {
 
@@ -3436,7 +2432,7 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
 
         $pr_condition = ($user_id != NULL && !empty(trim($user_id)) && is_numeric($user_id)) ? " and pr.user_id = $user_id " : "";
         $t->db->select('oi.*,p.id as product_id,p.is_cancelable,p.is_prices_inclusive_tax,p.cancelable_till,p.type,p.slug,p.download_allowed,p.download_link,sd.store_name,u.longitude as seller_longitude,u.mobile as seller_mobile,u.address as seller_address,u.latitude as seller_latitude,(select username from users where id=oi.delivery_boy_id) as delivery_boy_name ,sd.store_description,sd.rating as seller_rating,sd.logo as seller_profile,ot.courier_agency,ot.tracking_id,ot.awb_code,ot.url,u.username as seller_name,p.is_returnable,
-        pv.special_price,pv.price as main_price,p.image,p.name,p.pickup_location,pv.weight,sd.no_of_ratings as seller_no_of_ratings,p.rating as product_rating,p.type,pr.rating as user_rating, pr.images as user_rating_images, pr.comment as user_rating_comment,oi.status as status,
+        pv.special_price,pv.price as main_price,p.image,p.name,p.pickup_location,pv.weight,p.rating as product_rating,p.type,pr.rating as user_rating, pr.images as user_rating_images, pr.comment as user_rating_comment,oi.status as status,
         (Select count(id) from order_items where order_id = oi.order_id ) as order_counter ,
         (Select count(active_status) from order_items where active_status ="cancelled" and order_id = oi.order_id ) as order_cancel_counter , (Select count(active_status) from order_items where active_status ="returned" and order_id = oi.order_id ) as order_return_counter ')
             ->join('product_variants pv', 'pv.id=oi.product_variant_id', 'left')
@@ -3451,7 +2447,6 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
             $t->db->where('oi.seller_id=' . $seller_id);
             $t->db->where("oi.active_status != 'awaiting'");
         }
-
         if (isset($order_type) && $order_type != '' && $order_type == 'digital') {
             $t->db->where("p.type = 'digital_product'");
         }
@@ -3473,7 +2468,7 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
         $t->db->group_by('oi.id');
         $order_item_data = $t->db->get('order_items oi')->result_array();
 
-        // print_r($order_item_data);
+
 
         $return_request = fetch_details('return_requests', ['user_id' => $user_id]);
         if ($order_details[$i]['payment_method'] == "bank_transfer") {
@@ -3492,7 +2487,7 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
         $order_details[$i]['order_recipient_person'] = (isset($order_details[$i]['order_recipient_person']) && !empty($order_details[$i]['order_recipient_person'])) ? $order_details[$i]['order_recipient_person'] : "";
         $order_details[$i]['attachments'] = (isset($bank_transfer) && !empty($bank_transfer)) ? $bank_transfer : [];
         $order_details[$i]['notes'] = (isset($order_details[$i]['notes']) && !empty($order_details[$i]['notes'])) ? $order_details[$i]['notes'] : "";
-        $order_details[$i]['payment_method'] = isset($order_details[$i]['payment_method']) ? ucwords(str_replace('_', " ", $order_details[$i]['payment_method'])) : $order_details[$i]['payment_method'];
+        $order_details[$i]['payment_method'] = ($order_details[$i]['payment_method'] == 'bank_transfer') ? ucwords(str_replace('_', " ", $order_details[$i]['payment_method'])) : $order_details[$i]['payment_method'];
         $order_details[$i]['courier_agency'] = "";
         $order_details[$i]['tracking_id'] = "";
         $order_details[$i]['url'] = "";
@@ -3535,7 +2530,7 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
                 $amount = $order_item_data[$k]['quantity'] * $price;
             }
             if (!empty($order_item_data)) {
-                // print_r()
+
                 $user_rating_images = json_decode($order_item_data[$k]['user_rating_images'], true);
                 $order_item_data[$k]['user_rating_images'] = array();
                 if (!empty($user_rating_images)) {
@@ -3543,21 +2538,13 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
                         $order_item_data[$k]['user_rating_images'][] = base_url($user_rating_images[$f]);
                     }
                 }
-                // print_r($order_item_data[$k]['is_prices_inclusive_tax']);
-                // print_r("-----");
-
-                // print_r($price * $order_item_data[$k]['tax_percent'] / 100);
-                // print_r("-----");
-
                 // $price_tax_amount = $price * ($order_item_data[$k]['tax_percent'] / 100);
                 if (isset($order_item_data[$k]['is_prices_inclusive_tax']) && $order_item_data[$k]['is_prices_inclusive_tax'] == 1) {
                     $price_tax_amount  = $price - ($price * (100 / (100 + $order_item_data[$k]['tax_percent'])));
                 } else {
                     $price_tax_amount = $price * ($order_item_data[$k]['tax_percent'] / 100);
                 }
-                // print_r($price_tax_amount);
-                // $order_item_data[$k]['tax_amount'] = isset($price_tax_amount) && !empty($price_tax_amount) ?  (float)number_format($price_tax_amount, 2) : 0.00;
-                $order_item_data[$k]['tax_amount'] = isset($price_tax_amount) && !empty($price_tax_amount) ?  (float)$price_tax_amount : 0.00;
+                $order_item_data[$k]['tax_amount'] = isset($price_tax_amount) && !empty($price_tax_amount) ?  (float)number_format($price_tax_amount, 2) : 0.00;
                 $order_item_data[$k]['net_amount'] = $order_item_data[$k]['price'] - $order_item_data[$k]['tax_amount'];
                 $item_subtotal += $order_item_data[$k]['sub_total'];
                 $order_item_data[$k]['seller_name'] = (!empty($order_item_data[$k]['seller_name'])) ? $order_item_data[$k]['seller_name'] : '';
@@ -3583,14 +2570,10 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
                 $order_item_data[$k]['user_rating'] = (!empty($order_item_data[$k]['user_rating'])) ? $order_item_data[$k]['user_rating'] : '0';
                 $order_item_data[$k]['user_rating_comment'] = (!empty($order_item_data[$k]['user_rating_comment'])) ? $order_item_data[$k]['user_rating_comment'] : '';
                 $order_item_data[$k]['status'] = json_decode($order_item_data[$k]['status']);
-                // print_r($order_item_data[$k]['tax_amount']);
-                // print_r("*********");
-                // die;
-                // print_r($order_item_data[$k]['quantity']);
                 if (!in_array($order_item_data[$k]['active_status'], ['returned', 'cancelled'])) {
                     $total_tax_percent = $total_tax_percent +  $order_item_data[$k]['tax_percent'];
-                    $total_tax_amount  = $total_tax_amount + $order_item_data[$k]['tax_amount'];
-                    // $total_tax_amount  =  $order_item_data[$k]['tax_amount'] * $order_item_data[$k]['quantity'];
+                    // $total_tax_amount  = $total_tax_amount + $order_item_data[$k]['tax_amount'];
+                    $total_tax_amount  =  $order_item_data[$k]['tax_amount'] * $order_item_data[$k]['quantity'];
                 }
                 $order_item_data[$k]['image_sm'] = (empty($order_item_data[$k]['image']) || file_exists(FCPATH . $order_item_data[$k]['image']) == FALSE) ? base_url(NO_IMAGE) : get_image_url($order_item_data[$k]['image'], 'thumb', 'sm');
                 $order_item_data[$k]['image_md'] = (empty($order_item_data[$k]['image']) || file_exists(FCPATH . $order_item_data[$k]['image']) == FALSE) ? base_url(NO_IMAGE) : get_image_url($order_item_data[$k]['image'], 'thumb', 'md');
@@ -3639,7 +2622,6 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
 
         $order_details[$i]['delivery_time'] = (isset($order_details[$i]['delivery_time']) && !empty($order_details[$i]['delivery_time'])) ? $order_details[$i]['delivery_time'] : "";
         $order_details[$i]['delivery_date'] = (isset($order_details[$i]['delivery_date']) && !empty($order_details[$i]['delivery_date'])) ? $order_details[$i]['delivery_date'] : "";
-        $order_details[$i]['otp'] = (isset($order_details[$i]['otp']) && !empty($order_details[$i]['otp'])) ? $order_details[$i]['otp'] : "";
         $order_details[$i]['is_returnable'] = ($returnable_count >= 1 && isset($delivery_date) && !empty($delivery_date) && $today < $return_till) ? '1' : '0';
         $order_details[$i]['is_cancelable'] = ($cancelable_count >= 1) ? '1' : '0';
         $order_details[$i]['is_already_returned'] = ($already_returned_count == count($order_item_data)) ? '1' : '0';
@@ -3899,57 +2881,8 @@ function delete_images($subdirectory, $image_name)
     }
 }
 
-// function get_image_url($path, $image_type = '', $image_size = '', $file_type = 'image')
-// {
-//     $path = explode('/', (string)$path);
-//     $subdirectory = '';
-//     for ($i = 0; $i < count($path) - 1; $i++) {
-//         $subdirectory .= $path[$i] . '/';
-//     }
-//     $image_name = end($path);
-
-//     $file_main_dir = FCPATH . $subdirectory;
-//     $image_main_dir = base_url() . $subdirectory;
-//     if ($file_type == 'image') {
-//         $types = ['thumb', 'cropped'];
-//         $sizes = ['md', 'sm'];
-//         if (in_array(trim(strtolower($image_type)), $types) &&  in_array(trim(strtolower($image_size)), $sizes)) {
-//             $filepath = $file_main_dir . $image_type . '-' . $image_size . '/' . $image_name;
-//             $imagepath = $image_main_dir . $image_type . '-' . $image_size . '/' . $image_name;
-//             if (file_exists($filepath)) {
-//                 return  $imagepath;
-//             } else if (file_exists($file_main_dir . $image_name)) {
-//                 return  $image_main_dir . $image_name;
-//             } else {
-//                 return  base_url() . NO_IMAGE;
-//             }
-//         } else {
-//             if (file_exists($file_main_dir . $image_name)) {
-//                 return  $image_main_dir . $image_name;
-//             } else {
-//                 return  base_url() . NO_IMAGE;
-//             }
-//         }
-//     } else {
-//         $file = new SplFileInfo($file_main_dir . $image_name);
-//         $ext  = $file->getExtension();
-
-//         $media_data =  find_media_type($ext);
-//         $image_placeholder = $media_data[1];
-//         $filepath = FCPATH .  $image_placeholder;
-//         $extensionpath = base_url() .  $image_placeholder;
-//         if (file_exists($filepath)) {
-//             return  $extensionpath;
-//         } else {
-//             return  base_url() . NO_IMAGE;
-//         }
-//     }
-// }
 function get_image_url($path, $image_type = '', $image_size = '', $file_type = 'image')
 {
-    if (filter_var($path, FILTER_VALIDATE_URL)) {
-        return $path;
-    }
     $path = explode('/', (string)$path);
     $subdirectory = '';
     for ($i = 0; $i < count($path) - 1; $i++) {
@@ -3994,6 +2927,7 @@ function get_image_url($path, $image_type = '', $image_size = '', $file_type = '
         }
     }
 }
+
 function fetch_users($id)
 {
     $t = &get_instance();
@@ -4113,7 +3047,7 @@ function get_invoice_html($order_id)
             $t->data['order_detls'] = $res;
             $t->data['items'] = $items;
             $t->data['promo_code'] = $promo_code;
-            $t->data['settings'] = $settings;
+            $t->data['settings'] = get_settings('system_settings', true);
             $invoice_generated_html = $t->load->view('admin/invoice-template', $t->data, TRUE);
         } else {
             $invoice_generated_html = '';
@@ -4161,7 +3095,7 @@ function get_seller_invoice_html($order_id, $seller_id)
             $t->data['s_user_data'] = $s_user_data;
             $t->data['seller_data'] = $seller_data;
             $t->data['promo_code'] = $promo_code;
-            $t->data['settings'] = $settings;
+            $t->data['settings'] = get_settings('system_settings', true);
             $invoice_generated_html = $t->load->view('seller/invoice-template', $t->data, TRUE);
         } else {
             $invoice_generated_html = '';
@@ -4232,11 +3166,10 @@ function get_min_max_price_of_product($product_id = '')
         $price_tax_amount = 0;
         $special_price_tax_amount = 0;
     }
-    //print_r($response);
-    $data['min_price'] = isset($response) && !empty($response) ? min(array_column($response, 'price')) + $price_tax_amount : 0;
-    $data['max_price'] = isset($response) && !empty($response) ? max(array_column($response, 'price')) + $price_tax_amount : 0;
-    $data['special_price'] = isset($response) && !empty($response) ? min(array_column($response, 'special_price')) + $special_price_tax_amount : 0;
-    $data['max_special_price'] = isset($response) && !empty($response) ? max(array_column($response, 'special_price')) + $special_price_tax_amount : 0;
+    $data['min_price'] = min(array_column($response, 'price')) + $price_tax_amount;
+    $data['max_price'] = max(array_column($response, 'price')) + $price_tax_amount;
+    $data['special_price'] = min(array_column($response, 'special_price')) + $special_price_tax_amount;
+    $data['max_special_price'] = max(array_column($response, 'special_price')) + $special_price_tax_amount;
     $data['discount_in_percentage'] = find_discount_in_percentage($data['special_price'] + $special_price_tax_amount, $data['min_price'] + $price_tax_amount);
     return $data;
 }
@@ -4402,17 +3335,13 @@ function get_favorites($user_id, $limit = NULL, $offset = NULL)
         ->select('p.*')
         ->order_by('f.id', "DESC")
         ->get('favorites f')->result_array();
-    // echo "<pre>";
-    // echo $CI->db->last_query();
-    // print_r($res);
+
     $res = array_map(function ($d) {
         $d['image_md'] = get_image_url($d['image'], 'thumb', 'md');
         $d['image_sm'] = get_image_url($d['image'], 'thumb', 'sm');
-        $d['relative_path'] = $d['image'];
         $d['image'] = get_image_url($d['image']);
         $d['variants'] = get_variants_values_by_pid($d['id']);
         $d['min_max_price'] = get_min_max_price_of_product($d['id']);
-        $d['is_favorite'] = '1';
         return $d;
     }, $res);
     return $res;
@@ -4443,7 +3372,7 @@ function current_theme($id = '', $name = '', $slug = '', $is_default = 1, $statu
     }, $res);
     return $res;
 }
-function get_languages($id = '', $language_name = '', $code = '', $is_rtl = '', $is_default = '')
+function get_languages($id = '', $language_name = '', $code = '', $is_rtl = '')
 {
     $CI = &get_instance();
     if (!empty($id)) {
@@ -4457,9 +3386,6 @@ function get_languages($id = '', $language_name = '', $code = '', $is_rtl = '', 
     }
     if (!empty($is_rtl)) {
         $CI->db->where('is_rtl', $is_rtl);
-    }
-    if (!empty($is_default)) {
-        $CI->db->where('is_default', $is_default);
     }
     $res = $CI->db->get('languages')->result_array();
     return $res;
@@ -4643,43 +3569,6 @@ function verify_payment_transaction($txn_id, $payment_method, $additional_data =
             return "stripe is supplied";
             break;
 
-            // case 'phonepe':
-            //     $CI->load->library("phonepe");
-            //     $transaction = $CI->phonepe->check_status($txn_id);
-            //     $status = $transaction['code'];
-            //     if (!empty($transaction)) {
-            //         if ($status == 'PAYMENT_SUCCESS') {
-            //             $response['error'] = false;
-            //             $response['message'] = "Payment has been completed successfully";
-            //             $response['amount'] = $transaction['data']['amount'];
-            //             $response['data'] = $transaction;
-            //             return $response;
-            //         } elseif ($status == "BAD_REQUEST"  || $status == "AUTHORIZATION_FAILED" || $status == "PAYMENT_ERROR" || $status == "TRANSACTION_NOT_FOUND" || $status == "PAYMENT_DECLINED" || $status == "TIMED_OUT") {
-            //             $response['error'] = true;
-            //             $response['message'] = $transaction['message'];
-            //             $response['amount'] = (isset($transaction['data']['amount'])) ? $transaction['data']['amount'] : 0;
-            //             $response['data'] = $transaction;
-            //             return $response;
-            //         } else {
-            //             $response['error'] = true;
-            //             $response['message'] = "Internal error occurred please try again later!";
-            //             $response['amount'] = (isset($transaction['data']['amount'])) ? $transaction['data']['amount'] : 0;;
-            //             $response['data'] = $transaction;
-            //             return $response;
-            //         }
-            //     } else {
-            //         $response['error'] = true;
-            //         $response['message'] = "Payment not found by the transaction ID!";
-            //         $response['amount'] = 0;
-            //         $response['data'] = [];
-            //         return $response;
-            //     }
-            //     break;
-        case 'phonepe':
-            $response['error'] = false;
-            $response['message'] = "Payment captured successfully";
-            return $response;
-            break;
 
         case 'paytm':
             $CI->load->library('paytm');
@@ -4923,8 +3812,7 @@ function process_refund($id, $status, $type = 'order_items')
         $new_delivery_charge = ($new_total > 0) ? recalulate_delivery_charge($order_details[0]['address_id'], $new_total, $delivery_charge) : 0;
         /* recalculate promo discount */
         $new_promo_discount = recalculate_promo_discount($promo_code, $promo_discount, $user_id, $new_total, $payment_method, $new_delivery_charge, $wallet_balance);
-        // print_r($new_promo_discount);
-        // die;
+
         $new_final_total = $new_total + $new_delivery_charge - $new_promo_discount;
         $bank_receipt = fetch_details('order_bank_transfer', ['order_id' => $order_item_details[0]['order_id']]);
         $bank_receipt_status = (isset($bank_receipt[0]['status'])) ? $bank_receipt[0]['status'] : "";
@@ -4990,7 +3878,7 @@ function process_refund($id, $status, $type = 'order_items')
                 'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                 'type' => "wallet",
             );
-            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+            send_notification($fcmMsg, $fcm_ids);
             (notify_event(
                 "wallet_transaction",
                 ["customer" => [$user_res[0]['email']]],
@@ -5147,7 +4035,7 @@ function process_refund($id, $status, $type = 'order_items')
                     'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                     'type' => "wallet",
                 );
-                send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                send_notification($fcmMsg, $fcm_ids);
                 (notify_event(
                     "wallet_transaction",
                     ["customer" => [$user_res[0]['email']]],
@@ -5173,7 +4061,7 @@ function process_refund($id, $status, $type = 'order_items')
                         'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                         'type' => "wallet",
                     );
-                    send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                    send_notification($fcmMsg, $fcm_ids);
                     (notify_event(
                         "wallet_transaction",
                         ["customer" => [$user_res[0]['email']]],
@@ -5340,7 +4228,7 @@ function process_refund_old($id, $status, $type = 'order_items')
                             'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                             'type' => "wallet",
                         );
-                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                        send_notification($fcmMsg, $fcm_ids);
                         (notify_event(
                             "wallet_transaction",
                             ["customer" => [$user_res[0]['email']]],
@@ -5374,7 +4262,7 @@ function process_refund_old($id, $status, $type = 'order_items')
                                 'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                                 'type' => "wallet",
                             );
-                            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                            send_notification($fcmMsg, $fcm_ids);
                             (notify_event(
                                 "wallet_transaction",
                                 ["customer" => [$user_res[0]['email']]],
@@ -5406,7 +4294,7 @@ function process_refund_old($id, $status, $type = 'order_items')
                                         'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                                         'type' => "wallet",
                                     );
-                                    send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                                    send_notification($fcmMsg, $fcm_ids);
                                     (notify_event(
                                         "wallet_transaction",
                                         ["customer" => [$user_res[0]['email']]],
@@ -5433,7 +4321,7 @@ function process_refund_old($id, $status, $type = 'order_items')
                                         'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                                         'type' => "wallet",
                                     );
-                                    send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                                    send_notification($fcmMsg, $fcm_ids);
                                     (notify_event(
                                         "wallet_transaction",
                                         ["customer" => [$user_res[0]['email']]],
@@ -5474,7 +4362,7 @@ function process_refund_old($id, $status, $type = 'order_items')
                             'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                             'type' => "wallet",
                         );
-                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                        send_notification($fcmMsg, $fcm_ids);
                         (notify_event(
                             "wallet_transaction",
                             ["customer" => [$user_res[0]['email']]],
@@ -5507,7 +4395,7 @@ function process_refund_old($id, $status, $type = 'order_items')
                                         'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                                         'type' => "wallet",
                                     );
-                                    send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                                    send_notification($fcmMsg, $fcm_ids);
                                     (notify_event(
                                         "wallet_transaction",
                                         ["customer" => [$user_res[0]['email']]],
@@ -5535,7 +4423,7 @@ function process_refund_old($id, $status, $type = 'order_items')
                                         'body' => (!empty($custom_notification)) ? $message : $currency . ' ' . $returnable_amount,
                                         'type' => "wallet",
                                     );
-                                    send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                                    send_notification($fcmMsg, $fcm_ids);
                                     (notify_event(
                                         "wallet_transaction",
                                         ["customer" => [$user_res[0]['email']]],
@@ -5613,6 +4501,9 @@ function process_refund_old($id, $status, $type = 'order_items')
 function get_sliders($id = '', $type = '', $type_id = '')
 {
     $ci = &get_instance();
+
+    // Construir la consulta con filtros y ordenamiento por 'id' de mayor a menor
+    $ci->db->from('sliders');
     if (!empty($id)) {
         $ci->db->where('id', $id);
     }
@@ -5622,12 +4513,15 @@ function get_sliders($id = '', $type = '', $type_id = '')
     if (!empty($type_id)) {
         $ci->db->where('type_id', $type_id);
     }
-    $res = $ci->db->get('sliders')->result_array();
-    $res = array_map(function ($d) {
-        $ci = &get_instance();
-        if ($d['type'] != "slider_url") {
-            $d['link'] = '';
-        }
+    $ci->db->order_by('id', 'DESC'); // Ordenar por 'id' de mayor a menor
+    $query = $ci->db->get();
+
+    // Obtener los resultados como un array de arrays
+    $res = $query->result_array();
+
+    // Procesar los resultados para agregar los enlaces según el tipo de slider (opcional)
+    foreach ($res as &$d) {
+        $d['link'] = '';
         if (!empty($d['type'])) {
             if ($d['type'] == "categories") {
                 $type_details = $ci->db->where('id', $d['type_id'])->select('slug')->get('categories')->row_array();
@@ -5641,10 +4535,11 @@ function get_sliders($id = '', $type = '', $type_id = '')
                 }
             }
         }
-        return $d;
-    }, $res);
+    }
+
     return $res;
 }
+
 
 function get_offers($id = '', $type = '', $type_id = '')
 {
@@ -5741,28 +4636,14 @@ function get_delivery_charge($address_id, $total = 0)
     $min_amount = $system_settings['min_amount'];
     $delivery_charge = $system_settings['delivery_charge'];
     if ((isset($system_settings['area_wise_delivery_charge']) && !empty($system_settings['area_wise_delivery_charge']))) {
-        if (isset($system_settings['pincode_wise_deliverability']) && $system_settings['pincode_wise_deliverability'] == 1) {
-            if ((isset($address[0]['area_id']) && !empty($address[0]['area_id'])) || (isset($address[0]['pincode']) && !empty($address[0]['pincode']))) {
-                $area = fetch_details('areas', ['id' => $address[0]['area_id']], 'delivery_charges,minimum_free_delivery_order_amount');
-                if ($t->db->field_exists('delivery_charges', 'zipcodes') && $t->db->field_exists('minimum_free_delivery_order_amount', 'zipcodes')) {
-                    $zipcode = fetch_details('zipcodes', ['zipcode' => $address[0]['pincode'], 'city_id' => $address[0]['city_id']], 'delivery_charges,minimum_free_delivery_order_amount');
-                }
-                if (isset($area[0]['minimum_free_delivery_order_amount']) || isset($zipcode[0]['minimum_free_delivery_order_amount'])) {
-                    $min_amount = isset($area[0]['minimum_free_delivery_order_amount']) && !empty($area[0]['minimum_free_delivery_order_amount']) ? $area[0]['minimum_free_delivery_order_amount'] : $zipcode[0]['minimum_free_delivery_order_amount'];
-                    $delivery_charge = isset($area[0]['delivery_charges']) && !empty($area[0]['delivery_charges']) ? $area[0]['delivery_charges'] : $zipcode[0]['delivery_charges'];
-                }
+        if ((isset($address[0]['area_id']) && !empty($address[0]['area_id'])) || (isset($address[0]['pincode']) && !empty($address[0]['pincode']))) {
+            $area = fetch_details('areas', ['id' => $address[0]['area_id']], 'delivery_charges,minimum_free_delivery_order_amount');
+            if ($t->db->field_exists('delivery_charges', 'zipcodes') && $t->db->field_exists('minimum_free_delivery_order_amount', 'zipcodes')) {
+                $zipcode = fetch_details('zipcodes', ['zipcode' => $address[0]['pincode'], 'city_id' => $address[0]['city_id']], 'delivery_charges,minimum_free_delivery_order_amount');
             }
-        }
-        if (isset($system_settings['city_wise_deliverability']) && $system_settings['city_wise_deliverability'] == 1) {
-            // print_r("here");
-            $zipcode = fetch_details('zipcodes', ['city_id' => $address[0]['city_id']], 'delivery_charges,minimum_free_delivery_order_amount');
-            // print_r($zipcode);
-            if (isset($address[0]['city_id'])) {
-                // print_r($zipcode);
-                // print_r($address[0]['city_id']);
+            if (isset($area[0]['minimum_free_delivery_order_amount']) || isset($zipcode[0]['minimum_free_delivery_order_amount'])) {
                 $min_amount = isset($area[0]['minimum_free_delivery_order_amount']) && !empty($area[0]['minimum_free_delivery_order_amount']) ? $area[0]['minimum_free_delivery_order_amount'] : $zipcode[0]['minimum_free_delivery_order_amount'];
-                $delivery_charge = $zipcode[0]['delivery_charges'];
-                // print_r($delivery_charge);
+                $delivery_charge = isset($area[0]['delivery_charges']) && !empty($area[0]['delivery_charges']) ? $area[0]['delivery_charges'] : $zipcode[0]['delivery_charges'];
             }
         }
     }
@@ -5788,10 +4669,6 @@ function validate_otp($otp, $order_item_id = NULL, $order_id = NULL, $seller_id 
 
 function is_product_delivarable($type, $type_id, $product_id)
 {
-    // print_r($type);
-    // print_r($type_id);
-    // print_r($product_id);
-    // die;
     $ci = &get_instance();
 
     if ($type == 'zipcode') {
@@ -5799,8 +4676,6 @@ function is_product_delivarable($type, $type_id, $product_id)
     } else if ($type == 'area') {
         $res = fetch_details('areas', ['id' => $type_id], 'zipcode_id');
         $zipcode_id = $res[0]['zipcode_id'];
-    } else if ($type == 'city') {
-        $city_id = $type_id;
     } else {
         return false;
     }
@@ -5819,27 +4694,12 @@ function is_product_delivarable($type, $type_id, $product_id)
         } else {
             return false;
         }
-    } else if (!empty($city_id) && $city_id != 0) {
-        $ci->db->select('id');
-        $ci->db->group_Start();
-        $where = "(((deliverable_city_type = '2' AND FIND_IN_SET('" . $city_id . "',deliverable_cities))OR deliverable_city_type = '1') OR (deliverable_city_type = '3' AND NOT FIND_IN_SET('" . $city_id . "',deliverable_cities))) ";
-        $ci->db->where($where);
-        $ci->db->group_End();
-        $ci->db->where("id = $product_id");
-        $product = $ci->db->get('products')->num_rows();
-        // print_r($product);
-        // die;
-        if ($product > 0) {
-            return true;
-        } else {
-            return false;
-        }
     } else {
         return false;
     }
 }
 
-function check_cart_products_delivarable($user_id, $area_id = 0, $zipcode = "", $zipcode_id = "", $city = "", $city_id = "")
+function check_cart_products_delivarable($user_id, $area_id = 0, $zipcode = "", $zipcode_id = "")
 {
     $t = &get_instance();
     $products = $tmpRow = array();
@@ -5850,27 +4710,13 @@ function check_cart_products_delivarable($user_id, $area_id = 0, $zipcode = "", 
         $product_weight = 0;
         for ($i = 0; $i < $cart[0]['cart_count']; $i++) {
             /* check in local shipping first */
-            if ($city_id > 0) {
-                // print_r("in if ");
-                $tmpRow['is_deliverable'] = (!empty($city_id) && $city_id > 0) ?
-                    is_product_delivarable('city', $city_id, $cart[$i]['product_id'])
+
+            if (isset($settings['local_shipping_method']) && $settings['local_shipping_method'] == 1) {
+                $tmpRow['is_deliverable'] = (!empty($zipcode_id) && $zipcode_id > 0) ?
+                    is_product_delivarable('zipcode', $zipcode_id, $cart[$i]['product_id'])
                     : false;
-            } else {
-                if (isset($settings['local_shipping_method']) && $settings['local_shipping_method'] == 1) {
-                    $tmpRow['is_deliverable'] = (!empty($zipcode_id) && $zipcode_id > 0) ?
-                        is_product_delivarable('zipcode', $zipcode_id, $cart[$i]['product_id'])
-                        : false;
-                }
+                $tmpRow['delivery_by'] = (isset($tmpRow['is_deliverable']) && $tmpRow['is_deliverable']) ? "local" : "";
             }
-            $tmpRow['delivery_by'] = (isset($tmpRow['is_deliverable']) && $tmpRow['is_deliverable']) ? "local" : "";
-
-
-            // if (isset($settings['local_shipping_method']) && $settings['local_shipping_method'] == 1) {
-            //     $tmpRow['is_deliverable'] = (!empty($zipcode_id) && $zipcode_id > 0) ?
-            //         is_product_delivarable('zipcode', $zipcode_id, $cart[$i]['product_id'])
-            //         : false;
-            //     $tmpRow['delivery_by'] = (isset($tmpRow['is_deliverable']) && $tmpRow['is_deliverable']) ? "local" : "";
-            // }
 
             /* check in standard shipping then */
             if (isset($settings['shiprocket_shipping_method']) && $settings['shiprocket_shipping_method'] == 1) {
@@ -5879,7 +4725,7 @@ function check_cart_products_delivarable($user_id, $area_id = 0, $zipcode = "", 
                     $t->load->library(['Shiprocket']);
                     $pickup_pincode = fetch_details('pickup_locations', ['pickup_location' => $cart[$i]['pickup_location']], 'pin_code');
                     $product_weight += $cart[$i]['weight'] * $cart[$i]['qty'];
-                    // print_r($pickup_pincode);
+
                     if (isset($zipcode) && !empty($zipcode)) {
 
                         if ($product_weight > 15) {
@@ -5895,7 +4741,6 @@ function check_cart_products_delivarable($user_id, $area_id = 0, $zipcode = "", 
                             ];
 
                             $check_deliveribility = $t->shiprocket->check_serviceability($availibility_data);
-                            // print_r($check_deliveribility);
 
                             if (isset($check_deliveribility['status_code']) && $check_deliveribility['status_code'] == 422) {
                                 $tmpRow['is_deliverable'] = false;
@@ -5975,7 +4820,6 @@ function orders_count($status = "", $seller_id = "", $order_type = "")
 
     $count_res->where($where);
     $result =  $count_res->get('`order_items` oi')->result_array();
-    // echo $t->db->last_query();
     return $result[0]['total'];
 }
 
@@ -6041,26 +4885,7 @@ function get_seller_permission($seller_id, $permit = NULL)
     }
 }
 
-// function get_price($type = "max")
-// {
-//     $t = &get_instance();
-//     $t->db->select('IF( pv.special_price > 0, `pv`.`special_price`, pv.price ) as pr_price')
-//         ->join(" categories c", "p.category_id=c.id ", 'LEFT')
-//         ->join(" seller_data sd", "p.seller_id=sd.user_id ")
-//         ->join('`product_variants` pv', 'p.id = pv.product_id', 'LEFT')
-//         ->join('`product_attributes` pa', ' pa.product_id = p.id ', 'LEFT');
-//     $t->db->where(" `p`.`status` = '1' AND `pv`.`status` = 1 AND `sd`.`status` = 1 AND   (`c`.`status` = '1' OR `c`.`status` = '0')");
-//     $result = $t->db->from("products p ")->get()->result_array();
-//     if (isset($result) && !empty($result)) {
-//         $pr_price = array_column($result, 'pr_price');
-//         $data = ($type == "min") ? min($pr_price) : max($pr_price);
-//     } else {
-//         $data = 0;
-//     }
-//     return $data;
-// }
-
-function get_price()
+function get_price($type = "max")
 {
     $t = &get_instance();
     $t->db->select('IF( pv.special_price > 0, `pv`.`special_price`, pv.price ) as pr_price')
@@ -6068,27 +4893,21 @@ function get_price()
         ->join(" seller_data sd", "p.seller_id=sd.user_id ")
         ->join('`product_variants` pv', 'p.id = pv.product_id', 'LEFT')
         ->join('`product_attributes` pa', ' pa.product_id = p.id ', 'LEFT');
-    $t->db->where(" `p`.`status` = '1' AND `pv`.`status` = 1 AND `sd`.`status` = 1 AND (`c`.`status` = '1' OR `c`.`status` = '0')");
+    $t->db->where(" `p`.`status` = '1' AND `pv`.`status` = 1 AND `sd`.`status` = 1 AND   (`c`.`status` = '1' OR `c`.`status` = '0')");
     $result = $t->db->from("products p ")->get()->result_array();
     if (isset($result) && !empty($result)) {
         $pr_price = array_column($result, 'pr_price');
-        return [
-            'min' => min($pr_price),
-            'max' => max($pr_price)
-        ];
+        $data = ($type == "min") ? min($pr_price) : max($pr_price);
     } else {
-        return [
-            'min' => 0,
-            'max' => 0
-        ];
+        $data = 0;
     }
+    return $data;
 }
-
 
 function check_for_parent_id($category_id)
 {
     $t = &get_instance();
-    $t->db->select('id,parent_id,name,slug');
+    $t->db->select('id,parent_id,name');
     $t->db->where('id', $category_id);
     $result = $t->db->from("categories")->get()->result_array();
     if (!empty($result)) {
@@ -6123,60 +4942,15 @@ function update_cash_received($amount, $delivery_boy_id, $action)
 
 function word_limit($string, $length = WORD_LIMIT, $dots = "...")
 {
-    $split = explode(" ", $string);
-    $newLength = 0;
-    $words = [];
-    foreach ($split as $word) {
-        $newLength += strlen($word);
-        array_push($words, $word);
-        if ($newLength >= $length) {
-            break;
-        }
-    }
-    $newstr = implode(" ", $words);
-    if (strlen($newstr) < $string) {
-        $newstr .= $dots;
-    }
-    return $newstr;
-    // return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+    return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
 }
 function short_description_word_limit($string, $length = SHORT_DESCRIPTION_WORD_LIMIT, $dots = "...")
 {
-    $split = explode(" ", $string);
-    $newLength = 0;
-    $words = [];
-    foreach ($split as $word) {
-        $newLength += strlen($word);
-        array_push($words, $word);
-        if ($newLength >= $length) {
-            break;
-        }
-    }
-    $newstr = implode(" ", $words);
-    if (strlen($newstr) < $string) {
-        $newstr .= $dots;
-    }
-    return $newstr;
-    // return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+    return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
 }
 function description_word_limit($string, $length = DESCRIPTION_WORD_LIMIT, $dots = "...")
 {
-    $split = explode(" ", $string);
-    $newLength = 0;
-    $words = [];
-    foreach ($split as $word) {
-        $newLength += strlen($word);
-        array_push($words, $word);
-        if ($newLength >= $length) {
-            break;
-        }
-    }
-    $newstr = implode(" ", $words);
-    if (strlen($newstr) < $string) {
-        $newstr .= $dots;
-    }
-    return $newstr;
-    // return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+    return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
 }
 function calculate_tax_inclusive($original_cost, $tax)
 {
@@ -6372,8 +5146,6 @@ function check_parcels_deliveriblity($parcels, $user_pincode)
                 $check_deliveribility_with_cod = $t->shiprocket->check_serviceability($availibility_data_with_cod);
                 $shiprocket_data_with_cod = shiprocket_recomended_data($check_deliveribility_with_cod);
 
-                $data = [];
-
                 $data[$seller_id][$pickup_location]['parcel_weight'] = $parcel_weight['weight'];
                 $data[$seller_id][$pickup_location]['pickup_availability'] = $shiprocket_data['pickup_availability'];
                 $data[$seller_id][$pickup_location]['courier_name'] = $shiprocket_data['courier_name'];
@@ -6509,7 +5281,7 @@ function cancel_shiprocket_order($shiprocket_order_id)
 //     return $parsedString;
 // }
 
-function    parse_sms(string $string = "", string $mobile = "", string $sms = "", string $country_code = "")
+function parse_sms(string $string = "", string $mobile = "", string $sms = "", string $country_code = "")
 {
     $parsedString = str_replace("{only_mobile_number}", $mobile, $string);
     $parsedString = str_replace("{message}", $sms, $parsedString); // Use $parsedString as the third argument
@@ -6676,13 +5448,14 @@ function get_notification_variables()
 function set_user_otp($mobile, $otp)
 {
     $t = &get_instance();
-    // $otp = random_int(100000, 999999);
+    $otp = random_int(100000, 999999);
     $dateString = date('Y-m-d H:i:s');
     $time = strtotime($dateString);
     // print_r($dateString);
     // print_r($time);
     // die;
     $identity_column = $t->config->item('identity', 'ion_auth');
+    // $mobile = "7284938224";
 
     $otps = fetch_details('otps', ['mobile' => $mobile]);
     $data['otp'] = $otp;
@@ -6716,7 +5489,7 @@ function checkOTPExpiration($otpTime)
     $timeDifference = $currentTime - $otpTime;
 
 
-    if ($timeDifference <= 60) {
+    if ($timeDifference <= 30) {
         return [
             "error" => false,
             "message" => "Success: OTP is valid."
@@ -6724,332 +5497,7 @@ function checkOTPExpiration($otpTime)
     } else {
         return [
             "error" => true,
-            "message" => "OTP has expired."
+            "message" => "Error: Session has expired."
         ];
     }
-}
-
-function get_statistics($product_varient_id)
-{
-
-    $t = &get_instance();
-    $dateString = date('Y-m-d H:i:s');
-
-    $query = $t->db->query('
-    SELECT
-        (SELECT COUNT(id) FROM order_items 
-         WHERE product_variant_id = ? 
-         AND DATE(date_added) >= DATE(NOW()) - INTERVAL 31 DAY) AS total_ordered,
-        (SELECT COUNT(f.id) FROM favorites f 
-         LEFT JOIN product_variants pv ON f.product_id = pv.product_id 
-         WHERE pv.id = ?) AS total_favorites,
-        (SELECT COUNT(id) FROM cart 
-         WHERE product_variant_id = ?) AS total_in_cart
-', [$product_varient_id, $product_varient_id, $product_varient_id]);
-
-    $result = $query->row_array();
-
-    // Round to the nearest multiple of 100
-    $totalOrdered = round($result['total_ordered'], -1);
-    $totalFavorites = round($result['total_favorites'], -1);
-    $totalInCart = round($result['total_in_cart'], -1);
-
-    // Add a "+" sign if needed
-    $totalOrdered = ($totalOrdered > 10) ? number_format($totalOrdered) . '+' : $totalOrdered;
-    $totalFavorites = ($totalFavorites > 10) ? number_format($totalFavorites) . '+' : $totalFavorites;
-    $totalInCart = ($totalInCart > 10) ? number_format($totalInCart) . '+' : $totalInCart;
-    $total = [
-        "total_ordered" => $totalOrdered,
-        "total_favorites" => $totalFavorites,
-        "total_in_cart" => $totalInCart,
-        'product_variant_id' => $product_varient_id
-    ];
-
-    // print_r($reult);
-    // print_r($totsal);
-    return $total;
-}
-
-function time2str($ts)
-{
-    if (!ctype_digit($ts))
-        $ts = strtotime($ts);
-
-    $diff = time() - $ts;
-    if ($diff == 0)
-        return 'now';
-    elseif ($diff > 0) {
-        $day_diff = floor($diff / 86400);
-        if ($day_diff == 0) {
-            if ($diff < 60) return 'just now';
-            if ($diff < 120) return '1 minute ago';
-            if ($diff < 3600) return floor($diff / 60) . ' minutes ago';
-            if ($diff < 7200) return '1 hour ago';
-            if ($diff < 86400) return floor($diff / 3600) . ' hours ago';
-        }
-        if ($day_diff == 1) return 'Yesterday';
-        if ($day_diff < 7) return $day_diff . ' days ago';
-        if ($day_diff < 31) return ceil($day_diff / 7) . ' weeks ago';
-        if ($day_diff < 60) return 'last month';
-        return date('F Y', $ts);
-    } else {
-        $diff = abs($diff);
-        $day_diff = floor($diff / 86400);
-        if ($day_diff == 0) {
-            if ($diff < 120) return 'in a minute';
-            if ($diff < 3600) return 'in ' . floor($diff / 60) . ' minutes';
-            if ($diff < 7200) return 'in an hour';
-            if ($diff < 86400) return 'in ' . floor($diff / 3600) . ' hours';
-        }
-        if ($day_diff == 1) return 'Tomorrow';
-        if ($day_diff < 4) return date('l', $ts);
-        if ($day_diff < 7 + (7 - date('w'))) return 'next week';
-        if (ceil($day_diff / 7) < 4) return 'in ' . ceil($day_diff / 7) . ' weeks';
-        if (date('n', $ts) == date('n') + 1) return 'next month';
-        return date('F Y', $ts);
-    }
-}
-
-function checkProductSellerIds(array $data): string
-{
-    $sellerIds = []; // Array to store unique product_seller_ids
-
-    // Iterate through each element in the array
-    foreach ($data as $item) {
-        // Check if the item is an array and contains the 'product_seller_id' key
-        if (is_array($item) && array_key_exists('product_seller_id', $item)) {
-            $sellerIds[] = $item['product_seller_id']; // Add product_seller_id to the array
-        }
-    }
-
-    // Remove duplicate values and reindex the array
-    $uniqueSellerIds = array_values(array_unique($sellerIds));
-
-    // If there is only one unique product_seller_id, they are all the same
-    // if diffrent then return 0 , if same then return 1
-    if (count($uniqueSellerIds) === 1) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-function verify_app_request()
-{
-    // print_r("here");
-    // die;
-
-    // to verify the token from application
-    $t = &get_instance();
-    $t->load->library(['jwt', 'key']);
-
-    try {
-        $token = $t->jwt->getBearerToken();
-    } catch (\Exception $e) {
-        return [
-            "error" => true,
-            "message" => $e->getMessage(),
-            "status" => 401,
-            "data" => []
-        ];
-    }
-
-
-    if (empty($token)) {
-        return [
-            "error" => true,
-            "message" => "Unauthorized access not allowed",
-            "status" => 401,
-
-            "status_code" => 101,
-            "data" => []
-        ];
-    }
-    $api_keys = JWT_SECRET_KEY;
-
-    if (empty($api_keys)) {
-        return [
-            "error" => true,
-            "message" => 'No API found !',
-            "status" => 401,
-            "data" => []
-        ];
-    }
-    $flag = true;
-    $error = true;
-
-    $message = '';
-    $status_code = 0;
-    $user_token = "";
-    // print_R($token);
-    try {
-        $user_id = $t->jwt->decode($token, new Key($api_keys, 'HS256'))->user_id;
-        $user_data = fetch_details('users', ['id' => $user_id]);
-        $user_token = $user_data[0]['apikey'];
-    } catch (\Exception $e) {
-        $message = $e->getMessage();
-    }
-    if ($user_token == $token) {
-        try {
-            // $payload = $t->jwt->decode($token, $api_keys, ['HS256']);
-            // print_r($user_token);
-            $payload = $t->jwt->decode($token, new Key($api_keys, 'HS256'));
-            // print_r($payload);
-
-            if (isset($payload->iss)) {
-                $error = false;
-                $flag = false;
-            } else {
-                $error = true;
-                $flag = false;
-                $message = 'Token Expired';
-                $status_code = 403;
-            }
-        } catch (\Exception $e) {
-            $message = $e->getMessage();
-        }
-    } else {
-        // print_r($_POST);
-        if (isset($_POST['mobile']) && !empty($_POST['mobile'])) {
-            $user_data = fetch_details('users', ['mobile' => $_POST['mobile']]);
-        } elseif (isset($_POST['email']) && !empty($_POST['email'])) {
-            $user_data = fetch_details('users', ['email' => $_POST['email']]);
-        } else {
-            $user_data = fetch_details('users', ['id' => $_POST['user_id']]);
-        }
-
-        // print_r($user_data[0]);
-        $new_token = generate_token($user_data[0]['mobile'], $user_data[0]['email']);
-        return [
-            "error" => false,
-            "message" => "Token expired. New token generated.",
-            "status" => 200,
-            "new_token" => $new_token,
-            "data" => $user_data[0]
-        ];
-    }
-    if ($flag) {
-        return [
-            "error" => true,
-            "message" => $message,
-            "status" => 401,
-            "data" => []
-        ];
-    } else {
-        if ($error == true) {
-            return [
-                "error" => true,
-                "message" => $message,
-                "status" => 401,
-                "status_code" => 102,
-                "data" => []
-            ];
-        } else {
-            return [
-                "error" => false,
-                "message" => "Token verified !!",
-                "status" => 200,
-                "data" => $user_data[0]
-            ];
-        }
-    }
-}
-
-
-function generate_token($identity, $email = null)
-{
-
-    $t = &get_instance();
-    $t->load->library('jwt');
-    if (!empty($identity)) {
-        $user_id = fetch_details("users", ['mobile' => $identity], "id")[0]['id'];
-    } else {
-        $user_id = fetch_details("users", ['email' => $email],  "id")[0]['id'];
-    }
-    $payload = [
-        'iat' => time(), /* issued at time */
-        'iss' => 'eshop',
-        // 'exp' => time() + (30 * 60), /* expires after 1 minute */
-        'exp' => time() + (60 * 60 * 24 * 365),
-        // 'sub' => 'eshop Authentication'
-        'user_id' => $user_id
-    ];
-    $token = $t->jwt->encode($payload, JWT_SECRET_KEY);
-    return $token;
-}
-
-function format_price($price, $decimal_point = 2)
-{
-    $settings = get_settings('system_settings', true);
-    if (isset($settings['decimal_point'])) {
-        return number_format($price, $settings['decimal_point']);
-    } else {
-        return number_format($price, $decimal_point);
-    }
-}
-
-function convertAllWebpToPng()
-{
-
-    $t = &get_instance();
-    $allFiles = $t->db->where([
-        "extension" => "webp"
-    ])->get('media')->result_array();
-
-
-    $basePath = FCPATH;
-
-    foreach ($allFiles as $row) {
-        $target_path = $basePath . $row["sub_directory"];
-        $rowFileName = $row["name"];
-
-        $arr = explode(".", $rowFileName);
-        if (in_array("webp", $arr)) {
-            $title = $rowFileName;
-            $arr[count($arr) - 1] = "png";
-            $newName = $target_path . implode(".", $arr);
-            $title = rtrim($title, ".webp");
-            $im = imagecreatefromwebp($target_path . $rowFileName);
-
-            if (file_exists($newName)) {
-                $fileName = $arr[count($arr) - 2];
-                $fileName1 = $arr[count($arr) - 2];
-                $temp = explode("_", $fileName);
-
-                // Check if the filename has any underscore separators
-                if (count($temp) == 1) {
-                    $temp = explode("_", $fileName . "_1");
-                }
-
-                if (count($temp) != 1) {
-                    // Check if the last part of the filename is a number
-                    if (is_numeric(end($temp))) {
-                        // Check if a file with the same name and a numeric suffix exists
-                        if (file_exists($target_path . $fileName1 . "_1.png")) {
-                            $temp[count($temp) - 1] = (int) end($temp) + 1;
-                        } else {
-                            $temp[count($temp) - 1] = (int) end($temp);
-                        }
-                    }
-                    $fileName = implode("_", $temp);
-                    $title = $fileName;
-                }
-
-                $arr[count($arr) - 2] = $fileName;
-                $newName = $target_path . implode(".", $arr);
-            }
-
-            $array = [
-                'name' => $title . ".png",
-                'title' => $title,
-                "extension" => "png"
-            ];
-
-            update_details($array, ['name' => $rowFileName], "media");
-            unlink($target_path . $rowFileName);
-            imagepng($im, $newName);
-            imagedestroy($im);
-        }
-    }
-    return true;
 }
