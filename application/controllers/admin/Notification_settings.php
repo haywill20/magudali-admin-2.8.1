@@ -26,7 +26,7 @@ class Notification_settings extends CI_Controller
             // $this->data['fcm_server_key'] = get_settings('fcm_server_key');
             $this->data['vap_id_Key'] = get_settings('vap_id_Key');
             $this->data['sender_id'] = get_settings('sender_id');
-            $this->data['firebase_project_id'] = get_settings('firebase_project_id');
+            $this->data['firebase_project_id'] = 'maguali-2734d';
             $this->load->view('admin/template', $this->data);
         } else {
             redirect('admin/login', 'refresh');
@@ -242,7 +242,7 @@ class Notification_settings extends CI_Controller
             }
             // $fcm_key = get_settings('fcm_server_key');
             
-            $firebase_project_id = get_settings('firebase_project_id');
+            $firebase_project_id = 'maguali-2734d';
             $service_account_file = get_settings('service_account_file');
 
             // if (empty($fcm_key)) {
