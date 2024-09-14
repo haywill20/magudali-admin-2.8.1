@@ -1987,7 +1987,7 @@ function send_notification($fcmMsg, $registrationIDs_chunks, $customBodyFields =
     // print_R($customBodyFields);
     // print_R($registrationIDs_chunks);
 
-    $project_id = 'maguali-2734d';
+    $project_id = get_settings('firebase_project_id');
 
     $url = 'https://fcm.googleapis.com/v1/projects/' . $project_id . '/messages:send';
     // $access_token = getAccessToken();
