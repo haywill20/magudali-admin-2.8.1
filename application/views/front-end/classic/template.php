@@ -4,6 +4,7 @@
 <?php
 
 $settings = get_settings('web_settings', true);
+$system_settings = get_settings('system_settings', true);
 $primary_colour = (isset($settings['primary_color']) && !empty($settings['primary_color'])) ?  $settings['primary_color'] : '#FF6A65';
 $secondary_colour = (isset($settings['secondary_color']) && !empty($settings['secondary_color'])) ?  $settings['secondary_color'] : '#FF6A65';
 $font_color = (isset($settings['font_color']) && !empty($settings['font_color'])) ?  $settings['font_color'] : '#FFF';
@@ -25,9 +26,24 @@ $font_color = (isset($settings['font_color']) && !empty($settings['font_color'])
     <meta property="og:image:height" content="1024">
 
 
-    <?php $cookie_lang = $this->input->cookie('language', TRUE);
+    <?php
+    if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
+        $daynamic_lang = '';
+    } else {
+        $daynamic_lang = $this->config->item('language');
+    }
+    // print_r(defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0);
+    // print_r($daynamic_lang);
+    $cookie_lang = $this->input->cookie('language', TRUE);
     $path = $is_rtl = "";
-    if (!empty($cookie_lang)) {
+    if (!empty($daynamic_lang)) {
+        $language = get_languages(0, $daynamic_lang, 0, 1);
+        // print_r($language);
+        if (!empty($language)) {
+            $path = ($language[0]['is_rtl'] == 1) ? 'rtl/' : "";
+            $is_rtl =  ($language[0]['is_rtl'] == 1) ? true : false;
+        }
+    } else if (!empty($cookie_lang)) {
         $language = get_languages(0, $cookie_lang, 0, 1);
         if (!empty($language)) {
             $path = ($language[0]['is_rtl'] == 1) ? 'rtl/' : "";
@@ -43,6 +59,8 @@ $font_color = (isset($settings['font_color']) && !empty($settings['font_color'])
         }
     }
     $data['is_rtl'] = $is_rtl;
+    // print_r($is_rtl);
+
     ?>
     <?php $this->load->view('front-end/' . THEME . '/include-css', $data); ?>
     <style>
@@ -55,9 +73,9 @@ $font_color = (isset($settings['font_color']) && !empty($settings['font_color'])
 </head>
 
 <body id="body" data-is-rtl='<?= $is_rtl ?>'>
-    <?php $this->load->view('front-end/' . THEME . '/header'); ?>
+    <?php $this->load->view('front-end/' . THEME . '/header', $system_settings); ?>
     <?php $this->load->view('front-end/' . THEME . '/pages/' . $main_page); ?>
-    <?php $this->load->view('front-end/' . THEME . '/footer'); ?>
+    <?php $this->load->view('front-end/' . THEME . '/footer', $system_settings); ?>
     <?php $this->load->view('front-end/' . THEME . '/include-script'); ?>
 
 </body>

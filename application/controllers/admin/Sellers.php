@@ -12,6 +12,8 @@ class Sellers extends CI_Controller
         $this->load->library(['ion_auth', 'form_validation', 'upload']);
         $this->load->helper(['url', 'language', 'file']);
         $this->load->model('Seller_model');
+        $this->data['firebase_project_id'] = get_settings('firebase_project_id');
+        $this->data['service_account_file'] = get_settings('service_account_file');
         if (!has_permissions('read', 'seller')) {
             $this->session->set_flashdata('authorize_flag', PERMISSION_ERROR_MSG);
             redirect('admin/home', 'refresh');
@@ -25,6 +27,11 @@ class Sellers extends CI_Controller
             $settings = get_settings('system_settings', true);
             $this->data['title'] = 'Seller Management | ' . $settings['app_name'];
             $this->data['meta_description'] = ' Seller Management  | ' . $settings['app_name'];
+            $this->data['sellers_status'] = $this->db->select(' u.username as seller_name,u.id as seller_id,sd.category_ids,sd.id as seller_data_id,sd.status as seller_status')
+                ->join('users_groups ug', ' ug.user_id = u.id ')
+                ->join('seller_data sd', ' sd.user_id = u.id ')
+                ->where(['ug.group_id' => '4'])
+                ->get('users u')->result_array();
             $this->load->view('admin/template', $this->data);
         } else {
             redirect('admin/login', 'refresh');
@@ -58,6 +65,9 @@ class Sellers extends CI_Controller
     public function view_sellers()
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
+            if ($_GET['seller_status'] && !empty($_GET['seller_status'])) {
+                return $this->Seller_model->get_sellers_list($_GET['seller_status']);
+            }
             return $this->Seller_model->get_sellers_list();
         } else {
             redirect('admin/login', 'refresh');
@@ -91,7 +101,7 @@ class Sellers extends CI_Controller
             }
             if ($status == 2) {
                 $this->response['error'] = true;
-                $this->response['message'] = 'First approve this Seller from edit seller.';
+                $this->response['message'] = 'Please approve seller first for delete only seller.';
                 print_r(json_encode($this->response));
                 return;
                 exit();
@@ -128,7 +138,10 @@ class Sellers extends CI_Controller
                 exit();
             }
             $id = $this->input->get('id', true);
+            $user = fetch_details('users', ['id' => $id]);
+
             $delete = array(
+                'users' => 0,
                 "media" => 0,
                 "payment_requests" => 0,
                 "products" => 0,
@@ -141,12 +154,25 @@ class Sellers extends CI_Controller
             );
 
             $seller_media = fetch_details('seller_data', ['user_id' => $id], 'id,logo,authorized_signature,national_identity_card,address_proof');
-
             if (!empty($seller_media)) {
-                unlink(FCPATH . $seller_media[0]['logo']);
-                unlink(FCPATH . $seller_media[0]['national_identity_card']);
-                unlink(FCPATH . $seller_media[0]['address_proof']);
-                unlink(FCPATH . $seller_media[0]['authorized_signature']);
+                if (!empty($seller_media[0])) {
+                    if (!empty($seller_media[0]['logo'])) {
+                        unlink(FCPATH . $seller_media[0]['logo']);
+                    }
+                    if (!empty($seller_media[0]['national_identity_card'])) {
+                        unlink(FCPATH . $seller_media[0]['national_identity_card']);
+                    }
+                    if (!empty($seller_media[0]['address_proof'])) {
+                        unlink(FCPATH . $seller_media[0]['address_proof']);
+                    }
+                    if (!empty($seller_media[0]['authorized_signature'])) {
+                        unlink(FCPATH . $seller_media[0]['authorized_signature']);
+                    }
+                }
+                // unlink(FCPATH . $seller_media[0]['logo']);
+                // unlink(FCPATH . $seller_media[0]['national_identity_card']);
+                // unlink(FCPATH . $seller_media[0]['address_proof']);
+                // unlink(FCPATH . $seller_media[0]['authorized_signature']);
             }
 
             if (update_details(['seller_id' => 0], ['seller_id' => $id], 'media')) {
@@ -219,6 +245,9 @@ class Sellers extends CI_Controller
             if (isset($delete['seller_data']) && !empty($delete['seller_data']) && isset($delete['seller_commission']) && !empty($delete['seller_commission'])) {
                 $deleted = TRUE;
             }
+            if (delete_details(['id' => $id], 'users')) {
+                $delete['users'] = 1;
+            }
             if (update_details(['group_id' => '2'], ['user_id' => $id, 'group_id' => 4], 'users_groups') == TRUE && $deleted == TRUE) {
                 $this->response['error'] = false;
                 $this->response['message'] = 'Seller deleted from seller succesfully';
@@ -252,14 +281,14 @@ class Sellers extends CI_Controller
             $this->form_validation->set_rules('name', 'Name', 'trim|required|xss_clean');
             $this->form_validation->set_rules('email', 'Mail', 'trim|required|xss_clean');
             if (!isset($_POST['edit_seller'])) {
-                $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|numeric|xss_clean|min_length[5]|edit_unique[users.mobile.' . $user->id . ']');
+                $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|numeric|xss_clean|min_length[5]|max_length[16]|edit_unique[users.mobile.' . $user->id . ']');
                 $this->form_validation->set_rules('password', 'Password', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('confirm_password', 'Confirm password', 'trim|required|matches[password]|xss_clean');
             }
             $this->form_validation->set_rules('address', 'Address', 'trim|required|xss_clean');
             $this->form_validation->set_rules('store_name', 'Store Name', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('tax_name', 'Tax Name', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('tax_number', 'Tax Number', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('tax_name', 'Tax Name', 'trim|xss_clean');
+            $this->form_validation->set_rules('tax_number', 'Tax Number', 'trim|xss_clean');
             $this->form_validation->set_rules('status', 'Status', 'trim|required|xss_clean');
 
             if (!isset($_POST['edit_seller'])) {
@@ -267,12 +296,21 @@ class Sellers extends CI_Controller
                     $this->form_validation->set_rules('commission_data', 'Category Commission data or Global Commission is missing', 'trim|required|xss_clean');
                 }
             }
-
+            // print_r($_FILES);
             if (!isset($_POST['edit_seller'])) {
-                $this->form_validation->set_rules('store_logo', 'Store Logo', 'trim|xss_clean');
-                $this->form_validation->set_rules('authorized_signature', 'Authorized Signature', 'trim|xss_clean');
-                $this->form_validation->set_rules('national_identity_card', 'National Identity Card', 'trim|xss_clean');
-                $this->form_validation->set_rules('address_proof', 'Address Proof', 'trim|xss_clean');
+                if (isset($_FILES) && !empty($_FILES) && empty($_FILES['store_logo']['name'])) {
+                    $this->form_validation->set_rules('store_logo', 'Store Logo', 'trim|required|xss_clean');
+                }
+                if (isset($_FILES) && !empty($_FILES) && empty($_FILES['authorized_signature']['name'])) {
+                    $this->form_validation->set_rules('authorized_signature', 'Authorized Signature', 'trim|required|xss_clean');
+                }
+                // if (isset($_FILES) && !empty($_FILES) && empty($_FILES['national_identity_card']['name'])) {
+                //     $this->form_validation->set_rules('national_identity_card', 'National Identity Card', 'trim|required|xss_clean');
+                // }
+                // if (isset($_FILES) && !empty($_FILES) && empty($_FILES['address_proof']['name'])) {
+                //     $this->form_validation->set_rules('address_proof', 'Address Proof', 'trim|required|xss_clean');
+                // }
+
             }
 
             if (!$this->form_validation->run()) {
@@ -584,38 +622,41 @@ class Sellers extends CI_Controller
                         $seller_fcm_id[0] = $seller_fcm[0]['fcm_id'];
 
                         $registrationIDs_chunks = array_chunk($seller_fcm_id, 1000);
-
-                        if (!empty($seller_fcm_id)) {
+                        $firebase_project_id = $this->data['firebase_project_id'];
+                        $service_account_file = $this->data['service_account_file'];
+                        if (!empty($seller_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                             $fcmMsg = array(
                                 'title' => $title,
                                 'body' => $fcm_admin_msg,
                                 'type' => "seller_account_update",
                                 'content_available' => true
                             );
-                            send_notification($fcmMsg, $registrationIDs_chunks);
+                            send_notification($fcmMsg, $registrationIDs_chunks,$fcmMsg);
                         }
                         $email_message = array(
                             'username' => 'Hello, Dear <b>' . ucfirst($seller_fcm[0]['username']) . '</b>, ',
                             'subject' => $title,
+                            'email' => $seller_fcm[0]['email'],
                             'message' => $mail_admin_msg
                         );
+                        send_mail($seller_fcm[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
                         // send_mail($seller_fcm[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
                     }
                     $seller_data = array(
                         'user_id' => $this->input->post('edit_seller', true),
                         'edit_seller_data_id' => $this->input->post('edit_seller_data_id', true),
-                        'address_proof' => (!empty($proof_doc)) ? $proof_doc : $this->input->post('old_address_proof', true),
-                        'national_identity_card' => (!empty($id_card_doc)) ? $id_card_doc : $this->input->post('old_national_identity_card', true),
+                        // 'address_proof' => (!empty($proof_doc)) ? $proof_doc : $this->input->post('old_address_proof', true),
+                        // 'national_identity_card' => (!empty($id_card_doc)) ? $id_card_doc : $this->input->post('old_national_identity_card', true),
                         'store_logo' => (!empty($store_logo_doc)) ? $store_logo_doc : $this->input->post('old_store_logo', true),
                         'authorized_signature' => (!empty($authorized_signature_doc)) ? $authorized_signature_doc : $this->input->post('old_authorized_signature', true),
                         'status' => $this->input->post('status', true),
-                        'pan_number' => $this->input->post('pan_number', true),
-                        'tax_number' => $this->input->post('tax_number', true),
-                        'tax_name' => $this->input->post('tax_name', true),
-                        'bank_name' => $this->input->post('bank_name', true),
-                        'bank_code' => $this->input->post('bank_code', true),
-                        'account_name' => $this->input->post('account_name', true),
-                        'account_number' => $this->input->post('account_number', true),
+                        // 'pan_number' => $this->input->post('pan_number', true),
+                        // 'tax_number' => $this->input->post('tax_number', true),
+                        // 'tax_name' => $this->input->post('tax_name', true),
+                        // 'bank_name' => $this->input->post('bank_name', true),
+                        // 'bank_code' => $this->input->post('bank_code', true),
+                        // 'account_name' => $this->input->post('account_name', true),
+                        // 'account_number' => $this->input->post('account_number', true),
                         'store_description' => $this->input->post('store_description', true),
                         'store_url' => $this->input->post('store_url', true),
                         'store_name' => $this->input->post('store_name', true),
@@ -753,17 +794,17 @@ class Sellers extends CI_Controller
                         $data = array(
                             'user_id' => $user_id[0]['id'],
                             'address_proof' => (!empty($proof_doc)) ? $proof_doc : null,
-                            'national_identity_card' => (!empty($id_card_doc)) ? $id_card_doc : null,
                             'store_logo' => (!empty($store_logo_doc)) ? $store_logo_doc : null,
+                            // 'national_identity_card' => (!empty($id_card_doc)) ? $id_card_doc : null,
                             'authorized_signature' => (!empty($authorized_signature_doc)) ? $authorized_signature_doc : null,
                             'status' => $this->input->post('status', true),
-                            'pan_number' => $this->input->post('pan_number', true),
-                            'tax_number' => $this->input->post('tax_number', true),
-                            'tax_name' => $this->input->post('tax_name', true),
-                            'bank_name' => $this->input->post('bank_name', true),
-                            'bank_code' => $this->input->post('bank_code', true),
-                            'account_name' => $this->input->post('account_name', true),
-                            'account_number' => $this->input->post('account_number', true),
+                            // 'pan_number' => $this->input->post('pan_number', true),
+                            // 'tax_number' => $this->input->post('tax_number', true),
+                            // 'tax_name' => $this->input->post('tax_name', true),
+                            // 'bank_name' => $this->input->post('bank_name', true),
+                            // 'bank_code' => $this->input->post('bank_code', true),
+                            // 'account_name' => $this->input->post('account_name', true),
+                            // 'account_number' => $this->input->post('account_number', true),
                             'store_description' => $this->input->post('store_description', true),
                             'store_url' => $this->input->post('store_url', true),
                             'store_name' => $this->input->post('store_name', true),

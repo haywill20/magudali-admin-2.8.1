@@ -78,7 +78,8 @@ class Customer extends CI_Controller
             } else {
                 if ($_POST['type'] == 'debit' || $_POST['type'] == 'credit') {
                     $message = (isset($_POST['message']) && !empty($_POST['message'])) ? $this->input->post('message', true) : "Balance " . $_POST['type'] . "ed.";
-                    $response = update_wallet_balance($_POST['type'], $_POST['user_id'], $_POST['amount'], $message);
+                    $status = 'success';
+                    $response = update_wallet_balance($_POST['type'], $_POST['user_id'], $_POST['amount'], $message, '', '', 'wallet', $status);
                     $response['csrfName'] = $this->security->get_csrf_token_name();
                     $response['csrfHash'] = $this->security->get_csrf_hash();
                     print_r(json_encode($response));

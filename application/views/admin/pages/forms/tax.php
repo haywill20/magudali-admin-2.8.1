@@ -42,11 +42,7 @@
                                     <button type="reset" class="btn btn-warning">Reset</button>
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Tax' : 'Add Tax' ?></button>
                                 </div>
-                                <div class="d-flex justify-content-center">
-                                    <div class="form-group" id="error_box">
 
-                                    </div>
-                                </div>
                             </div>
                         </form>
                     </div>

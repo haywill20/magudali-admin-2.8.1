@@ -757,14 +757,15 @@
                                     </div>
                                     <div class="row">
                                         <div class="form-group col-md-4">
-                                            <label for="">PhonePe Mode <small>[ sandbox / live ]</small>
+                                            <label for="">PhonePe Mode <small>[ SANDBOX / UAT / PRODUCTION ]</small>
                                             </label>
                                         </div>
                                         <div class="form-group col-md-8">
                                             <select name="phonepe_payment_mode" class="form-control">
                                                 <option value="">Select Mode</option>
-                                                <option value="sandbox" <?= (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == 'sandbox') ? 'selected' : '' ?>>Sandbox</option>
-                                                <option value="live" <?= (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == 'live') ? 'selected' : '' ?>>Live</option>
+                                                <option value="SANDBOX" <?= (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == 'SANDBOX') ? 'selected' : '' ?>>SANDBOX</option>
+                                                <option value="UAT" <?= (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == 'UAT') ? 'selected' : '' ?>>UAT</option>
+                                                <option value="PRODUCTION" <?= (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == 'PRODUCTION') ? 'selected' : '' ?>>PRODUCTION</option>
                                             </select>
                                         </div>
                                     </div>
@@ -776,14 +777,14 @@
                                             <input type="text" class="form-control" name="phonepe_marchant_id" value="<?= @$settings['phonepe_marchant_id']  ?>" />
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <!-- <div class="row">
                                         <div class="form-group col-md-4">
                                             <label for="phonepe_app_id">App id</label>
                                         </div>
                                         <div class="form-group col-md-8">
                                             <input type="text" class="form-control" name="phonepe_app_id" value="<?= @$settings['phonepe_app_id']  ?>" />
                                         </div>
-                                    </div>
+                                    </div> -->
                                     <div class="row">
                                         <div class="form-group col-md-4">
                                             <label for="phonepe_salt_index">Salt index</label>
@@ -858,7 +859,8 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label for="notes">Extra Notes</label>
-                                        <textarea name="notes" class="textarea addr_editor" placeholder="Extra Notes">  <?= @$settings['notes'] ?></textarea>
+                                        <!-- <textarea name="notes" class="textarea addr_editor" placeholder="Extra Notes">  <?//= @$settings['notes'] ?></textarea> -->
+                                        <textarea name="notes" class="textarea addr_editor" placeholder="Extra Notes">  <?= @str_replace('\"', '', str_replace('\r\n', '&#13;&#10;', $settings['notes'])) ?></textarea>
                                     </div>
                                 </div>
 
@@ -879,10 +881,7 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn">Update Payment Settings</button>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-center">
-                                <div class="form-group" id="error_box">
-                                </div>
-                            </div>
+
                         </form>
                     </div>
                     <!--/.card-->

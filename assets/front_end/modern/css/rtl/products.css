@@ -22,10 +22,10 @@
 }
 
 .seller-image-container {
-    max-width: 195px;
-    height: 230px;
+    width: 400px;
+    height: 240px;
     margin: initial;
-    margin-left: 20px;
+    /* margin-right: 20px; */
     position: relative;
     vertical-align: middle;
     line-height: 230px;
@@ -35,7 +35,7 @@
     max-height: 100%;
 }
 .product-image-container {
-    max-width: 195px;
+    /* max-width: 195px; */
     height: 230px;
     margin: auto;
     position: relative;
@@ -176,7 +176,7 @@
     height: 15px;
     width: 15px;
     border-radius: 0;
-    transform: translateX(50%) rotate(45deg);
+    transform: translateX(50%) rotate(-45deg);
     top: -20px;
     z-index: -1;
 }

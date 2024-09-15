@@ -291,7 +291,7 @@
 /* 1.5 Chat */
 .chat-box .chat-content {
   /* background-color: #e8e7e7 !important; */
-  height: 330px;
+  height: 412px;
   overflow: hidden;
   padding-top: 25px !important;
 }
@@ -376,8 +376,20 @@
   height: 33px !important;
   border-radius: 50% !important;
   position: absolute !important;
-  top: -40% !important;
-  right: 20px !important;
+  top: -300% !important;
+  right: -16px !important;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
+}
+.chat-box .chat-form .btn-arrow {
+  padding: 0 !important;
+  width: 33px !important;
+  height: 33px !important;
+  border-radius: 50% !important;
+  position: absolute !important;
+  top: -300% !important;
+  right: -16px !important;
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);

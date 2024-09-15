@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2><?= isset($page_main_bread_crumb) ? $page_main_bread_crumb : 'Product Listing' ?></h2>
         <nav aria-label="breadcrumb">
@@ -60,7 +60,7 @@
                                     </div>
                                     <div class="form-group col-md-5 d-flex">
                                         <label for="seller_search"></label>
-                                        <input type="search" name="seller_search" class="form-control" id="seller_search" value="<?= (isset($seller_search) && !empty($seller_search)) ? $seller_search : "" ?>" placeholder="Search Seller">
+                                        <input type="search" name="seller_search" class="form-control" id="seller_search" value="<?= (isset($seller_search) && !empty($seller_search)) ? $seller_search : "" ?>" placeholder="<?= !empty($this->lang->line('search_seller')) ? $this->lang->line('search_seller') : 'Search Seller' ?>">
                                     </div>
                                 </div>
                             <?php } ?>
@@ -70,35 +70,37 @@
 
                         <?php if (isset($_GET['type']) && $_GET['type'] == "list") { ?>
                             <div class="col-md-12 col-sm-6">
-                                <div class="row mt-4">
-                                    <div class="col-12">
-                                        <h1 class="h4"><?= !empty($this->lang->line('sellers')) ? $this->lang->line('sellers') : 'Sellers' ?></h4>
-                                    </div>
+                                <div class="col-12">
+                                    <h1 class="h4"><?= !empty($this->lang->line('sellers')) ? $this->lang->line('sellers') : 'Sellers' ?></h4>
+                                </div>
+                                <div class="d-flex flex-column mt-4">
                                     <?php foreach ($sellers as $row) { ?>
-                                        <div class="col-md-3">
-                                            <div class="product-grid">
-                                                <div class="product-image">
-                                                    <div class="product-image-container">
-                                                        <a href="<?= base_url('products?seller=' . $row['slug']) ?>">
-                                                            <img class="pic-1 lazy" data-src="<?= $row['seller_profile'] ?>">
-                                                            <?php $row['seller_profile']; ?>
-                                                        </a>
+                                        <div class="d-flex mb-2">
+                                            <div class="col-md-3">
+                                                <div class="product-grid" style="padding: 0px !important;">
+                                                    <div class="product-image">
+                                                        <div class="product-image-container">
+                                                            <a href="<?= base_url('sellers/seller_details/' . $row['slug']) ?>">
+                                                                <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $row['seller_profile_path'] . '&width=320&quality=80') ?>">
+                                                                <?php $row['seller_profile']; ?>
+                                                            </a>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="product-content">
-                                                <h3 class="list-product-title title"><a href="<?= base_url('products?seller=' . $row['slug']) ?>"><?= $row['seller_name'] ?></a></h3>
-                                                <div class="rating">
-                                                    <input type="text" class="kv-fa rating-loading" value="<?= number_format($row['seller_rating'], 1) ?>" data-size="sm" title="" readonly>
-                                                </div>
-                                                <p class="text-muted list-product-desc"><?= $row['store_description'] ?></p>
-                                                <div class="price mb-2 list-view-price">
-                                                    <?= $row['store_name'] ?>
-                                                </div>
-                                                <div class="button button-sm m-0 p-0">
-                                                    <a class="add-to-cart view-products" href="<?= base_url('products?seller=' . $row['slug']) ?>">View Products</a>
+                                            <div class="col-md-9">
+                                                <div class="product-content">
+                                                    <h3 class="list-product-title title"><a href="<?= base_url('sellers/seller_details/' . $row['slug']) ?>"><?= $row['seller_name'] ?></a></h3>
+                                                    <div class="rating">
+                                                        <input type="text" class="kv-fa rating-loading" value="<?= number_format($row['seller_rating'], 1) ?>" data-size="sm" title="" readonly>
+                                                    </div>
+                                                    <p class="text-muted list-product-desc"><?= $row['store_description'] ?></p>
+                                                    <div class="price mb-2 list-view-price">
+                                                        <?= $row['store_name'] ?>
+                                                    </div>
+                                                    <div class="button button-sm m-0 p-0">
+                                                        <a class="add-to-cart view-products" href="<?= base_url('products?seller=' . $row['slug']) ?>"><?= !empty($this->lang->line('view_products')) ? $this->lang->line('view_products') : 'View Products' ?></a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -107,17 +109,18 @@
                             </div>
 
                         <?php } else { ?>
-                            <div class="row w-100">
-                                <div class="col-12">
-                                    <h1 class="h4"><?= !empty($this->lang->line('sellers')) ? $this->lang->line('sellers') : 'Sellers' ?></h4>
-                                </div>
-                                <?php foreach ($sellers as $row) { ?>
-                                    <div class="col-md-4 col-sm-6">
+                            <div class="">
+                                <h1 class="h4"><?= !empty($this->lang->line('sellers')) ? $this->lang->line('sellers') : 'Sellers' ?></h4>
+                            </div>
+                            <div class="d-flex flex-wrap">
+                                <?php foreach ($sellers as $row) {
+                                ?>
+                                    <div class="col-md-3 col-sm-6 mb-4">
                                         <div class="product-grid">
                                             <div class="product-image">
                                                 <div class="product-image-container">
-                                                    <a href="<?= base_url('products?seller=' . $row['slug']) ?>">
-                                                        <img class="pic-1 lazy" data-src="<?= $row['seller_profile'] ?>">
+                                                    <a href="<?= base_url('sellers/seller_details/' . $row['slug']) ?>">
+                                                        <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $row['seller_profile_path'] . '&width=320&quality=80') ?>">
                                                     </a>
                                                 </div>
                                             </div>
@@ -125,7 +128,7 @@
                                                 <input type="text" class="kv-fa rating-loading" value="<?= number_format($row['seller_rating'], 1) ?>" data-size="sm" title="" readonly>
                                             </div>
                                             <div class="product-content">
-                                                <h3 class="title"><a href="<?= base_url('products?seller=' . $row['slug']) ?>"><?= $row['seller_name'] ?></a></h3>
+                                                <h3 class="title"><a href="<?= base_url('sellers/seller_details/' . $row['slug']) ?>"><?= $row['seller_name'] ?></a></h3>
                                                 <div class="price mb-2">
                                                     <?= $row['store_name'] ?>
                                                 </div>

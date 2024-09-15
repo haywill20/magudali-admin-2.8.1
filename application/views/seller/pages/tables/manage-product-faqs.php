@@ -33,6 +33,7 @@
                             <div class="modal-body p-0">
                                 <form class="form-horizontal form-submit-event" id="product_edit_faq_form" action="<?= base_url('seller/product/edit_product_faqs'); ?>" method="POST" enctype="multipart/form-data">
                                     <div class="card-body">
+                                        <input type="hidden" name="user_id" id="user_id" value="<?= $_SESSION['user_id'] ?>">
                                         <?php
                                         if (isset($fetched_data[0]['id'])) { ?>
                                             <input type="hidden" name="edit_product_faq" value="<?= @$fetched_data[0]['id'] ?>">
@@ -56,10 +57,7 @@
                                             <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Product Faq' : 'Add Product FAQ' ?></button>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-center">
-                                        <div class="form-group" id="error_box">
-                                        </div>
-                                    </div>
+
                                 </form>
                             </div>
                         </div>
@@ -85,6 +83,7 @@
                                         <th data-field="id" data-sortable="true">ID</th>
                                         <th data-field="user_id" data-sortable="false" data-visible='false'>User Id</th>
                                         <th data-field="product_id" data-sortable="false" data-visible='false'>Product Id</th>
+                                        <th data-field="product_name" data-sortable="false" data-visible='false'>Product Name</th>
                                         <th data-field="question" data-sortable="false">Question</th>
                                         <th data-field="answer" data-sortable="false">Answer</th>
                                         <th data-field="answered_by" data-sortable="false" data-visible='false'>Answered by</th>

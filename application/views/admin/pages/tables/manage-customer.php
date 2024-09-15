@@ -74,12 +74,12 @@
                                         <th data-field="email" data-sortable="true">Email</th>
                                         <th data-field="mobile" data-sortable="true">Mobile No</th>
                                         <th data-field="balance" data-sortable="true">Balance</th>
-                                        <th data-field="street" data-sortable="true">Street</th>
+                                        <!-- <th data-field="street" data-sortable="true">Street</th>
                                         <th data-field="area" data-sortable="true">Area</th>
-                                        <th data-field="city" data-sortable="true">City</th>
+                                        <th data-field="city" data-sortable="true">City</th> -->
                                         <th data-field="date" data-sortable="true">Date</th>
                                         <th data-field="status" data-sortable="true">Status</th>
-                                        <th data-field="actions" data-sortable="true">Actions</th>
+                                        <th data-field="actions" data-sortable="false">Actions</th>
                                     </tr>
                                 </thead>
                             </table>

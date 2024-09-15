@@ -22,7 +22,7 @@
                 <div class="col-md-12">
                     <div class="card card-info">
                         <!-- form start -->
-                        <form class="form-horizontal form-submit-event" action="<?= base_url('admin/brand/add_brand'); ?>" method="POST" id="add_product_form" enctype="multipart/form-data">
+                        <form class="form-horizontal form-submit-event brand_add" action="<?= base_url('admin/brand/add_brand'); ?>" method="POST" id="add_product_form" enctype="multipart/form-data">
                             <?php if (isset($fetched_data[0]['id'])) { ?>
                                 <input type="hidden" name="edit_brand" value="<?= @$fetched_data[0]['id'] ?>">
                             <?php } ?>
@@ -60,10 +60,7 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Brand' : 'Add Brand' ?></button>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-center">
-                                <div class="form-group" id="error_box">
-                                </div>
-                            </div>
+
                     </div>
                     <!-- /.card-footer -->
                     </form>

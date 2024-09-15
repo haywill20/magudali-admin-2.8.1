@@ -8,6 +8,7 @@
 
     0. curl($url, $method = 'GET', $data = [])
 */
+#[\AllowDynamicProperties]
 class Razorpay
 {
     private $key_id = "";

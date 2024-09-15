@@ -75,11 +75,25 @@ class Product_faqs extends CI_Controller
 
     public function add_faqs()
     {
+
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_seller()) {
-            $this->product_faqs_model->add_product_faqs($_POST);
-            $this->response['error'] = false;
-            $this->response['message'] = 'Faq added Succesfully';
-            print_r(json_encode($this->response));
+            $this->form_validation->set_rules('question', 'Question', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('answer', 'Answer', 'trim|required|xss_clean');
+            if (!$this->form_validation->run()) {
+                $this->response['error'] = true;
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                $this->response['message'] = validation_errors();
+                print_r(json_encode($this->response));
+            } else {
+                $this->product_faqs_model->add_product_faqs($_POST);
+                $this->response['error'] = false;
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                $message = (isset($_POST['edit_product_faq'])) ? 'FAQ Updated Successfully' : 'FAQ Added Successfully';
+                $this->response['message'] = $message;
+                print_r(json_encode($this->response));
+            }
         } else {
             redirect('seller/login', 'refresh');
         }

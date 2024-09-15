@@ -20,7 +20,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="card card-info">
+                    <div class="card card-info overflow-auto">
                         <div class="card-body">
                             <table class="table">
                                 <tr>
@@ -38,7 +38,8 @@
                                 </tr>
                                 <tr>
                                     <th class="w-10px">Contact</th>
-                                    <td><?= (ALLOW_MODIFICATION == 0 && !defined(ALLOW_MODIFICATION)) ? str_repeat("X", strlen($order_detls[0]['mobile']) - 3) . substr($order_detls[0]['mobile'], -3) : $order_detls[0]['mobile']; ?></td>
+
+                                    <td><?= (!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0)  ? str_repeat("X", strlen($order_detls[0]['mobile']) - 3) . substr($order_detls[0]['mobile'], -3) : $order_detls[0]['mobile']; ?></td>
                                 </tr>
                                 <?php if (!empty($order_detls[0]['notes'])) { ?>
                                     <tr>
@@ -57,6 +58,8 @@
                                         for ($i = 0; $i < count($sellers); $i++) {
                                             $seller_data = fetch_details('users', ['id' => $sellers[$i]], 'username');
                                             $seller_otp = fetch_details('order_items', ['order_id' => $order_detls[0]['order_id'], 'seller_id' => $sellers[$i]], 'otp')[0]['otp'];
+                                            $system_settings = get_settings('system_settings', true);
+                                            $otp_system = $system_settings['is_delivery_boy_otp_setting_on'];
                                             $total = 0;
                                             $tax_amount = 0;
                                         ?>
@@ -87,7 +90,7 @@
                                                                             <option value="cancelled" <?= (strtolower($item['active_status']) == 'cancelled') ? 'selected' : '' ?>>Cancel</option>
                                                                         </select>
                                                                     </div>
-                                                                    <div class="col-md-5 d-flex align-items-center"><a href="javascript:void(0);" title="Update status" data-id=' <?= $item['id'] ?> ' data-otp-system='<?= $order_detls[0]['item_otp'] != 0 || $item['seller_otp'] != 0 ? '1' : '0' ?>' class="btn btn-primary btn-xs update_status_delivery_boy mr-1"><i class="far fa-arrow-alt-circle-up"></i></a></div>
+                                                                    <div class="col-md-5 d-flex align-items-center"><a href="javascript:void(0);" title="Update status" data-id=' <?= $item['id'] ?> ' data-otp-system='<?= $otp_system != 0 ? '1' : '0' ?>' class="btn btn-primary btn-xs update_status_delivery_boy mr-1"><i class="far fa-arrow-alt-circle-up"></i></a></div>
                                                                 </div>
                                                                 <div class="order-product-image">
                                                                     <a href='<?= base_url() . $item['product_image'] ?>' data-toggle='lightbox' data-gallery='order-images'> <img src='<?= base_url() . $item['product_image'] ?>' class='h-75'></a>

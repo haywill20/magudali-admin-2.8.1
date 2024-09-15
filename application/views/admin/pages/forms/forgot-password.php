@@ -9,14 +9,19 @@
         <div class="text-center h5"><?= !empty($this->lang->line('forgot_password')) ? $this->lang->line('forgot_password') : 'Forgot Password' ?></div>
         <hr class="mt-0">
         <form id="send_forgot_password_otp_form" method="POST" action="#">
+          <input type="hidden" name="forget_password_val" value="1" id="forget_password_val">
+
           <div class="col-md-12">
             <input type="text" class="form-control" name="mobile_number" id="forgot_password_number" placeholder="Mobile number" value="">
           </div>
           <div class="col-md-12 d-flex justify-content-center pb-4 mt-3">
             <div id="recaptcha-container-2"></div>
           </div>
+          <div class="d-flex justify-content-center">
+            <div class="form-group" id="forgot_password_error_box"></div>
+          </div>
           <footer>
-            <button type="submit" id="forgot_password_send_otp_btn" class="submit_btn  btn btn-primary btn-block"><?= !empty($this->lang->line('send_otp')) ? $this->lang->line('send_otp') : 'Send OTP' ?></button>
+            <button type="submit" id="forgot_password_send_otp_btn" class="submit_btn  btn btn-primary btn-block forgot-send-otp-btn"><?= !empty($this->lang->line('send_otp')) ? $this->lang->line('send_otp') : 'Send OTP' ?></button>
           </footer>
           <br>
           <p class="mb-1">

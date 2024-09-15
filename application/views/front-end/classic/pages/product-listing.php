@@ -1,7 +1,8 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
-        <h2><?= isset($page_main_bread_crumb) ? $page_main_bread_crumb : 'Products' ?><?= (isset($seller) && !empty($seller[0]['store_name'])) ? " By " . $seller[0]['store_name'] : '' ?></h2>
+        <h2><?= isset($page_main_bread_crumb) ? $page_main_bread_crumb : 'Products' ?>
+            <?= (isset($seller) && !empty($seller[0]['store_name'])) ? " By " . $seller[0]['store_name'] : '' ?></h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="<?= base_url() ?>"><?= !empty($this->lang->line('home')) ? $this->lang->line('home') : 'Home' ?></a></li>
@@ -15,8 +16,8 @@
             </ol>
         </nav>
     </div>
-
 </section>
+
 <!-- end breadcrumb -->
 <input type="hidden" id="product-filters" value='<?= (!empty($filters)) ? escape_array($filters) : ""  ?>' data-key="<?= $filters_key ?>" />
 <input type="hidden" id="brand-filters" value='<?= (!empty($brands)) ? escape_array($brands) : ""  ?>' data-key="<?= $filters_key ?>" />
@@ -31,7 +32,7 @@
                     <div id="product-filters-desktop" class="filter_attributes mb-5 mt-2">
                         <div class="align-content-center d-flex justify-content-between">
                             <h6 class="m-0"><?= label('attributes', 'Attributes') ?></h6>
-                            <a href="#" class="text-decoration-none hover product_filter_btn"><?= label('filter', 'Filter') ?></a>
+                            <a href="#" class="text-decoration-none hover product_filter_btn"><?= !empty($this->lang->line('filter')) ? $this->lang->line('filter') : 'Filter' ?></a>
                         </div>
                         <div id="product-filters-desktop">
                             <?php foreach ($products['filters'] as $key => $row) {
@@ -81,7 +82,7 @@
                     <?php if (isset($brands) && !empty($brands)) { ?>
                         <div class="align-content-center d-flex justify-content-between">
                             <h6 class="m-0"><?= label('brands', 'Brands') ?></h6>
-                            <a href="#" class="text-decoration-none hover product_filter_btn"><?= label('filter', 'Filter') ?></a>
+                            <a href="#" class="text-decoration-none hover product_filter_btn"><?= !empty($this->lang->line('filter')) ? $this->lang->line('filter') : 'Filter' ?></a>
                         </div>
                         <div class="brand_filter d-flex flex-wrap gap-4 mb-5 mt-2 p-1">
                             <?php
@@ -95,7 +96,8 @@
                                 <div class="brand_div form-check">
                                     <label class="form-check-label" for="<?= $value['brand_id'] ?>-brand">
                                         <input class="brand form-check-input" type="radio" name="brandRadio" data-value="<?= $value['brand_slug'] ?>" id="<?= $value['brand_id'] ?>-brand" checked>
-                                        <img src="<?= base_url($value['brand_img']) ?>" alt="brand-logo" class="h-6">
+                                        <img src="<?= base_url('assets/front_end/modern/img/product-placeholder.jpg') ?>" data-src="<?= base_url('media/image?path=' . $value['brand_img'] . '&width=35&quality=80') ?>" alt="brand-logo" class="h-6 lazy" style="height: 1.5rem !important;">
+
                                     </label>
 
                                 </div>
@@ -107,7 +109,7 @@
                     <?php if (isset($categories)) { ?>
                         <div class="align-content-center d-flex justify-content-between">
                             <h6 class="m-0"><?= label('categories', 'Categories') ?></h6>
-                            <a href="#" class="text-decoration-none hover product_filter_btn"><?= label('filter', 'Filter') ?></a>
+                            <a href="#" class="text-decoration-none hover product_filter_btn"><?= !empty($this->lang->line('filter')) ? $this->lang->line('filter') : 'Filter' ?></a>
                         </div>
                         <div class="category_filter mb-5 mt-2">
                             <?php
@@ -132,7 +134,7 @@
                 </div>
 
                 <div class="text-center d-flex gap-2">
-                    <button class="button button-rounded button-warning product_filter_btn w-50">Filter</button>
+                    <button class="button button-rounded button-warning product_filter_btn w-50"><?= !empty($this->lang->line('filter')) ? $this->lang->line('filter') : 'Filter' ?></button>
                     <a href="#" id="reload" class="button button-danger-outline button-rounded rounded-pill w-50"><?= label('clear', 'Clear') ?></a>
                 </div>
             </div>
@@ -214,14 +216,19 @@
                                     <h4 class="h4"><?= !empty($this->lang->line('products')) ? $this->lang->line('products') : 'Products' ?></h4>
                                 </div>
                                 <?php foreach ($products['product'] as $row) {
+                                     if ($row['type'] == 'simple_product') {
+                                        $product_stock = $row['stock'];
+                                    }else{
+                                        $product_stock = $row['total_stock'];
+                                    }
                                 ?>
 
                                     <div class="col-md-3">
-                                        <div class="product-grid mb-2">
+                                        <div class="product-grid mb-2" style="padding: 0px !important;">
                                             <div class="product-image">
                                                 <div class="product-image-container">
                                                     <a href="<?= base_url('products/details/' . $row['slug']) ?>">
-                                                        <img class="pic-1 lazy" data-src="<?= $row['image_sm'] ?>">
+                                                        <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $row['relative_path'] . '&width=330&quality=80') ?>">
                                                     </a>
                                                 </div>
                                                 <ul class="social">
@@ -239,14 +246,14 @@
                                                     $data_step = (isset($row['minimum_order_quantity']) && !empty($row['quantity_step_size'])) ? $row['quantity_step_size'] : 1;
                                                     $data_max = (isset($row['total_allowed_quantity']) && !empty($row['total_allowed_quantity'])) ? $row['total_allowed_quantity'] : 0;
                                                     ?>
-                                                    <li><a href="" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view"><i class="fa fa-search"></i></a></li>
+                                                    <li><a href="" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view"><i class="fa fa-search"></i></a></li>
                                                     <li>
                                                         <?php if ($row['variants'][0]['cart_count'] != 0) { ?>
-                                                            <a href="<?= base_url('cart') ?>" data-tip="Go to Cart">
+                                                            <a href="<?= base_url('cart') ?>" data-tip="<?= !empty($this->lang->line('go_to_cart')) ? $this->lang->line('go_to_cart') : 'Go To Cart' ?>">
                                                                 <i class='fa fa-arrow-right'></i>
                                                             </a>
                                                         <?php } else { ?>
-                                                            <a href="" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $row['name'] ?>" data-product-image="<?= $row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                                            <a href="" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add to Cart' ?>" class="add_to_cart" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock= "<?= $product_stock ?>" data-product-title="<?= $row['name'] ?>" data-product-image="<?= $row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
                                                                 <i class="fa fa-shopping-cart"></i>
                                                             </a>
                                                         <?php } ?>
@@ -254,14 +261,14 @@
                                                     <li>
                                                         <?php $variant_id = (count($row['variants']) <= 1) ? $row['variants'][0]['id'] : ""; ?>
 
-                                                        <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                                        <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                                             <i class="fa fa-random"></i>
                                                         </a>
                                                     </li>
                                                 </ul>
                                                 <?php if (isset($row['min_max_price']['special_price']) && $row['min_max_price']['special_price'] != '' && $row['min_max_price']['special_price'] != 0 && $row['min_max_price']['special_price'] < $row['min_max_price']['min_price']) { ?>
-                                                    <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?></span>
-                                                    <span class="product-discount-label"><?= $row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                                    <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?><?= $row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                                    <!-- <span class="product-discount-label"><?//= $row['min_max_price']['discount_in_percentage'] ?>%</span> -->
                                                 <?php } ?>
                                                 <aside class="add-favorite">
                                                     <button type="button" class="btn far fa-heart add-to-fav-btn <?= ($row['is_favorite'] == 1) ? 'fa text-danger' : '' ?>" data-product-id="<?= $row['id'] ?>"></button>
@@ -277,42 +284,41 @@
                                                 <input type="text" class="kv-fa rating-loading" value="<?= $row['rating'] ?>" data-size="sm" title="" readonly>
                                             </div>
 
-                                            <!-- <p class="text-muted list-product-desc"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?></p> -->
-                                            <p class="text-muted list-product-desc"><?= strip_tags($row['short_description']); ?></p>
+                                            <p class="text-muted list-product-desc title_wrap"><?= strip_tags($row['short_description']); ?></p>
                                             <div class="price mb-2 list-view-price">
-                                                <?php 
-                                            if (($row['variants'][0]['special_price'] < $row['variants'][0]['price']) && ($row['variants'][0]['special_price'] != 0)) { ?>
-                                                <p class="mb-0 mt-2 price text-dark">
-                                                    <span id="price" style='font-size: 20px;'>
-                                                        <?php echo $settings['currency'] ?>
-                                                        <?php
-                                                        $price = $row['variants'][0]['special_price'];
-                                                        echo number_format($price, 2);
-                                                        ?>
-                                                    </span>
-                                                    <sup>
-                                                        <span class="special-price striped-price text-danger" id="product-striped-price-div">
-                                                            <s id="striped-price">
-                                                                <?php echo $settings['currency'] ?>
-                                                                <?php $price = $row['variants'][0]['price'];
-                                                                echo number_format($price, 2);
-                                                                // echo $price;
-                                                                ?>
-                                                            </s>
+                                                <?php
+                                                if (($row['variants'][0]['special_price'] < $row['variants'][0]['price']) && ($row['variants'][0]['special_price'] != 0)) { ?>
+                                                    <p class="mb-0 mt-2 price text-dark">
+                                                        <span id="price" style='font-size: 20px;'>
+                                                            <?php echo $settings['currency'] ?>
+                                                            <?php
+                                                            $price = $row['variants'][0]['special_price'];
+                                                            echo format_price($price);
+                                                            ?>
                                                         </span>
-                                                    </sup>
-                                                </p>
-                                            <?php } else { ?>
-                                                <p class="mb-0 mt-2 price text-dark">
-                                                    <span id="price" style='font-size: 20px;'>
-                                                        <?php echo $settings['currency'] ?>
-                                                        <?php
-                                                        $price = $row['variants'][0]['price'];
-                                                        echo number_format($price, 2);
-                                                        ?>
-                                                    </span>
-                                                </p>
-                                            <?php } ?>
+                                                        <sup>
+                                                            <span class="special-price striped-price text-danger" id="product-striped-price-div">
+                                                                <s id="striped-price">
+                                                                    <?php echo $settings['currency'] ?>
+                                                                    <?php $price = $row['variants'][0]['price'];
+                                                                    echo format_price($price);
+                                                                    // echo $price;
+                                                                    ?>
+                                                                </s>
+                                                            </span>
+                                                        </sup>
+                                                    </p>
+                                                <?php } else { ?>
+                                                    <p class="mb-0 mt-2 price text-dark">
+                                                        <span id="price" style='font-size: 20px;'>
+                                                            <?php echo $settings['currency'] ?>
+                                                            <?php
+                                                            $price = $row['variants'][0]['price'];
+                                                            echo format_price($price);
+                                                            ?>
+                                                        </span>
+                                                    </p>
+                                                <?php } ?>
                                             </div>
                                             <div class="button button-sm m-0 p-0">
                                                 <?php $variant_price = ($row['variants'][0]['special_price'] > 0 && $row['variants'][0]['special_price'] != '') ? $row['variants'][0]['special_price'] : $row['variants'][0]['price'];
@@ -324,7 +330,7 @@
                                                 <?php if ($row['variants'][0]['cart_count'] != 0) { ?>
                                                     <a class="add-to-cart" href="<?= base_url('cart') ?>"><i class='fas fa-arrow-right'></i> <?= !empty($this->lang->line('go_to_cart')) ? $this->lang->line('go_to_cart') : 'Go To Cart' ?></a>
                                                 <?php } else { ?>
-                                                    <a class="add-to-cart add_to_cart" href="" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $row['name'] ?>" data-product-image="<?= $row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">+ <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                                    <a class="add-to-cart add_to_cart" href="" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock= "<?= $product_stock ?>" data-product-title="<?= $row['name'] ?>" data-product-image="<?= $row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">+ <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                                                 <?php } ?>
                                             </div>
                                         </div>
@@ -337,7 +343,14 @@
                                 <div class="col-12">
                                     <h4 class="h4"><?= !empty($this->lang->line('products')) ? $this->lang->line('products') : 'Products' ?></h4>
                                 </div>
-                                <?php foreach ($products['product'] as $row) { ?>
+                                <?php foreach ($products['product'] as $row) {
+                                     if ($row['type'] == 'simple_product') {
+                                        $product_stock = $row['stock'];
+                                    }else{
+                                        $product_stock = $row['total_stock'];
+                                    }
+                                    
+                                    ?>
                                     <div class="col-md-4 col-sm-6 mb-3">
                                         <div class="product-grid">
                                             <aside class="add-favorite">
@@ -346,7 +359,7 @@
                                             <div class="product-image">
                                                 <div class="product-image-container">
                                                     <a href="<?= base_url('products/details/' . $row['slug']) ?>">
-                                                        <img class="pic-1 lazy" data-src="<?= $row['image_sm'] ?>">
+                                                        <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $row['relative_path'] . '&width=330&quality=80') ?>">
                                                     </a>
                                                 </div>
                                                 <ul class="social">
@@ -364,14 +377,14 @@
                                                     $data_step = (isset($row['minimum_order_quantity']) && !empty($row['quantity_step_size'])) ? $row['quantity_step_size'] : 1;
                                                     $data_max = (isset($row['total_allowed_quantity']) && !empty($row['total_allowed_quantity'])) ? $row['total_allowed_quantity'] : 0;
                                                     ?>
-                                                    <li><a href="" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view"><i class="fa fa-search"></i></a></li>
+                                                    <li><a href="" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view"><i class="fa fa-search"></i></a></li>
                                                     <li>
                                                         <?php if ($row['variants'][0]['cart_count'] != 0) { ?>
-                                                            <a href="<?= base_url('cart') ?>" data-tip="Go to Cart">
+                                                            <a href="<?= base_url('cart') ?>" data-tip="<?= !empty($this->lang->line('go_to_cart')) ? $this->lang->line('go_to_cart') : 'Go To Cart' ?>">
                                                                 <i class='fa fa-arrow-right'></i>
                                                             </a>
                                                         <?php } else { ?>
-                                                            <a href="" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $row['name'] ?>" data-product-image="<?= $row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                                            <a href="" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add to Cart' ?>" class="add_to_cart" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock= "<?= $product_stock ?>" data-product-title="<?= $row['name'] ?>" data-product-image="<?= $row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
                                                                 <i class="fa fa-shopping-cart"></i>
                                                             </a>
                                                         <?php } ?>
@@ -379,21 +392,21 @@
                                                     <li>
                                                         <?php $variant_id = (count($row['variants']) <= 1) ? $row['variants'][0]['id'] : ""; ?>
 
-                                                        <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                                        <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                                             <i class="fa fa-random"></i>
                                                         </a>
                                                     </li>
                                                 </ul>
                                                 <?php if (isset($row['min_max_price']['special_price']) && $row['min_max_price']['special_price'] != '' && $row['min_max_price']['special_price'] != 0 && $row['min_max_price']['special_price'] < $row['min_max_price']['min_price']) { ?>
-                                                    <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?></span>
-                                                    <span class="product-discount-label"><?= $row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                                    <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?> <?= $row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                                    <!-- <span class="product-discount-label"><?//= $row['min_max_price']['discount_in_percentage'] ?>%</span> -->
                                                 <?php } ?>
                                             </div>
                                             <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
                                                 <input type="text" class="kv-fa rating-loading" value="<?= $row['rating'] ?>" data-size="sm" title="" readonly>
                                             </div>
                                             <div class="product-content">
-                                                <h2 class="title"><a href="<?= base_url('products/details/' . $row['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['name']))), 30); ?></a></h2>
+                                                <h2 class="title title_wrap"><a href="<?= base_url('products/details/' . $row['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($row['name'])) ?></a></h2>
                                                 <div class="">
                                                     <?php if (($row['variants'][0]['special_price'] < $row['variants'][0]['price']) && ($row['variants'][0]['special_price'] != 0)) { ?>
                                                         <p class="mb-2 mt-2">
@@ -401,7 +414,7 @@
                                                                 <?php echo $settings['currency'] ?>
                                                                 <?php
                                                                 $price = $row['variants'][0]['special_price'];
-                                                                echo number_format($price, 2);
+                                                                echo format_price($price);
                                                                 ?>
                                                             </span>
                                                             <sup>
@@ -409,7 +422,7 @@
                                                                     <s id="striped-price">
                                                                         <?php echo $settings['currency'] ?>
                                                                         <?php $price = $row['variants'][0]['price'];
-                                                                        echo number_format($price, 2);
+                                                                        echo format_price($price);
                                                                         // echo $price;
                                                                         ?>
                                                                     </s>
@@ -422,7 +435,7 @@
                                                                 <?php echo $settings['currency'] ?>
                                                                 <?php
                                                                 $price = $row['variants'][0]['price'];
-                                                                echo number_format($price, 2);
+                                                                echo format_price($price);
                                                                 ?>
                                                             </span>
                                                         </p>
@@ -436,7 +449,7 @@
                                                 <?php if ($row['variants'][0]['cart_count'] != 0) { ?>
                                                     <a class="add-to-cart" href="<?= base_url('cart') ?>"><i class='fas fa-arrow-right'></i> <?= !empty($this->lang->line('go_to_cart')) ? $this->lang->line('go_to_cart') : 'Go To Cart' ?></a>
                                                 <?php } else { ?>
-                                                    <a class="add-to-cart add_to_cart" href="" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $row['name'] ?>" data-product-image="<?= $row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">+ <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                                    <a class="add-to-cart add_to_cart" href="" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock= "<?= $product_stock ?>" data-product-title="<?= $row['name'] ?>" data-product-image="<?= $row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">+ <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                                                 <?php } ?>
                                             </div>
                                         </div>
@@ -448,7 +461,7 @@
 
                     <?php if ((!isset($sub_categories) || empty($sub_categories)) && (!isset($products) || empty($products['product']))) { ?>
                         <div class="col-12 text-center">
-                            <h1 class="h2">No Products Found.</h1>
+                            <h1 class="h2"><?= !empty($this->lang->line('no_products_found')) ? $this->lang->line('no_products_found') : 'No Products Found' ?></h1>
                             <a href="<?= base_url('products') ?>" class="button button-rounded button-warning"><?= !empty($this->lang->line('go_to_shop')) ? $this->lang->line('go_to_shop') : 'Go to Shop' ?></a>
                         </div>
                     <?php } ?>
@@ -467,7 +480,7 @@
                         <div id="product-filters-mobile" class="filter_attributes mb-5 mt-2">
                             <div class="align-content-center d-flex justify-content-between">
                                 <h6 class="m-0"><?= label('attributes', 'Attributes') ?></h6>
-                                <a href="#" class="text-decoration-none hover product_filter_btn"><?= label('filter', 'Filter') ?></a>
+                                <a href="#" class="text-decoration-none hover product_filter_btn"><?= !empty($this->lang->line('filter')) ? $this->lang->line('filter') : 'Filter' ?></a>
                             </div>
                             <?php if (isset($products['filters']) && !empty($products['filters'])) { ?>
                                 <div class="accordion" id="accordionExample">
@@ -518,7 +531,7 @@
                             <?php if (isset($brands)) { ?>
                                 <div class="align-content-center d-flex justify-content-between">
                                     <h6 class="m-0"><?= label('brands', 'Brands') ?></h6>
-                                    <a href="#" class="text-decoration-none hover product_filter_btn"><?= label('filter', 'Filter') ?></a>
+                                    <a href="#" class="text-decoration-none hover product_filter_btn"><?= !empty($this->lang->line('filter')) ? $this->lang->line('filter') : 'Filter' ?></a>
                                 </div>
                                 <div class="brand_filter d-flex flex-wrap gap-4 mb-5 mt-2 p-1">
                                     <?php
@@ -532,7 +545,8 @@
                                         <div class="brand_div">
                                             <label class="" for="<?= $value['brand_id'] ?>">
                                                 <input class="brand" type="radio" name="brandRadio" data-value="<?= $value['brand_slug'] ?>" id="<?= $value['brand_id'] ?>" checked>
-                                                <img src="<?= base_url($value['brand_img']) ?>" alt="brand-logo" class="h-6">
+                                                <img src="<?= base_url('assets/front_end/modern/img/product-placeholder.jpg') ?>" data-src="<?= base_url('media/image?path=' . $value['brand_img'] . '&width=35&quality=80') ?>" alt="brand-logo" class="h-6 lazy" style="height: 1.5rem !important;">
+
                                             </label>
 
                                         </div>
@@ -545,7 +559,7 @@
                             <?php if (isset($categories)) { ?>
                                 <div class="align-content-center d-flex justify-content-between">
                                     <h6 class="m-0"><?= label('categories', 'Categories') ?></h6>
-                                    <a href="#" class="text-decoration-none hover product_filter_btn"><?= label('filter', 'Filter') ?></a>
+                                    <a href="#" class="text-decoration-none hover product_filter_btn"><?= !empty($this->lang->line('filter')) ? $this->lang->line('filter') : 'Filter' ?></a>
                                 </div>
                                 <div class="category_filter mb-5 mt-2">
                                     <?php

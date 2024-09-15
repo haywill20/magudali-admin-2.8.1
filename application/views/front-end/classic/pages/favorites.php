@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('favorite')) ? $this->lang->line('favorite') : 'Favorites' ?></h2>
         <nav aria-label="breadcrumb">
@@ -36,7 +36,16 @@
                         <div class="row">
                             <?php
                             if (isset($products) && !empty($products)) {
-                                foreach ($products as $row) { ?>
+                                foreach ($products as $row) {
+                                    if ($row['type'] == 'simple_product') {
+                                        $product_stock = $row['stock'];
+                                    }else{
+                                        $product_stock = $row['total_stock'];
+                                    }
+                                    // echo "<pre>";
+                                    // print_r($row);
+                                    // die;
+                            ?>
                                     <div class="col-lg-4 col-sm-6 mt-5">
                                         <div class="product-grid">
                                             <aside class="add-favorite">
@@ -45,7 +54,7 @@
                                             <div class="product-image">
                                                 <div class="product-image-container">
                                                     <a href="#">
-                                                        <img class="pic-1" src="<?= $row['image_sm'] ?>">
+                                                        <img class="pic-1" src="<?= base_url('media/image?path=' . $row['relative_path'] . '&width=300&quality=80') ?>">
                                                     </a>
                                                 </div>
                                                 <ul class="social">
@@ -58,11 +67,11 @@
                                                         $modal = "#quick-view";
                                                     }
                                                     ?>
-                                                    <li><a href="" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view"><i class="fa fa-search"></i></a></li>
-                                                    <li><a href="" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-izimodal-open="<?= $modal ?>"><i class="fa fa-shopping-cart"></i></a></li>
+                                                    <li><a href="" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view"><i class="fa fa-search"></i></a></li>
+                                                    <li><a href="" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>" class="add_to_cart" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock= "<?= $product_stock ?>" data-izimodal-open="<?= $modal ?>"><i class="fa fa-shopping-cart"></i></a></li>
                                                     <li>
                                                         <?php $variant_id = (count((array)$product_row['variants']) <= 1) ? $product_row['variants'][0]['id'] : ""; ?>
-                                                        <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                                        <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                                             <i class="fa fa-random"></i>
                                                         </a>
                                                     </li>
@@ -72,12 +81,69 @@
                                                 <input type="text" class="kv-fa rating-loading" value="<?= $row['rating'] ?>" data-size="sm" title="" readonly>
                                             </div>
                                             <div class="product-content">
-                                                <h3 class="title"><a href="<?= base_url('products/details/' . $row['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['name'])))); ?></a></h3>
-                                                <div class="price"><i></i><?php $price = get_price_range_of_product($row['id']);
-                                                                            echo $price['range'];
-                                                                            ?></span>
-                                                </div>
-                                                <a class="add-to-cart add_to_cart" href="" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-izimodal-open="<?= $modal ?>">+ <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                                <h3 class="title title_wrap"><a href="<?= base_url('products/details/' . $row['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($row['name'])) ?></a></h3>
+                                                <!-- <div class="price"> -->
+                                                    <?php if ($row['type'] == "simple_product") { ?>
+                                                        <p class="mb-0 mt-2 price" id="price">
+                                                            <?php
+                                                            // echo "<pre>";
+                                                            // print_r($row['variants']);
+                                                            // $price = get_price_range_of_product($row['id']);
+                                                            $price = $row['variants'][0]['price'];
+                                                            echo format_price($price);
+                                                            ?>
+                                                            <sup>
+                                                                <span class="special-price striped-price">
+                                                                    <s>
+                                                                        <?= !empty($row['min_max_price']['special_price']) && $row['min_max_price']['special_price'] != NULL  ?   
+                                                                        $settings['currency'] . '</i>' . format_price($row['min_max_price']['min_price']) : '' ?>
+                                                                        </s>
+                                                                    </span>
+                                                                </sup>
+                                                        </p>
+                                                        <!-- <p class="mb-0 mt-2 price d-none" id="price">
+                                                            <?php
+                                                            // $price = get_price_range_of_product($row['id']); 
+                                                            // $price = $row['variants'][0]['price'];
+                                                            // echo format_price($price);
+                                                            ?>
+                                                        </p> -->
+                                                    <?php } else { ?>
+                                                        <?php if (($row['variants'][0]['special_price'] < $row['variants'][0]['price']) && ($row['variants'][0]['special_price'] != 0)) { ?>
+                                                            <p class="mb-0 mt-2">
+                                                                <span id="" style='font-size: 20px;'>
+                                                                    <?php echo $settings['currency'] ?>
+                                                                    <?php
+                                                                    $price = $row['variants'][0]['special_price'];
+                                                                    echo format_price($price);
+                                                                    ?>
+                                                                </span>
+                                                                <sup>
+                                                                    <span class="special-price striped-price text-danger" id="product-striped-price-div">
+                                                                        <s id="striped-price">
+                                                                            <?php echo $settings['currency'] ?>
+                                                                            <?php $price = $row['variants'][0]['price'];
+                                                                            echo format_price($price);
+                                                                            // echo $price;
+                                                                            ?>
+                                                                        </s>
+                                                                    </span>
+                                                                </sup>
+                                                            </p>
+                                                        <?php } else { ?>
+                                                            <p class="mb-0 mt-2 price">
+                                                                <span id="price" style='font-size: 20px;'>
+                                                                    <?php echo $settings['currency'] ?>
+                                                                    <?php
+                                                                    $price = $row['variants'][0]['price'];
+                                                                    echo format_price($price);
+                                                                    ?>
+                                                                </span>
+                                                            </p>
+                                                        <?php } ?>
+                                                    <?php } ?>
+                                                <!-- </div> -->
+                                                <a class="add-to-cart add_to_cart" href="" data-product-id="<?= $row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock= "<?= $product_stock ?>" data-izimodal-open="<?= $modal ?>">+ <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                                             </div>
                                         </div>
                                     </div>

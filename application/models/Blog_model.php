@@ -88,7 +88,7 @@ class Blog_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
         if (isset($_GET['category_id'])) {
             $category_id = $_GET['category_id'];
@@ -107,14 +107,12 @@ class Blog_model extends CI_Model
             } else {
                 $sort = $_GET['sort'];
             }
-        if (isset($_GET['order']))
-            $order = $_GET['order'];
-
-        if (isset($_GET['search']) and $_GET['search'] != '') {
-            $search = $_GET['search'];
-            $multipleWhere = ['`id`' => $search, '`name`' => $search];
-        }
-        if (isset($seller_id) && $seller_id != "") {
+            
+            if (isset($_GET['search']) and $_GET['search'] != '') {
+                $search = $_GET['search'];
+                $multipleWhere = ['`id`' => $search, '`name`' => $search];
+            }
+            if (isset($seller_id) && $seller_id != "") {
             $this->db->select('category_ids');
             $where1 = 'user_id = ' . $seller_id;
             $this->db->where($where1);
@@ -127,7 +125,7 @@ class Blog_model extends CI_Model
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $count_res->or_like($multipleWhere);
         }
-
+        
         if (isset($seller_id) && $seller_id != "") {
             $count_res->where_in('id', $cat_ids);
         }
@@ -136,7 +134,7 @@ class Blog_model extends CI_Model
         foreach ($cat_count as $row) {
             $total = $row['total'];
         }
-
+        
         $search_res = $this->db->select(' * ');
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $search_res->or_like($multipleWhere);
@@ -144,12 +142,12 @@ class Blog_model extends CI_Model
         if (isset($where) && !empty($where)) {
             $search_res->where($where);
         }
-
+        
         if (isset($seller_id) && $seller_id != "") {
             $count_res->where_in('id', $cat_ids);
         }
-
-        $cat_search_res = $search_res->order_by($sort, "asc")->limit($limit, $offset)->get('blog_categories')->result_array();
+        // print_r($order);
+        $cat_search_res = $search_res->order_by($sort, 'DESC')->limit($limit, $offset)->get('blog_categories')->result_array();
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
@@ -244,7 +242,7 @@ class Blog_model extends CI_Model
 
         $fetched_records = $this->db->get('blog_categories');
         $categories = $fetched_records->result_array();
-        
+
         // Initialize Array with fetched data
         $data = array();
         foreach ($categories as $categories) {
@@ -259,7 +257,7 @@ class Blog_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
         $category_id = $_GET['category_id'];
 

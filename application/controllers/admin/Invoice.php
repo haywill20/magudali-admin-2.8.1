@@ -24,13 +24,15 @@ class Invoice extends CI_Controller
             if (isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
                 $res = $this->Order_model->get_order_details(['o.id' => $_GET['edit_id']], true);
                 if (!empty($res)) {
+                    // echo "<pre>";
+                    // print_r($res);
                     $items = [];
                     $promo_code = [];
                     if (!empty($res[0]['promo_code'])) {
                         $promo_code = fetch_details('promo_codes', ['promo_code' => trim($res[0]['promo_code'])]);
                     }
                     foreach ($res as $row) {
-                     
+
                         $temp['product_id'] = $row['product_id'];
                         $temp['seller_id'] = $row['seller_id'];
                         $temp['product_variant_id'] = $row['product_variant_id'];
@@ -40,6 +42,7 @@ class Invoice extends CI_Controller
                         $temp['tax_percent'] = $row['tax_percent'];
                         $temp['tax_amount'] = $row['tax_amount'];
                         $temp['price'] = $row['price'];
+                        $temp['product_price'] = $row['product_price'];
                         $temp['delivery_boy'] = $row['delivery_boy'];
                         $temp['mobile_number'] = $row['mobile_number'];
                         $temp['active_status'] = $row['oi_active_status'];

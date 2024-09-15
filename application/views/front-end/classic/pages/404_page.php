@@ -11,10 +11,10 @@
 
                     <div class="contant_box_404">
                         <h3 class="h2">
-                            Look like you're lost
+                            <?= !empty($this->lang->line('look_like_you_are_lost')) ? $this->lang->line('look_like_you_are_lost') : ' Look like you\'re lost' ?>
                         </h3>
 
-                        <p>the page you are looking for is not available, so please check your URL!</p>
+                        <p><?= !empty($this->lang->line('the_page_you_are_looking_for_is_not_available_so_please_check_your_url')) ? $this->lang->line('the_page_you_are_looking_for_is_not_available_so_please_check_your_url') : 'the page you are looking for is not available, so please check your URL!' ?></p>
 
                         <!-- <a href="<?= base_url() ?>" class="link_404">Go to Home</a> -->
                     </div>

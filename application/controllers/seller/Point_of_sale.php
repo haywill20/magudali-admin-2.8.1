@@ -21,6 +21,8 @@ class Point_of_sale extends CI_Controller
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_seller() && ($this->ion_auth->seller_status() == 1 || $this->ion_auth->seller_status() == 0)) {
             $this->data['main_page'] = VIEW . 'point_of_sale';
+            // $this->data['main_page'] = TABLES . 'manage-point_of_sale';
+
             $settings = get_settings('system_settings', true);
             $this->data['title'] = 'Point of Sale | ' . $settings['app_name'];
             $this->data['meta_description'] = 'Point of Sale |' . $settings['app_name'];
@@ -62,7 +64,7 @@ class Point_of_sale extends CI_Controller
     {
         $this->form_validation->set_rules('name', 'Name', 'trim|required|xss_clean');
         $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|xss_clean|min_length[5]|numeric|is_unique[users.mobile]', array('is_unique' => ' The mobile number is already registered . Please login'));
-        $this->form_validation->set_rules('password', 'Password', 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']');
+        $this->form_validation->set_rules('password', 'Password', 'required|xss_clean|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']');
         $this->response['csrfName'] = $this->security->get_csrf_token_name();
         $this->response['csrfHash'] = $this->security->get_csrf_hash();
         if ($this->form_validation->run() == false) {
@@ -104,7 +106,8 @@ class Point_of_sale extends CI_Controller
             print_r(json_encode($this->response));
             return false;
         }
-
+        // print_r($_POST);
+        // die;
         $post_data = json_decode($_POST['data'], true);
         if (!isset($_POST['user_id']) || empty($_POST['user_id'])) {
             $this->response['error'] = true;
@@ -208,6 +211,8 @@ class Point_of_sale extends CI_Controller
             }
             $final_total = $cart['overall_amount'];
             $place_order_data['final_total'] = $final_total;
+            // print_r($place_order_data);
+            // die;
             $res = $this->order_model->place_order($place_order_data);
             if (isset($res) && !empty($res)) {
                 // creating transaction record for card payments
@@ -235,4 +240,32 @@ class Point_of_sale extends CI_Controller
             return false;
         }
     }
+
+
+    public function point_of_sale_orders()
+    {
+        if ($this->ion_auth->logged_in() && $this->ion_auth->is_seller() && ($this->ion_auth->seller_status() == 1 || $this->ion_auth->seller_status() == 0)) {
+            // $this->data['main_page'] = TABLES . 'manage-point_of_sale_orders';
+            // $settings = get_settings('system_settings', true);
+            // $this->data['title'] = 'Point of Sale Orders| ' . $settings['app_name'];
+            // $this->data['meta_description'] = 'Point of Sale Orders|' . $settings['app_name'];
+
+            $seller_id = $this->ion_auth->get_user_id();
+            // print_r($seller_id);
+            return $this->point_of_sale_model->get_pos_orders(NULL, 0, 10, 'oi.id', 'DESC', $seller_id, 1);
+        } else {
+            redirect('seller/login', 'refresh');
+        }
+    }
+
+    // public function point_of_sale_orders()
+    // {
+    //     if ($this->ion_auth->logged_in() && $this->ion_auth->is_seller() && ($this->ion_auth->seller_status() == 1 || $this->ion_auth->seller_status() == 0)) {
+    //         $seller_id = $this->ion_auth->get_user_id();
+    //         // print_r($seller_id);
+    //         return $this->order_model->get_order_items_list(NULL, 0, 10, 'oi.id', 'DESC', $seller_id);
+    //     } else {
+    //         redirect('seller/login', 'refresh');
+    //     }
+    // }
 }

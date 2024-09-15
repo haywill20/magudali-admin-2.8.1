@@ -8,7 +8,7 @@
                             <div class="card-body">
                                 <div class="media d-flex">
                                     <div class="align-self-center text-danger">
-                                    <i class="ion-ios-cart-outline display-4"></i>
+                                        <i class="ion-ios-cart-outline display-4"></i>
                                     </div>
                                     <div class="media-body text-right">
                                         <h5 class="text-muted text-bold-500">Orders</h5>
@@ -62,7 +62,7 @@
                                         <i class="ion-cash display-4"></i>
                                     </div>
                                     <div class="media-body text-right">
-                                        <h5 class="text-muted text-bold-500">Balance (<?= $curreny?>)</h5>
+                                        <h5 class="text-muted text-bold-500">Balance (<?= $curreny ?>)</h5>
                                         <h3 class="text-bold-600"><?= number_format($balance, 2) ?></h3>
                                     </div>
                                 </div>
@@ -259,7 +259,7 @@
                                         <th data-field="status" data-sortable='true' data-visible='false'>Status</th>
                                         <th data-field="active_status" data-sortable='true' data-visible='true'>Active Status</th>
                                         <th data-field="date_added" data-sortable='true'>Order Date</th>
-                                        <th data-field="operate">Action</th>
+                                        <th data-field="operate" data-sortable="false">Action</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -304,10 +304,10 @@
                                             <button type="submit" class="btn btn-success" id="submit_btn">Save</button>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-center">
+                                    <!-- <div class="d-flex justify-content-center">
                                         <div class="form-group" id="error_box">
                                         </div>
-                                    </div>
+                                    </div> -->
                                     <!-- /.card-body -->
                                 </form>
                             </div>

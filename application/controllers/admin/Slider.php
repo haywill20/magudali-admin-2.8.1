@@ -42,7 +42,19 @@ class Slider extends CI_Controller
             $settings = get_settings('system_settings', true);
             $this->data['title'] = 'Slider Management | ' . $settings['app_name'];
             $this->data['meta_description'] = ' Slider Management  | ' . $settings['app_name'];
+            $this->data['categories'] = $this->category_model->get_categories();
+            if (isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
+                $this->response['fetched_data'] = fetch_details('sliders', ['id' => $_GET['edit_id']]);
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                // $this->response['slider_data'] = $this->data['fetched_data'];
+                echo json_encode($this->response);
+                return;
+            }
+            // print_R($this->data['fetched_data']);
             $this->data['about_us'] = get_settings('about_us');
+            $this->data['csrfName'] = $this->security->get_csrf_token_name();
+            $this->data['csrfHash'] = $this->security->get_csrf_hash();
             $this->load->view('admin/template', $this->data);
         } else {
             redirect('admin/login', 'refresh');
@@ -84,7 +96,7 @@ class Slider extends CI_Controller
     }
     public function add_slider()
     {
-        if (isset($_POST['edit_slider'])) {
+        if (isset($_POST['edit_slider']) && !empty($_POST['edit_slider'])) {
             if (print_msg(!has_permissions('update', 'home_slider_images'), PERMISSION_ERROR_MSG, 'home_slider_images')) {
                 return false;
             }
@@ -121,11 +133,12 @@ class Slider extends CI_Controller
             $this->response['message'] = validation_errors();
             print_r(json_encode($this->response));
         } else {
+            // print_r($_POST);
             $this->Slider_model->add_slider($_POST);
             $this->response['error'] = false;
             $this->response['csrfName'] = $this->security->get_csrf_token_name();
             $this->response['csrfHash'] = $this->security->get_csrf_hash();
-            $message = (isset($_POST['edit_slider'])) ? 'Slider Updated Successfully' : 'Slider Added Successfully';
+            $message = (isset($_POST['edit_slider']) && !empty($_POST['edit_slider'])) ? 'Slider Updated Successfully' : 'Slider Added Successfully';
             $this->response['message'] = $message;
             print_r(json_encode($this->response));
         }

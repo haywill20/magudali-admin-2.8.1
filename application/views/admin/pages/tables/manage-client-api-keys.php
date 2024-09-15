@@ -43,10 +43,7 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Client Api ' : 'Add Client Api' ?></button>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-center">
-                                <div class="form-group" id="error_box">
-                                </div>
-                            </div>
+
                         </form>
                         <div class="card-body">
                             <div class="row">

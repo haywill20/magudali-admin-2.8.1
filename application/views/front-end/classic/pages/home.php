@@ -1,4 +1,4 @@
-<section class="mt-2">
+<section class="mt-2 deeplink_wrapper">
     <div class="main-content">
         <div class=''>
             <!-- Swiper -->
@@ -8,7 +8,8 @@
                         <?php foreach ($sliders as $row) { ?>
                             <div class="swiper-slide center-swiper-slide">
                                 <a href="<?= $row['link'] ?>">
-                                    <img src="<?= base_url($row['image']) ?>">
+                                    <!-- <img src="<?= base_url($row['image']) ?>"> -->
+                                    <img src="<?= base_url('media/image?path=' . $row['image'] . '&width=1518&quality=80') ?>">
                                 </a>
                             </div>
                         <?php } ?>
@@ -26,24 +27,25 @@
 
 <section class="main-content mt-md-2 mt-sm-0">
     <div class="category-section container-fluid text-center dark-category-section icon-dark-sec">
-        <div class="text-center text-white category-section-title">
-            <h3><?= !empty($this->lang->line('category')) ? $this->lang->line('category') : 'Browse Categories' ?></h3>
+        <div class="text-center text-black category-section-title">
+            <h3><?= !empty($this->lang->line('category')) ? $this->lang->line('category') : 'Popular Categories' ?></h3>
         </div>
         <!-- Swiper -->
         <div class="swiper-container category-swiper swiper-container-initialized swiper-container-horizontal icon-swiper">
-            <div class="swiper-wrapper categgory-bg">
+            <div class="swiper-wrapper">
                 <?php foreach ($categories as $key => $row) { ?>
                     <div class="swiper-slide">
                         <div class="category-grid">
                             <div class="category-image">
-                                <div class="category-image-container">
+                                <div class="category-image-container brand_image">
                                     <a href="<?= base_url('products/category/' . html_escape($row['slug'])) ?>">
-                                        <img src="<?= $row['image'] ?>">
+                                        <!-- <img src="<?= $row['image'] ?>"> -->
+                                        <img src="<?= base_url('media/image?path=' . $row['relative_path'] . '&width=130&quality=80') ?>" class="brand_img">
                                     </a>
-                                    <div class="cat-font-color">
-                                        <h4><?= html_escape($row['name']) ?></h4>
-                                    </div>
                                 </div>
+                            </div>
+                            <div class="text-black">
+                                <h4><?= html_escape($row['name']) ?></h4>
                             </div>
                         </div>
                     </div>
@@ -51,14 +53,14 @@
                 <div class="swiper-slide">
                     <div class="category-grid">
                         <div class="category-image">
-                            <div class="category-image-container">
+                            <div class="category-image-container brand_image">
                                 <a href="<?= base_url('home/categories/') ?>">
-                                    <img src="<?= base_url('assets/front_end/classic/images/dashboard.png') ?>">
+                                    <img src="<?= base_url('assets/front_end/classic/images/dashboard.png') ?>" class="brand_img">
                                 </a>
-                                <div class="cat-font-color">
-                                    <span>See All</span>
-                                </div>
                             </div>
+                        </div>
+                        <div class="text-black">
+                            <span><?= !empty($this->lang->line('see_all')) ? $this->lang->line('see_all') : 'See All'; ?></span>
                         </div>
                     </div>
                 </div>
@@ -77,7 +79,7 @@
             <div class="align-items-center d-flex justify-content-between">
                 <!-- <div class="d-md-flex justify-content-md-between"> -->
                 <div class="">
-                    <h3 class="text-dark mb-0 h2">Brands</h3>
+                    <h3 class="text-dark mb-0 h2"><?= !empty($this->lang->line('brands')) ? $this->lang->line('brands') : 'Brands'; ?></h3>
                 </div>
                 <div class="col-md-2">
                     <a href="<?= base_url('home/brands/') ?>" class="hover text-decoration-none featured-section-view-more">
@@ -90,13 +92,13 @@
 
         <!-- Swiper -->
         <div class="my-4">
-            <div class="swiper-container brand-swiper" data-dots="true">
+            <div class="swiper-container brand-swiper text-center" data-dots="true">
                 <div class="swiper-wrapper">
                     <?php foreach ($brands as $key => $row) { ?>
                         <div class="swiper-slide swiper-slide-brand">
                             <a href="<?= base_url('products?brand=' . html_escape($row['brand_slug'])) ?>" class="text-decoration-none">
                                 <div class="brand_image">
-                                    <img class="lazy brand_img" src="<?= base_url('assets/front_end/modern/img/product-placeholder.jpg') ?>" data-src="<?= $row['brand_img'] ?>" alt="<?= html_escape($row['brand_name']) ?>" />
+                                    <img class="lazy brand_img" src="<?= base_url('assets/front_end/modern/img/product-placeholder.jpg') ?>" data-src="<?= base_url('media/image?path=' . $row['brand_img'] . '&width=100&quality=80') ?>" alt="<?= html_escape($row['brand_name']) ?>" />
                                 </div>
                                 <h6 class="fs-14 my-3 text-dark"><?= html_escape($row['brand_name']) ?></h6>
                             </a>
@@ -120,6 +122,9 @@
 
     <?php $offer_counter = 0;
     $offers =  get_offers();
+    // echo "<pre>";
+    // print_r($offers);
+    // die;
 
     foreach ($sections as $count_key => $row) {
         if (!empty($row['product_details'])) {
@@ -128,7 +133,7 @@
                     $offer_counter++;
                     if (!empty($offers) && !empty($offers[$count_key - 1])) { ?>
                         <a href="<?= $offers[$count_key - 1]['link'] ?>">
-                            <img class="img-fluid lazy" data-src="<?= base_url($offers[$count_key - 1]['image']) ?>">
+                            <img class="img-fluid lazy" data-src="<?= base_url('media/image?path=' . $offers[$count_key - 1]['image'] . '&width=1518&quality=80') ?>">
                         </a>
                 <?php }
                 } ?>
@@ -153,110 +158,125 @@
                         <div <?= ($is_rtl == true) ? "dir='rtl'" : ""; ?> class="swiper-wrapper">
 
                             <?php if (isset($row['product_details']) && !empty($row['product_details'])) { ?>
-                                <?php foreach ($row['product_details'] as $product_row) { ?>
-                                    <div class="swiper-slide">
-                                        <div class="product-grid">
-                                            <aside class="add-fav">
-                                                <button type="button" class="btn <?= ($product_row['is_favorite'] == 1) ? '' : 'far' ?> fa-heart add-to-fav-btn <?= ($product_row['is_favorite'] == 1) ? 'fa text-danger' : '' ?>" data-product-id="<?= $product_row['id'] ?>"></button>
-                                            </aside>
-                                            <div class="product-image">
-                                                <div class="product-image-container">
-                                                    <a href="<?= base_url('products/details/' . $product_row['slug']) ?>">
-                                                        <img class="pic-1" src="<?= $product_row['image_sm'] ?>">
-                                                    </a>
+                                <?php
+                                $i = 0;
+                                if (count($row['product_details']) > 0) {
+                                    foreach ($row['product_details'] as $product_row) {
+                                        if ($product_row['type'] == 'simple_product') {
+                                            $product_stock = $product_row['stock'];
+                                        } else {
+                                            $product_stock = $product_row['total_stock'];
+                                        }
+                                        if ($i == 8) {
+                                            break;
+                                        }
+                                ?>
+                                        <div class="swiper-slide">
+                                            <div class="product-grid">
+                                                <aside class="add-fav">
+                                                    <button type="button" class="btn <?= ($product_row['is_favorite'] == 1) ? '' : 'far' ?> fa-heart add-to-fav-btn <?= ($product_row['is_favorite'] == 1) ? 'fa text-danger' : '' ?>" data-product-id="<?= $product_row['id'] ?>"></button>
+                                                </aside>
+                                                <div class="product-image">
+                                                    <div class="product-image-container">
+                                                        <a href="<?= base_url('products/details/' . $product_row['slug']) ?>">
+                                                            <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $product_row['relative_path'] . '&width=230&quality=80') ?>">
+                                                        </a>
+                                                    </div>
+                                                    <ul class="social">
+                                                        <li>
+                                                            <a href="#" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
+                                                                <i class="fa fa-search"></i>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <?php
+                                                            if (count($product_row['variants']) <= 1) {
+                                                                $variant_id = $product_row['variants'][0]['id'];
+                                                                $modal = "";
+                                                            } else {
+                                                                $variant_id = "";
+                                                                $modal = "#quick-view";
+                                                            }
+                                                            ?>
+                                                            <?php $variant_price = ($product_row['variants'][0]['special_price'] > 0 && $product_row['variants'][0]['special_price'] != '') ? $product_row['variants'][0]['special_price'] : $product_row['variants'][0]['price'];
+                                                            $data_min = (isset($product_row['minimum_order_quantity']) && !empty($product_row['minimum_order_quantity'])) ? $product_row['minimum_order_quantity'] : 1;
+                                                            $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
+                                                            $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
+                                                            ?>
+                                                            <a href="#" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                                                <i class="fa fa-shopping-cart"></i>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <?php
+                                                            if (count($product_row['variants']) <= 1) {
+                                                                $variant_id = $product_row['variants'][0]['id'];
+                                                            } else {
+                                                                $variant_id = "";
+                                                            }
+                                                            ?>
+                                                            <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                                                <i class="fa fa-random"></i>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                    <?php if (isset($product_row['min_max_price']['special_price']) && $product_row['min_max_price']['special_price'] != '' && $product_row['min_max_price']['special_price'] != 0 && $product_row['min_max_price']['special_price'] < $product_row['min_max_price']['min_price']) { ?>
+                                                        <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?><?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                                        <!-- <span class="product-discount-label"><? //= $product_row['min_max_price']['discount_in_percentage'] 
+                                                                                                    ?>%</span> -->
+                                                    <?php } ?>
                                                 </div>
-                                                <ul class="social">
-                                                    <li>
-                                                        <a href="#" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
-                                                            <i class="fa fa-search"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <?php
-                                                        if (count($product_row['variants']) <= 1) {
-                                                            $variant_id = $product_row['variants'][0]['id'];
-                                                            $modal = "";
-                                                        } else {
-                                                            $variant_id = "";
-                                                            $modal = "#quick-view";
-                                                        }
-                                                        ?>
-                                                        <?php $variant_price = ($product_row['variants'][0]['special_price'] > 0 && $product_row['variants'][0]['special_price'] != '') ? $product_row['variants'][0]['special_price'] : $product_row['variants'][0]['price'];
-                                                        $data_min = (isset($product_row['minimum_order_quantity']) && !empty($product_row['minimum_order_quantity'])) ? $product_row['minimum_order_quantity'] : 1;
-                                                        $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
-                                                        $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
-                                                        ?>
-                                                        <a href="#" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
-                                                            <i class="fa fa-shopping-cart"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <?php
-                                                        if (count($product_row['variants']) <= 1) {
-                                                            $variant_id = $product_row['variants'][0]['id'];
-                                                        } else {
-                                                            $variant_id = "";
-                                                        }
-                                                        ?>
-                                                        <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
-                                                            <i class="fa fa-random"></i>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                                <?php if (isset($product_row['min_max_price']['special_price']) && $product_row['min_max_price']['special_price'] != '' && $product_row['min_max_price']['special_price'] != 0 && $product_row['min_max_price']['special_price'] < $product_row['min_max_price']['min_price']) { ?>
-                                                    <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?></span>
-                                                    <span class="product-discount-label"><?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
-                                                <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
-                                            </div>
-                                            <div class="product-content">
-                                                <h2 class="title" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product_row['name'])) ?>">
-                                                    <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])))) ?></a>
-                                                </h2>
-                                                <?php if (($product_row['variants'][0]['special_price'] < $product_row['variants'][0]['price']) && ($product_row['variants'][0]['special_price'] != 0)) { ?>
-                                                    <p class="mb-2 mt-2">
-                                                        <span id="" style='font-size: 20px;'>
-                                                            <?php echo $settings['currency'] ?>
-                                                            <?php
-                                                            $price = $product_row['variants'][0]['special_price'];
-                                                            echo number_format($price, 2);
-                                                            ?>
-                                                        </span>
-                                                        <sup>
-                                                            <span class="special-price striped-price text-danger" id="product-striped-price-div">
-                                                                <s id="striped-price">
-                                                                    <?php echo $settings['currency'] ?>
-                                                                    <?php $price = $product_row['variants'][0]['price'];
-                                                                    echo number_format($price, 2);
-                                                                    // echo $price;
-                                                                    ?>
-                                                                </s>
+                                                <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
+                                                    <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
+                                                </div>
+                                                <div class="product-content">
+                                                    <h2 class="title title_wrap" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product_row['name'])) ?>">
+                                                        <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])) ?></a>
+                                                    </h2>
+                                                    <?php if (($product_row['variants'][0]['special_price'] < $product_row['variants'][0]['price']) && ($product_row['variants'][0]['special_price'] != 0)) { ?>
+                                                        <p class="mb-2 mt-2">
+                                                            <span id="" style='font-size: 20px;'>
+                                                                <?php echo $settings['currency'] ?>
+                                                                <?php
+                                                                $price = $product_row['variants'][0]['special_price'];
+                                                                echo format_price($price);
+                                                                ?>
                                                             </span>
-                                                        </sup>
-                                                    </p>
-                                                <?php } else { ?>
-                                                    <p class="mb-2 mt-2">
-                                                        <span id="price" style='font-size: 20px;'>
-                                                            <?php echo $settings['currency'] ?>
-                                                            <?php
-                                                            $price = $product_row['variants'][0]['price'];
-                                                            echo number_format($price, 2);
-                                                            ?>
-                                                        </span>
-                                                    </p>
-                                                <?php } ?>
-                                                <?php $variant_price = ($product_row['variants'][0]['special_price'] > 0 && $product_row['variants'][0]['special_price'] != '') ? $product_row['variants'][0]['special_price'] : $product_row['variants'][0]['price'];
-                                                $data_min = (isset($product_row['minimum_order_quantity']) && !empty($product_row['minimum_order_quantity'])) ? $product_row['minimum_order_quantity'] : 1;
-                                                $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
-                                                $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
-                                                ?>
-                                                <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                                            <sup>
+                                                                <span class="special-price striped-price text-danger" id="product-striped-price-div">
+                                                                    <s id="striped-price">
+                                                                        <?php echo $settings['currency'] ?>
+                                                                        <?php $price = $product_row['variants'][0]['price'];
+                                                                        echo format_price($price);
+                                                                        // echo $price;
+                                                                        ?>
+                                                                    </s>
+                                                                </span>
+                                                            </sup>
+                                                        </p>
+                                                    <?php } else { ?>
+                                                        <p class="mb-2 mt-2">
+                                                            <span id="price" style='font-size: 20px;'>
+                                                                <?php echo $settings['currency'] ?>
+                                                                <?php
+                                                                $price = $product_row['variants'][0]['price'];
+                                                                echo format_price($price);
+                                                                ?>
+                                                            </span>
+                                                        </p>
+                                                    <?php } ?>
+                                                    <?php $variant_price = ($product_row['variants'][0]['special_price'] > 0 && $product_row['variants'][0]['special_price'] != '') ? $product_row['variants'][0]['special_price'] : $product_row['variants'][0]['price'];
+                                                    $data_min = (isset($product_row['minimum_order_quantity']) && !empty($product_row['minimum_order_quantity'])) ? $product_row['minimum_order_quantity'] : 1;
+                                                    $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
+                                                    $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
+                                                    ?>
+                                                    <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                            <?php }
+                            <?php $i++;
+                                    }
+                                }
                             } ?>
 
                         </div>
@@ -269,7 +289,7 @@
                 if ($count_key != 0) {
                     if (!empty($offers) && !empty($offers[$count_key - 1])) { ?>
                         <a href="<?= $offers[$count_key - 1]['link'] ?>">
-                            <img class="img-fluid lazy" data-src="<?= base_url($offers[$count_key - 1]['image']) ?>">
+                            <img class="img-fluid lazy" data-src="<?= base_url('media/image?path=' . $offers[$count_key - 1]['image'] . '&width=1518&quality=80') ?>">
                         </a>
                 <?php }
                 }
@@ -278,14 +298,6 @@
                 <div class="product-style-1 product-style-1-right product-section pt-4 pb-4 bg-white mt-2 mb-2 row ">
                     <div class="col-12 col-md-8 row products-list mx-auto">
                         <div class="col-12 my-4 featured-section-title pl-4 mx-0">
-                            <!-- <div class="row">
-                                <div class="col-md-12 px-0">
-                                    <h3 class="section-title"><?= ucfirst($row['title']) ?></h3>
-                                </div>
-                                <div class="text-left my-auto title-sm col-6 pl-0"><?= $row['short_description']; ?></div>
-                                <div class="col-12 text-right"><a href="<?= base_url('products/section/' . $row['id'] . '/' . $row['slug']) ?>" class="featured-section-view-more"><?= !empty($this->lang->line('view_more')) ? $this->lang->line('view_more') : 'View More' ?></a>
-                                </div>
-                            </div> -->
                             <div class="row">
                                 <div class="align-items-center col-md-12 d-flex justify-content-between">
                                     <div class="col-md-6">
@@ -301,9 +313,26 @@
                             <hr>
                         </div>
                         <?php $product_count = count($row['product_details']) - 1; ?>
-                        <?php $last_product = $row['product_details'][$product_count]; ?>
+                        <?php $last_product = $row['product_details'][$product_count];
+                        if ($last_product['type'] == 'simple_product') {
+                            $product_stock = $last_product['stock'];
+                        } else {
+                            $product_stock = $last_product['total_stock'];
+                        }
+                        ?>
                         <?php if (isset($row['product_details']) && !empty($row['product_details'])) { ?>
-                            <?php foreach ($row['product_details'] as $key => $product_row) { ?>
+                            <?php
+                            $i = 0;
+                            foreach ($row['product_details'] as $key => $product_row) {
+                                if ($product_row['type'] == 'simple_product') {
+                                    $product_stock = $product_row['stock'];
+                                } else {
+                                    $product_stock = $product_row['total_stock'];
+                                }
+                                if ($i == 3) {
+                                    break;
+                                }
+                            ?>
                                 <?php if ($key != $product_count) { ?>
                                     <div class="col-md-4">
                                         <div class="product-grid">
@@ -312,12 +341,12 @@
                                             <div class="product-image">
                                                 <div class="product-image-container">
                                                     <a href="<?= base_url('products/details/' . $product_row['slug']) ?>">
-                                                        <img class="pic-1 lazy" data-src="<?= $product_row['image_sm'] ?>">
+                                                        <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $product_row['relative_path'] . '&width=270&quality=80') ?>">
                                                     </a>
                                                 </div>
                                                 <ul class="social">
                                                     <li>
-                                                        <a href="#" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
+                                                        <a href="#" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
                                                             <i class="fa fa-search"></i>
                                                         </a>
                                                     </li>
@@ -336,7 +365,7 @@
                                                         $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                                         $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                                         ?>
-                                                        <a href="#" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                                        <a href="#" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
                                                             <i class="fa fa-shopping-cart"></i>
                                                         </a>
                                                     </li>
@@ -348,22 +377,23 @@
                                                             $variant_id = "";
                                                         }
                                                         ?>
-                                                        <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                                        <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                                             <i class="fa fa-random"></i>
                                                         </a>
                                                     </li>
                                                 </ul>
                                                 <?php if (isset($product_row['min_max_price']['special_price']) && $product_row['min_max_price']['special_price'] != '' && $product_row['min_max_price']['special_price'] != 0 && $product_row['min_max_price']['special_price'] < $product_row['min_max_price']['min_price']) { ?>
-                                                    <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?></span>
-                                                    <span class="product-discount-label"><?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                                    <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?> <?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                                    <!-- <span class="product-discount-label"><? //= $product_row['min_max_price']['discount_in_percentage'] 
+                                                                                                ?>%</span> -->
                                                 <?php } ?>
                                             </div>
-                                            <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
-                                                <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
-                                            </div>
+                                            <!-- <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
+                                                </div> -->
                                             <div class="product-content">
-                                                <h2 class="title" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product_row['name'])) ?>">
-                                                    <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])))) ?></a>
+                                                <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
+                                                <h2 class="title title_wrap" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product_row['name'])) ?>">
+                                                    <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])) ?></a>
                                                 </h2>
                                                 <?php if (($product_row['variants'][0]['special_price'] < $product_row['variants'][0]['price']) && ($product_row['variants'][0]['special_price'] != 0)) { ?>
                                                     <p class="mb-2 mt-2">
@@ -371,7 +401,7 @@
                                                             <?php echo $settings['currency'] ?>
                                                             <?php
                                                             $price = $product_row['variants'][0]['special_price'];
-                                                            echo number_format($price, 2);
+                                                            echo format_price($price);
                                                             ?>
                                                         </span>
                                                         <sup>
@@ -379,7 +409,7 @@
                                                                 <s id="striped-price">
                                                                     <?php echo $settings['currency'] ?>
                                                                     <?php $price = $product_row['variants'][0]['price'];
-                                                                    echo number_format($price, 2);
+                                                                    echo format_price($price);
                                                                     // echo $price;
                                                                     ?>
                                                                 </s>
@@ -392,7 +422,7 @@
                                                             <?php echo $settings['currency'] ?>
                                                             <?php
                                                             $price = $product_row['variants'][0]['price'];
-                                                            echo number_format($price, 2);
+                                                            echo format_price($price);
                                                             ?>
                                                         </span>
                                                     </p>
@@ -402,12 +432,13 @@
                                                 $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                                 $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                                 ?>
-                                                <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                                <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                                             </div>
                                         </div>
                                     </div>
                                 <?php } ?>
-                        <?php }
+                        <?php $i++;
+                            }
                         } ?>
                     </div>
                     <!-- Last Product -->
@@ -419,13 +450,13 @@
                                 <div class="product-image-container d-flex align-items-center justify-content-center">
                                     <div>
                                         <a href="<?= base_url('products/details/' . $last_product['slug']) ?>">
-                                            <img class="pic-1 lazy" data-src="<?= $last_product['image_sm'] ?>">
+                                            <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $last_product['relative_path'] . '&width=450&quality=80') ?>">
                                         </a>
                                     </div>
                                 </div>
                                 <ul class="social">
                                     <li>
-                                        <a href="#" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $last_product['id'] ?>" data-product-variant-id="<?= $last_product['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
+                                        <a href="#" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $last_product['id'] ?>" data-product-variant-id="<?= $last_product['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
                                             <i class="fa fa-search"></i>
                                         </a>
                                     </li>
@@ -444,7 +475,7 @@
                                         $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                         $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                         ?>
-                                        <a href="#" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                        <a href="#" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
                                             <i class="fa fa-shopping-cart"></i>
                                         </a>
                                     </li>
@@ -456,7 +487,7 @@
                                             $variant_id = "";
                                         }
                                         ?>
-                                        <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                        <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                             <i class="fa fa-random"></i>
                                         </a>
                                     </li>
@@ -465,12 +496,12 @@
                                     <div class="home-badge"><span class="badge badge-pill badge-primary">Sale</span></div>
                                 <?php } ?>
                             </div>
-                            <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
-                                <input type="text" class="kv-fa rating-loading" value="<?= $last_product['rating'] ?>" data-size="sm" title="" readonly>
-                            </div>
+                            <!-- <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
+                                </div> -->
                             <div class="product-content">
-                                <h2 class="title" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $last_product['name'])) ?>">
-                                    <a href="<?= base_url('products/details/' . $last_product['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($last_product['name'])))) ?></a>
+                                <input type="text" class="kv-fa rating-loading" value="<?= $last_product['rating'] ?>" data-size="sm" title="" readonly>
+                                <h2 class="title title_wrap" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $last_product['name'])) ?>">
+                                    <a href="<?= base_url('products/details/' . $last_product['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($last_product['name'])) ?></a>
                                 </h2>
                                 <?php if ($last_product['variants'][0]['special_price'] < $last_product['variants'][0]['price']) { ?>
                                     <p class="mb-2 mt-2">
@@ -478,7 +509,7 @@
                                             <?php echo $settings['currency'] ?>
                                             <?php
                                             $price = $last_product['variants'][0]['special_price'];
-                                            echo number_format($price, 2);
+                                            echo format_price($price);
                                             ?>
                                         </span>
                                         <sup>
@@ -486,7 +517,7 @@
                                                 <s id="striped-price">
                                                     <?php echo $settings['currency'] ?>
                                                     <?php $price = $last_product['variants'][0]['price'];
-                                                    echo number_format($price, 2);
+                                                    echo format_price($price);
                                                     // echo $price;
                                                     ?>
                                                 </s>
@@ -499,7 +530,7 @@
                                             <?php echo $settings['currency'] ?>
                                             <?php
                                             $price = $last_product['variants'][0]['special_price'];
-                                            echo number_format($price, 2);
+                                            echo format_price($price);
                                             ?>
                                         </span>
                                     </p>
@@ -509,7 +540,7 @@
                                 $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                 $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                 ?>
-                                <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $last_product['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $last_product['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                             </div>
                         </div>
                     </div>
@@ -518,14 +549,20 @@
                 if ($count_key != 0) {
                     if (!empty($offers) && !empty($offers[$count_key - 1])) { ?>
                         <a href="<?= $offers[$count_key - 1]['link'] ?>">
-                            <img class="img-fluid lazy" data-src="<?= base_url($offers[$count_key - 1]['image']) ?>">
+                            <img class="img-fluid lazy" data-src="<?= base_url('media/image?path=' . $offers[$count_key - 1]['image'] . '&width=1518&quality=80') ?>">
                         </a>
                 <?php }
                 }
                 ?>
                 <!-- Style 2 Design -->
                 <!-- First Product -->
-                <?php $first_product = $row['product_details'][0]; ?>
+                <?php $first_product = $row['product_details'][0];
+                if ($first_product['type'] == 'simple_product') {
+                    $product_stock = $first_product['stock'];
+                } else {
+                    $product_stock = $first_product['total_stock'];
+                }
+                ?>
                 <div class="product-style-1 product-style-1-left product-section pt-4 pb-4 bg-white mt-2 mb-2 row">
                     <div class="col-md-4 col-12 style-3-product-right-lg">
                         <div class="product-grid">
@@ -539,13 +576,13 @@
                                 <div class="product-image-container d-flex align-items-center justify-content-center">
                                     <div>
                                         <a href="<?= base_url('products/details/' . $first_product['slug']) ?>">
-                                            <img class="pic-1 lazy" data-src="<?= $first_product['image_sm'] ?>">
+                                            <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $first_product['relative_path'] . '&width=450&quality=80') ?>">
                                         </a>
                                     </div>
                                 </div>
                                 <ul class="social">
                                     <li>
-                                        <a href="#" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $first_product['id'] ?>" data-product-variant-id="<?= $first_product['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
+                                        <a href="#" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $first_product['id'] ?>" data-product-variant-id="<?= $first_product['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
                                             <i class="fa fa-search"></i>
                                         </a>
                                     </li>
@@ -564,7 +601,7 @@
                                         $data_step = (isset($first_product['minimum_order_quantity']) && !empty($first_product['quantity_step_size'])) ? $first_product['quantity_step_size'] : 1;
                                         $data_max = (isset($first_product['total_allowed_quantity']) && !empty($first_product['total_allowed_quantity'])) ? $first_product['total_allowed_quantity'] : 0;
                                         ?>
-                                        <a href="#" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $first_product['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $first_product['name'] ?>" data-product-image="<?= $first_product['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($first_product['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                        <a href="#" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>" class="add_to_cart" data-product-id="<?= $first_product['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $first_product['name'] ?>" data-product-image="<?= $first_product['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($first_product['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
                                             <i class="fa fa-shopping-cart"></i>
                                         </a>
                                     </li>
@@ -577,7 +614,7 @@
                                                 $variant_id = "";
                                             }
                                         ?>
-                                            <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                            <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                                 <i class="fa fa-random"></i>
                                             </a>
                                         <?php } ?>
@@ -585,20 +622,20 @@
                                 </ul>
                             </div>
                             <div itemscope itemtype="https://schema.org/Product">
-                                <?php if (isset($product_row['rating']) && isset($product_row['no_of_rating']) && !empty($product_row['no_of_rating']) &&  !empty($product_row['rating']) && $product_row['no_of_rating'] != "") { ?>
-                                    <div class="col-md-12 mb-3 product-rating-small" dir="ltr" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+                                <div class="product-content">
+                                    <?php if (isset($product_row['rating']) && isset($product_row['no_of_rating']) && !empty($product_row['no_of_rating']) &&  !empty($product_row['rating']) && $product_row['no_of_rating'] != "") { ?>
+                                        <!-- <div class="col-md-12 mb-3 product-rating-small" dir="ltr" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating"> -->
                                         <meta itemprop="reviewCount" content="<?= $product_row['no_of_rating'] ?>" />
                                         <meta itemprop="ratingValue" content="<?= $product_row['rating'] ?>" />
                                         <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
-                                    </div>
-                                <?php } else { ?>
-                                    <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
+                                        <!-- </div> -->
+                                    <?php } else { ?>
+                                        <!-- <div class="col-md-12 mb-3 product-rating-small" dir="ltr"> -->
                                         <input type="text" class="kv-fa rating-loading" value="<?= $first_product['rating'] ?>" data-size="sm" title="" readonly>
-                                    </div>
-                                <?php } ?>
-                                <div class="product-content">
-                                    <h3 class="title" title="<?= $first_product['name'] ?>" itemprop="name">
-                                        <a href="<?= base_url('products/details/' . $first_product['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($first_product['name'])))) ?></a>
+                                        <!-- </div> -->
+                                    <?php } ?>
+                                    <h3 class="title title_wrap" title="<?= $first_product['name'] ?>" itemprop="name">
+                                        <a href="<?= base_url('products/details/' . $first_product['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($first_product['name'])) ?></a>
                                     </h3>
                                     <div itemprop="offers" itemscope itemtype="https://schema.org/Offer">
                                         <meta itemprop="price" content="<?= $first_product['variants'][0]['price']; ?>" />
@@ -609,7 +646,7 @@
                                                 <?php echo $settings['currency'] ?>
                                                 <?php
                                                 $price = $first_product['variants'][0]['special_price'];
-                                                echo number_format($price, 2);
+                                                echo format_price($price);
                                                 ?>
                                             </span>
                                             <sup>
@@ -617,7 +654,7 @@
                                                     <s id="striped-price">
                                                         <?php echo $settings['currency'] ?>
                                                         <?php $price = $first_product['variants'][0]['price'];
-                                                        echo number_format($price, 2);
+                                                        echo format_price($price);
                                                         // echo $price;
                                                         ?>
                                                     </s>
@@ -630,7 +667,7 @@
                                                 <?php echo $settings['currency'] ?>
                                                 <?php
                                                 $price = $first_product['variants'][0]['special_price'];
-                                                echo number_format($price, 2);
+                                                echo format_price($price);
                                                 ?>
                                             </span>
                                         </p>
@@ -640,21 +677,13 @@
                                     $data_step = (isset($first_product['minimum_order_quantity']) && !empty($first_product['quantity_step_size'])) ? $first_product['quantity_step_size'] : 1;
                                     $data_max = (isset($first_product['total_allowed_quantity']) && !empty($first_product['total_allowed_quantity'])) ? $first_product['total_allowed_quantity'] : 0;
                                     ?>
-                                    <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $first_product['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $first_product['name'] ?>" data-product-image="<?= $first_product['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($first_product['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                    <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $first_product['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $first_product['name'] ?>" data-product-image="<?= $first_product['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($first_product['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-12 col-md-8 row products-list mx-auto">
                         <div class="col-12 my-4 featured-section-title pl-4 mx-0">
-                            <!-- <div class="row">
-                                <div class="col-md-12 px-0">
-                                    <h3 class="section-title"><?= ucfirst($row['title']) ?></h3>
-                                </div>
-                                <div class="text-left my-auto title-sm col-6"><?= $row['short_description']; ?></div>
-                                <div class="col-6 text-right"><a href="<?= base_url('products/section/' . $row['id'] . '/' . $row['slug']) ?>" class="featured-section-view-more"><?= !empty($this->lang->line('view_more')) ? $this->lang->line('view_more') : 'View More' ?></a>
-                                </div>
-                            </div> -->
                             <div class="row">
                                 <div class="align-items-center col-md-12 d-flex justify-content-between">
                                     <div class="col-md-6">
@@ -670,7 +699,18 @@
                             <hr>
                         </div>
                         <?php $product_count = count($row['product_details']) - 1; ?>
-                        <?php foreach ($row['product_details'] as $key => $product_row) { ?>
+                        <?php
+                        $i = 0;
+                        foreach ($row['product_details'] as $key => $product_row) {
+                            if ($product_row['type'] == 'simple_product') {
+                                $product_stock = $product_row['stock'];
+                            } else {
+                                $product_stock = $product_row['total_stock'];
+                            }
+                            if ($i == 4) {
+                                break;
+                            }
+                        ?>
                             <?php if ($key != 0) { ?>
                                 <div class="col-md-4 col-6">
                                     <div class="product-grid">
@@ -680,12 +720,12 @@
                                         <div class="product-image">
                                             <div class="product-image-container">
                                                 <a href="<?= base_url('products/details/' . $product_row['slug']) ?>">
-                                                    <img class="pic-1 lazy" data-src="<?= $product_row['image_sm'] ?>">
+                                                    <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $product_row['relative_path'] . '&width=270&quality=80') ?>">
                                                 </a>
                                             </div>
                                             <ul class="social">
                                                 <li>
-                                                    <a href="#" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
+                                                    <a href="#" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
                                                         <i class="fa fa-search"></i>
                                                     </a>
                                                 </li>
@@ -704,7 +744,7 @@
                                                     $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                                     $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                                     ?>
-                                                    <a href="#" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                                    <a href="#" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
                                                         <i class="fa fa-shopping-cart"></i>
                                                     </a>
                                                 </li>
@@ -716,25 +756,26 @@
                                                         $variant_id = "";
                                                     }
                                                     ?>
-                                                    <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                                    <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                                         <i class="fa fa-random"></i>
                                                     </a>
                                                 </li>
                                             </ul>
                                             <?php if (isset($product_row['min_max_price']['special_price']) && $product_row['min_max_price']['special_price'] != '' && $product_row['min_max_price']['special_price'] != 0 && $product_row['min_max_price']['special_price'] < $product_row['min_max_price']['min_price']) { ?>
-                                                <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?></span>
+                                                <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?> <?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
 
-                                                <span class="product-discount-label"><?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                                <!-- <span class="product-discount-label"><? //= $product_row['min_max_price']['discount_in_percentage'] 
+                                                                                            ?>%</span> -->
 
 
                                             <?php } ?>
                                         </div>
-                                        <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
-                                            <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
-                                        </div>
+                                        <!-- <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
+                                            </div> -->
                                         <div class="product-content">
-                                            <h3 class="title" title="<?= $product_row['name'] ?>">
-                                                <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])))); ?></a>
+                                            <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
+                                            <h3 class="title title_wrap" title="<?= $product_row['name'] ?>">
+                                                <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])) ?></a>
                                             </h3>
                                             <?php if (($product_row['variants'][0]['special_price'] < $product_row['variants'][0]['price']) && ($product_row['variants'][0]['special_price'] != 0)) { ?>
                                                 <p class="mb-2 mt-2">
@@ -742,7 +783,7 @@
                                                         <?php echo $settings['currency'] ?>
                                                         <?php
                                                         $price = $product_row['variants'][0]['special_price'];
-                                                        echo number_format($price, 2);
+                                                        echo format_price($price);
                                                         ?>
                                                     </span>
                                                     <sup>
@@ -750,7 +791,7 @@
                                                             <s id="striped-price">
                                                                 <?php echo $settings['currency'] ?>
                                                                 <?php $price = $product_row['variants'][0]['price'];
-                                                                echo number_format($price, 2);
+                                                                echo format_price($price);
                                                                 // echo $price;
                                                                 ?>
                                                             </s>
@@ -763,7 +804,7 @@
                                                         <?php echo $settings['currency'] ?>
                                                         <?php
                                                         $price = $product_row['variants'][0]['price'];
-                                                        echo number_format($price, 2);
+                                                        echo format_price($price);
                                                         ?>
                                                     </span>
                                                 </p>
@@ -773,19 +814,20 @@
                                             $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                             $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                             ?>
-                                            <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                            <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                                         </div>
                                     </div>
                                 </div>
                             <?php } ?>
-                        <?php } ?>
+                        <?php $i++;
+                        } ?>
                     </div>
                 </div>
                 <?php } else if ($row['style'] == 'style_3') {
                 if ($count_key != 0) {
                     if (!empty($offers) && !empty($offers[$count_key - 1])) { ?>
                         <a href="<?= $offers[$count_key - 1]['link'] ?>">
-                            <img class="img-fluid lazy" data-src="<?= base_url($offers[$count_key - 1]['image']) ?>">
+                            <img class="img-fluid lazy" data-src="<?= base_url('media/image?path=' . $offers[$count_key - 1]['image'] . '&width=1518&quality=80') ?>">
                         </a>
                 <?php }
                 }
@@ -793,7 +835,18 @@
                 <!-- Style 3 Design -->
                 <div class="product-style-2 product-style-2-left product-section py-2 bg-white mt-2 ">
                     <div class="col-12 col-md-12 row products-list mx-auto">
-                        <?php foreach ($row['product_details'] as $product_row) { ?>
+                        <?php
+                        $i = 0;
+                        foreach ($row['product_details'] as $product_row) {
+                            if ($product_row['type'] == 'simple_product') {
+                                $product_stock = $product_row['stock'];
+                            } else {
+                                $product_stock = $product_row['total_stock'];
+                            }
+                            if ($i == 5) {
+                                break;
+                            }
+                        ?>
                             <div class="col-md-2">
                                 <div class="product-grid">
                                     <aside class="add-fav">
@@ -802,12 +855,12 @@
                                     <div class="product-image">
                                         <div class="product-image-container">
                                             <a href="<?= base_url('products/details/' . $product_row['slug']) ?>">
-                                                <img class="pic-1 lazy" data-src="<?= $product_row['image_sm'] ?>">
+                                                <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $product_row['relative_path'] . '&width=215&quality=80') ?>">
                                             </a>
                                         </div>
                                         <ul class="social">
                                             <li>
-                                                <a href="#" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
+                                                <a href="#" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
                                                     <i class="fa fa-search"></i>
                                                 </a>
                                             </li>
@@ -826,7 +879,7 @@
                                                 $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                                 $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                                 ?>
-                                                <a href="#" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                                <a href="#" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
                                                     <i class="fa fa-shopping-cart"></i>
                                                 </a>
                                             </li>
@@ -838,22 +891,23 @@
                                                     $variant_id = "";
                                                 }
                                                 ?>
-                                                <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                                <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                                     <i class="fa fa-random"></i>
                                                 </a>
                                             </li>
                                         </ul>
                                         <?php if (isset($product_row['min_max_price']['special_price']) && $product_row['min_max_price']['special_price'] != '' && $product_row['min_max_price']['special_price'] != 0 && $product_row['min_max_price']['special_price'] < $product_row['min_max_price']['min_price']) { ?>
-                                            <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?></span>
-                                            <span class="product-discount-label"><?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                            <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?> <?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                            <!-- <span class="product-discount-label"><? //= $product_row['min_max_price']['discount_in_percentage'] 
+                                                                                        ?>%</span> -->
                                         <?php } ?>
                                     </div>
-                                    <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
-                                        <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
-                                    </div>
+                                    <!-- <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
+                                        </div> -->
                                     <div class="product-content">
-                                        <h2 class="title" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product_row['name'])) ?>">
-                                            <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])))) ?></a>
+                                        <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
+                                        <h2 class="title title_wrap" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product_row['name'])) ?>">
+                                            <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])) ?></a>
                                         </h2>
                                         <?php if (($product_row['variants'][0]['special_price'] < $product_row['variants'][0]['price']) && ($product_row['variants'][0]['special_price'] != 0)) { ?>
                                             <p class="mb-2 mt-2">
@@ -861,7 +915,7 @@
                                                     <?php echo $settings['currency'] ?>
                                                     <?php
                                                     $price = $product_row['variants'][0]['special_price'];
-                                                    echo number_format($price, 2);
+                                                    echo format_price($price);
                                                     ?>
                                                 </span>
                                                 <sup>
@@ -869,7 +923,7 @@
                                                         <s id="striped-price">
                                                             <?php echo $settings['currency'] ?>
                                                             <?php $price = $product_row['variants'][0]['price'];
-                                                            echo number_format($price, 2);
+                                                            echo format_price($price);
                                                             // echo $price;
                                                             ?>
                                                         </s>
@@ -882,7 +936,7 @@
                                                     <?php echo $settings['currency'] ?>
                                                     <?php
                                                     $price = $product_row['variants'][0]['price'];
-                                                    echo number_format($price, 2);
+                                                    echo format_price($price);
                                                     ?>
                                                 </span>
                                             </p>
@@ -892,11 +946,12 @@
                                         $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                         $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                         ?>
-                                        <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                        <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                                     </div>
                                 </div>
                             </div>
-                        <?php } ?>
+                        <?php $i++;
+                        } ?>
                         <div class="col-md-2 col-6">
                             <div class="product-grid">
                                 <div class="product-image featured-section">
@@ -919,7 +974,7 @@
                 if ($count_key != 0) {
                     if (!empty($offers) && !empty($offers[$count_key - 1])) { ?>
                         <a href="<?= $offers[$count_key - 1]['link'] ?>">
-                            <img class="img-fluid lazy" data-src="<?= base_url($offers[$count_key - 1]['image']) ?>">
+                            <img class="img-fluid lazy" data-src="<?= base_url('media/image?path=' . $offers[$count_key - 1]['image'] . '&width=1518&quality=80') ?>">
                         </a>
                 <?php }
                 }
@@ -943,7 +998,18 @@
                                 </div>
                             </div>
                         </div>
-                        <?php foreach ($row['product_details'] as $product_row) { ?>
+                        <?php
+                        $i = 0;
+                        foreach ($row['product_details'] as $product_row) {
+                            if ($product_row['type'] == 'simple_product') {
+                                $product_stock = $product_row['stock'];
+                            }else{
+                                $product_stock = $product_row['total_stock'];
+                            }
+                            if ($i == 5) {
+                                break;
+                            }
+                        ?>
                             <div class="col-md-2">
                                 <div class="product-grid">
                                     <aside class="add-fav">
@@ -952,12 +1018,12 @@
                                     <div class="product-image">
                                         <div class="product-image-container">
                                             <a href="<?= base_url('products/details/' . $product_row['slug']) ?>">
-                                                <img class="pic-1 lazy" data-src="<?= $product_row['image_sm'] ?>">
+                                                <img class="pic-1 lazy" data-src="<?= base_url('media/image?path=' . $product_row['relative_path'] . '&width=215&quality=80') ?>">
                                             </a>
                                         </div>
                                         <ul class="social">
                                             <li>
-                                                <a href="#" class="quick-view-btn" data-tip="Quick View" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
+                                                <a href="#" class="quick-view-btn" data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $product_row['variants'][0]['id'] ?>" data-izimodal-open="#quick-view">
                                                     <i class="fa fa-search"></i>
                                                 </a>
                                             </li>
@@ -976,7 +1042,7 @@
                                                 $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                                 $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                                 ?>
-                                                <a href="#" data-tip="Add to Cart" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
+                                                <a href="#" data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>" class="add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image']; ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>">
                                                     <i class="fa fa-shopping-cart"></i>
                                                 </a>
                                             </li>
@@ -988,22 +1054,23 @@
                                                     $variant_id = "";
                                                 }
                                                 ?>
-                                                <a href="#" class="compare" data-tip="Compare" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
+                                                <a href="#" class="compare" data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>">
                                                     <i class="fa fa-random"></i>
                                                 </a>
                                             </li>
                                         </ul>
                                         <?php if (isset($product_row['min_max_price']['special_price']) && $product_row['min_max_price']['special_price'] != '' && $product_row['min_max_price']['special_price'] != 0 && $product_row['min_max_price']['special_price'] < $product_row['min_max_price']['min_price']) { ?>
-                                            <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?></span>
-                                            <span class="product-discount-label"><?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                            <span class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?> <?= $product_row['min_max_price']['discount_in_percentage'] ?>%</span>
+                                            <!-- <span class="product-discount-label"><? //= $product_row['min_max_price']['discount_in_percentage'] 
+                                                                                        ?>%</span> -->
                                         <?php } ?>
                                     </div>
-                                    <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
-                                        <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
-                                    </div>
+                                    <!-- <div class="col-md-12 mb-3 product-rating-small" dir="ltr">
+                                        </div> -->
                                     <div class="product-content">
-                                        <h2 class="title" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product_row['name'])) ?>">
-                                            <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])))) ?></a>
+                                        <input type="text" class="kv-fa rating-loading" value="<?= $product_row['rating'] ?>" data-size="sm" title="" readonly>
+                                        <h2 class="title title_wrap" title="<?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product_row['name'])) ?>">
+                                            <a href="<?= base_url('products/details/' . $product_row['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['name'])) ?></a>
                                         </h2>
                                         <?php if (($product_row['variants'][0]['special_price'] < $product_row['variants'][0]['price']) && ($product_row['variants'][0]['special_price'] != 0)) { ?>
                                             <p class="mb-2 mt-2">
@@ -1011,7 +1078,7 @@
                                                     <?php echo $settings['currency'] ?>
                                                     <?php
                                                     $price = $product_row['variants'][0]['special_price'];
-                                                    echo number_format($price, 2);
+                                                    echo format_price($price);
                                                     ?>
                                                 </span>
                                                 <sup>
@@ -1019,7 +1086,7 @@
                                                         <s id="striped-price">
                                                             <?php echo $settings['currency'] ?>
                                                             <?php $price = $product_row['variants'][0]['price'];
-                                                            echo number_format($price, 2);
+                                                            echo format_price($price);
                                                             // echo $price;
                                                             ?>
                                                         </s>
@@ -1032,7 +1099,7 @@
                                                     <?php echo $settings['currency'] ?>
                                                     <?php
                                                     $price = $product_row['variants'][0]['price'];
-                                                    echo number_format($price, 2);
+                                                    echo format_price($price);
                                                     ?>
                                                 </span>
                                             </p>
@@ -1042,11 +1109,12 @@
                                         $data_step = (isset($product_row['minimum_order_quantity']) && !empty($product_row['quantity_step_size'])) ? $product_row['quantity_step_size'] : 1;
                                         $data_max = (isset($product_row['total_allowed_quantity']) && !empty($product_row['total_allowed_quantity'])) ? $product_row['total_allowed_quantity'] : 0;
                                         ?>
-                                        <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
+                                        <a href="#" class="add-to-cart add_to_cart" data-product-id="<?= $product_row['id'] ?>" data-product-variant-id="<?= $variant_id ?>" data-product-stock="<?= $product_stock ?>" data-product-title="<?= $product_row['name'] ?>" data-product-image="<?= $product_row['image'] ?>" data-product-price="<?= $variant_price; ?>" data-min="<?= $data_min; ?>" data-step="<?= $data_step; ?>" data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product_row['short_description'])))); ?>" data-izimodal-open="<?= $modal ?>"><i class="fas fa-cart-plus"></i> <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?></a>
                                     </div>
                                 </div>
                             </div>
-                        <?php } ?>
+                        <?php $i++;
+                        } ?>
                     </div>
                 </div>
             <?php } ?>
@@ -1059,10 +1127,10 @@
     <?php if (isset($web_settings['app_download_section']) && $web_settings['app_download_section'] == 1) { ?>
         <div class="container-fluid mobile-app call-to-action-section product-section pt-4 pb-4 bg-white mt-2 mb-2">
             <div class="row">
-                <div class="col-md-6 col-lg-4 offset-lg-1">
-
+                <div class="col-md-6 col-lg-4 offset-lg-1 d-flex justify-content-center align-items-center">
+                    <?php $logo = get_settings('web_logo'); ?>
                     <div class="mobile-app-wrapper">
-                        <img src="<?= THEME_ASSETS_URL . 'demo/avtars/4861083.jpg' ?>" alt="">
+                        <img src="<?= base_url($logo) ?>" alt="">
                     </div>
 
                 </div>

@@ -23,11 +23,20 @@ class Phonepe
         $system_settings = get_settings('system_settings', true);
 
         $this->salt_index = (isset($settings['phonepe_salt_index'])) ? $settings['phonepe_salt_index'] : " ";
-        $this->app_id = (isset($settings['phonepe_app_id'])) ? $settings['phonepe_app_id'] : " ";
+        // $this->app_id = (isset($settings['phonepe_app_id'])) ? $settings['phonepe_app_id'] : " ";
         $this->salt_key = (isset($settings['phonepe_salt_key'])) ? $settings['phonepe_salt_key'] : " ";
         $this->merchant_id = (isset($settings['phonepe_marchant_id'])) ? $settings['phonepe_marchant_id'] : " ";
-        $this->url = (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == "live") ? "https://api.phonepe.com/apis/hermes" : "https://api-preprod.phonepe.com/apis/pg-sandbox";
-        $this->environment = (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == "live") ? 'PRODUCTION' : 'UAT';
+        $this->url = (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == "PRODUCTION") ? "https://api.phonepe.com/apis/hermes" : "https://api-preprod.phonepe.com/apis/pg-sandbox";
+
+        if(isset($settings['phonepe_payment_mode'])){
+            if ($settings['phonepe_payment_mode'] == 'PRODUCTION') {
+                $this->environment = 'PRODUCTION';
+            } elseif($settings['phonepe_payment_mode'] == 'UAT'){
+                $this->environment = 'UAT';
+            } else {
+                $this->environment = 'SANDBOX';
+            }
+        }
     }
 
     public function get_credentials()
@@ -42,8 +51,7 @@ class Phonepe
     public function pay($data)
     {
         $data['merchantId'] = $this->merchant_id;
-        $data['app_id'] = $this->app_id;
-        $data['environment'] = $this->environment;
+        // $data['app_id'] = $this->app_id;
         $data['paymentInstrument'] = array(
             'type' => 'PAY_PAGE',
         );
@@ -64,32 +72,42 @@ class Phonepe
             "X-VERIFY: $finalXHeader"
         ];
         $response = $this->curl($url, $method, json_encode(['request' => $encode]), $header);
+        
         $res = json_decode($response['body'], true);
         return $res;
     }
-
-    public function phonepe_payment($data)
+    public function phonepe_checksum($data)
     {
-        $data['merchantId'] = $this->merchant_id;
-        $url = $this->url . '/pg/v1/pay';
-        $method = 'POST';
+        $phonePeMerId = $this->merchant_id;
+        $phonePeEndPointUrl = base_url("admin/webhook/phonepe_webhook");
+        $phonePeSaltKey = $this->salt_key;
+        $phonePeSaltIndex = $this->salt_index;
+        $totalPrice = $data['final_total'];
+        $userMobileNumber = $data['mobile'];
 
-        /** generating a X-VERIFY header */
-        $encode = base64_encode(json_encode($data));
-        $saltKey = $this->salt_key;
-        $saltIndex = $this->salt_index;
-        $string = $encode . '/pg/v1/pay' . $saltKey;
-        $sha256 = hash('sha256', $string);
-        $finalXHeader = $sha256 . '###' . $saltIndex;
-
-        $header = [
-            "Content-Type: application/json",
-            "accept: application/json",
-            "X-VERIFY: $finalXHeader"
+        $amt = (int)round($totalPrice * 100);
+        $jsonData = [
+            "merchantId" => $phonePeMerId,
+            "merchantTransactionId" => $data['order_id'],
+            "merchantUserId"=> $phonePeMerId,
+            "amount" => $amt,
+            // "redirectUrl" => $phonePeEndPointUrl,
+            "redirectMode" => "REDIRECT",
+            "callbackUrl" => $phonePeEndPointUrl,
+            "mobileNumber" => $userMobileNumber,
+            // "deviceContext" => ["deviceOS" => $data['deviceOS']],
+            "paymentInstrument" => ["type" => "PAY_PAGE"]
         ];
-        $response = $this->curl($url, $method, json_encode(['request' => $encode]), $header);
-        $res = json_decode($response['body'], true);
-        return $res;
+        $base64Data = base64_encode(json_encode($jsonData,JSON_UNESCAPED_SLASHES));
+        $apiEndPoint = "/pg/v1/pay";
+        $dataToHash = $base64Data . $apiEndPoint . $phonePeSaltKey;
+        $sHA256 = hash('sha256', $dataToHash);
+        $checksum = $sHA256 . '###' . $phonePeSaltIndex;
+        $data =  [
+            "payload" => $jsonData,
+            "checksum" => $checksum
+        ];
+        return $data;
     }
 
     public function check_status($id = '')

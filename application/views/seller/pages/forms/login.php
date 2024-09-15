@@ -36,10 +36,7 @@
                         <div class="col-12">
                             <button type="submit" id="submit_btn1" class="btn btn-primary btn-block">Verify Account</button>
                         </div>
-                        <div class="justify-content-center mt-2 col-md-12">
-                            <div class="form-group" id="error_box">
-                            </div>
-                        </div>
+
                     </div>
                 </form>
             </div>
@@ -70,7 +67,7 @@
                     <input type="password" class="form-control form-input" name="password" id="password" placeholder="Enter Your Password" value="<?= (ALLOW_MODIFICATION == 0) ? '12345678' : '' ?>">
 
                 </div>
-               
+
                 <div class="row">
                     <div class="col-12 mb-3 text-right">
                         <a href="<?= base_url('/seller/login/forgot_password') ?>" class="text-dark"><?= !empty($this->lang->line('forgot_password')) ? $this->lang->line('forgot_password') : 'Forgot Password' ?> ?</a>
@@ -83,15 +80,12 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <!-- /.col -->
                     <div class="col-12">
                         <button type="submit" id="submit_btn" class="btn btn-block p-2 btn-signin">Sign In</button>
                     </div>
-                    <div class="justify-content-center mt-2 col-md-12">
-                        <div class="form-group" id="error_box">
-                        </div>
-                    </div>
+
                 </div>
             </form>
             <div class="mb-3">

@@ -9,8 +9,10 @@ class Orders extends CI_Controller
     {
         parent::__construct();
         $this->load->database();
-        $this->load->helper(['url', 'language', 'timezone_helper']);
+        $this->load->helper(['url', 'language', 'timezone_helper', 'sms_helper', 'function_helper']);
         $this->load->model('Order_model');
+        $this->data['firebase_project_id'] = get_settings('firebase_project_id');
+        $this->data['service_account_file'] = get_settings('service_account_file');
     }
 
     public function index()
@@ -88,9 +90,14 @@ class Orders extends CI_Controller
     /* To update the status of particular order item */
     public function update_order_status()
     {
-        
+        // print_r($_POST);
+        // print_r($_GET);
+
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_delivery_boy()) {
             $res = validate_order_status($_GET['id'], $_GET['status']);
+            $system_settings = get_settings('system_settings', true);
+            $otp_system = $system_settings['is_delivery_boy_otp_setting_on'];
+
             if ($res['error']) {
                 $this->response['error'] = true;
                 $this->response['message'] = $res['message'];
@@ -106,18 +113,23 @@ class Orders extends CI_Controller
                 ->get('order_items oi')->result_array();
 
             if ($_GET['status'] == 'delivered') {
-                if (!validate_otp($_GET['otp'], $order_item_res[0]['order_item_id'], $order_item_res[0]['order_id'], $order_item_res[0]['seller_id'])) {
-                    $this->response['error'] = true;
-                    $this->response['message'] = 'Invalid OTP supplied!';
-                    $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                    $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                    $this->response['data'] = array();
-                    print_r(json_encode($this->response));
-                    return false;
+                if ($otp_system == 1) {
+
+                    if (!validate_otp($_GET['otp'], $order_item_res[0]['order_item_id'], $order_item_res[0]['order_id'], $order_item_res[0]['seller_id'])) {
+                        $this->response['error'] = true;
+                        $this->response['message'] = 'Invalid OTP supplied!';
+                        $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                        $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                        $this->response['data'] = array();
+                        print_r(json_encode($this->response));
+                        return false;
+                    }
                 }
             }
             $order_id = fetch_details('order_items', ['id' => $_GET['id']], 'order_id');
             $order_method = fetch_details('orders', ['id' => $order_id[0]['order_id']], 'payment_method');
+            $firebase_project_id = $this->data['firebase_project_id'];
+            $service_account_file = $this->data['service_account_file'];
             if ($order_method[0]['payment_method'] == 'bank_transfer') {
                 $bank_receipt = fetch_details('order_bank_transfer', ['order_id' => $order_id[0]['order_id']]);
                 $transaction_status = fetch_details('transactions', ['order_id' => $order_id[0]['order_id']], 'status');
@@ -131,7 +143,7 @@ class Orders extends CI_Controller
                     return false;
                 }
             }
-          
+
             if ($_GET['status'] == 'cancelled' || $_GET['status'] == 'returned') {
                 if ($this->Order_model->update_order(['status' => $_GET['status']], ['id' => $order_item_res[0]['id']], true, 'order_items')) {
                     $this->Order_model->update_order(['active_status' => $_GET['status']], ['id' => $order_item_res[0]['id']], false, 'order_items');
@@ -151,17 +163,17 @@ class Orders extends CI_Controller
                         $user_res = fetch_details('users', ['id' => $user_id], 'username,fcm_id,mobile,email');
                         $fcm_ids = array();
                         //custom message
-                        if ($_POST['status'] == 'received') {
+                        if ($_GET['status'] == 'received') {
                             $type = ['type' => "customer_order_received"];
-                        } elseif ($_POST['status'] == 'processed') {
+                        } elseif ($_GET['status'] == 'processed') {
                             $type = ['type' => "customer_order_processed"];
-                        } elseif ($_POST['status'] == 'shipped') {
+                        } elseif ($_GET['status'] == 'shipped') {
                             $type = ['type' => "customer_order_shipped"];
-                        } elseif ($_POST['status'] == 'delivered') {
+                        } elseif ($_GET['status'] == 'delivered') {
                             $type = ['type' => "customer_order_delivered"];
-                        } elseif ($_POST['status'] == 'cancelled') {
+                        } elseif ($_GET['status'] == 'cancelled') {
                             $type = ['type' => "customer_order_cancelled"];
-                        } elseif ($_POST['status'] == 'returned') {
+                        } elseif ($_GET['status'] == 'returned') {
                             $type = ['type' => "customer_order_returned"];
                         }
                         $custom_notification = fetch_details('custom_notifications', $type, '');
@@ -174,7 +186,7 @@ class Orders extends CI_Controller
                         $message = output_escaping(trim($data, '"'));
                         $customer_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $user_res[0]['username'] . 'Order status updated to' . $_GET['status'] . ' for your order ID #' . $order_item_res[0]['order_id'] . ' please take note of it! Thank you for shopping with us. Regards ' . $app_name . '';
 
-                        if (!empty($user_res[0]['fcm_id'])) {
+                        if (!empty($user_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                             $fcmMsg = array(
                                 'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
                                 'body' => $customer_msg,
@@ -182,14 +194,15 @@ class Orders extends CI_Controller
                             );
 
                             $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                            send_notification($fcmMsg, $fcm_ids);
+                            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                         }
-                        notify_event(
-                            $type['type'],
-                            ["customer" => [$user_res[0]['email']]],
-                            ["customer" => [$user_res[0]['mobile']]],
-                            ["orders.id" => $order_item_res[0]['order_id']]
-                        );
+                        // print_r($type['type']);
+                        // notify_event(
+                        //     $type['type'],
+                        //     ["customer" => [$user_res[0]['email']]],
+                        //     ["customer" => [$user_res[0]['mobile']]],
+                        //     ["orders.id" => $order_item_res[0]['order_id']]
+                        // );
                     }
                     // Update login id in order_item table
                     update_details(['updated_by' => $_SESSION['user_id']], ['id' =>  $_GET['id']], 'order_items');
@@ -202,8 +215,10 @@ class Orders extends CI_Controller
                     return false;
                 }
             } else {
-                if ($this->Order_model->update_order(['status' => $_GET['status']], ['order_id' => $order_item_res[0]['order_id'], 'seller_id' => $order_item_res[0]['seller_id'],'active_status !='=>'cancelled'], true, 'order_items')) {
-                    $this->Order_model->update_order(['active_status' => $_GET['status']], ['order_id' => $order_item_res[0]['order_id'], 'seller_id' => $order_item_res[0]['seller_id'],'active_status !='=>'cancelled'], false, 'order_items');
+                if ($this->Order_model->update_order(['status' => $_GET['status']], ['order_id' => $order_item_res[0]['order_id'], 'seller_id' => $order_item_res[0]['seller_id'], 'active_status !=' => 'cancelled'], true, 'order_items')) {
+                // if ($this->Order_model->update_order(['status' => $_GET['status']], ['id' => $order_item_res[0]['id'], 'seller_id' => $order_item_res[0]['seller_id'], 'active_status !=' => 'cancelled'], true, 'order_items')) {
+                    $this->Order_model->update_order(['active_status' => $_GET['status']], ['order_id' => $order_item_res[0]['order_id'], 'seller_id' => $order_item_res[0]['seller_id'], 'active_status !=' => 'cancelled'], false, 'order_items');
+                    // $this->Order_model->update_order(['active_status' => $_GET['status']], ['id' => $order_item_res[0]['id'], 'seller_id' => $order_item_res[0]['seller_id'], 'active_status !=' => 'cancelled'], false, 'order_items');
                     process_refund($order_item_res[0]['id'], $_GET['status'], 'order_items');
                     if (($order_item_res[0]['order_counter'] == intval($order_item_res[0]['order_cancel_counter']) + 1 && $_GET['status'] == 'cancelled') ||  ($order_item_res[0]['order_counter'] == intval($order_item_res[0]['order_return_counter']) + 1 && $_GET['status'] == 'returned') || ($order_item_res[0]['order_counter'] == intval($order_item_res[0]['order_delivered_counter']) + 1 && $_GET['status'] == 'delivered') || ($order_item_res[0]['order_counter'] == intval($order_item_res[0]['order_processed_counter']) + 1 && $_GET['status'] == 'processed') || ($order_item_res[0]['order_counter'] == intval($order_item_res[0]['order_shipped_counter']) + 1 && $_GET['status'] == 'shipped')) {
                         /* process the refer and earn */
@@ -219,21 +234,25 @@ class Orders extends CI_Controller
                         $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                         $user_res = fetch_details('users', ['id' => $user_id], 'username,fcm_id,email,mobile');
                         $fcm_ids = array();
+                        // print_r($user_id);
+                        // print_r($user_res);
                         //custom message
-                        if ($_POST['status'] == 'received') {
+                        if ($_GET['status'] == 'received') {
                             $type = ['type' => "customer_order_received"];
-                        } elseif ($_POST['status'] == 'processed') {
+                        } elseif ($_GET['status'] == 'processed') {
                             $type = ['type' => "customer_order_processed"];
-                        } elseif ($_POST['status'] == 'shipped') {
+                        } elseif ($_GET['status'] == 'shipped') {
                             $type = ['type' => "customer_order_shipped"];
-                        } elseif ($_POST['status'] == 'delivered') {
+                        } elseif ($_GET['status'] == 'delivered') {
                             $type = ['type' => "customer_order_delivered"];
-                        } elseif ($_POST['status'] == 'cancelled') {
+                        } elseif ($_GET['status'] == 'cancelled') {
                             $type = ['type' => "customer_order_cancelled"];
-                        } elseif ($_POST['status'] == 'returned') {
+                        } elseif ($_GET['status'] == 'returned') {
                             $type = ['type' => "customer_order_returned"];
                         }
                         $custom_notification = fetch_details('custom_notifications', $type, '');
+                        // print_r("here exist ");
+                        // print_r($_POST);
                         $hashtag_cutomer_name = '< cutomer_name >';
                         $hashtag_order_id = '< order_item_id >';
                         $hashtag_application_name = '< application_name >';
@@ -242,16 +261,15 @@ class Orders extends CI_Controller
                         $data = str_replace(array($hashtag_cutomer_name, $hashtag_order_id, $hashtag_application_name), array($user_res[0]['username'], $order_item_res[0]['order_id'], $app_name), $hashtag);
                         $message = output_escaping(trim($data, '"'));
                         $customer_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $user_res[0]['username'] . 'Order status updated to' . $_GET['status'] . ' for your order ID #' . $order_item_res[0]['order_id'] . ' please take note of it! Thank you for shopping with us. Regards ' . $app_name . '';
-
-                        if (!empty($user_res[0]['fcm_id'])) {
+                        // print_r($user_res[0]['fcm_id']);
+                        if (!empty($user_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                             $fcmMsg = array(
                                 'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
                                 'body' => $customer_msg,
                                 'type' => "order",
                             );
-
                             $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                            send_notification($fcmMsg, $fcm_ids);
+                            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                         }
                         notify_event(
                             $type['type'],

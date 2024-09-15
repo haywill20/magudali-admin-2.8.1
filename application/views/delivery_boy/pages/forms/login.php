@@ -15,7 +15,7 @@
             <p class="text-dark mb-4">Please login to your account</p>
             <!-- <p class="login-box-msg">Sign in to start your session</p> -->
             <form action="<?= base_url('delivery_boy/login/auth') ?>" class='form-submit-event' method="post">
-                    <input type='hidden' name='<?= $this->security->get_csrf_token_name() ?>' value='<?= $this->security->get_csrf_hash() ?>'>
+                <input type='hidden' name='<?= $this->security->get_csrf_token_name() ?>' value='<?= $this->security->get_csrf_hash() ?>'>
                 <div class="mb-3">
                     <label for="mobile" class="form-label text-dark">Mobile </label>
                     <input type="<?= $identity_column ?>" class="form-control form-input" name="identity" placeholder="<?= ucfirst($identity_column)  ?>" <?= (ALLOW_MODIFICATION == 0) ? 'value="1234567890"' : ""; ?>>
@@ -41,10 +41,7 @@
                     <div class="col-12">
                         <button type="submit" id="submit_btn" class="btn btn-block p-2 btn-signin">Sign In</button>
                     </div>
-                    <div class="justify-content-center mt-2 col-md-12">
-                        <div class="form-group" id="error_box">
-                        </div>
-                    </div>
+
                 </div>
             </form>
 

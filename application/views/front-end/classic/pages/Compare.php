@@ -1,4 +1,4 @@
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?></h2>
         <nav aria-label="breadcrumb">
@@ -13,8 +13,11 @@
     <div class="entry-content">
         <div id="compare-items">
             <div class="container">
-                <div class="row">
-                    <div class="col-md-12 d-flex justify-content-center h5">No items to compare</div>
+                <div class="align-items-center d-flex flex-column">
+                    <div class="empty-compare">
+                        <img src="<?= base_url('assets/front_end/classic/images/empty-compare.webp') ?>" alt="<?= !empty($this->lang->line('no_items_to_compare')) ? $this->lang->line('no_items_to_compare') : 'No items to compare' ?>">
+                    </div>
+                    <div class="h5"><?= !empty($this->lang->line('no_items_to_compare')) ? $this->lang->line('no_items_to_compare') : 'No items to compare' ?></div>
                 </div>
             </div>
         </div>

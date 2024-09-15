@@ -25,25 +25,25 @@ function requestPermission() {
 $(document).ready(function () {
 
     $.ajax({
-        url: base_url + "my-account/get_system_settings/",
-        async: false,
-        type: "POST",
-        data: csrfName + "=" + csrfHash,
+        url: base_url + "my-account/get_system_settings",
+        type: "GET",
         dataType: 'json',
         success: function (result) {
+            
+            console.log(result);
+            var res = JSON.parse(result.response);
+            // console.log(res);
 
-            var res = JSON.parse(result);
-
-            csrfName = res['csrfName'];
-            csrfHash = res['csrfHash'];
+            csrfName = result.csrfName,
+            csrfHash = result.csrfHash
 
             const app = initializeApp(res);
 
             const messaging = getMessaging();
 
             requestPermission();
-           
-            getToken(messaging, { vapidKey: 'BFEiHMx_xNqwKyUpJWziDBrlNc4bvUWVp0LeHfG1KTWK5kz1cXljFut7791iQ712nNQf2Syki3JzXIK0eaP_tj4' }).then((currentToken) => {
+
+            getToken(messaging, { vapidKey: result.vap_id_key }).then((currentToken) => {
                 console.log("Inside get Token");
                 if (currentToken) {
                     console.log("Token :", currentToken);
@@ -58,9 +58,9 @@ $(document).ready(function () {
                 // ...
             });
             var typing_timer = [];
-             onMessage(messaging, (payload) => {
+            onMessage(messaging, (payload) => {
                 var notification = JSON.parse(payload.data.data);
-            
+
                 if (notification.type == 'typing') {
                     console.log("in typing");
                     var from_id_fmc = notification.from_id;
@@ -122,7 +122,7 @@ $(document).ready(function () {
                     var new_msg = JSON.parse(notification.new_msg);
                     var msg_id = notification.msg_id;
 
-                    var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
+                    var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle avtar_img"></figure>';
                     // if (notification['profile'] !== undefined && notification['profile'] !== null) {
                     // } else {
                     //     var picture = '<figure class="avatar avatar-md" data-initial="' + notification['picture'] + '"></figure>';
@@ -267,8 +267,8 @@ function getOnlineMemebers() {
 
     $.ajax({
         url: base_url + "my-account/get_online_members",
-        type: "POST",
-        data: csrfName + "=" + csrfHash,
+        type: "GET",
+        // data: csrfName + "=" + csrfHash,
         dataTpe: 'json',
         success: function (result) {
             var data = JSON.parse(result);
@@ -363,7 +363,7 @@ $(document).on('keyup', '#chat-input-textarea', function () {
             var type = 'typing';
             var msg_type = $("#chat_type").val();
             sendFCM(receiver_id, title, msg, type, msg_type);
-            
+
         }
     } else {
         $('#chat-preview-btn').removeClass("d-none");
@@ -462,13 +462,13 @@ $(document).on("dragenter", "#chat-box-content", function (e) {
     showDropZone();
 })
 
-window.closeDropZone = function() {
+window.closeDropZone = function () {
     $('#chat-box-content').show();
     $('#chat-dropbox').addClass("d-none");
     Dropzone.forElement("#myAlbum").removeAllFiles(true);
 }
 
-window.showDropZone = function() {
+window.showDropZone = function () {
     $('#chat-dropbox').removeClass("d-none");
     $('#chat-box-content').hide();
 
@@ -527,9 +527,9 @@ function getUserPicture(user_id) {
 // sending msg
 $(document).on('submit', '#chat-form2', function (e) {
     e.preventDefault();
-   
+
     var drop_file_count = myDropzone.files.length;
-  
+
 
     var to_id = $("#opposite_user_id").val();
     var type = $("#chat_type").val();
@@ -581,7 +581,7 @@ $(document).on('submit', '#chat-form2', function (e) {
                 }
                 var user_name = new_msg[0].senders_name;
 
-                var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
+                var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle avtar_img"></figure>';
                 // if (new_msg[0].profile !== undefined && new_msg[0].profile !== null) {
                 // } else {
                 //     var picture = '<figure class="avatar avatar-md" data-initial="' + new_msg[0].picture + '"></figure>';
@@ -660,35 +660,6 @@ $(document).on('submit', '#chat-form2', function (e) {
 });
 
 
-$(document).on('click', '#delete_group', function (e) {
-    e.preventDefault();
-    var group_id = $(this).data("id");
-    swal({
-        title: 'Are you sure want to delete group ?',
-        text: 'All messages and related media & attachments will be deleted forever, you will not be able to recover it later!',
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true,
-    })
-        .then((willDelete) => {
-
-            if (willDelete) {
-                deleteGroup(group_id);
-            }
-        });
-});
-
-function deleteGroup(group_id) {
-    $.ajax({
-        url: base_url + "my-account/delete_group/" + group_id,
-        type: "POST",
-        data: csrfName + "=" + csrfHash,
-        success: function (result) {
-            location.reload();
-        }
-    });
-}
-
 $(document).on('click', '.delete-msg-alert', function (e) {
 
     e.preventDefault();
@@ -763,7 +734,12 @@ function updateWebFCM(token) {
         type: "POST",
         data: csrfName + "=" + csrfHash + "&web_fcm=" + fcmtoken,
         dataTpe: 'json',
-        success: function (result) { }
+        success: function (result) {
+            var data = JSON.parse(result);
+            csrfName = data.csrfName, 
+            csrfHash = data.csrfHash
+            console.log(data);
+         }
     });
 }
 
@@ -874,7 +850,7 @@ function newLoadChat(from_id, type, offset = '', limit = '', sort = '', order = 
                                 var string = convert(chats['msg'][i].text);
                                 var chat_content = string.replace(/<[\/]{0,1}(p)[^><]*>/ig, "");
 
-                                var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
+                                var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle avtar_img"></figure>';
                                 // if (chats['msg'][i].profile !== undefined && chats['msg'][i].profile !== null) {
                                 // } else {
                                 //     var picture = '<figure class="avatar avatar-md" data-initial="' + chats['msg'][i].picture + '"></figure>';
@@ -952,7 +928,7 @@ function sendFCM(receiver_id, title, msg, type, message_type = '') {
         },
         dataTpe: 'json',
         success: function (result) {
-            }
+        }
     });
 }
 
@@ -979,7 +955,7 @@ function printChat(chats, id_of_user) {
                 is_divide = 'yes';
             }
 
-            picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
+            picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle avtar_img"></figure>';
             // if (chats[i].profile !== undefined && chats[i].profile !== null) {
             // } else {
             //     picture = '<figure class="avatar avatar-md" data-initial="' + chats[i].picture + '"></figure>';
@@ -1024,7 +1000,7 @@ function printChat(chats, id_of_user) {
 
 
 function switchChat(from_id, type) {
-console.log(from_id);
+    console.log(from_id);
     $.ajax({
         url: base_url + "my-account/switch_chat",
         type: "POST",
@@ -1040,7 +1016,7 @@ console.log(from_id);
             if (type == 'person') {
                 $("#chat_title").text(person[0]?.username);
 
-                var html = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
+                var html = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle avtar_img"></figure>';
 
                 $("#chat-avtar-main").html(html);
                 // if (person[0].profile !== '' && person[0].profile !== null) {
@@ -1166,86 +1142,6 @@ $(document).on('click', '.go-to-bottom-btn', function () {
     $(".go-to-bottom-btn").hide();
 });
 
-$(document).on("click", "#modal-edit-group-call", function () {
-
-    var id = $(this).data("id");
-    $.ajax({
-        type: "POST",
-        url: base_url + "my-account/get_group_members",
-        data: {
-            group_id: id
-        },
-        dataType: "json",
-        success: function (result) {
-            var title = result['data'][0].title;
-            var description = result['data'][0].description;
-            var update_id = result['data'][0].group_id;
-
-            var user_ids = [];
-            var admin_ids = [];
-            $.each(result['data'], function (key, val) {
-                user_ids[key] = val.user_id;
-                if (val.is_admin == 1) {
-                    admin_ids[key] = val.user_id;
-                }
-            });
-
-            $('#update_id').val(update_id);
-            $('#delete_group').attr("data-id", update_id);
-            $('#update_title').val(title);
-            $('#update_description').val(description);
-            $('#update_users').val(user_ids);
-            $('#update_users').trigger('change');
-
-            $('#update_admins').val(admin_ids);
-            $('#update_admins').trigger('change');
-
-            $("#modal-edit-group").trigger("click");
-        }
-    });
-
-});
-
-$(document).on("click", "#modal-info-group-call", function () {
-
-    var id = $(this).data("id");
-    $.ajax({
-        type: "POST",
-        url: base_url + "my-account/get_group_members",
-        data: {
-            group_id: id
-        },
-        dataType: "json",
-        success: function (result) {
-            var title = result['data'][0].title;
-            var description = result['data'][0].description;
-            var update_id = result['data'][0].group_id;
-
-            var user_ids = [];
-            var admin_ids = [];
-
-            $.each(result['data'], function (key, val) {
-                user_ids[key] = val.user_id;
-                if (val.is_admin == 1) {
-                    admin_ids[key] = val.user_id;
-                }
-            });
-
-            $('#update_id_info').val(update_id);
-            $('#update_title_info').val(title);
-            $('#update_description_info').val(description);
-            $('#update_users_info').val(user_ids);
-            $('#update_users_info').trigger('change');
-
-            $('#update_admins_info').val(admin_ids);
-            $('#update_admins_info').trigger('change');
-
-            $("#modal-info-group").trigger("click");
-        }
-    });
-
-});
-
 Dropzone.autoDiscover = false;
 var myDropzone = new Dropzone("#myAlbum", {
     url: base_url + "my-account/send_msg",
@@ -1286,7 +1182,7 @@ myDropzone.on('successmultiple', function (file, response) {
     var to_id = $("#opposite_user_id").val();
     var message = $("#chat-input-textarea").val();
 
-    var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
+    var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle avtar_img"></figure>';
 
 
     $.chatCtrl('#mychatbox2', {
@@ -1314,7 +1210,7 @@ myDropzone.on('successmultiple', function (file, response) {
 $(document).on('change', '#chat_user', function () {
 
     console.log("here");
-console.log($("#chat_user")[0]);
+    console.log($("#chat_user")[0]);
     var oppo_user_id = JSON.parse($("#chat_user").val())
     var type = 'person';
     if ($(this).data("not_in_group") == true) {
@@ -1412,7 +1308,7 @@ $('.search_user').each(function () {
         placeholder: 'Search for countries',
     });
     search_user.on('select2:select', function (e) {
-        $('.search_user').empty().trigger("change");
+        $('.search_user').empty();
         console.log('select event');
     });
 });

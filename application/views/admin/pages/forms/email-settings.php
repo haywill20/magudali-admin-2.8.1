@@ -94,10 +94,7 @@
                                 </div>
 
                                 <!-- /.card-body -->
-                                <div class="d-flex justify-content-center">
-                                    <div id="error_box">
-                                    </div>
-                                </div>
+
                             </div>
                         </form>
                     </div>

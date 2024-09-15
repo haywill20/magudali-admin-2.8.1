@@ -75,6 +75,11 @@ $query_builder = TRUE;
 
 $db['default'] = array(
     'dsn'    => '',
+    // 'hostname' => 'localhost',
+    // 'username' => 'root',
+    // 'password' => '',
+    // 'database' => 'eshop_vendor',
+    // 'hostname' => 'localhost',
     'hostname' => 'localhost',
     'username' => 'maguinev_magudali',
     'password' => 'magudali@21',

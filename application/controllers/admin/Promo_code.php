@@ -43,6 +43,13 @@ class Promo_code extends CI_Controller
             $settings = get_settings('system_settings', true);
             $this->data['title'] = 'Promo Code Management | ' . $settings['app_name'];
             $this->data['meta_description'] = ' Promo Code Management  | ' . $settings['app_name'];
+            if (isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
+                $this->data['fetched_data'] = fetch_details('promo_codes', ['id' => $_GET['edit_id']]);
+                $this->data['csrfName'] = $this->security->get_csrf_token_name();
+                $this->data['csrfHash'] = $this->security->get_csrf_hash();
+                echo json_encode($this->data);
+                return;
+            }
             $this->load->view('admin/template', $this->data);
         } else {
             redirect('admin/login', 'refresh');
@@ -98,9 +105,9 @@ class Promo_code extends CI_Controller
             $this->form_validation->set_rules('end_date', 'End date ', 'trim|required|xss_clean');
             $this->form_validation->set_rules('no_of_users', 'No of Users ', 'trim|required|numeric|xss_clean');
             $this->form_validation->set_rules('minimum_order_amount', 'Minimum Order Amount ', 'trim|numeric|required|xss_clean');
-            $this->form_validation->set_rules('discount', 'Discount ', 'trim|required|numeric|xss_clean');
             $this->form_validation->set_rules('discount_type', 'Discount Type ', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('max_discount_amount', 'Maximum Discount Amount ', 'trim|numeric|required|xss_clean');
+            $this->form_validation->set_rules('discount', 'Discount', 'trim|required|numeric|xss_clean|less_than_equal_to[' . $this->input->post('minimum_order_amount') . ']');
+            $this->form_validation->set_rules('max_discount_amount', 'Maximum Discount Amount', 'trim|numeric|required|xss_clean|less_than_equal_to[' . $this->input->post('minimum_order_amount') . ']');
             $this->form_validation->set_rules('repeat_usage', 'Repeat Usage ', 'trim|required|xss_clean');
             $this->form_validation->set_rules('image', 'Image ', 'required|xss_clean');
             $this->form_validation->set_rules('is_cashback', 'Is Cashback ', 'trim|xss_clean');

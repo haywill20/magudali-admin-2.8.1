@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('cart')) ? $this->lang->line('cart') : 'Cart' ?></h2>
         <nav aria-label="breadcrumb">
@@ -69,7 +69,7 @@
                                                     [$row['qty']]
                                                 ); ?>
                                                 <?php if (isset($check_current_stock_status['error'])  && $check_current_stock_status['error'] == TRUE) { ?>
-                                                    <div><span class='text text-danger'> Out of Stock </span></div>
+                                                    <div><span class='text text-danger'> <?= !empty($this->lang->line('out_of_stock')) ? $this->lang->line('out_of_stock') : 'Out Of Stock' ?></span></div>
                                                 <?php } else { ?>
                                                     <div class="num-in">
                                                         <?php $price = $row['special_price'] != '' && $row['special_price'] != null && $row['special_price'] > 0 ? $row['special_price'] : $row['price']; ?>
@@ -83,7 +83,7 @@
                                         <td class="text-muted p-0 total-price"><span class="product-line-price"> <?= $settings['currency'] . '' . number_format(($row['qty'] * $price), 2) ?></span></td>
                                         <td>
                                             <div class="product-removal">
-                                                <i class="remove-product fas fa-trash-alt text-danger" name="remove_inventory" id="remove_inventory" data-id="<?= $row['id']; ?>" title="Remove From Cart"></i>
+                                                <i class="remove-product fas fa-trash-alt text-danger" name="remove_inventory" id="remove_inventory" data-id="<?= $row['id']; ?>" title="<?= !empty($this->lang->line('remove_from_cart')) ? $this->lang->line('remove_from_cart') : 'Remove From Cart' ?>"></i>
                                             </div>
                                         </td>
                                     </tr>

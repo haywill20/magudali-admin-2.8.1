@@ -34,7 +34,7 @@
                             data-page-list="[5, 10, 20, 50, 100, 200]"
                             data-search="true" data-show-columns="true"
                             data-show-refresh="true" data-trim-on-search="false"
-                            data-sort-name="id" data-sort-order="asc"
+                            data-sort-name="id" data-sort-order="desc"
                             data-mobile-responsive="true"
                             data-toolbar="" data-show-export="true"
                             data-maintain-selected="true"

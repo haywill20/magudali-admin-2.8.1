@@ -144,6 +144,9 @@ class Invoice_model extends CI_Model
         $start_date = null,
         $end_date = null
     ) {
+        // print_r($_POST);
+        // print_r("get data");
+        // print_r($_GET);
         if (isset($_POST['offset'])) {
             $offset = $_POST['offset'];
         }
@@ -175,7 +178,7 @@ class Invoice_model extends CI_Model
             $count_res->where(" DATE(oi.date_added) >= DATE('" . $start_date . "') ");
             $count_res->where(" DATE(oi.date_added) <= DATE('" . $end_date . "') ");
         } else {
-            $count_res->where(" DATE(oi.date_added) >= DATE('" . $date . "') ");
+            $count_res->where(" DATE(oi.date_added) <= DATE('" . $date . "') ");
         }
         if (isset($filters) && !empty($filters)) {
             $this->db->group_Start();
@@ -191,11 +194,13 @@ class Invoice_model extends CI_Model
             ->join('users u', 'u.id= o.user_id', 'left')
             ->join('order_items oitems', 'o.id=oitems.order_id', 'left');
         if (!empty($_GET['seller_id']) || !empty($_POST['seller_id'])) {
+            // print_r("in this");
             $seller_id = (!empty($_GET['seller_id']) && isset($_GET['seller_id'])) ? $_GET['seller_id'] : $_POST['seller_id'];
             $search_res->join('order_items oi', 'oi.order_id=o.id', 'left');
             $search_res->join('seller_data sd', 'oi.seller_id=' . $seller_id, 'left');
             $search_res->join('users us ', ' us.id = oi.seller_id', 'left');
             $search_res->where("oi.seller_id=" . $seller_id);
+            // echo $this->db->last_query();
         }
         if (!empty($_GET['start_date']) && !empty($_GET['end_date']) || !empty($_POST['start_date']) && !empty($_POST['end_date'])) {
             $start_date = (!empty($_GET['start_date']) && isset($_GET['start_date'])) ? $_GET['start_date'] : $_POST['start_date'];
@@ -203,7 +208,7 @@ class Invoice_model extends CI_Model
             $search_res->where(" DATE(oi.date_added) >= DATE('" . $start_date . "') ");
             $search_res->where(" DATE(oi.date_added) <= DATE('" . $end_date . "') ");
         } else {
-            $search_res->where(" DATE(oi.date_added) >= DATE('" . $date . "') ");
+            $search_res->where(" DATE(oi.date_added) <= DATE('" . $date . "') ");
         }
         if (isset($filters) && !empty($filters)) {
             $search_res->group_Start();

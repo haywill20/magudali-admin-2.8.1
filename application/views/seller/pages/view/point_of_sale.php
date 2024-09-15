@@ -100,7 +100,7 @@
                                             <label for="delivery_charge_service"><?= labels('shipping_charge', 'Shipping charge') ?></label></span>
                                             <input type="number" class="delivery_charge_service form-control" id="delivery_charge_service" value="" placeholder="0.00" name="delivery_charge" min="0.00">
 
-                                            <label for="discount_service"><?= labels('discount', 'Discount') ?></label> <small>(<?= labels('if_any', 'if any') ?>)</small></span>
+                                            <label for="discount_service"><?= labels('discount', 'Discount') ?></label><span>(<?= (isset($settings['currency']) && !empty($settings['currency'])) ?   $settings['currency'] : '';   ?>)</span> <small>(<?= labels('if_any', 'if any') ?>)</small></span>
                                             <input type="number" class="discount_service form-control" id="discount_service" value="" placeholder="0.00" name="discount" min="0.00">
 
                                             <hr class="mt-2 mb-2">
@@ -190,7 +190,7 @@
                     </div>
                     <div class="form-group">
                         <label for="mobile">Mobile:</label>
-                        <input type="text" class="form-control" id="mobile" placeholder="Enter Your Mobile Number" name="mobile">
+                        <input type="text" class="form-control" maxlength="16" oninput="validateNumberInput(this)" id="mobile" placeholder="Enter Your Mobile Number" name="mobile">
                     </div>
                     <div class="form-group">
                         <label for="password">Password:</label>

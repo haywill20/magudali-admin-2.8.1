@@ -31,6 +31,10 @@ class Setting extends CI_Controller
             $this->data['logo'] = get_settings('logo');
             $this->data['favicon'] = get_settings('favicon');
             $this->data['settings'] = get_settings('system_settings', true);
+            $this->data['shiprocket_settings'] = get_settings('shipping_method', true);
+            // echo "<pre>";
+            // print_r($this->data['shiprocket_settings']);
+            // die;
             $this->data['currency'] = get_settings('currency');
             $this->load->view('admin/template', $this->data);
         } else {
@@ -75,11 +79,21 @@ class Setting extends CI_Controller
             $this->form_validation->set_rules('tax_number', 'Tax Number', 'trim|xss_clean');
             $this->form_validation->set_rules('is_refer_earn_on', 'Refer and Earn system', 'trim|xss_clean');
             $this->form_validation->set_rules('welcome_wallet_balance_on', 'Welcome Wallet Balance', 'trim|xss_clean');
-            $this->form_validation->set_rules('allow_order_attachments', 'Upload Order Attachments', 'trim|xss_clean');
+            // $this->form_validation->set_rules('allow_order_attachments', 'Upload Order Attachments', 'trim|xss_clean');
             $this->form_validation->set_rules('logo', 'Logo', 'trim|required|xss_clean', array('required' => 'Logo is required'));
             $this->form_validation->set_rules('favicon', 'Favicon', 'trim|required|xss_clean', array('required' => 'Favicon is required'));
             $this->form_validation->set_rules('supported_locals', 'Supported Locals', 'trim|xss_clean');
             $this->form_validation->set_rules('decimal_point', 'Decimal Point', 'trim|xss_clean');
+            $this->form_validation->set_rules('pincode_wise_deliverability', 'Pincode Wise Deliverability', 'trim|xss_clean');
+            $this->form_validation->set_rules('city_wise_deliverability', 'City Wise Deliverability', 'trim|xss_clean');
+            
+            $app_purchase_code = get_settings('doctor_brown');
+            if (isset($app_purchase_code) && !empty($app_purchase_code)) {
+                $this->form_validation->set_rules('android_app_store_link', 'Android APP store link', 'trim|required|xss_clean');
+                $this->form_validation->set_rules('ios_app_store_link', 'ios APP store link', 'trim|required|xss_clean');
+                $this->form_validation->set_rules('scheme', 'Scheme For APP', 'trim|required|xss_clean');
+                $this->form_validation->set_rules('host', 'Host For APP', 'trim|required|xss_clean');
+            }
 
             if (isset($_POST['is_refer_earn_on']) && $_POST['is_refer_earn_on']) {
                 $this->form_validation->set_rules('min_refer_earn_order_amount', 'Minimum Refer & Earn Order Amount', 'trim|required|numeric|xss_clean');
@@ -91,8 +105,24 @@ class Setting extends CI_Controller
             if (isset($_POST['welcome_wallet_balance_on']) && $_POST['welcome_wallet_balance_on']) {
                 $this->form_validation->set_rules('wallet_balance_amount', 'Welcome Wallet Balance Amount', 'trim|required|numeric|xss_clean');
             }
-            if (isset($_POST['allow_order_attachments']) && $_POST['allow_order_attachments']) {
-                $this->form_validation->set_rules('upload_limit', 'Mamimum Upload Limit', 'trim|required|xss_clean|max_length[10]');
+            // if (isset($_POST['allow_order_attachments']) && $_POST['allow_order_attachments']) {
+            //     $this->form_validation->set_rules('upload_limit', 'Mamimum Upload Limit', 'trim|required|xss_clean|max_length[10]');
+            // }
+            if ((!isset($_POST['pincode_wise_deliverability']) && !isset($_POST['city_wise_deliverability']))) {
+                $this->response['error'] = true;
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                $this->response['message'] = 'Please select atleast one deliverability system';
+                print_r(json_encode($this->response));
+                return false;
+            }
+            if ((isset($_POST['pincode_wise_deliverability']) && isset($_POST['city_wise_deliverability']))) {
+                $this->response['error'] = true;
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                $this->response['message'] = 'You Can set only one deliverability at a time';
+                print_r(json_encode($this->response));
+                return false;
             }
             if (!$this->form_validation->run()) {
 
@@ -105,6 +135,7 @@ class Setting extends CI_Controller
                 $_POST['system_timezone_gmt'] = preg_replace('/\s+/', '', $_POST['system_timezone_gmt']);
                 $_POST['system_timezone_gmt'] = ($_POST['system_timezone_gmt'] == '00:00') ? "+" . $_POST['system_timezone_gmt'] : $_POST['system_timezone_gmt'];
                 $_POST['whatsapp_number'] =  $_POST['whatsapp_number'];
+                $_POST['copyright_details'] =  $_POST['copyright_details'];
                 $this->Setting_model->update_system_setting($_POST);
                 $this->response['error'] = false;
                 $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -179,6 +210,15 @@ class Setting extends CI_Controller
     public function set_default_theme()
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
+            if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
+                $this->response['error'] = true;
+                $this->response['message'] = DEMO_VERSION_MSG;
+                echo json_encode($this->response);
+                $response['csrfName'] = $this->security->get_csrf_token_name();
+                $response['csrfHash'] = $this->security->get_csrf_hash();
+                return false;
+                exit();
+            }
             if (print_msg(!has_permissions('update', 'settings'), PERMISSION_ERROR_MSG, 'settings')) {
                 return false;
             }

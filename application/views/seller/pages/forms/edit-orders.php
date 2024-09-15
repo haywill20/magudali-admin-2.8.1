@@ -69,10 +69,10 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="d-flex justify-content-center">
+                            <!-- <div class="d-flex justify-content-center">
                                 <div class="form-group" id="error_box">
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -114,10 +114,10 @@
                                                         <button type="submit" class="btn btn-success" id="submit_btn">Save</button>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex justify-content-center">
+                                                <!-- <div class="d-flex justify-content-center">
                                                     <div class="form-group" id="error_box">
                                                     </div>
-                                                </div>
+                                                </div> -->
                                                 <!-- /.card-body -->
                                             </form>
                                         </div>
@@ -203,10 +203,10 @@
                                                     <button type="submit" class="btn btn-success create_shiprocket_parcel">Create Order</button>
                                                 </div>
 
-                                                <div class="d-flex justify-content-center">
+                                                <!-- <div class="d-flex justify-content-center">
                                                     <div class="form-group" id="error_box">
                                                     </div>
-                                                </div>
+                                                </div> -->
                                                 <!-- /.card-body -->
 
                                             </form>
@@ -221,7 +221,7 @@
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <div class="card card-info">
+                    <div class="card card-info overflow-auto">
                         <div class="card-body">
                             <table class="table">
                                 <?php
@@ -299,10 +299,10 @@
                                                     <lable class="badge badge-warning mt-2" style="font-size:13px;">Note : Select square box of item only when you want to update it as cancelled or returned.</lable>
                                                 </p>
                                             <?php } else { ?>
-                                                <div class="row">
-                                                    <div class="col-md-12 mb-2">
-                                                        <lable class="badge badge-success">Select status <?= get_seller_permission($seller_id, 'assign_delivery_boy') ? 'and delivery boy' : '' ?> which you want to update</lable>
-                                                    </div>
+                                                <div class="col-md-12 mb-2">
+                                                    <lable class="badge badge-success">Select status <?= get_seller_permission($seller_id, 'assign_delivery_boy') ? 'and delivery boy' : '' ?> which you want to update</lable>
+                                                </div>
+                                                <div class="d-flex">
 
                                                     <div class="col-md-3">
                                                         <select name="status" class="form-control status">
@@ -333,7 +333,7 @@
                                                     <?php } ?>
                                                     <div class="col-md-6">
                                                         <a href="javascript:void(0)" class="edit_order_tracking btn btn-success btn-xl col-md-1" title="Order Tracking" data-order_id=' <?= $order_detls[0]['id']; ?>' data-seller_id="<?= $items[0]['seller_id'] ?>" data-target="#transaction_modal" data-toggle="modal" style="height:35px;width:38px;"><i class="fa fa-map-marker-alt"></i></a>
-                                                        <a href="javascript:void(0);" title="Bulk Update" data-seller_id="<?= $items[0]['seller_id'] ?>" class="btn btn-primary col-md-3 ml-1 update_status_admin_bulk">
+                                                        <a href="javascript:void(0);" title="Bulk Update" data-seller_id="<?= $items[0]['seller_id'] ?>" class="btn btn-primary ml-1 update_status_admin_bulk">
                                                             Update
                                                         </a>
                                                         <?php if ($shipping_method['shiprocket_shipping_method'] == 1) { ?>
@@ -407,6 +407,8 @@
                                                     //send notification while shiprocket order status changed
                                                     if (isset($type) && !empty($type)) {
                                                         $settings = get_settings('system_settings', true);
+                                                        $firebase_project_id = get_settings('firebase_project_id');
+                                                        $service_account_file = get_settings('service_account_file');
                                                         $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                                                         $custom_notification = fetch_details('custom_notifications', $type, '');
                                                         $hashtag_cutomer_name = '< cutomer_name >';
@@ -427,9 +429,9 @@
                                                         $fcm_ids  =  array();
 
                                                         //send notification to customer
-                                                        if (!empty($user_res[0]['fcm_id'])) {
+                                                        if (!empty($user_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                                                             $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                                                            send_notification($fcmMsg, $fcm_ids);
+                                                            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                                                         }
                                                         (notify_event(
                                                             $type['type'],
@@ -546,7 +548,9 @@
                                                             <?php } ?>
                                                             <div><span class="text-bold">Name : </span><small><?= $item['pname'] ?> </small></div>
                                                             <div><span class="text-bold">Quantity : </span><?= $item['quantity'] ?> </div>
-                                                            <div><span class="text-bold">Price : </span><?= $item['price'] + $item['tax_amount'] ?></div>
+                                                            <!-- <div><span class="text-bold">Price : </span><? //= $item['price'] + $item['tax_amount'] 
+                                                                                                                ?></div> -->
+                                                            <div><span class="text-bold">Price : </span><?= $item['price'] ?></div>
                                                             <div><span class="text-bold">Discounted Price : </span> <?= $item['discounted_price'] ?> </div>
                                                             <div><span class="text-bold">Subtotal : </span><?= $item['price'] * $item['quantity'] ?> </div>
                                                             <?php
@@ -603,7 +607,12 @@
                                 </tr>
                                 <tr>
                                     <th class="w-10px">Total(<?= $settings['currency'] ?>)</th>
-                                    <td id=' amount'><?php echo $total; ?></td>
+                                    <td id='amount'>
+                                        <?php
+                                        echo $order_detls[0]['order_total'];
+                                        $total = $order_detls[0]['order_total'];
+                                        ?>
+                                    </td>
                                 </tr>
 
                                 <tr class="d-none">

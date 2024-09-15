@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2><?= isset($page_main_bread_crumb) ? $page_main_bread_crumb : 'Read Blog' ?></h2>
         <nav aria-label="breadcrumb">
@@ -11,7 +11,7 @@
                         <li class="breadcrumb-item"><?= $row ?></li>
                 <?php }
                 } ?>
-                <li class="breadcrumb-item active" aria-current="page"><?= !empty($this->lang->line('view-blog')) ? $this->lang->line('view-blog') : 'View-blog' ?></li>
+                <li class="breadcrumb-item active" aria-current="page"><?= !empty($this->lang->line('view_blog')) ? $this->lang->line('view_blog') : 'View blog' ?></li>
             </ol>
         </nav>
     </div>
@@ -38,7 +38,7 @@
                         </div>
                         <div class="card-body">
                             <h2 class="view-blog-title mb-2 mt-2"><?= $blog[0]['title'] ?></h2>
-                            <p class="card-text mt-5"><?= str_replace('\r\n', '&#13;&#10;', $blog[0]['description']) ?></p>
+                            <p class="card-text mt-5"><?= str_replace('\"', '', str_replace('\r\n', '&#13;&#10;', $blog[0]['description'])) ?></p>
                         </div>
                     </div>
                 </div>

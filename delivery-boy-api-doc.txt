@@ -11,7 +11,7 @@ Defined API Methods:-
 
 1. login
 2. get_delivery_boy_details
-3. get_orders
+3. get_orders <---- Newly changes ---->
 4. get_fund_transfers
 5. update_user
 6. update_fcm
@@ -21,9 +21,11 @@ Defined API Methods:-
 10. get_settings
 11. send_withdrawal_request
 12. get_withdrawal_request
-13. update_order_item_status
+13. update_order_consignment_status  <---- Newly changes ---->
 14. get_delivery_boy_cash_collection
-15. delete_delivery_boy
+15. delete_delivery_boy.
+16. verify_otp
+17. resend_otp
 ------------------------------------------
 What parameters to be Passed?  See here >>
 ------------------------------------------
@@ -42,19 +44,18 @@ Use POST method to pass the parameters
 3. get_orders
     user_id:101
     active_status: received  {received,delivered,cancelled,processed,returned}     // optional
-
     limit:25            // { default - 25 } optional
     offset:0            // { default - 0 } optional
     sort: id / date_added // { default - id } optional
     order:DESC/ASC      // { default - DESC } optional
 
 4. get_fund_transfers
-
     user_id:101
     limit:25            // { default - 25 } optional
     offset:0            // { default - 0 } optional
     sort: id / date_added // { default - id } optional
     order:DESC/ASC      // { default - DESC } optional
+
 5. update_user
     user_id:34
     username:hiten
@@ -76,10 +77,8 @@ Use POST method to pass the parameters
     id:114
     offset:0        // {optional}
     limit:10        // {optional}
-
     sort:id           // {optional}
     order:DESC / ASC            // {optional}
-
     search:search_value         // {optional}
 
 9. verify_user
@@ -88,7 +87,7 @@ Use POST method to pass the parameters
 
 10. get_settings
 
-    type : delivery_boy_privacy_policy / delivery_boy_terms_conditions
+     type : delivery_boy_privacy_policy / delivery_boy_terms_conditions
 
 11. send_withdrawal_request
 
@@ -102,25 +101,28 @@ Use POST method to pass the parameters
     limit:10
     offset:10
 
-13. update_order_item_status
-
-    order_item_id:1
-    status : received / processed / shipped / delivered / cancelled / returned
-    delivery_boy_id: 15
-    otp:value      //{required when status is delivered}
+13. update_order_consignment_status
+        consignment_id:1
+        status : received / processed / shipped / delivered / cancelled / returned
+        otp:value      //{required when status is delivered}
 
 14. get_delivery_boy_cash_collection
-
-    delivery_boy_id:15  
-    status:             // {delivery_boy_cash (delivery boy collected) | delivery_boy_cash_collection (admin collected)}
-    limit:25            // { default - 25 } optional
-    offset:0            // { default - 0 } optional
-    sort:               // { id } optional
-    order:DESC/ASC      // { default - DESC } optional
-    search:value        // {optional} 
+        delivery_boy_id:15  
+        status:             // {delivery_boy_cash (delivery boy collected) | delivery_boy_cash_collection (admin collected)}
+        limit:25            // { default - 25 } optional
+        offset:0            // { default - 0 } optional
+        sort:               // { id } optional
+        order:DESC/ASC      // { default - DESC } optional
+        search:value        // {optional} 
 
 15. delete_delivery_boy
+        user_id:15
+        mobile:9874563214
+        password:12345695
 
-    user_id:15
-    mobile:9874563214
-    password:12345695
+16. verify_otp
+        otp: 123456
+        phone number: 9876543210
+
+17. resend_otp
+        mobile:9876543210

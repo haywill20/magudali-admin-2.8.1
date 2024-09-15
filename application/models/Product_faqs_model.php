@@ -112,7 +112,10 @@ class Product_faqs_model extends CI_Model
 
         $i = 0;
         foreach ($rating_search_res as $row) {
-
+            // echo "<pre>";
+            // print_r($row);
+            $product = fetch_details('products', ['id' => $row['product_id']], 'name');
+            // print_r($product);
             $row = output_escaping($row);
             $date = new DateTime($row['date_added']);
 
@@ -128,6 +131,7 @@ class Product_faqs_model extends CI_Model
             $tempRow['id'] = $row['id'];
             $tempRow['user_id'] = $row['user_id'];
             $tempRow['product_id'] = $row['product_id'];
+            $tempRow['product_name'] = $product[0]['name'];
             $tempRow['votes'] = $row['votes'];
             $tempRow['question'] = $row['question'];
             $tempRow['answer'] = $row['answer'];

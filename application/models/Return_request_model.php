@@ -16,7 +16,7 @@ class Return_request_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
 
         if (isset($_GET['offset']))
@@ -109,7 +109,8 @@ class Return_request_model extends CI_Model
         $item_id  = $data['order_item_id'];
 
         $this->db->where('id', $data['return_request_id'])->update('return_requests', $request);
-
+        $firebase_project_id = get_settings('firebase_project_id');
+        $service_account_file = get_settings('service_account_file');
         if ($data['status'] == '1') {
             $this->load->model('order_model');
             process_refund($data['order_item_id'], 'returned');
@@ -147,7 +148,7 @@ class Return_request_model extends CI_Model
                 ["users.mobile" => $customer_res[0]['mobile']]
             ));
 
-            if (!empty($user_res[0]['fcm_id'])) {
+            if (!empty($user_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                 $fcmMsg = array(
                     'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "You have new order to deliver",
                     'body' => $delivery_boy_msg,
@@ -155,9 +156,9 @@ class Return_request_model extends CI_Model
                 );
 
                 $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                send_notification($fcmMsg, $fcm_ids);
+                send_notification($fcmMsg, $fcm_ids, $fcmMsg);
             }
-            if (!empty($customer_res[0]['fcm_id'])) {
+            if (!empty($customer_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                 $fcmMsg = array(
                     'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
                     'body' => $customer_msg,
@@ -165,7 +166,7 @@ class Return_request_model extends CI_Model
                 );
 
                 $fcm_ids[0][] = $customer_res[0]['fcm_id'];
-                send_notification($fcmMsg, $fcm_ids);
+                send_notification($fcmMsg, $fcm_ids, $fcmMsg);
             }
         } elseif ($data['status'] == '2') {
 
@@ -202,7 +203,7 @@ class Return_request_model extends CI_Model
             ));
 
 
-            if (!empty($customer_res[0]['fcm_id'])) {
+            if (!empty($customer_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                 $fcmMsg = array(
                     'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
                     'body' => $customer_msg,
@@ -210,7 +211,7 @@ class Return_request_model extends CI_Model
                 );
 
                 $fcm_ids[0][] = $customer_res[0]['fcm_id'];
-                send_notification($fcmMsg, $fcm_ids);
+                send_notification($fcmMsg, $fcm_ids, $fcmMsg);
             }
         }
     }

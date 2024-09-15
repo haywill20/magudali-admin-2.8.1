@@ -35,7 +35,7 @@
     max-height: 100%;
 }
 .product-image-container {
-    max-width: 195px;
+    /* max-width: 195px; */
     height: 230px;
     margin: auto;
     position: relative;
@@ -197,6 +197,7 @@
     position: absolute;
     top: 10px;
     left: 0;
+    border-radius: 0 10px 10px 0;
 }
 
 .product-grid .product-discount-label {
@@ -361,16 +362,16 @@
     padding: 0px;
 }
 
-.product-style-1 .product-image {
+/* .product-style-1 .product-image {
     height: 140px;
-}
+} */
 
 .product-style-1 .product-image-container {
-    max-width: 100px;
-    height: 125px;
+    max-width: 270px;
+    /* height: 125px; */
     margin: auto;
     position: relative;
-    line-height: 145px;
+    /* line-height: 145px; */
 }
 
 .product-style-1 .add-fav>button {
@@ -426,11 +427,12 @@
 }
 
 .product-style-2 .product-image {
-    height: 220px;
+    height: 215px;
 }
 
 .product-style-2 .product-image-container {
-    height: 180px;
+    height: 215px;
+    max-width: 215px;
 }
 
 .product-style-2 .title-sm {

@@ -1,17 +1,18 @@
 <?php $settings = get_settings('system_settings', true);
 $doctor_brown_for_app = get_settings('doctor_brown');
+$web_doctor_brown = get_settings('web_doctor_brown');
 
 $authentication_settings = get_settings('authentication_settings');
-$sms_gateway_settings = get_settings('sms_gateway_settings');
-// print_r($authentication_settings);
+// $sms_gateway_settings = get_settings('sms_gateway_settings');
+// // print_r($authentication_settings);
 
-if ($sms_gateway_settings !== null && is_string($sms_gateway_settings)) {
-    $sms_gateway_data = get_settings('sms_gateway_settings');
-}else{
-    $sms_gateway_data = [];
-}
-
-// print_r($sms_gateway_data);
+// if ($sms_gateway_settings !== null && is_string($sms_gateway_settings)) {
+//     $sms_gateway_data = get_settings('sms_gateway_settings');
+// }else{
+//     $sms_gateway_data = [];
+// }
+// echo "<pre>";
+// print_r($settings);
 
 if ($authentication_settings !== null && is_string($authentication_settings)) {
     $authentication = json_decode(get_settings('authentication_settings'), true);
@@ -19,7 +20,7 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
     $authentication = [];
 }
 ?>
-<input type="hidden" id="sms_gateway_data" value='<?= isset($sms_gateway_data) ? ($sms_gateway_data) : [] ?>' />
+<!-- <input type="hidden" id="sms_gateway_data" value='<?//= isset($sms_gateway_data) ? ($sms_gateway_data) : [] ?>' /> -->
 <aside class="main-sidebar elevation-2 sidebar-dark-indigo">
     <!-- Brand Logo -->
     <a href="<?= base_url('admin/home') ?>" class="brand-link">
@@ -564,12 +565,12 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
                                     <p>Time Slots</p>
                                 </a>
                             </li>
-                            <!-- <li class="nav-item">
-                                <a href="<?//= base_url('admin/authentication-settings') ?>" class="nav-link">
-                                    <i class="fa fa-bell nav-icon "></i>
+                            <li class="nav-item">
+                                <a href="<?= base_url('admin/authentication-settings') ?>" class="nav-link">
+                                    <i class="fa fa-key nav-icon "></i>
                                     <p>Authentication Mode</p>
                                 </a>
-                            </li> -->
+                            </li>
                             <li class="nav-item">
                                 <a href="<?= base_url('admin/notification-settings') ?>" class="nav-link">
                                     <i class="fa fa-bell nav-icon "></i>
@@ -656,6 +657,8 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
                         </ul>
                     </li>
 
+                    <?php if (isset($web_doctor_brown) && !empty($web_doctor_brown)) {
+                            ?>
                     <li class="nav-item has-treeview">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fa fa-globe-asia text-warning"></i>
@@ -686,13 +689,14 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
                             <?//php if (isset($authentication['authentication_method']) && $authentication['authentication_method'] == 'firebase') { ?>
                                 <li class="nav-item">
                                     <a href="<?= base_url('admin/web-setting/firebase') ?>" class="nav-link">
-                                        <i class="bx bxl-firebase nav-icon "></i>
+                                        <img src="<?= base_url('assets/admin/images/firebase.svg') ?>" alt="firebase" class="nav-icon" style="height:20px;">
                                         <p>Firebase</p>
                                     </a>
                                 </li>
                             <?//php } ?>
                         </ul>
                     </li>
+                    <?php } ?>
                 <?php } ?>
                 <?php if (has_permissions('read', 'pickup_location')) { ?>
                     <li class="nav-item has-treeview">
@@ -793,10 +797,13 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
                         </a>
                     </li>
                     <?php }
-                $userData = get_user_permissions($this->session->userdata('user_id'));
-                if (!empty($userData)) {
-                    if ($userData[0]['role'] == 0 || $userData[0]['role'] == 1) {
+                // $userData = get_user_permissions($this->session->userdata('user_id'));
+                // if (!empty($userData)) {
+                //     if ($userData[0]['role'] == 0 || $userData[0]['role'] == 1) {
                     ?>
+                     <?php 
+            if (has_permissions('read', 'system_user')) {
+            ?>
                         <li class="nav-item mb-4">
                             <a href="<?= base_url('admin/system-users/') ?>" class="nav-link">
                                 <i class="nav-icon fas fa-user-tie text-danger"></i>
@@ -804,7 +811,7 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
                             </a>
                         </li>
                 <?php
-                    }
+                    // }}
                 } ?>
             </ul>
         </nav>

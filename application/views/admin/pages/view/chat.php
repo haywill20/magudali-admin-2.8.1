@@ -12,10 +12,10 @@
                                     <!-- </form> -->
                                     <select name="select_user_id[]" id="chat_user" class="search_user w-100" multiple data-placeholder=" Type to search and select users" onload="multiselect()">
                                         <?php
-                                        $user_details = fetch_details('users', ['active' => 1],);
+                                        $user_details = fetch_details('users', ['active' => 1]);
                                         if (!empty($user_details)) {
                                         ?>
-                                            <option value="<?= $user_details[0]['id'] ?>"> <?= $user_details[0]['opponent_username'] ?></option>
+                                            <option value="<?= $user_details[0]['id'] ?>"> <?= $user_details[0]['username'] ?></option>
                                         <?php
                                         }
 

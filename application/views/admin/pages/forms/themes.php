@@ -31,7 +31,7 @@
                                         <th data-field="is_default" data-sortable="false">Default</th>
                                         <th data-field="status" data-sortable="false">Status</th>
                                         <th data-field="created_on" data-sortable="false" data-visible="false">Created On</th>
-                                        <th data-field="operate" data-sortable="true">Action</th>
+                                        <th data-field="operate" data-sortable="false">Action</th>
                                     </tr>
                                 </thead>
                             </table>

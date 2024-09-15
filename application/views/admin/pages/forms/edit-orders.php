@@ -72,10 +72,10 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="d-flex justify-content-center">
+                            <!-- <div class="d-flex justify-content-center">
                                 <div class="form-group" id="error_box">
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -117,10 +117,10 @@
                                                         <button type="submit" class="btn btn-success" id="submit_btn">Save</button>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex justify-content-center">
+                                                <!-- <div class="d-flex justify-content-center">
                                                     <div class="form-group" id="error_box">
                                                     </div>
-                                                </div>
+                                                </div> -->
                                                 <!-- /.card-body -->
                                             </form>
                                         </div>
@@ -206,10 +206,10 @@
                                                     <button type="submit" class="btn btn-success create_shiprocket_parcel">Create Order</button>
                                                 </div>
 
-                                                <div class="d-flex justify-content-center">
+                                                <!-- <div class="d-flex justify-content-center">
                                                     <div class="form-group" id="error_box">
                                                     </div>
-                                                </div>
+                                                </div> -->
                                                 <!-- /.card-body -->
 
                                             </form>
@@ -224,8 +224,64 @@
                     </div>
                 </div>
 
+                <!-- model for update bank transfer recipt  -->
+                <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="payment_transaction_modal" data-backdrop="static" data-keyboard="false">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="user_name"></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card card-info">
+                                            <!-- form start -->
+                                            <form class="form-horizontal " id="edit_transaction_form" action="<?= base_url('admin/orders/edit_transactions/'); ?>" method="POST" enctype="multipart/form-data">
+                                                <input type="hidden" name="id" id="id">
+
+                                                <div class="card-body pad">
+                                                    <div class="form-group ">
+                                                        <label for="transaction"> Update Transaction </label>
+                                                        <select class="form-control" name="status" id="t_status">
+                                                            <option value="awaiting"> Awaiting </option>
+                                                            <option value="Success"> Success </option>
+                                                            <option value="Failed"> Failed </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group ">
+                                                        <label for="txn_id">Txn_id</label>
+                                                        <input type="text" class="form-control" name="txn_id" id="txn_id" placeholder="txn_id" />
+                                                    </div>
+                                                    <div class="form-group ">
+                                                        <label for="message">Message</label>
+                                                        <input type="text" class="form-control" name="message" id="message" placeholder="Message" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button type="reset" class="btn btn-warning">Reset</button>
+                                                        <button type="submit" class="btn btn-success" id="submit_btn">Update Transaction</button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- /.card-body -->
+                                            </form>
+                                        </div>
+                                        <!--/.card-->
+                                    </div>
+                                    <!--/.col-md-12-->
+                                </div>
+                                <!-- /.row -->
+
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-md-12">
-                    <div class="card card-info">
+                    <div class="card card-info overflow-auto">
                         <div class="card-body">
                             <table class="table">
                                 <?php
@@ -301,10 +357,13 @@
                                             <p>
                                                 <lable class="badge badge-success " style="font-size:13px;">Select status, delivery boy and radio button of seller which you want to update</lable>
                                             </p>
-                                            <div class="row delivery_boy ">
-
+                                            <?php
+                                            // print_R($items[0]['active_status']);
+                                            // die;
+                                            ?>
+                                            <div class="d-flex delivery_boy ">
                                                 <div class="col-md-3">
-                                                    <select name="status" class="form-control status">
+                                                    <select name="status" class="form-control status" <?php echo $items[0]['active_status'] == "awaiting" ? 'disabled' : '' ?>>
                                                         <option value=''>Select Status</option>
                                                         <option value="processed">Processed</option>
                                                         <option value="shipped">Shipped</option>
@@ -313,8 +372,9 @@
                                                         <option value="returned">Returned</option>
                                                     </select>
                                                 </div>
+
                                                 <div class="col-md-3">
-                                                    <select id='deliver_by' name='deliver_by' class='form-control' required>
+                                                    <select id='deliver_by' name='deliver_by' class='form-control' <?php echo $items[0]['active_status'] == "awaiting" ? 'disabled' : '' ?> required>
                                                         <option value=''>Select Delivery Boy</option>
                                                         <?php foreach ($delivery_res as $row) { ?>
                                                             <option value="<?= $row['user_id'] ?>"><?= $row['username'] ?></option>
@@ -322,9 +382,15 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <!-- <a href="javascript:void(0)" class="edit_order_tracking btn btn-success btn-xl" title="Order Tracking" data-order_id=' <?= $order_detls[0]['id']; ?>' data-seller_id=' <?= $sellers[$i] ?> ' data-courier_agency=' <?= $item['courier_agency'] ?> ' data-tracking_id=' <?= $item['tracking_id'] ?> ' data-url=' <?= $item['url'] ?> ' data-target="#transaction_modal" data-toggle="modal" style="height:35px;width:38px;"><i class="fa fa-map-marker-alt"></i></a> -->
+                                                    <!-- <a href="javascript:void(0)" class="edit_order_tracking btn btn-success btn-xs mr-1 action-btn ml-1 " title="Order Tracking" data-order_id=' <? //= $order_detls[0]['id']; 
+                                                                                                                                                                                                        ?>' data-order_item_id=' <? //= $item['id'] 
+                                                                                                                                                                                                                                    ?> ' data-seller_id=' <? //= $item['seller_id'] 
+                                                                                                                                                                                                                                                                                    ?> ' data-courier_agency=' <? //= $item['courier_agency'] 
+                                                                                                                                                                                                                                                                                                                                ?> ' data-tracking_id=' <? //= $item['tracking_id'] 
+                                                                                                                                                                                                                                                                                                                                                                                ?> ' data-url=' <? //= $item['url'] 
+                                                                                                                                                                                                                                                                                                                                                                                                                                ?> ' data-target="#transaction_modal" data-toggle="modal"><i class="fa fa-map-marker-alt"></i></a> -->
                                                     <a href="javascript:void(0)" class="edit_order_tracking btn btn-success btn-xl " title="Order Tracking" data-order_id=' <?= $order_detls[0]['id']; ?>' data-target="#transaction_modal" data-toggle="modal" style="height:35px;width:38px;"><i class="fa fa-map-marker-alt"></i></a>
-                                                    <a href="javascript:void(0);" title="Bulk Update" data-id=' <?= $sellers[$i] ?> ' class="btn btn-primary ml-3 col-md-4 update_status_admin_bulk">
+                                                    <a href="javascript:void(0);" title="Bulk Update" data-id=' <?= $sellers[$i] ?> ' class="btn btn-primary ml-3 update_status_admin_bulk">
                                                         Update
                                                     </a>
                                                     <?php if ($shipping_method['shiprocket_shipping_method'] == 1) { ?>
@@ -416,6 +482,8 @@
                                                                     //send notification while shiprocket order status changed
                                                                     if (isset($type) && !empty($type)) {
                                                                         $settings = get_settings('system_settings', true);
+                                                                        $firebase_project_id = get_settings('firebase_project_id');
+                                                                        $service_account_file = get_settings('service_account_file');
                                                                         $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                                                                         $custom_notification = fetch_details('custom_notifications', $type, '');
                                                                         $hashtag_cutomer_name = '< cutomer_name >';
@@ -441,9 +509,9 @@
                                                                         $fcm_ids = $seller_fcm_ids =  array();
 
                                                                         //send notification to customer
-                                                                        if (!empty($user_res[0]['fcm_id'])) {
+                                                                        if (!empty($user_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                                                                             $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                                                                            send_notification($fcmMsg, $fcm_ids);
+                                                                            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                                                                         }
                                                                         (notify_event(
                                                                             $type['type'],
@@ -453,9 +521,9 @@
                                                                         ));
 
                                                                         //send notification to seller
-                                                                        if (!empty($seller_data[0]['fcm_id'])) {
+                                                                        if (!empty($seller_data[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                                                                             $seller_fcm_ids[0][] = $seller_data[0]['fcm_id'];
-                                                                            send_notification($seller_fcmMsg, $seller_fcm_ids);
+                                                                            send_notification($seller_fcmMsg, $seller_fcm_ids, $seller_fcmMsg);
                                                                         }
                                                                     }
                                                                 }
@@ -689,9 +757,12 @@
                                 </div>
                                 <tr>
                                     <th class="w-10px">Total(<?= $settings['currency'] ?>)</th>
-                                    <td id=' amount'><?php echo $order_detls[0]['order_total'];
-                                                        $total = $order_detls[0]['order_total'];
-                                                        ?></td>
+                                    <td id='amount'>
+                                        <?php
+                                        echo $order_detls[0]['order_total'];
+                                        $total = $order_detls[0]['order_total'];
+                                        ?>
+                                    </td>
                                 </tr>
 
                                 <tr class="d-none">
@@ -736,7 +807,14 @@
                                 </tr>
                                 <tr>
                                     <th class="w-10px">Payment Method</th>
-                                    <td><?php echo $order_detls[0]['payment_method']; ?></td>
+                                    <td><?php echo $order_detls[0]['payment_method']; ?>
+                                        <?php if (isset($transaction_search_res)) {
+                                        ?>
+
+                                            <a href="javascript:void(0)" class="edit_transaction action-btn btn btn-success btn-xs mr-1 mb-1" title="Update bank transfer recipt status " data-id="<?= $order_detls[0]['id'] ?>" data-txn_id="<?= $transaction_search_res[0]['txn_id'] ?>" data-status="<?= $transaction_search_res[0]['status'] ?>" data-message="<?= $transaction_search_res[0]['message'] ?>" data-target="#payment_transaction_modal" data-toggle="modal"><i class="fa fa-pen"></i></a>
+
+                                        <?php } ?>
+                                    </td>
                                 </tr>
                                 <?php
                                 if (!empty($bank_transfer)) { ?>
@@ -787,13 +865,16 @@
                                     <td><?php echo date('d-M-Y', strtotime($order_detls[0]['date_added'])); ?></td>
                                 </tr>
                             </table>
-                            <?php 
+                            <?php
                             // echo "<pre>";
-                            // print_R($order_detls) ?>
-                            <?//= ($order_detls[0]['mobile'] != '' && isset($order_detls[0]['mobile'])) ? $order_detls[0]['mobile'] : ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0)  ? str_repeat("X", strlen($mobile_data[0]['mobile']) - 3) . substr($mobile_data[0]['mobile'], -3) : $mobile_data[0]['mobile'])   ?>
+                            // print_R($order_detls) 
+                            ?>
+                            <? //= ($order_detls[0]['mobile'] != '' && isset($order_detls[0]['mobile'])) ? $order_detls[0]['mobile'] : ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0)  ? str_repeat("X", strlen($mobile_data[0]['mobile']) - 3) . substr($mobile_data[0]['mobile'], -3) : $mobile_data[0]['mobile'])   
+                            ?>
 
 
-                            <a href="https://api.whatsapp.com/send?phone=<?= ($order_detls[0]['country_code'])?><?= ($order_detls[0]['mobile'] != '' && isset($order_detls[0]['mobile'])) ? $order_detls[0]['mobile'] : ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0)  ? str_repeat("X", strlen($mobile_data[0]['mobile']) - 3) . substr($mobile_data[0]['mobile'], -3) : $mobile_data[0]['mobile'])   ?>&amp;text=Hello <?= $order_detls[0]['uname'] ?>, Your order with ID : <?= $order_detls[0]['order_id'] ?> and is <?= $order_detls[0]['oi_active_status'] ?>. Please take a note of it. If you have further queries feel free to contact us. Thank you." target="_blank" title="Send Whatsapp Notification For Order" class="btn btn-success"><img src="<?= base_irl ?>" ><i class="fa fa-whatsapp"></i> Send Whatsapp Notification</a>
+                            <a href="https://api.whatsapp.com/send?phone=<?= ($order_detls[0]['country_code']) ?><?= ($order_detls[0]['mobile'] != '' && isset($order_detls[0]['mobile'])) ?
+                                                                                                                        $order_detls[0]['mobile'] : ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0)  ? str_repeat("X", strlen($mobile_data[0]['mobile']) - 3) . substr($mobile_data[0]['mobile'], -3) : $mobile_data[0]['mobile'])   ?>&amp;text=Hello <?= $order_detls[0]['uname'] ?>, Your order with ID : <?= $order_detls[0]['order_id'] ?> and is <?= $order_detls[0]['oi_active_status'] ?>. Please take a note of it. If you have further queries feel free to contact us. Thank you." target="_blank" title="Send Whatsapp Notification For Order" class="btn btn-success"><i class="fa fa-whatsapp"></i> Send Whatsapp Notification</a>
                         </div>
                     </div>
                     <!--/.card-->
@@ -837,10 +918,10 @@
                                         <button type="submit" class="btn btn-secondary" id="submit_btn">Refund</button>
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-center">
+                                <!-- <div class="d-flex justify-content-center">
                                     <div class="form-group" id="error_box">
                                     </div>
-                                </div>
+                                </div> -->
                                 <!-- /.card-body -->
                             </form>
                         </div>

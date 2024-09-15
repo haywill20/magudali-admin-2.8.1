@@ -14,7 +14,7 @@
 	8. resolve_bank()
 	9. curl_request()
 */
-
+#[\AllowDynamicProperties]
 class Paystack
 {
 	private $secret_key, $public_key, $curl;

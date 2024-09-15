@@ -44,40 +44,38 @@ class Brand_model extends CI_Model
         return $response;
     }
 
-    public function get_brands($id = NULL, $limit = '', $offset = '', $sort = 'row_order', $order = 'ASC', $has_child_or_item = 'true', $slug = '', $ignore_status = '', $seller_id = '')
-    {
-        $this->db->select('b.id as brand_id , b.name as brand_name, b.slug as brand_slug, b.image as brand_img');
-        
-            $this->db->join('products p', ' p.brand = b.name', 'left');
-            $this->db->group_start();
-            $this->db->or_where(['b.name ' => ' p.brand '], NULL, FALSE);
-            $this->db->group_End();
-            $this->db->group_by('b.id');
-
-        //  echo $this->db->last_query();
-        //  die;
-
-        if (!empty($limit) || !empty($offset)) {
-            $this->db->offset($offset);
-            $this->db->limit($limit);
-        }
-
-        $this->db->order_by((string)$sort, (string)$order);
-
-        $parent = $this->db->get('brands b');
-        $brands = $parent->result();
-        $count_res = $this->db->count_all_results('brands b');
-        $i = 0;
-
-        return  json_decode(json_encode($brands), 1);
+    public function get_brands($id = NULL, $limit = '', $offset = '', $sort = 'row_order', $order = 'ASC', $status = '1')
+{
+    $this->db->select('b.id as brand_id, b.name as brand_name, b.slug as brand_slug, b.image as brand_img, b.status as brand_status');
+    
+    $this->db->join('products p', 'p.brand = b.name', 'left');
+    $this->db->where('b.status', $status);
+    $this->db->group_by('b.id');
+    
+    if (!empty($limit)) {
+        $this->db->limit($limit, $offset);
     }
+    $this->db->order_by($sort, $order);
+    
+    $query = $this->db->get('brands b');
+    $brands = $query->result();
+    
+    // Count the total results that match the status condition
+    $this->db->where('b.status', $status);
+    // echo $this->db->last_query();
+    $count_res = $this->db->count_all_results('brands b');
+    
+    // Convert the result to an associative array
+    return json_decode(json_encode($brands), true);
+}
+
 
     public function get_brand_list()
     {
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
         $where = ['status !=' => NULL];
 
@@ -117,7 +115,7 @@ class Brand_model extends CI_Model
             $search_res->where($where);
         }
 
-        $brand_search_res = $search_res->order_by($sort, "asc")->limit($limit, $offset)->get('brands')->result_array();
+        $brand_search_res = $search_res->order_by($sort, $order)->limit($limit, $offset)->get('brands')->result_array();
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
@@ -161,22 +159,22 @@ class Brand_model extends CI_Model
         print_r(json_encode($bulkData));
     }
 
-    function delete_blog()
-    {
-        if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
+    // function delete_blog()
+    // {
+    //     if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
 
-            if (print_msg(!has_permissions('delete', 'blogs'), PERMISSION_ERROR_MSG, 'blogs')) {
-                return false;
-            }
-            if ($this->blog_model->delete_brand($_GET['id']) == TRUE) {
-                $this->response['error'] = true;
-                $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                $this->response['message'] = 'Deleted Succesfully';
-                print_r(json_encode($this->response));
-            }
-        } else {
-            redirect('admin/login', 'refresh');
-        }
-    }
+    //         if (print_msg(!has_permissions('delete', 'blogs'), PERMISSION_ERROR_MSG, 'blogs')) {
+    //             return false;
+    //         }
+    //         if ($this->blog_model->delete_brand($_GET['id']) == TRUE) {
+    //             $this->response['error'] = true;
+    //             $this->response['csrfName'] = $this->security->get_csrf_token_name();
+    //             $this->response['csrfHash'] = $this->security->get_csrf_hash();
+    //             $this->response['message'] = 'Deleted Succesfully';
+    //             print_r(json_encode($this->response));
+    //         }
+    //     } else {
+    //         redirect('admin/login', 'refresh');
+    //     }
+    // }
 }

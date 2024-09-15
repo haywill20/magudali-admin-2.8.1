@@ -36,10 +36,7 @@
                   <button type="submit" class="btn btn-success" id="submit_btn">Update About Us</button>
                 </div>
               </div>
-              <div class="d-flex justify-content-center">
-                <div class="form-group" id="error_box">
-                </div>
-              </div>
+
               <!-- /.card-body -->
             </form>
           </div>

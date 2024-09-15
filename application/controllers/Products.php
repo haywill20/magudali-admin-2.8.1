@@ -12,6 +12,8 @@ class Products extends CI_Controller
         $this->load->library(['pagination']);
         $this->data['settings'] = get_settings('system_settings', true);
         $this->data['web_settings'] = get_settings('web_settings', true);
+        $this->data['auth_settings'] = get_settings('authentication_settings', true);
+        $this->data['web_logo'] = get_settings('web_logo');
         $this->data['is_logged_in'] = ($this->ion_auth->logged_in()) ? 1 : 0;
         $this->data['user'] = ($this->ion_auth->logged_in()) ? $this->ion_auth->user()->row() : array();
         $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -20,11 +22,6 @@ class Products extends CI_Controller
 
     public function index()
     {
-        $web_doctor_brown = get_settings('web_doctor_brown', true);
-        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
-            /* redirect him to the page where he can enter the purchase code */
-            redirect(base_url("admin/purchase-code"));
-        }
         $this->form_validation->set_data($this->input->get(null, true));
         $this->form_validation->set_rules('category', 'Category', 'trim|xss_clean');
         $this->form_validation->set_rules('per-page', 'Per Page', 'trim|numeric|xss_clean');
@@ -80,17 +77,9 @@ class Products extends CI_Controller
             $filter['brand'] =  $brand[0]['name'];
         }
 
-        $category_slug = (isset($_GET['category']) && !empty($_GET['category']) && $_GET['category'] != "") ? $this->input->get('category', true) : '';
-        // print_r($category_slug);
-        // die;
+        $brands = $this->brand_model->get_brands('', $limit = NULL, 0, 'row_order', 'ASC', '1');
 
-
-        $offset =  0;
-        $sort = 'row_order';
-        $order =  'ASC';
-        $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, 'false');
-
-        $products = fetch_product(null, $filter, null, $category_slug, $limit = NULL, $offset, $sort, $order);
+        // $products = fetch_product(null, $filter, null, $category_slug, $limit = NULL, $offset, $sort, $order);
         // echo "<pre>";
         // print_r($brands);
         // die;
@@ -106,14 +95,21 @@ class Products extends CI_Controller
         //     }
         // }
 
-        $category = $this->category_model->get_categories(
-            '',
-            null,
-            $offset = 0,
-            $sort = null,
-            $order = null,
-            $has_child_or_item = 'true'
-        );
+        // $category = $this->category_model->get_categories(
+        //     $id = NULL, 
+        //     $limit = '', 
+        //     $offset = '', 
+        //     $sort = 'row_order', 
+        //     $order = 'ASC', 
+        //     $has_child_or_item = 'true', 
+        //     $slug = '', 
+        //     $ignore_status = ''
+        // );
+        $category = fetch_details('categories', ['status' => 1]);
+
+        // echo "<pre>";
+        // print_r($category);
+        // die;
 
         if (!empty($category_id)) {
             $category_id = explode('|', $category_id);
@@ -139,35 +135,34 @@ class Products extends CI_Controller
             $sort = 'pv.price';
             $order = 'ASC';
         } elseif ($sort_by == "price-desc") {
-            $sort = 'pv.price';
+            $sort = 'pv.special_price';
             $order = 'DESC';
         }
+
+
+
         $total_rows = fetch_product(null, $filter, null, $category_id, null, null, null, null, TRUE, NULL, $seller_id);
 
-        $theme = fetch_details('themes', ['status' => 1], 'name');
-        // print_r($filter);
+        // print_r($_SESSION);
         // die;
+        $theme = fetch_details('themes', ['status' => 1], 'name');
         $limit = ($this->input->get('per-page')) ? $this->input->get('per-page', true) : 12;
+        $config['base_url'] = base_url('products');
+        $config['total_rows'] = $total_rows;
+        $config['per_page'] = $limit;
+        $config['num_links'] = 7;
+        $config['use_page_numbers'] = TRUE;
+        $config['reuse_query_string'] = TRUE;
+        $config['page_query_string'] = FALSE;
+
+        $config['attributes'] = array('class' => 'page-link');
+        $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
+        $config['full_tag_close'] = '</ul>';
+
+        if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
+            $theme[0]['name'] = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'modern';
+        }
         if (isset($theme[0]['name']) && strtolower($theme[0]['name']) == 'modern') {
-            $config['base_url'] = base_url('products');
-            $config['total_rows'] = $total_rows;
-            $config['per_page'] = $limit;
-            $config['num_links'] = 7;
-            $config['use_page_numbers'] = TRUE;
-            $config['reuse_query_string'] = TRUE;
-            $config['page_query_string'] = FALSE;
-
-            $config['attributes'] = array('class' => 'page-link');
-            $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
-            $config['full_tag_close'] = '</ul>';
-
-            // $config['first_tag_open'] = '<li class="page-item">';
-            // $config['first_link'] = 'First';
-            // $config['first_tag_close'] = '</li>';
-
-            // $config['last_tag_open'] = '<li class="page-item">';
-            // $config['last_link'] = 'Last';
-            // $config['last_tag_close'] = '</li>';
 
             $config['prev_tag_open'] = '<li class="page-item">';
             $config['prev_link'] = '<i class="uil uil-arrow-left"></i>';
@@ -176,25 +171,7 @@ class Products extends CI_Controller
             $config['next_tag_open'] = '<li class="page-item">';
             $config['next_link'] = '<i class="uil uil-arrow-right"></i>';
             $config['next_tag_close'] = '</li>';
-
-            $config['cur_tag_open'] = '<li class="page-item active disabled"><a class="page-link">';
-            $config['cur_tag_close'] = '</a></li>';
-
-            $config['num_tag_open'] = '<li class="page-item">';
-            $config['num_tag_close'] = '</li>';
         } else {
-            $config['base_url'] = base_url('products');
-            $config['total_rows'] = $total_rows;
-            $config['per_page'] = $limit;
-            $config['num_links'] = 7;
-            $config['use_page_numbers'] = TRUE;
-            $config['reuse_query_string'] = TRUE;
-            $config['page_query_string'] = FALSE;
-
-            $config['attributes'] = array('class' => 'page-link');
-            $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
-            $config['full_tag_close'] = '</ul>';
-
             $config['first_tag_open'] = '<li class="page-item">';
             $config['first_link'] = 'First';
             $config['first_tag_close'] = '</li>';
@@ -210,20 +187,20 @@ class Products extends CI_Controller
             $config['next_tag_open'] = '<li class="page-item">';
             $config['next_link'] = '<i class="fa fa-arrow-right"></i>';
             $config['next_tag_close'] = '</li>';
-
-            $config['cur_tag_open'] = '<li class="page-item active disabled"><a class="page-link">';
-            $config['cur_tag_close'] = '</a></li>';
-
-            $config['num_tag_open'] = '<li class="page-item">';
-            $config['num_tag_close'] = '</li>';
         }
 
+        $config['cur_tag_open'] = '<li class="page-item active disabled"><a class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
 
         $page_no = (empty($this->uri->segment(2))) ? 1 : $this->uri->segment(2);
         if (!is_numeric($page_no)) {
             redirect(base_url('products'));
         }
         $offset = ($page_no - 1) * $limit;
+        // print_r($offset);
         $this->pagination->initialize($config);
         $this->data['links'] =  $this->pagination->create_links();
         $this->data['main_page'] = 'product-listing';
@@ -237,10 +214,11 @@ class Products extends CI_Controller
         $this->data['products'] = fetch_product($user_id, $filter, null, $category_id, $limit, $offset, $sort, $order, NULL, NULL, $seller_id);
 
 
-        $this->data['filters'] = (isset($this->data['products']['filters'])) ? json_encode($this->data['products']['filters']) : "";
         // echo "<pre>";
-        //         print_r($brands);
-        //         die;
+        // echo $this->db->last_query();
+        // print_r($this->data['products']);
+        // die;
+        $this->data['filters'] = (isset($this->data['products']['filters'])) ? json_encode($this->data['products']['filters']) : "";
         $this->data['filters_key'] = 'all_products_listing';
         $this->data['page_main_bread_crumb'] = "Product Listing";
         $this->load->view('front-end/' . THEME . '/template', $this->data);
@@ -248,11 +226,6 @@ class Products extends CI_Controller
 
     public function category($category_slug = '')
     {
-        $web_doctor_brown = get_settings('web_doctor_brown', true);
-        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
-            /* redirect him to the page where he can enter the purchase code */
-            redirect(base_url("admin/purchase-code"));
-        }
         $this->form_validation->set_data($this->input->get(null, true));
 
         $this->form_validation->set_rules('per-page', 'Per Page', 'trim|numeric|xss_clean');
@@ -272,11 +245,11 @@ class Products extends CI_Controller
         // $offset =  0;
         // $sort = 'row_order';
         // $order =  'ASC';
-        // $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, 'false');
+        // $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, '1');
         $offset =  0;
         $sort = 'row_order';
         $order =  'ASC';
-        $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, 'false');
+        $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, '1');
 
         $category_id = get_category_id_by_slug($category_slug);
         if (empty($category_id)) {
@@ -290,9 +263,10 @@ class Products extends CI_Controller
             $order = null,
             $has_child_or_item = 'true'
         );
+        // $category = $this->category_model->get_categories($category_id, $limit, $offset, $sort, $order, 'true');
 
         $limit = ($this->input->get('per-page')) ? $this->input->get('per-page', true) : 12;
-        $products = fetch_product(null, '', null, $category_id, $limit, $offset, $sort, $order);
+        // $products = fetch_product(null, '', null, $category_id, $limit, $offset, $sort, $order);
 
         // $brands = array();
         // for ($i = 0; $i < count($products['product']); $i++) {
@@ -426,11 +400,6 @@ class Products extends CI_Controller
 
     public function details($slug = '')
     {
-        $web_doctor_brown = get_settings('web_doctor_brown', true);
-        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
-            /* redirect him to the page where he can enter the purchase code */
-            redirect(base_url("admin/purchase-code"));
-        }
         $user_id = NULL;
         if ($this->data['is_logged_in']) {
             $user_id = $this->data['user']->id;
@@ -438,14 +407,20 @@ class Products extends CI_Controller
 
         $slug = urldecode($slug);
         $valid_zipcode = (!empty($this->session->userdata('valid_zipcode'))) ? $this->session->userdata('valid_zipcode') : "";
-        $product = fetch_product($user_id, ['slug' => $slug], NULL, NULL, NULL, NULL, NULL, NULL, NULL, $valid_zipcode);
+        $product = fetch_product($user_id, ['slug' => $slug], NULL, NULL, NULL, NULL, NULL, NULL, NULL, $valid_zipcode, NULL, 1);
+
+        $product_variant_id = $product['product'][0]['variants'][0]['id'];
+        $res = get_statistics($product_variant_id);
 
         if (empty($product['product'])) {
             redirect(base_url('products'));
         }
         $product['product'][0]['zipcode'] = $valid_zipcode;
         $this->data['product'] = $product;
-        $user_rating_limit = 5;
+        // echo "<pre>";
+        // print_r($product);
+        // die;
+        $user_rating_limit = 10;
         $user_rating_offset = 0;
         $this->data['product_ratings'] = $this->rating_model->fetch_rating($product['product'][0]['id'], null, $user_rating_limit, $user_rating_offset, 'pr.id', 'DESC');
         $this->data['review_images'] = $this->rating_model->fetch_rating($product['product'][0]['id'], '', 2, 0, 'pr.id', 'DESC', '', 1);
@@ -461,6 +436,7 @@ class Products extends CI_Controller
         $this->data['product_image'] = $product['product'][0]['image'];
         $this->data['username'] = $this->session->userdata('username');
         $this->data['user_rating_limit'] = $user_rating_limit;
+        $this->data['statistics'] = $res;
         $this->data['seller_products_count'] = $this->Home_model->count_products($product['product'][0]['seller_id']);
         $this->data['user_rating_offset'] = $user_rating_limit + $user_rating_offset;
         $category_id = fetch_details('products', ['id' => $product['product'][0]['id']], 'category_id');
@@ -476,28 +452,28 @@ class Products extends CI_Controller
         if (empty($product_id)) {
             return false;
         }
+        $settings = get_settings('system_settings', true);
+        // echo "<pre>";
+        // print_r($settings);
+        // die;
         $user_id = NULL;
         if ($this->data['is_logged_in']) {
             $user_id = $this->data['user']->id;
         }
         $valid_zipcode = (!empty($this->session->userdata('valid_zipcode'))) ? $this->session->userdata('valid_zipcode') : "";
-        $product = fetch_product($user_id, null, $product_id, NULL, NULL, NULL, NULL, NULL, NULL, $valid_zipcode);
+        $product = fetch_product($user_id, null, $product_id, NULL, NULL, NULL, NULL, NULL, NULL, $valid_zipcode, NULL, 1);
         if (isset($product['product']) && empty($product['product'])) {
             return false;
         }
         $product['product'][0]['zipcode'] = $valid_zipcode;
         $product = $product['product'][0];
         $product['get_price'] = get_price_range_of_product($product['id']);
+        $product['check_deliverability'] = $settings;
         print_r(json_encode($product));
     }
 
     public function section($section_id = '', $section_title = '')
     {
-        $web_doctor_brown = get_settings('web_doctor_brown', true);
-        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
-            /* redirect him to the page where he can enter the purchase code */
-            redirect(base_url("admin/purchase-code"));
-        }
         if (empty($section_id)) {
             redirect(base_url());
         }
@@ -570,7 +546,7 @@ class Products extends CI_Controller
         $offset =  0;
         $sort = 'row_order';
         $order =  'ASC';
-        $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, 'false');
+        $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, '1');
         $brand_slug = (isset($_GET['brand']) && !empty($_GET['brand']) && $_GET['brand'] != "") ? $this->input->get('brand', true) : '';
         if (!empty($brand_slug)) {
             $brand = fetch_details('brands', ['slug' => $brand_slug]);
@@ -588,7 +564,7 @@ class Products extends CI_Controller
 
 
 
-        // $limit = ($this->input->get('per-page')) ? $this->input->get('per-page', true) : 12;
+        $limit = ($this->input->get('per-page')) ? $this->input->get('per-page', true) : 12;
         $sort_by = ($this->input->get('sort')) ? $this->input->get('sort', true) : '';
         $user_id = NULL;
         if ($this->data['is_logged_in']) {
@@ -624,7 +600,10 @@ class Products extends CI_Controller
         $config['page_query_string'] = FALSE;
 
         // $config['attributes'] = array('class' => 'page-link');
-
+        // echo "<pre>";
+        // print_r("total_rows : " .$total_rows);
+        // print_r("limit : ".$limit);
+        // die;
         $theme = fetch_details('themes', ['status' => 1], 'name');
 
         if (isset($theme[0]['name']) && strtolower($theme[0]['name']) == 'modern') {
@@ -701,7 +680,11 @@ class Products extends CI_Controller
 
         $this->data['brands'] = (isset($brands)) ? json_encode($brands) : "";
         $this->data['categories'] = (isset($category)) ? json_encode($category) : "";
-
+        // echo "<pre>";
+        // print_r("limit : " .$limit);
+        // print_r("offset : ".$offset);
+        // print_r("sort : ".$sort);
+        // print_r("order : " .$order);
         $this->data['products'] = fetch_product(null, $filter, $product_ids, $product_categories, $limit, $offset, $sort, $order);
         $this->data['filters'] = (isset($this->data['products']['filters'])) ? json_encode($this->data['products']['filters']) : "";
         $this->data['section_slug'] = fetch_details('sections', ['id' => $section_id]);
@@ -711,11 +694,6 @@ class Products extends CI_Controller
     }
     public function search()
     {
-        $web_doctor_brown = get_settings('web_doctor_brown', true);
-        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
-            /* redirect him to the page where he can enter the purchase code */
-            redirect(base_url("admin/purchase-code"));
-        }
         $this->form_validation->set_data($this->input->get(null, true));
         $this->form_validation->set_rules('per-page', 'Per Page', 'trim|numeric|xss_clean');
         $this->form_validation->set_rules('sort', 'Sort', 'trim|xss_clean');
@@ -757,6 +735,35 @@ class Products extends CI_Controller
         if ($this->data['is_logged_in']) {
             $user_id = $this->data['user']->id;
         }
+
+        $category = $this->category_model->get_categories(
+            '',
+            null,
+            $offset = 0,
+            $sort = null,
+            $order = null,
+            $has_child_or_item = 'true'
+        );
+
+        $offset =  0;
+        $sort = 'row_order';
+        $order =  'ASC';
+        $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, '1');
+        $brand_slug = (isset($_GET['brand']) && !empty($_GET['brand']) && $_GET['brand'] != "") ? $this->input->get('brand', true) : '';
+        if (!empty($brand_slug)) {
+            $brand = fetch_details('brands', ['slug' => $brand_slug]);
+            $filter['brand'] =  $brand[0]['name'];
+        }
+        // print_r($brand_slug);
+        // die;
+
+
+        $category_slug = (isset($_GET['category']) && !empty($_GET['category']) && $_GET['category'] != "") ? $this->input->get('category', true) : '';
+        if (!empty($category_slug)) {
+            // $category = fetch_details('brands', ['slug' => $brand_slug]);
+            $filter['category'] =  $category_slug;
+        }
+
         //Product Sorting
         $sort = '';
         $order = '';
@@ -819,7 +826,11 @@ class Products extends CI_Controller
         $offset = ($page_no - 1) * $limit;
         $this->pagination->initialize($config);
         $this->data['links'] =  $this->pagination->create_links();
-        $page_title = 'Search Result for "' . html_escape($_GET['q']) . '"';
+        if (isset($_GET['q'])) {
+            $page_title = 'Search Result for "' . html_escape($_GET['q']) . '"';
+        } else {
+            $page_title = 'products search';
+        }
         $this->data['main_page'] = 'product-listing';
         $this->data['title'] = $page_title . ' | ' . $this->data['web_settings']['site_title'];
         $this->data['keywords'] = $page_title . ',Product Section, ' . $this->data['web_settings']['meta_keywords'];
@@ -832,17 +843,17 @@ class Products extends CI_Controller
         $this->data['products'] = fetch_product(null, $filter, null, null, $limit, $offset, $sort, $order);
         $this->data['filters'] = (isset($this->data['products']['filters'])) ? json_encode($this->data['products']['filters']) : "";
         $this->data['filters_key'] = 'products_search';
-        $this->data['page_main_bread_crumb'] = $page_title;
+        $this->data['brands'] = (isset($brands)) ? json_encode($brands) : "";
+        $this->data['categories'] = (isset($category)) ? json_encode($category) : "";
+        // print_r($this->data['categories']);
+        // die;
+        // $this->data['page_main_bread_crumb'] = $page_title;
+        $this->data['page_search_bread_crumb'] = $page_title;
         $this->load->view('front-end/' . THEME . '/template', $this->data);
     }
 
     public function tags($tag = '')
     {
-        $web_doctor_brown = get_settings('web_doctor_brown', true);
-        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
-            /* redirect him to the page where he can enter the purchase code */
-            redirect(base_url("admin/purchase-code"));
-        }
         if (empty($tag)) {
             redirect(base_url());
         }
@@ -1234,13 +1245,61 @@ class Products extends CI_Controller
         }
     }
 
+    public function check_city()
+    {
+        $this->form_validation->set_rules('product_id', 'Product Id', 'trim|numeric|xss_clean|required');
+        $this->form_validation->set_rules('city', 'City', 'trim|xss_clean|required');
+        if (!$this->form_validation->run()) {
+            $this->response['error'] = true;
+            $this->response['message'] = validation_errors();
+            $this->response['data'] = array();
+            echo json_encode($this->response);
+        } else {
+            $city = $this->input->post('city', true);
+            $is_city = is_exist(['name' => $city], 'cities');
+            $product_id = $this->input->post('product_id', true);
+            // print_r("in controller if ");
+            if ($is_city) {
+                $city_id = fetch_details('cities', ['name' => $city], 'id');
+                $is_available = is_product_delivarable('city', $city_id[0]['id'], $product_id);
+                // print_r($is_available);
+
+                if ($is_available) {
+                    $_SESSION['valid_city'] = $city;
+                    $this->response['error'] = false;
+                    $this->response['message'] = '<b class="text-success">Product is deliverable on "' . $city . '"</b>';
+                    echo json_encode($this->response);
+                    return false;
+                } else {
+                    $this->response['error'] = true;
+                    $this->response['message'] = '<b class="text-danger">Product is not deliverable on "' . $city . '"</b>';
+                    echo json_encode($this->response);
+                    return false;
+                }
+            } else {
+                $this->response['error'] = true;
+                $this->response['message'] = '<b class="text-danger">Product is not deliverable on "' . $city . '"</b>';
+                echo json_encode($this->response);
+                return false;
+            }
+        }
+    }
+
     public function add_faqs()
     {
         if ($this->ion_auth->logged_in()) {
-            $this->product_faqs_model->add_product_faqs($_POST);
-            $this->response['error'] = false;
-            $this->response['message'] = 'Faq added Succesfully';
-            print_r(json_encode($this->response));
+            $this->form_validation->set_rules('question', 'Question', 'trim|xss_clean|required');
+            if (!$this->form_validation->run()) {
+                $this->response['error'] = true;
+                $this->response['message'] = validation_errors();
+                $this->response['data'] = array();
+                echo json_encode($this->response);
+            } else {
+                $this->product_faqs_model->add_product_faqs($_POST);
+                $this->response['error'] = false;
+                $this->response['message'] = 'Faq added Succesfully';
+                print_r(json_encode($this->response));
+            }
         } else {
             redirect('admin/login', 'refresh');
         }
@@ -1308,5 +1367,22 @@ class Products extends CI_Controller
 
             redirect($_SERVER['HTTP_REFERER']);
         }
+    }
+
+    public function test($slug = '')
+    {
+        echo "<pre>";
+        $slug = urldecode($slug);
+        $user_id = NULL;
+        if ($this->data['is_logged_in']) {
+            $user_id = $this->data['user']->id;
+        }
+        $product = fetch_product($user_id, ['slug' => $slug], NULL, NULL, NULL, NULL, NULL, NULL, NULL, '');
+        $product_variant_id = $product['product'][0]['variants'][0]['id'];
+        $res = get_statistics($product_variant_id);
+        print_R($product_variant_id);
+
+        print_R($res);
+        // print_r($product['product'][0]['variants'][0]['id']);
     }
 }

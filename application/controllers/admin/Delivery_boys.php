@@ -32,6 +32,10 @@ class Delivery_boys extends CI_Controller
                     ->get('users u')
                     ->result_array();
             }
+            $this->data['shipping_method'] = get_settings('shipping_method', true);
+            $this->data['system_settings'] = get_settings('system_settings', true);
+            $this->data['cities'] = fetch_details('cities', "", 'name,id');
+
             // echo "<pre>";
             // print_r($this->data);
             // die;
@@ -57,7 +61,9 @@ class Delivery_boys extends CI_Controller
     public function view_delivery_boys()
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
-
+            if (isset($_GET['delivery_boy_status']) && !empty($_GET['delivery_boy_status'])) {
+                return $this->Delivery_boy_model->get_delivery_boys_list($_GET['delivery_boy_status']);
+            }
             return $this->Delivery_boy_model->get_delivery_boys_list();
         } else {
             redirect('admin/login', 'refresh');
@@ -66,6 +72,8 @@ class Delivery_boys extends CI_Controller
 
     public function delete_delivery_boys()
     {
+        // print_r($_GET);
+        // die;
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
 
             if (print_msg(!has_permissions('delete', 'delivery_boy'), PERMISSION_ERROR_MSG, 'delivery_boy', false)) {
@@ -78,6 +86,30 @@ class Delivery_boys extends CI_Controller
                 return false;
                 exit();
             }
+            if (!isset($_GET['id']) && empty($_GET['id'])) {
+                $this->response['error'] = true;
+                $this->response['message'] = 'Seller id is required';
+                print_r(json_encode($this->response));
+                return;
+                exit();
+            }
+            $dboy_id = $this->input->get('id', true);
+            $order_items = fetch_details('order_items', ['delivery_boy_id' => $dboy_id]);
+
+            //check all the assign order item status which is not delivered yet 
+            foreach ($order_items as $order_item) {
+                // print_r($order_item);
+                $order_item_status  = $order_item['active_status'];
+                if ($order_item_status != 'delivered' || $order_item_status != 'returned' || $order_item_status != 'cancelled') {
+                    $this->response['error'] = true;
+                    $this->response['message'] = 'You cannot delivery boy , orders is not delivered, please once assign to other delivery boy or deliver all the orders ';
+                    print_r(json_encode($this->response));
+                    return;
+                    exit();
+                }
+            }
+            // print_r($order_items);
+            // die;
             if (update_details(['group_id' => '2'], ['user_id' => $_GET['id'], 'group_id' => 3], 'users_groups') == TRUE) {
                 $this->response['error'] = false;
                 $this->response['message'] = 'User removed from delivery boy succesfully';
@@ -95,6 +127,8 @@ class Delivery_boys extends CI_Controller
 
     public function add_delivery_boy()
     {
+        // print_r($_POST);
+        // die;
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
 
             if (isset($_POST['edit_delivery_boy'])) {
@@ -109,7 +143,7 @@ class Delivery_boys extends CI_Controller
 
             $this->form_validation->set_rules('name', 'Name', 'trim|required|xss_clean');
             $this->form_validation->set_rules('email', 'Mail', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|xss_clean|min_length[5]');
+            $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|xss_clean|min_length[5]|max_length[16]');
             $this->form_validation->set_rules('status', 'Status', 'trim|required|xss_clean');
             if (!isset($_POST['edit_delivery_boy'])) {
                 $this->form_validation->set_rules('password', 'Password', 'trim|required|xss_clean');
@@ -117,7 +151,14 @@ class Delivery_boys extends CI_Controller
             }
             $this->form_validation->set_rules('address', 'Address', 'trim|required|xss_clean');
             $this->form_validation->set_rules('bonus_type', 'Bonus Type', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('serviceable_zipcodes[]', 'Serviceable Zipcodes', 'trim|required|xss_clean');
+
+            if (isset($_POST['pincode_wise_deliverability']) && !empty($_POST['pincode_wise_deliverability']) && ($_POST['pincode_wise_deliverability'] == 1)) {
+                $this->form_validation->set_rules('serviceable_zipcodes[]', 'Serviceable Zipcodes', 'trim|required|xss_clean');
+            }
+            if (isset($_POST['city_wise_deliverability']) && !empty($_POST['city_wise_deliverability']) && ($_POST['city_wise_deliverability'] == 1)) {
+                $this->form_validation->set_rules('serviceable_cities[]', 'Serviceable Cities', 'trim|required|xss_clean');
+            }
+
             $bonus = 0;
             if (isset($_POST['bonus_type']) && $_POST['bonus_type'] == 'fixed_amount_per_order_item') {
                 $this->form_validation->set_rules('bonus_amount', 'Bonus Amount', 'trim|required|numeric|xss_clean');
@@ -135,23 +176,21 @@ class Delivery_boys extends CI_Controller
                 }
             }
 
-            if(isset($_POST['edit_delivery_boy']))
-            {
+            if (isset($_POST['edit_delivery_boy'])) {
                 $delivery_boy_data = fetch_details('users', ['id' => $_POST['edit_delivery_boy']], 'driving_license');
                 $driving_license = explode(',', $delivery_boy_data[0]['driving_license']);
             }
-            
+
             if (isset($_POST['edit_delivery_boy'])) {
-                if (isset($_FILES) && !empty($_FILES) && !empty($_FILES['driving_license']['name'][0]) && count($_FILES['driving_license']['name']) < 2 ) {
-                
+                if (isset($_FILES) && !empty($_FILES) && !empty($_FILES['driving_license']['name'][0]) && count($_FILES['driving_license']['name']) < 2) {
+
                     $this->form_validation->set_rules('driving_license', 'driving_license', 'trim|required|xss_clean', array('required' => 'Please add front and back image of Driving license'));
-                } elseif (isset($driving_license) && !empty($driving_license[0]) && $driving_license[0] !='NULL') {
-                    
-                    if(count($driving_license) < 2){
-                        
-                    $this->form_validation->set_rules('driving_license', 'driving_license', 'trim|required|xss_clean', array('required' => 'Please add front and back image of Driving license'));
+                } elseif (isset($driving_license) && !empty($driving_license[0]) && $driving_license[0] != 'NULL') {
+
+                    if (count($driving_license) < 2) {
+
+                        $this->form_validation->set_rules('driving_license', 'driving_license', 'trim|required|xss_clean', array('required' => 'Please add front and back image of Driving license'));
                     }
-                    
                 }
                 if (isset($_FILES) && !empty($_FILES) && !empty($_FILES['driving_license']['name'][0]) && count($_FILES['driving_license']['name']) > 2) {
                     $this->form_validation->set_rules('driving_license', 'driving_license', 'trim|required|xss_clean', array('required' => 'You can only choose two images'));
@@ -195,7 +234,7 @@ class Delivery_boys extends CI_Controller
 
                     if (isset($_POST['edit_delivery_boy']) && !empty($_POST['edit_delivery_boy']) && isset($delivery_boy_data[0]['driving_license']) && !empty($delivery_boy_data[0]['driving_license'])) {
                         $old_logo = explode('/', $delivery_boy_data[0]['driving_license']);
-                       
+
                         delete_images(DELIVERY_BOY_DOCUMENTS_PATH, $old_logo[4]);
                     }
                     for ($i = 0; $i < $other_image_cnt; $i++) {
@@ -253,11 +292,37 @@ class Delivery_boys extends CI_Controller
                         echo json_encode($response);
                         return false;
                     }
+
+                    if (isset($_POST['serviceable_zipcodes']) && !empty($_POST['serviceable_zipcodes'])) {
+                        $serviceable_zipcodes = implode(",", $this->input->post('serviceable_zipcodes', true));
+                    } else {
+                        $serviceable_zipcodes = NULL;
+                    }
+
+                    if (isset($_POST['serviceable_cities']) && !empty($_POST['serviceable_cities'])) {
+                        $serviceable_cities = implode(",", $this->input->post('serviceable_cities', true));
+                    } else {
+                        $serviceable_cities = NULL;
+                    }
+
                     $_POST['status'] = $this->input->post('status', true);
-                    $_POST['serviceable_zipcodes'] = implode(",", $_POST['serviceable_zipcodes']);
+                    $_POST['serviceable_zipcodes'] = $serviceable_zipcodes;
+                    $_POST['serviceable_cities'] = $serviceable_cities;
                     $_POST['driving_license'] = isset($images_new_name_arr) && !empty($images_new_name_arr) ? implode(',', (array)$images_new_name_arr) : implode(',', (array)$delivery_boy_data[0]['driving_license']);
 
                     $this->Delivery_boy_model->update_delivery_boy($_POST);
+                    if (!empty($_POST['edit_delivery_boy'])) {
+                        $delivery_boy_id = fetch_details('users', ['id' => $_POST['edit_delivery_boy']]);
+                        $title = "Congratulations! Your Delivery Boy Account Has Been Approved";
+                        $mail_admin_msg = 'We are delighted to inform you that your application to become an approved delivery boy account on our platform has been successful! Congratulations on this significant milestone.';
+                        $email_message = array(
+                            'username' => 'Hello, Dear <b>' . ucfirst($delivery_boy_id[0]['username']) . '</b>, ',
+                            'subject' => $title,
+                            'email' => $delivery_boy_id[0]['email'],
+                            'message' => $mail_admin_msg
+                        );
+                        send_mail($delivery_boy_id[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
+                    }
                 } else {
 
                     if (!$this->form_validation->is_unique($_POST['mobile'], 'users.mobile') || !$this->form_validation->is_unique($_POST['email'], 'users.email')) {
@@ -276,12 +341,25 @@ class Delivery_boys extends CI_Controller
                     $identity = ($identity_column == 'mobile') ? $mobile : $email;
                     $password = $this->input->post('password');
 
+                    if (isset($_POST['serviceable_zipcodes']) && !empty($_POST['serviceable_zipcodes'])) {
+                        $serviceable_zipcodes = implode(",", $this->input->post('serviceable_zipcodes', true));
+                    } else {
+                        $serviceable_zipcodes = NULL;
+                    }
+
+                    if (isset($_POST['serviceable_cities']) && !empty($_POST['serviceable_cities'])) {
+                        $serviceable_cities = implode(",", $this->input->post('serviceable_cities', true));
+                    } else {
+                        $serviceable_cities = NULL;
+                    }
+
                     $additional_data = [
                         'username' => $this->input->post('name'),
                         'address' => $this->input->post('address'),
                         'bonus_type' => $this->input->post('bonus_type'),
                         'bonus' => $bonus,
-                        'serviceable_zipcodes' => implode(",", $this->input->post('serviceable_zipcodes', true)),
+                        'serviceable_zipcodes' => $serviceable_zipcodes,
+                        'serviceable_cities' => $serviceable_cities,
                         'type' => 'phone',
                         'driving_license' => implode(',', $images_new_name_arr),
                         'status' => $this->input->post('status', true),

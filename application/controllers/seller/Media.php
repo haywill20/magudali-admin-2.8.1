@@ -93,16 +93,65 @@ class Media extends CI_Controller
             $this->response['error'] = true;
             $this->response['csrfName'] = $this->security->get_csrf_token_name();
             $this->response['csrfHash'] = $this->security->get_csrf_hash();
+            $this->response['file_name'] = '';
             $this->response['message'] = (empty($_FILES)) ? "Files not Uploaded Successfully..!" :  $other_image_info_error;
             print_r(json_encode($this->response));
-        } else {
-            $this->response['error'] = false;
-            $this->response['csrfName'] = $this->security->get_csrf_token_name();
-            $this->response['csrfHash'] = $this->security->get_csrf_hash();
-            $this->response['message'] = "Files Uploaded Successfully..!";
-            $this->response['error'] = (isset($other_image_info_error) && !empty($other_image_info_error)) ? $other_image_info_error : false;
-            print_r(json_encode($this->response));
+            return;
         }
+        $arr = explode(".", $_FILES['documents']['name'][0]);
+        if (in_array("webp", $arr)) {
+            $title = $_FILES['documents']['name'][0];
+            $arr[count($arr) - 1] = "png";
+            $newName = $target_path . implode(".", $arr);
+            $title = rtrim($title, ".webp");
+            $im = imagecreatefromwebp($target_path . $_FILES['documents']['name'][0]);
+
+            if (file_exists($newName)) {
+                $fileName = $arr[count($arr) - 2];
+                $fileName1 = $arr[count($arr) - 2];
+                $temp = explode("_", $fileName);
+
+                // Check if the filename has any underscore separators
+                if (count($temp) == 1) {
+                    $temp = explode("_", $fileName . "_1");
+                }
+
+                if (count($temp) != 1) {
+                    // Check if the last part of the filename is a number
+                    if (is_numeric(end($temp))) {
+                        // Check if a file with the same name and a numeric suffix exists
+                        if (file_exists($target_path . $fileName1 . "_1.png")) {
+                            $temp[count($temp) - 1] = (int) end($temp) + 1;
+                        } else {
+                            $temp[count($temp) - 1] = (int) end($temp);
+                        }
+                    }
+                    $fileName = implode("_", $temp);
+                    $title = $fileName;
+                }
+
+                $arr[count($arr) - 2] = $fileName;
+                $newName = $target_path . implode(".", $arr);
+            }
+
+            $array = [
+                'name' => $title . ".png",
+                'title' => $title,
+                "extension" => "png"
+            ];
+
+            update_details($array, ['name' => $_FILES['documents']['name'][0]], "media");
+            unlink($target_path . $_FILES['documents']['name'][0]);
+            imagepng($im, $newName);
+            imagedestroy($im);
+        }
+        $this->response['error'] = false;
+        $this->response['csrfName'] = $this->security->get_csrf_token_name();
+        $this->response['csrfHash'] = $this->security->get_csrf_hash();
+        $this->response['file_name'] = $_FILES['documents']['name'][0];
+        $this->response['message'] = "Files Uploaded Successfully..!";
+        $this->response['error'] = $other_image_info_error;
+        print_r(json_encode($this->response));
     }
 
     function delete($mediaid = false)
@@ -154,6 +203,38 @@ class Media extends CI_Controller
             $this->response['message'] = "Media could not be deleted!";
             print_r(json_encode($this->response));
             return false;
+        }
+    }
+
+    public function media_delete()
+    {
+        // Check if it's an AJAX request and if IDs are sent via POST.
+
+        if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_seller()) {
+            redirect('seller/login', 'refresh');
+            exit();
+        }
+        if ($this->input->post('ids')) {
+            $ids = $this->input->post('ids');
+
+            // Validate IDs (optional, depending on your application logic)
+            $deleted = $this->media_model->delete_media($ids);
+
+            if ($deleted) {
+                $response['success'] = true;
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                $response['message'] = 'Media items deleted successfully.';
+            } else {
+                $response['success'] = false;
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                $response['message'] = 'Failed to delete media items.';
+            }
+
+            echo json_encode($response);
+        } else {
+            redirect('seller/login', 'refresh');
         }
     }
 

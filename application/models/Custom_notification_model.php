@@ -5,6 +5,8 @@ class Custom_notification_model extends CI_Model
 
     public function add_custom_notification($data)
     {
+        // print_r($data);
+        // die;
         $data = escape_array($data);
         $custom_notification_data = [
             'title' => $data['title'],

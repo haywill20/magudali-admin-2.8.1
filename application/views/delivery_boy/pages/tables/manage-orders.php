@@ -24,7 +24,7 @@
                         <div class="card-innr">
                             <div class="gaps-1-5x row d-flex adjust-items-center">
                                 <div class="form-group col-md-4">
-                                    <label>Date range:</label>
+                                    <label>Date and time range:</label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="far fa-clock"></i></span>
@@ -67,7 +67,7 @@
                                             </div>
                                         </div>
                                         <div class="col-md-2 mt-4">
-                                            <button type="button" class="btn btn-default mt-2" onclick="status_date_wise_search()">Filter</button>
+                                            <button type="button" class="btn btn-default mt-2" onclick="status_date_wise_search()">Search</button>
                                         </div>
                                     </div>
                                     <!-- <div class="w-25 h-25">  -->
@@ -101,7 +101,7 @@
                                         <th data-field="status" data-sortable='true' data-visible='false'>Status</th>
                                         <th data-field="active_status" data-sortable='true' data-visible='true'>Active Status</th>
                                         <th data-field="date_added" data-sortable='true'>Order Date</th>
-                                        <th data-field="operate">Action</th>
+                                        <th data-field="operate" data-sortable="false">Action</th>
                                     </tr>
                                 </thead>
                             </table>

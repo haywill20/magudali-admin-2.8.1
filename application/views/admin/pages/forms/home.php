@@ -223,7 +223,7 @@
                         </div>
                     </div>
                 </div>
-                <h5 class="col mt-3">Order Outlines</h5>
+                <h5 class="col mt-3">Order items Outlines</h5>
                 <div class="row col-12 d-flex">
                     <div class="col-3">
                         <div class="small-box awaiting-box">
@@ -302,6 +302,39 @@
                             </div>
                         </div>
                     </div>
+                    <!-- <div class="col-3">
+                        <div class="small-box bg-secondary">
+                            <div class="inner">
+                                <h3><?= $status_counts['draft'] ?></h3>
+                                <p>Draft</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-xs fa-level-up-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small-box bg-secondary">
+                            <div class="inner">
+                                <h3><?= $status_counts['return_request_approved'] ?></h3>
+                                <p>Return Request Approved</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-xs fa-level-up-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small-box bg-secondary">
+                            <div class="inner">
+                                <h3><?= $status_counts['return_request_pending'] ?></h3>
+                                <p>Return Request Pending</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-xs fa-level-up-alt"></i>
+                            </div>
+                        </div>
+                    </div> -->
                 </div>
                 <div class="col-md-12 main-content">
                     <div class="card content-area p-4">
@@ -330,10 +363,14 @@
                                                 <option value="Paypal">Paypal</option>
                                                 <option value="RazorPay">RazorPay</option>
                                                 <option value="Paystack">Paystack</option>
-                                                <option value="Flutterwave">Flutterwave</option>`
+                                                <option value="Flutterwave">Flutterwave</option>
                                                 <option value="Paytm">Paytm</option>
                                                 <option value="Stripe">Stripe</option>
                                                 <option value="bank_transfer">Direct Bank Transfers</option>
+                                                <option value="midtrans">Midtrans</option>
+                                                <option value="my_fatoorah">My Fatoorah</option>
+                                                <option value="instamojo">Instamojo</option>
+                                                <option value="phonepe">PhonePe</option>
                                             </select>
                                         </div>
                                     </div>
@@ -369,7 +406,7 @@
                                         <th data-field="delivery_time" data-sortable='true' data-visible='false'>Delivery Time</th>
                                         <th data-field="notes" data-sortable='false' data-visible='false'>O. Notes</th>
                                         <th data-field="date_added" data-sortable='true'>Order Date</th>
-                                        <th data-field="operate">Action</th>
+                                        <th data-field="operate" data-sortable="false">Action</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -398,11 +435,11 @@
                                     <th data-field="id" data-sortable="true">ID</th>
                                     <th data-field="order_id" data-sortable="true">Order ID</th>
                                     <th data-field="order_item_id" data-sortable="false">Order Item ID</th>
-                                    <th data-field="courier_agency" data-sortable="false">courier_agency</th>
-                                    <th data-field="tracking_id" data-sortable="false">tracking_id</th>
+                                    <th data-field="courier_agency" data-sortable="false">Courier Agency</th>
+                                    <th data-field="tracking_id" data-sortable="false">Tracking ID</th>
                                     <th data-field="url" data-sortable="false">URL</th>
                                     <th data-field="date" data-sortable="false">Date</th>
-                                    <th data-field="operate" data-sortable="true">Actions</th>
+                                    <th data-field="operate" data-sortable="false">Actions</th>
                                 </tr>
                             </thead>
                         </table>
@@ -430,7 +467,7 @@
                             <th data-field="name" data-sortable="false">Name</th>
                             <th data-field="mobile" data-sortable="true">Mobile No</th>
                             <th data-field="date" data-sortable="true">Date</th>
-                            <th data-field="operate">Actions</th>
+                            <th data-field="operate" data-sortable="false">Actions</th>
                         </tr>
                     </thead>
                 </table>
@@ -457,7 +494,7 @@
                             <th data-field="name" data-sortable="false">Name</th>
                             <th data-field="mobile" data-sortable="true">Mobile No</th>
                             <th data-field="date" data-sortable="true">Date</th>
-                            <th data-field="operate">Actions</th>
+                            <th data-field="operate" data-sortable="false">Actions</th>
                         </tr>
                     </thead>
                 </table>
@@ -483,7 +520,7 @@
                             <th data-field="name" data-sortable="false">Name</th>
                             <th data-field="mobile" data-sortable="true">Mobile No</th>
                             <th data-field="date" data-sortable="true">Date</th>
-                            <th data-field="operate">Actions</th>
+                            <th data-field="operate" data-sortable="false">Actions</th>
                         </tr>
                     </thead>
                 </table>

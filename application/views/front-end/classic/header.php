@@ -1,19 +1,40 @@
 <?php
+// $cookie_lang = setcookie('language', 'arabic');
 $this->load->model('category_model');
 $categories = $this->category_model->get_categories(null, 8);
 $language = get_languages();
 $cookie_lang = $this->input->cookie('language', TRUE);
+// $cookie_value = $this->input->cookie('language');
+// $cookie_lang = 'arabic';
+if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
+    $daynamic_lang = '';
+} else {
+    $daynamic_lang = $this->config->item('language');
+}
+// $daynamic_lang = $this->config->item('language');
+// print_r($daynamic_lang);
+
 $language_index = 0;
 if (!empty($cookie_lang)) {
     $language_index = array_search($cookie_lang, array_column($language, "language"));
+} else if (!empty($daynamic_lang)) {
+    $language_index = array_search($daynamic_lang, array_column($language, "language"));
 }
 $web_settings = get_settings('web_settings', true);
 $auth_settings = get_settings('authentication_settings', true);
+$settings = get_settings('system_settings', true);
 ?>
-
 <!-- header starts -->
 <div id="mySidenav" class="sidenav is-closed-left">
     <input type="hidden" id="auth_settings" name="auth_settings" value='<?= isset($auth_settings['authentication_method']) ? $auth_settings['authentication_method'] : ''; ?>'>
+    <input type="hidden" id="low_stock_limit" name="low_stock_limit" value='<?= isset($settings['low_stock_limit']) ? $settings['low_stock_limit'] : '10'; ?>'>
+    <input type="hidden" id="allow_items_in_cart" name="allow_items_in_cart" value='<?= isset($settings['max_items_cart']) ? $settings['max_items_cart'] : '10'; ?>'>
+    <input type="hidden" id="decimal_point" name="decimal_point" value='<?= isset($settings['decimal_point']) ? $settings['decimal_point'] : '2'; ?>'>
+    <input type="hidden" name="android_app_store_link" id="android_app_store_link" value="<?= (isset($settings['android_app_store_link']) && !empty($settings['android_app_store_link'])) ? $settings['android_app_store_link'] : '' ?>">
+    <input type="hidden" name="ios_app_store_link" id="ios_app_store_link" value="<?= (isset($settings['ios_app_store_link']) && !empty($settings['ios_app_store_link'])) ? $settings['ios_app_store_link'] : '' ?>">
+    <input type="hidden" name="scheme" id="scheme" value="<?= (isset($settings['scheme']) && !empty($settings['scheme'])) ? $settings['scheme'] : '' ?>">
+    <input type="hidden" name="host" id="host" value="<?= (isset($settings['host']) && !empty($settings['host'])) ? $settings['host'] : '' ?>">
+    <input type="hidden" name="share_slug" id="share_slug" value="true">
     <div class="container">
         <div class="row my-2 pr-2 text-uppercase d-flex align-items-center">
             <div class="col-12 text-right close-sidenav"> <a href='#' onclick="closeNav();"><?= !empty($this->lang->line('close')) ? $this->lang->line('close') : 'Close' ?> <i class="fa fa-times"></i></a></div>
@@ -42,8 +63,8 @@ $auth_settings = get_settings('authentication_settings', true);
             <aside class="sidebar">
                 <div id="leftside-navigation" class="nano">
                     <ul class="nano-content">
-                        <li><a href="<?= base_url('products') ?>"><i class="fas fa-box-open fa-lg"></i> <span><?= !empty($this->lang->line('products')) ? $this->lang->line('products') : 'Products' ?></span></a></li>
-                        <li><a href="<?= base_url('sellers') ?>"><i class="fas fa-store fa-lg"></i><span class="ml-1"><?= label('sellers', 'Sellers') ?></span></a></li>
+                        <li><a href="<?= base_url('products') ?>"><i class="fas fa-box-open fa-lg"></i> <span><?= !empty($this->lang->line('shop')) ? $this->lang->line('shop') : 'Shop' ?></span></a></li>
+                        <li><a href="<?= base_url('seller/auth/sign_up') ?>" target="_blank"><i class="fas fa-user-plus fa-lg"></i><span class="ml-1"><?= !empty($this->lang->line('become_a_seller')) ? $this->lang->line('become_a_seller') : 'Become a Seller' ?></a></li>
                         <?php if ($this->ion_auth->logged_in()) { ?>
                             <li><a href="<?= base_url('my-account/wallet') ?>"><i class="fa fa-wallet fa-lg"></i> <?= !empty($this->lang->line('balance')) ? $this->lang->line('balance') : 'Balance' ?> <?= ' : ' . $settings['currency'] . ' ' . $user->balance ?></a></li>
                             <li><a href="<?= base_url('my-account') ?>"><i class="far fa-user-circle fa-lg"></i> <?= !empty($this->lang->line('my_account')) ? $this->lang->line('my_account') : 'My Account' ?></a></li>
@@ -59,15 +80,24 @@ $auth_settings = get_settings('authentication_settings', true);
                         <li><a href="<?= base_url('home/about-us') ?>"><i class="fa fa-info fa-lg"></i> <span><?= !empty($this->lang->line('about_us')) ? $this->lang->line('about_us') : 'About Us' ?></span></a></li>
                         <li><a href="<?= base_url('home/contact-us') ?>"><i class="fa fa-envelope fa-lg"></i> <span><?= !empty($this->lang->line('contact_us')) ? $this->lang->line('contact_us') : 'Contact Us' ?></span></a></li>
                         <li><a href="<?= base_url('home/faq') ?>"><i class="fas fa-question-circle fa-lg"></i><span class="ml-1"><?= label('faq', 'FAQs') ?></span></a></li>
-                        <li><a href="<?= base_url('blogs/') ?>"><i class="fas fa-blog fa-lg"></i><span class="ml-1"><?= label('blogs', 'Blogs') ?></span></a></li>
+                        <li><a href="<?= base_url('blogs/') ?>"><i class="fas fa-blog fa-lg"></i><span class="ml-1"><?= !empty($this->lang->line('blogs')) ? $this->lang->line('blogs') : 'Blogs' ?></span></a></li>
                         <?php if ($this->ion_auth->logged_in()) { ?>
-                            <li><a href="<?= base_url('login/logout') ?>"><i class="fa fa-sign-out-alt fa-lg"></i> <?= !empty($this->lang->line('logout')) ? $this->lang->line('logout') : 'Logout' ?></a></li>
+                            <li><a href="" id="logout_btn"><i class="fa fa-sign-out-alt fa-lg"></i> <?= !empty($this->lang->line('logout')) ? $this->lang->line('logout') : 'Logout' ?></a></li>
                         <?php } ?>
                         <li class="sub-menu">
                             <a href="javascript:void(0);"><i class="fa fa-language fa-lg"></i> <span><?= !empty($this->lang->line('language')) ? $this->lang->line('language') : 'Language' ?></span><i class="arrow fa fa-angle-left float-right"></i></a>
                             <ul>
                                 <?php foreach ($language as $row) { ?>
-                                    <li><a href="<?= base_url('home/lang/' . strtolower($row['language'])) ?>"><?= strtoupper($row['code']) . ' - ' . ucfirst($row['language']) ?></a></li>
+                                    <li>
+                                        <a href="<?= base_url('home/lang/' . strtolower($row['language'])) ?>">
+                                            <?= strtoupper($row['code']) . ' - ' . ucfirst($row['language']);
+                                            if (!empty($row['native_language'])) {
+                                                echo ' (' . $row['native_language'] . ')';
+                                            }
+                                            ?>
+                                        </a>
+                                    </li>
+
                                 <?php } ?>
                             </ul>
                         </li>
@@ -83,9 +113,13 @@ $auth_settings = get_settings('authentication_settings', true);
                         foreach ($categories as $row) { ?>
                             <li class="sub-menu">
                                 <a href="<?= base_url('products/category/' . $row['slug']) ?>">
-                                    <span class="category-span">
-                                        <img class="svg-icon-image lazy" data-src="<?= $row['image'] ?>" />
-                                        <span class="category-line-height text-dark"><?= $row['name'] ?></span>
+                                    <span class="category-span d-flex align-items-center">
+                                        <div class="col-2">
+                                            <img class="svg-icon-image lazy" data-src="<?= $row['image'] ?>" />
+                                        </div>
+                                        <div>
+                                            <span class="category-line-height text-dark"><?= $row['name'] ?></span>
+                                        </div>
                                     </span>
                                 </a>
                             </li>
@@ -111,7 +145,7 @@ $auth_settings = get_settings('authentication_settings', true);
         </div>
     </div>
     <hr class="m-0">
-    <div class="text-center mt-2"><a class="button button-danger button-rounded" href="<?= base_url('products') ?>"> <?= !empty($this->lang->line('return_to_shop')) ? $this->lang->line('return_to_shop') : 'Return To Shop' ?></a></div>
+    <div class="text-center mt-2"><a class="button button-danger button-rounded" href="<?= base_url('products') ?>"> <?= !empty($this->lang->line('return_to_shop')) ? $this->lang->line('return_to_shop') : 'Return to Shop' ?></a></div>
     <div class="shopping-cart-sm container bg-white rounded mt-4 mb-2" id="cart-item-sidebar">
         <?php
         if (isset($user->id)) {
@@ -220,14 +254,14 @@ $auth_settings = get_settings('authentication_settings', true);
         <?php } ?>
         <div class="container d-lg-none">
             <div class="w-100">
-                <div class="col-12 mobile-search px-0">
+                <div class="col-12 mobile-search px-0 mb-1">
                     <select class='search_product w-100 ' name="search"></select>
                 </div>
             </div>
         </div>
         <div class="navbar-collapse collapse" id="navbarNavDropdown">
             <div class="col-md-6">
-                <form class="mt-2 w-100">
+                <form class="w-100">
                     <div class="input-group md-form form-sm form-2 pl-0 h-50 mx-auto navbar-top-search-box">
                         <!-- <input > -->
                         <select class="form-control my-0 py-1 p-2 rounded-0 search_product" type="text" aria-label="Search"></select>
@@ -239,6 +273,8 @@ $auth_settings = get_settings('authentication_settings', true);
                     <li class="nav-item dropdown active">
                         <a class="m-1" data-toggle="dropdown" href="#">
                             <?php if ($cookie_lang) { ?>
+                                <span class="text-dark font-weight-bold"><?= ucfirst($language[$language_index]['code']) ?></span>
+                            <?php } else  if ($daynamic_lang) { ?>
                                 <span class="text-dark font-weight-bold"><?= ucfirst($language[$language_index]['code']) ?></span>
                             <?php } else { ?>
                                 <span class="text-dark font-weight-bold">En</span>
@@ -265,7 +301,7 @@ $auth_settings = get_settings('authentication_settings', true);
                                 <a href="<?= base_url('my-account/wallet') ?>" class="dropdown-item"><i class="fas fa-wallet mr-2 text-primary link-color"></i> <?= $settings['currency'] . ' ' . isset($user->balance) && !empty($user->balance) ? number_format($user->balance, 2) : 0.0 ?></a>
                                 <a href="<?= base_url('my-account') ?>" class="dropdown-item"><i class="fas fa-user mr-2 text-primary link-color"></i> <?= !empty($this->lang->line('profile')) ? $this->lang->line('profile') : 'Profile' ?> </a>
                                 <a href="<?= base_url('my-account/orders') ?>" class="dropdown-item"><i class="fas fa-history mr-2 text-primary link-color"></i> <?= !empty($this->lang->line('orders')) ? $this->lang->line('orders') : 'Orders' ?> </a>
-                                <a href="<?= base_url('login/logout') ?>" class="dropdown-item"><i class="fa fa-sign-out-alt mr-2 text-primary link-color"></i><?= !empty($this->lang->line('logout')) ? $this->lang->line('logout') : 'Logout' ?></a>
+                                <a href="" class="dropdown-item" id="logout_btn"><i class="fa fa-sign-out-alt mr-2 text-primary link-color"></i><?= !empty($this->lang->line('logout')) ? $this->lang->line('logout') : 'Logout' ?></a>
                             </div>
                         </li>
 
@@ -323,8 +359,13 @@ $auth_settings = get_settings('authentication_settings', true);
                                         <?php
                                         foreach ($categories as $row) { ?>
                                             <a href="<?= base_url('products/category/' . $row['slug']) ?>">
-                                                <li class="category-span"><img class="svg-icon-image lazy" data-src="<?= $row['image'] ?>" />
-                                                    <span class="category-line-height text-dark"><?= $row['name'] ?></span>
+                                                <li class="category-span d-flex align-items-center">
+                                                    <div class="col-md-4">
+                                                        <img class="svg-icon-image lazy" data-src="<?= $row['image'] ?>" />
+                                                    </div>
+                                                    <div>
+                                                        <span class="category-line-height text-dark"><?= $row['name'] ?></span>
+                                                    </div>
                                                 </li>
                                             </a>
                                         <?php } ?>
@@ -350,7 +391,7 @@ $auth_settings = get_settings('authentication_settings', true);
                                             <a href="<?= base_url() ?>"><?= !empty($this->lang->line('home')) ? $this->lang->line('home') : 'Home' ?></a>
                                         </li>
                                         <li class="morph-text">
-                                            <a href="<?= base_url('products') ?>"><?= !empty($this->lang->line('products')) ? $this->lang->line('products') : 'Products' ?></a>
+                                            <a href="<?= base_url('products') ?>"><?= !empty($this->lang->line('shop')) ? $this->lang->line('shop') : 'Shop' ?></a>
                                         </li>
                                         <li class="morph-text">
                                             <a href="<?= base_url('sellers') ?>"><?= !empty($this->lang->line('sellers')) ? $this->lang->line('sellers') : 'Sellers' ?></a>
@@ -372,6 +413,9 @@ $auth_settings = get_settings('authentication_settings', true);
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="column col-right d-md-flex d-none">
+                    <a href="<?= base_url('seller/auth/sign_up') ?>" target="_blank" class="btn btn-primary"><?= !empty($this->lang->line('become_a_seller')) ? $this->lang->line('become_a_seller') : 'Become a Seller' ?></a>
                 </div>
             </div>
         </div>

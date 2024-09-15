@@ -152,8 +152,8 @@ class MyConfig
         $t = &get_instance();
         $t->config->load('eshop');
 
-        $theme = (isset($_SESSION['theme']) && !empty($_SESSION['theme'])) ?$_SESSION['theme'] : ''; 
-        if(empty($theme)){
+        $theme = (isset($_SESSION['theme']) && !empty($_SESSION['theme'])) ? $_SESSION['theme'] : '';
+        if (empty($theme)) {
             $default_theme = $t->config->item('default_theme');
             $current_theme = current_theme();
             if (empty($current_theme)) {
@@ -177,11 +177,25 @@ class MyConfig
     {
         $ci = &get_instance();
         $ci->load->helper(['language']);
+        $ci->load->database();
+        // $query = $ci->db->set(['is_default' => 1])->where('id', '1')->update('languages');
+        $query = $ci->db->get_where('languages', ['is_default' => 1]);
+        $result = $query->result_array();
+        // echo "<pre>";
+        // print_r($result);
+        $language_name = $result[0]['language'];
+        $ci->config->set_item('language', $language_name);
+        // print_r($ci->config->item('language'));
         $siteLang = $ci->input->cookie('language', TRUE);
         if ($siteLang) {
             $ci->lang->load('web_labels_lang', $siteLang);
-        } else {
-            $ci->lang->load('web_labels_lang', 'english');
+        }
+        // else if (isset($language) && !empty($language)) {
+        //     $ci->lang->load('web_labels_lang', $ci->config->item('language'));
+
+        // } 
+        else {
+            $ci->lang->load('web_labels_lang', $language_name);
         }
     }
 
@@ -197,6 +211,50 @@ class MyConfig
             base_url("admin/login"),
             base_url("auth/login"),
             base_url("app/v1/api"),
+        );
+        $doctor_brown = get_settings('doctor_brown', true);
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+
+        if ((empty($doctor_brown) && empty($web_doctor_brown)) && !in_array(current_url(), $exclude_uris)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        } else {
+            if ((!empty($doctor_brown) && !in_array(current_url(), $exclude_uris))) {
+                /* redirect him to the page where he can enter the purchase code */
+                $calculated_time_check = $time_check = '';
+
+                $time_check = (isset($doctor_brown["time_check"])) ? trim($doctor_brown["time_check"]) : "";
+                $code_bravo = (isset($doctor_brown["code_bravo"])) ? trim($doctor_brown["code_bravo"]) : "";
+                $code_adam = (isset($doctor_brown["code_adam"])) ? trim($doctor_brown["code_adam"]) : "";
+                $dr_firestone = (isset($doctor_brown["dr_firestone"])) ? trim($doctor_brown["dr_firestone"]) : "";
+                $str = $code_bravo . "|" . $code_adam . "|" . $dr_firestone;
+                $calculated_time_check = hash('sha256', $str);
+                if (empty($calculated_time_check) || empty($time_check)) {
+                    if (!in_array(current_url(), $exclude_uris)) {
+                        redirect(base_url("admin/purchase-code"));
+                    }
+                }
+            }
+            if ((!empty($web_doctor_brown) && !in_array(current_url(), $exclude_uris))) {
+                /* redirect him to the page where he can enter the purchase code */
+                $calculated_time_check = $time_check = '';
+                $time_check = (isset($web_doctor_brown["time_check"])) ? trim($web_doctor_brown["time_check"]) : "";
+                $code_bravo = (isset($web_doctor_brown["code_bravo"])) ? trim($web_doctor_brown["code_bravo"]) : "";
+                $code_adam = (isset($web_doctor_brown["code_adam"])) ? trim($web_doctor_brown["code_adam"]) : "";
+                $dr_firestone = (isset($web_doctor_brown["dr_firestone"])) ? trim($web_doctor_brown["dr_firestone"]) : "";
+                $str = $code_bravo . "|" . $code_adam . "|" . $dr_firestone;
+                $calculated_time_check = hash('sha256', $str);
+                if (empty($calculated_time_check) || empty($time_check)) {
+                    if (!in_array(current_url(), $exclude_uris)) {
+                        redirect(base_url("admin/purchase-code"));
+                    }
+                }
+            }
+        }
+    }
+    function verify_web_doctor_brown()
+    {
+        $exclude_uris = array(
             base_url(),
             base_url("products"),
             base_url("cart"),
@@ -239,6 +297,8 @@ class MyConfig
             base_url("my-account/manage_address"),
             base_url("my-account/wallet"),
             base_url("my-account/transactions"),
+            base_url("my-account/chat"),
+            base_url("my-account/tickets"),
             base_url("my-account/add_address"),
             base_url("my-account/edit_address"),
             base_url("my-account/delete_address"),
@@ -273,29 +333,13 @@ class MyConfig
             base_url("sellers"),
             base_url("sellers/"),
         );
-        $doctor_brown = get_settings('doctor_brown', true);
+        // $doctor_brown = get_settings('doctor_brown', true);
         $web_doctor_brown = get_settings('web_doctor_brown', true);
 
-        if ((empty($doctor_brown) && empty($web_doctor_brown)) && !in_array(current_url(), $exclude_uris)) {
+        if ((empty($web_doctor_brown)) && in_array(current_url(), $exclude_uris)) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
         } else {
-            if ((!empty($doctor_brown) && !in_array(current_url(), $exclude_uris))) {
-                /* redirect him to the page where he can enter the purchase code */
-                $calculated_time_check = $time_check = '';
-
-                $time_check = (isset($doctor_brown["time_check"])) ? trim($doctor_brown["time_check"]) : "";
-                $code_bravo = (isset($doctor_brown["code_bravo"])) ? trim($doctor_brown["code_bravo"]) : "";
-                $code_adam = (isset($doctor_brown["code_adam"])) ? trim($doctor_brown["code_adam"]) : "";
-                $dr_firestone = (isset($doctor_brown["dr_firestone"])) ? trim($doctor_brown["dr_firestone"]) : "";
-                $str = $code_bravo . "|" . $code_adam . "|" . $dr_firestone;
-                $calculated_time_check = hash('sha256', $str);
-                if (empty($calculated_time_check) || empty($time_check)) {
-                    if (!in_array(current_url(), $exclude_uris)) {
-                        redirect(base_url("admin/purchase-code"));
-                    }
-                }
-            }
             if ((!empty($web_doctor_brown) && !in_array(current_url(), $exclude_uris))) {
                 /* redirect him to the page where he can enter the purchase code */
                 $calculated_time_check = $time_check = '';
@@ -313,6 +357,7 @@ class MyConfig
             }
         }
     }
+
     function maintenance_mode_web()
     {
         $include_uris = array(
@@ -394,50 +439,18 @@ class MyConfig
         );
         $system_settings = get_settings('system_settings', true);
 
-        if ((!empty($system_settings) && ($system_settings['is_web_under_maintenance'] == 1)) && !in_array(current_url(), $include_uris)) {
+        if ((!empty($system_settings) && isset($system_settings['is_web_under_maintenance']) && ($system_settings['is_web_under_maintenance'] == 1)) && in_array(current_url(), $include_uris)) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("maintenance"));
-        // } else {
-        //     if ((!empty($doctor_brown) && !in_array(current_url(), $exclude_uris))) {
-        //         /* redirect him to the page where he can enter the purchase code */
-        //         $calculated_time_check = $time_check = '';
-
-        //         $time_check = (isset($doctor_brown["time_check"])) ? trim($doctor_brown["time_check"]) : "";
-        //         $code_bravo = (isset($doctor_brown["code_bravo"])) ? trim($doctor_brown["code_bravo"]) : "";
-        //         $code_adam = (isset($doctor_brown["code_adam"])) ? trim($doctor_brown["code_adam"]) : "";
-        //         $dr_firestone = (isset($doctor_brown["dr_firestone"])) ? trim($doctor_brown["dr_firestone"]) : "";
-        //         $str = $code_bravo . "|" . $code_adam . "|" . $dr_firestone;
-        //         $calculated_time_check = hash('sha256', $str);
-        //         if (empty($calculated_time_check) || empty($time_check)) {
-        //             if (!in_array(current_url(), $exclude_uris)) {
-        //                 redirect(base_url("admin/purchase-code"));
-        //             }
-        //         }
-        //     }
-        //     if ((!empty($web_doctor_brown) && !in_array(current_url(), $exclude_uris))) {
-        //         /* redirect him to the page where he can enter the purchase code */
-        //         $calculated_time_check = $time_check = '';
-        //         $time_check = (isset($web_doctor_brown["time_check"])) ? trim($web_doctor_brown["time_check"]) : "";
-        //         $code_bravo = (isset($web_doctor_brown["code_bravo"])) ? trim($web_doctor_brown["code_bravo"]) : "";
-        //         $code_adam = (isset($web_doctor_brown["code_adam"])) ? trim($web_doctor_brown["code_adam"]) : "";
-        //         $dr_firestone = (isset($web_doctor_brown["dr_firestone"])) ? trim($web_doctor_brown["dr_firestone"]) : "";
-        //         $str = $code_bravo . "|" . $code_adam . "|" . $dr_firestone;
-        //         $calculated_time_check = hash('sha256', $str);
-        //         if (empty($calculated_time_check) || empty($time_check)) {
-        //             if (!in_array(current_url(), $exclude_uris)) {
-        //                 redirect(base_url("admin/purchase-code"));
-        //             }
-        //         }
-        //     }
         }
     }
     public function allow_modification()
     {
         $t = &get_instance();
         //if user is superadmin then allow modifications
-        if($t->session->userdata('mobile') == '9638527410'){
-            return define('ALLOW_MODIFICATION',1);
+        if ($t->session->userdata('mobile') == '9638527410') {
+            return define('ALLOW_MODIFICATION', 1);
         }
-        return define('ALLOW_MODIFICATION',IS_ALLOWED_MODIFICATION);
+        return define('ALLOW_MODIFICATION', IS_ALLOWED_MODIFICATION);
     }
 }

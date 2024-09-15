@@ -1,4 +1,5 @@
 <?php
+#[\AllowDynamicProperties]
 class My_fatoorah
 {
 
@@ -30,7 +31,7 @@ class My_fatoorah
     {
         $postFields = array(
             'paymentMethodId' => $payment_method,
-            'InvoiceValue' => intval($amount),
+            'InvoiceValue' => ($amount),
             'CallBackUrl'     => base_url("payment/process_myfatoorah"),
             'ErrorUrl'        => base_url("payment/process_myfatoorah"),
 
@@ -53,7 +54,7 @@ class My_fatoorah
         $postFields = array(
             'InvoiceAmount	' => 100,
             'CurrencyIso' => 'KWD',
-           
+
 
             // 'CallBackUrl'     => 'http://vendoreshop.wrteam.co.in/payment/process_myfatoorah',
             // 'ErrorUrl'        => 'http://vendoreshop.wrteam.co.in/payment/process_myfatoorah',

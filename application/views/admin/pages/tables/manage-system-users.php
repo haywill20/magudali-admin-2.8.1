@@ -50,7 +50,9 @@
                                         <th data-field="mobile" data-sortable="false">Mobile</th>
                                         <th data-field="email" data-sortable="false">Email</th>
                                         <th data-field="role" data-sortable="false">Role</th>
-                                        <th data-field="operate" data-sortable="false">Actions</th>
+                                        <?php if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 1) {  ?>
+                                            <th data-field="operate" data-sortable="false">Actions</th>
+                                        <?php } ?>
                                     </tr>
                                 </thead>
                             </table>

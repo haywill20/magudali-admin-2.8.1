@@ -17,7 +17,7 @@
                     <div class="row">
 
                         <div class="form-group col-md-4">
-                            <label>Date range:</label>
+                            <label>Date and time range:</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"><i class="far fa-clock"></i></span>
@@ -45,7 +45,7 @@
                         <div class="form-group col-md-4">
                             <div class="row mt-2">
                                 <div class="col-md-4 d-flex align-items-center pt-4">
-                                    <button type="button" class="btn btn-outline-primary btn-sm mr-2" onclick="status_date_wise_search()">Filter</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm mr-2" onclick="status_date_wise_search()">Search</button>
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="resetfilters()">Reset</button>
                                 </div>
 
@@ -53,12 +53,20 @@
                         </div>
                         <div class="col-md-12 main-content">
                             <div class="card content-area p-4">
-                                <div class="card-head">
+                                <div class="card-head d-flex justify-content-between">
                                     <h4 class="card-title">Media Details</h4>
+                                    <!-- <div id="mediaToolbar">
+                                        <button id="media_remove" class="btn btn-danger"><i class="fa fa-trash mr-2"></i>Delete</button>
+                                    </div> -->
                                 </div>
                                 <div class="card-innr">
                                     <div class="gaps-1-5x"></div>
-                                    <table class='table-striped' id='media-table' data-page-size="5" data-toggle="table" data-url="<?= base_url('admin/media/fetch') ?>" data-click-to-select="true" data-single-select='true' data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-query-params="mediaUploadParams">
+                                    <div id="mediaToolbar">
+                                        <button id="media_remove" class="btn btn-danger">
+                                            <i class="fa fa-trash mr-2"></i> Delete
+                                        </button>
+                                    </div>
+                                    <table class='table-striped' data-toolbar="#mediaToolbar" id='media-table' data-page-size="5" data-toggle="table" data-url="<?= base_url('admin/media/fetch') ?>" data-click-to-select="true" data-single-select='false' data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="mediaToolbar" data-show-export="true" data-query-params="mediaUploadParams">
                                         <thead>
                                             <tr>
                                                 <th data-field="state" data-checkbox="true"></th>

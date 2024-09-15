@@ -29,7 +29,7 @@
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="support_number">Support Number <span class='text-danger text-xs'>*</span></label>
-                                        <input type="number" class="form-control" name="support_number" value="<?= (isset($web_settings['support_number'])) ? output_escaping($web_settings['support_number']) : '' ?>" placeholder="Customer support mobile number" />
+                                        <input type="text" maxlength="16" oninput="validateNumberInput(this)" class="form-control" name="support_number" value="<?= (isset($web_settings['support_number'])) ? output_escaping($web_settings['support_number']) : '' ?>" placeholder="Customer support mobile number" />
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="support_email">Support Email <span class='text-danger text-xs'>*</span></label>
@@ -53,8 +53,8 @@
                                     </div>
                                     <div class="form-group col-md-12">
                                         <div class="row">
-                                            <div class="col-md-6 form-group">
-                                                <label for="logo">Logo <span class='text-danger text-xs'>*</span><small>(Recommended Size : larger than 120 x 120 & smaller than 150 x 150 pixels.)</small></label>
+                                            <div class="col-md-4 form-group">
+                                                <label for="logo">Header Logo <span class='text-danger text-xs'>*</span><small>(Recommended Size : larger than 120 x 120 & smaller than 150 x 150 pixels.)</small></label>
                                                 <div class="col-sm-10">
                                                     <div class='col-md-3'><a class="uploadFile img btn btn-primary text-white btn-sm" data-input='logo' data-isremovable='0' data-is-multiple-uploads-allowed='0' data-toggle="modal" data-target="#media-upload-modal" value="Upload Photo"><i class='fa fa-upload'></i> Upload</a></div>
                                                     <?php
@@ -78,7 +78,32 @@
                                                     <?php } ?>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 form-group">
+                                            <div class="col-md-4 form-group">
+                                                <label for="footer_logo">Footer Logo <span class='text-danger text-xs'>*</span><small>(Recommended Size : larger than 120 x 120 & smaller than 150 x 150 pixels.)</small></label>
+                                                <div class="col-sm-10">
+                                                    <div class='col-md-3'><a class="uploadFile img btn btn-primary text-white btn-sm" data-input='footer_logo' data-isremovable='0' data-is-multiple-uploads-allowed='0' data-toggle="modal" data-target="#media-upload-modal" value="Upload Photo"><i class='fa fa-upload'></i> Upload</a></div>
+                                                    <?php
+                                                    if (!empty($footer_logo)) {
+                                                    ?>
+                                                        <label class="text-danger mt-3">*Only Choose When Update is necessary</label>
+                                                        <div class="container-fluid row image-upload-section">
+                                                            <div class="col-md-3 col-sm-12 shadow p-3 mb-5 bg-white rounded m-4 text-center grow image">
+                                                                <div class=''>
+                                                                    <div class='upload-media-div'><img class="img-fluid mb-2" src="<?= BASE_URL() . $footer_logo ?>" alt="Image Not Found"></div>
+                                                                    <input type="hidden" name="footer_logo" id='footer_logo' value='<?= $footer_logo ?>'>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <?php
+                                                    } else { ?>
+                                                        <div class="container-fluid row image-upload-section">
+                                                            <div class="col-md-3 col-sm-12 shadow p-3 mb-5 bg-white rounded m-4 text-center grow image d-none">
+                                                            </div>
+                                                        </div>
+                                                    <?php } ?>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 form-group">
                                                 <label for="favicon">Favicon <span class='text-danger text-xs'>*</span></label>
                                                 <div class="col-sm-10">
                                                     <div class='col-md-3'><a class="uploadFile img btn btn-primary text-white btn-sm" data-input='favicon' data-isremovable='0' data-is-multiple-uploads-allowed='0' data-toggle="modal" data-target="#media-upload-modal" value="Upload Photo"><i class='fa fa-upload'></i> Upload</a></div>
@@ -266,10 +291,7 @@
 
 
                                 </div>
-                                <div class="d-flex justify-content-center">
-                                    <div class="form-group" id="error_box">
-                                    </div>
-                                </div>
+
                                 <div class="form-group">
                                     <button type="reset" class="btn btn-warning">Reset</button>
                                     <button type="submit" class="btn btn-success" id="submit_btn">Update Settings</button>

@@ -18,15 +18,15 @@
             </div>
         </a>
     </li>
-    <li class="nav-item mt-2">
-        <a class="nav-link rounded <?= ($current_url == base_url('my-account/notifications')) ? 'active' : '' ?>" id="notification" href="<?= base_url('my-account/notifications') ?>">
+    <!-- <li class="nav-item mt-2">
+        <a class="nav-link rounded <?//= ($current_url == base_url('my-account/notifications')) ? 'active' : '' ?>" id="notification" href="<?//= base_url('my-account/notifications') ?>">
             <div class="text-left py-1 px-3 sidebar-text">
                 <h6 class="mb-0">
-                    <i class="fas fa-bell fa-lg left-aside"></i> <?= !empty($this->lang->line('notification')) ? $this->lang->line('notification') : 'NOTIFICATION' ?>
+                    <i class="fas fa-bell fa-lg left-aside"></i> <?//= !empty($this->lang->line('notification')) ? $this->lang->line('notification') : 'NOTIFICATION' ?>
                 </h6>
             </div>
         </a>
-    </li>
+    </li> -->
     <li class="nav-item mt-2">
         <a class="nav-link rounded <?= ($current_url == base_url('my-account/favorites')) ? 'active' : '' ?>" id="wishlist" href="<?= base_url('my-account/favorites') ?>">
             <div class="text-left py-1 px-3 sidebar-text">
@@ -68,6 +68,24 @@
             <div class="text-left py-1 px-3 sidebar-text">
                 <h6 class="mb-0">
                     <i class="far fa-comments fa-lg left-aside"></i> <?= !empty($this->lang->line('chat')) ? $this->lang->line('chat') : 'Chat' ?>
+                </h6>
+            </div>
+        </a>
+    </li>
+    <li class="nav-item mt-2">
+        <a class="nav-link rounded <?= ($current_url == base_url('my-account/tickets')) ? 'active' : '' ?>" id="user-chat" href="<?= base_url('my-account/tickets') ?>">
+            <div class="text-left py-1 px-3 sidebar-text">
+                <h6 class="mb-0">
+                    <i class="fa fa-lg fa-ticket-alt left-aside"></i><?= !empty($this->lang->line('support_tickets')) ? $this->lang->line('support_tickets') : 'Support Tickets' ?>
+                </h6>
+            </div>
+        </a>
+    </li>
+    <li class="nav-item mt-2">
+        <a class="nav-link rounded <?= ($current_url == base_url('my-account/refer_and_earn')) ? 'active' : '' ?>" id="user-chat" href="<?= base_url('my-account/refer_and_earn') ?>">
+            <div class="text-left py-1 px-3 sidebar-text">
+                <h6 class="mb-0">
+                    <i class="fa fa-coins left-aside"></i><?= !empty($this->lang->line('refer_and_earn')) ? $this->lang->line('refer_and_earn') : 'Refer and Earn' ?>
                 </h6>
             </div>
         </a>

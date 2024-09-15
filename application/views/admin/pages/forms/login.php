@@ -40,10 +40,7 @@
                     <div class="col-12">
                         <button type="submit" id="submit_btn" class="btn btn-block p-2 btn-signin">Sign In</button>
                     </div>
-                    <div class="mt-2 col-md-12 text-center">
-                        <div class="form-group" id="error_box">
-                        </div>
-                    </div>
+
                 </div>
             </form>
         </div>

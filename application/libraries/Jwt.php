@@ -206,7 +206,6 @@ class Jwt
     }
     private static function getKey($keyOrKeyArray, $kid = null)
     {
-       
         if ($keyOrKeyArray instanceof Key) {
             return $keyOrKeyArray;
         }

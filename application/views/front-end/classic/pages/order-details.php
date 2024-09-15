@@ -1,5 +1,5 @@
 <!-- Demo header-->
-<section class="header settings-tab">
+<section class="header settings-tab deeplink_wrapper">
     <div class="container py-4">
         <div class="row">
             <div class="col-md-12 orders-section settings-tab-content">
@@ -13,7 +13,16 @@
 
                             <div class="flex-col my-auto">
                                 <h6 class="ml-auto mr-3">
-                                    <a target="_blank" href="<?= base_url('my-account/order-invoice/' . $order['id']) ?>" class='button button-primary-outline'><?= !empty($this->lang->line('invoice')) ? $this->lang->line('invoice') : 'Invoice' ?></a>
+                                    <?php
+                                    // echo "<pre>";
+                                    // print_r($order['order_items']);
+                                    // foreach ($order['order_items'] as $key => $order_item) {
+                                    if ($order['order_items'][0]['is_already_cancelled'] != 1) { ?>
+
+                                        <a target="_blank" href="<?= base_url('my-account/order-invoice/' . $order['id']) ?>" class='button button-primary-outline'><?= !empty($this->lang->line('invoice')) ? $this->lang->line('invoice') : 'Invoice' ?></a>
+                                    <?php }
+                                    // }
+                                    ?>
                                     <a href="<?= base_url('my-account/orders/') ?>" class='button button-danger-outline'><?= !empty($this->lang->line('back_to_list')) ? $this->lang->line('back_to_list') : 'Back to List' ?></a>
                                 </h6>
                             </div>
@@ -65,28 +74,66 @@
                                     <a href="<?= base_url('products/details/' . $item['slug']) ?>">
                                         <h5 class="bold"><?= ($key + 1) . '. ' . $item['name'] ?></h5>
                                     </a>
+                                    <?php
+                                    if (!empty($item['variant_values'])) {
+                                        $values = explode(', ', $item['variant_values']);
+                                        $attributes = explode(', ', $item['attr_name']);
+                                        // Initialize an empty string to store the final output
+                                        $output = '';
+                                        // Iterate through both arrays simultaneously
+                                        foreach ($attributes as $key => $attribute) {
+                                            // Append the attribute name and corresponding value to the output string
+                                            $output .= '<p class="mb-0 text-dark">' . $attribute . ': ' . $values[$key] . '</p>';
+                                            // Add line break if it's not the last attribute
+                                            if ($key < count($attributes) - 1) {
+                                                $output .= ",";
+                                            }
+                                        }
+
+                                    ?>
+                                        <div class="d-flex gap-2 mb-0 text-dark"><?= $output ?></div>
+                                    <?php } ?>
                                     <p class="text-muted"> <?= !empty($this->lang->line('quantity')) ? $this->lang->line('quantity') : 'Quantity' ?> : <?= $item['quantity'] ?></p>
                                     <?php if ($item['otp'] != 0) { ?>
                                         <p class="text-muted"> <?= !empty($this->lang->line('otp')) ? $this->lang->line('otp') : 'OTP' ?> <span class="font-weight-bold text-dark"> : <?= $item['otp'] ?></span> </p>
                                     <?php } ?>
-                                    <?php if (isset($item['courier_agency']) && !empty($item['courier_agency'])) { ?>
-                                        <p> <span class="text-muted"> <?= !empty($this->lang->line('courier_agency')) ? $this->lang->line('courier_agency') : 'Courier Agency' ?> : </span><a href="<?= $item['url'] ?>" title="click here to trace the order"><?= $item['courier_agency'] ?></a> </p>
-                                        <p class="text-muted" data-toggle="tooltip" data-placement="top" title="Copy this Tracking ID and trace your order with Courier Agency."> <?= !empty($this->lang->line('tracking_id')) ? $this->lang->line('tracking_id') : 'Tracking ID' ?> <span class="font-weight-bold text-dark"> : <?= $item['tracking_id'] ?></span> </p>
-                                    <?php } ?>
+                                    <?php
+                                    if (!empty($item['url']) || !empty($item['shiprocket_order_tracking_url'])) { ?>
+                                        <h6 class="h5"><?= !empty($this->lang->line('order_tracking_details')) ? $this->lang->line('order_tracking_details') : 'Order tracking details' ?> : </h6>
+
+                                        <?php if (isset($item['courier_agency']) && !empty($item['courier_agency'])) { ?>
+                                            <p> <span class="text-muted"> <?= !empty($this->lang->line('courier_agency')) ? $this->lang->line('courier_agency') : 'Courier Agency' ?> : </span><a href="<?= $item['url'] ?>" title="<?= !empty($this->lang->line('click_here_to_trace_the_order')) ? $this->lang->line('click_here_to_trace_the_order') : 'click here to trace the order' ?>"><?= $item['courier_agency'] ?></a> </p>
+                                            <p class="text-muted" data-toggle="tooltip" data-placement="top" title="<?= !empty($this->lang->line('copy_this_tracking_id_and_trace_your_order_with_courier_agency')) ? $this->lang->line('copy_this_tracking_id_and_trace_your_order_with_courier_agency') : 'Copy this Tracking ID and trace your order with Courier Agency' ?>"> <?= !empty($this->lang->line('tracking_id')) ? $this->lang->line('tracking_id') : 'Tracking ID' ?> <span class="font-weight-bold text-dark"> : <?= $item['tracking_id'] ?></span> </p>
+                                        <?php } ?>
+                                        <?php if (isset($item['url']) && !empty($item['url'])) { ?>
+                                            <p class="text-muted mb-0">
+                                                <?= !empty($this->lang->line('order_tracking_url')) ? $this->lang->line('order_tracking_url') : 'Order Tracking Url' ?> :
+                                                <a href="<?= $item['url'] ?>" title="<?= !empty($this->lang->line('click_here_to_trace_the_order')) ? $this->lang->line('click_here_to_trace_the_order') : 'click here to trace the order' ?>">
+                                                    <?= $item['url'] ?></a>
+                                            </p>
+                                        <?php } ?>
+                                        <?php if (isset($item['shiprocket_order_tracking_url']) && !empty($item['shiprocket_order_tracking_url'])) { ?>
+                                            <p class="text-muted mb-0">
+                                                <?= !empty($this->lang->line('shiprocket_order_tracking_url')) ? $this->lang->line('shiprocket_order_tracking_url') : 'Shiprocket Order Tracking Url' ?> :
+                                                <a href="<?= $item['shiprocket_order_tracking_url'] ?>" title="<?= !empty($this->lang->line('click_here_to_trace_the_order')) ? $this->lang->line('click_here_to_trace_the_order') : 'click here to trace the order' ?>">
+                                                    <?= $item['shiprocket_order_tracking_url'] ?></a>
+                                            </p>
+                                    <?php }
+                                    } ?>
                                     <h4 class="mt-3 mb-2 bold"> <span class="mt-5"><i><?= $settings['currency'] ?></i></span> <?= number_format(($item['price'] * $item['quantity']), 2) ?> <span class="small text-muted"></span></h4>
-                                   
-                                 
+
+
 
                                     <?php if ($item['type'] == 'digital_product' &&  $item['download_allowed'] == 1 && ($item['active_status'] == 'received' || $item['active_status'] == 'delivered')) {
                                         $download_link = $item['hash_link'];
                                     ?>
                                         <div class="media-body mt-3">
-                                            <a href="<?= base_url('products/download_link_hash/' . $item['id']) ?>" title="Download Product" class="btn btn-outline-info"><i class="fas fa-download"></i> Download</a>
+                                            <a href="<?= base_url('products/download_link_hash/' . $item['id']) ?>" title="<?= !empty($this->lang->line('download')) ? $this->lang->line('download') : 'Download' ?>" class="btn btn-outline-info"><i class="fas fa-download"></i> <?= !empty($this->lang->line('download')) ? $this->lang->line('download') : 'Download' ?></a>
                                         </div>
                                     <?php }
                                     if ($item['type'] == 'digital_product' &&  $item['download_allowed'] == 0) { ?>
                                         <div class="media-body mt-3">
-                                            <span class="text-danger">You will receive this item from seller via email.</span>
+                                            <span class="text-danger"><?= !empty($this->lang->line('you_will_receive_this_item_from_seller_via_email')) ? $this->lang->line('you_will_receive_this_item_from_seller_via_email') : 'You will receive this item from seller via email' ?></span>
                                         </div>
                                     <?php } ?>
                                 </div>

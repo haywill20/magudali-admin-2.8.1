@@ -8,7 +8,7 @@ class Cart extends CI_Controller
     {
         parent::__construct();
         $this->load->database();
-        $this->load->library(['cart', 'razorpay', 'stripe', 'paystack', 'flutterwave', 'midtrans', 'my_fatoorah', 'instamojo']);
+        $this->load->library(['cart', 'razorpay', 'stripe', 'paystack', 'flutterwave', 'midtrans', 'my_fatoorah', 'instamojo', 'phonepe']);
         $this->paystack->__construct('test');
         $this->load->model(['cart_model', 'address_model', 'order_model', 'Order_model', 'transaction_model']);
         $this->load->helper(['sms_helper', 'function_helper']);
@@ -18,15 +18,12 @@ class Cart extends CI_Controller
         $this->response['csrfHash'] = $this->security->get_csrf_hash();
         $this->data['settings'] = get_settings('system_settings', true);
         $this->data['web_settings'] = get_settings('web_settings', true);
+        $this->data['auth_settings'] = get_settings('authentication_settings', true);
+        $this->data['web_logo'] = get_settings('web_logo');
     }
 
     public function index()
     {
-        $web_doctor_brown = get_settings('web_doctor_brown', true);
-        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
-            /* redirect him to the page where he can enter the purchase code */
-            redirect(base_url("admin/purchase-code"));
-        }
         if ($this->data['is_logged_in']) {
             $this->data['main_page'] = 'cart';
             $this->data['title'] = 'Product Cart | ' . $this->data['web_settings']['site_title'];
@@ -68,7 +65,7 @@ class Cart extends CI_Controller
             $product_variant_id = explode(',', $_POST['product_variant_id']);
 
             $_POST['user_id'] = $this->data['user']->id;
-            $settings = get_settings('system_settings', true);
+            $settings = $this->data['settings'];
 
             if ($settings['is_single_seller_order'] == 1) {
                 if (!is_single_seller($product_variant_id, $_POST['user_id'])) {
@@ -90,7 +87,7 @@ class Cart extends CI_Controller
             }
 
             $_POST['user_id'] = $this->data['user']->id;
-            $settings = get_settings('system_settings', true);
+            $settings = $this->data['settings'];
             $cart_count = get_cart_count($_POST['user_id']);
             $is_variant_available_in_cart = is_variant_available_in_cart($_POST['product_variant_id'], $_POST['user_id']);
             if (!$is_variant_available_in_cart) {
@@ -102,6 +99,20 @@ class Cart extends CI_Controller
                     return;
                 }
             }
+            if (isset($_POST['buy_now']) && !empty($_POST['buy_now']) && $_POST['buy_now'] == 1) {
+                // print_r($_POST);
+                // die;
+                $old_cart_data = get_cart_total($this->data['user']->id);
+                $total_old_cart = json_encode($old_cart_data['variant_id']);
+
+                // print_r(($total_old_cart));
+                // die;
+                $this->cart_model->old_user_cart($this->data['user']->id, $total_old_cart);
+                # code...
+            }
+            // if ($cart_count >= 1) {
+            //     # code...
+            // }
             $saved_for_later = (isset($_POST['is_saved_for_later']) && $_POST['is_saved_for_later'] != "") ? $this->input->post('is_saved_for_later', true) : 0;
             $check_status = ($saved_for_later == 1) ? false : true;
             if (!$this->cart_model->add_to_cart($data, $check_status)) {
@@ -110,9 +121,13 @@ class Cart extends CI_Controller
                 } else {
                     $res = get_cart_total($this->data['user']->id, $_POST['product_variant_id']);
                 }
+                // print_r($res);
+                // die;
 
                 $this->response['error'] = false;
                 $this->response['message'] = 'Item added to Cart.';
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
                 $this->response['data'] = [
                     'total_quantity' => ($_POST['qty'] == 0) ? '0' : strval($_POST['qty']),
                     'sub_total' => strval($res['sub_total']),
@@ -138,6 +153,9 @@ class Cart extends CI_Controller
 
     public function cart_sync()
     {
+        // print_r("HERE");
+        // print_r($_POST);
+        // die;
         if (!isset($_POST['data']) || empty($_POST['data'])) {
             $this->response['error'] = true;
             $this->response['message'] = "Pass the data";
@@ -174,7 +192,17 @@ class Cart extends CI_Controller
             print_r(json_encode($this->response));
             return false;
         }
+        // print_r($this->data['is_logged_in']);
+        // print_r($_SESSION);
+        // $data = fetch_details('users', ['email' => $this->input->post('email', true)]);
+        // print_R($data);
+        // $username = $this->session->set_userdata('username', $data[0]['username']);
+        // print_r($this->data['user']);
         $user_id = $this->data['user']->id;
+        // $user_id = $_SESSION['user_id'];
+        // $_POST['user_id'] = $this->data['user']->id;
+        // print_r($user_id);
+        // die;
         $product_variant_ids = array_column($post_data, "product_variant_id");
         $quantity = array_column($post_data, "qty");
         $place_order_data = array();
@@ -182,8 +210,11 @@ class Cart extends CI_Controller
         $place_order_data['qty'] = implode(",", $quantity);
         $place_order_data['user_id'] =  $user_id;
 
-        $settings = get_settings('system_settings', true);
+        $settings = $this->data['settings'];
         $cart_count = get_cart_count($user_id);
+
+        // print_r($place_order_data);
+        // die;
         foreach ($product_variant_ids as $variant_id) {
             $is_variant_available_in_cart = is_variant_available_in_cart($variant_id, $user_id);
             if (!$is_variant_available_in_cart) {
@@ -258,6 +289,8 @@ class Cart extends CI_Controller
             );
             if ($this->cart_model->remove_from_cart($data)) {
                 $this->response['error'] = false;
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
                 $this->response['message'] = 'Removed From Cart !';
                 print_r(json_encode($this->response));
                 return false;
@@ -373,11 +406,6 @@ class Cart extends CI_Controller
     }
     public function checkout()
     {
-        $web_doctor_brown = get_settings('web_doctor_brown', true);
-        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
-            /* redirect him to the page where he can enter the purchase code */
-            redirect(base_url("admin/purchase-code"));
-        }
         if ($this->data['is_logged_in']) {
             $cart = $this->cart_model->get_user_cart($this->data['user']->id);
             if (empty($cart)) {
@@ -399,13 +427,16 @@ class Cart extends CI_Controller
             $this->data['keywords'] = 'Checkout, ' . $this->data['web_settings']['meta_keywords'];
             $this->data['description'] = 'Checkout | ' . $this->data['web_settings']['meta_description'];
             $cart_total_data = get_cart_total($this->data['user']->id);
+            // echo "<pre>";
+            // print_r($cart_total_data);
+            // die;
             $this->data['cart'] = $cart_total_data;
             $this->data['payment_methods'] = get_settings('payment_method', true);
             $this->data['time_slots'] = fetch_details('time_slots', 'status=1', '*');
             $this->data['wallet_balance'] = fetch_details('users', 'id=' . $this->data['user']->id, 'balance,mobile');
             $this->data['default_address'] = $this->address_model->get_address($this->data['user']->id, NULL, NULL, TRUE);
             $this->data['payment_methods'] = $payment_methods;
-            $settings = get_settings('system_settings', true);
+            $settings = $this->data['settings'];
             $this->data['support_email'] = (isset($settings['support_email']) && !empty($settings['support_email'])) ? $settings['support_email'] : 'abc@gmail.com';
             $currency = (isset($settings['currency']) && !empty($settings['currency'])) ? $settings['currency'] : '';
             $total = $this->data['cart']['total_arr'];
@@ -432,7 +463,6 @@ class Cart extends CI_Controller
 
     public function place_order()
     {
-
         if ($this->data['is_logged_in']) {
             /*
             mobile:9974692496
@@ -455,8 +485,6 @@ class Cart extends CI_Controller
             // tax_amount:10
             // tax_percentage:10
             // final_total:55
-
-
 
             $limit = (isset($_FILES['documents']['name'])) ? count($_FILES['documents']['name']) : 0;
             if ((!isset($_POST['address_id']) || empty($_POST['address_id'])) && $_POST['product_type'] != 'digital_product') {
@@ -525,116 +553,133 @@ class Cart extends CI_Controller
 
                 $_POST['order_note'] = (isset($_POST['order_note']) && !empty($_POST['order_note'])) ? $this->input->post("order_note", true) : NULL;
 
-                $upload_attachments = isset($settings['allow_order_attachments']) ? $settings['allow_order_attachments'] : '';
-                $upload_limit = isset($settings['upload_limit']) ? $settings['upload_limit'] : '';
+                // $settings = get_settings('system_settings', true);
+                $shipping_settings = get_settings('shipping_method', true);
+
+                $system_settings = $this->data['settings'];
+                // print_r($shipping_settings);
+                // print_r($system_settings);
+                // die;
+                // $upload_attachments = isset($settings['allow_order_attachments']) ? $settings['allow_order_attachments'] : '';
+                // $upload_limit = isset($settings['upload_limit']) ? $settings['upload_limit'] : '';
                 $limit = (isset($_FILES['documents']['name'])) ? count($_FILES['documents']['name']) : 0;
 
                 $images_new_name_arr = $attachments = array();
-                if ($upload_attachments == 0 && isset($_FILES['documents']['name'][0])) {
+
+                /* checking if any of the product requires the media file or not */
+                $product_variant_ids = $this->input->post('product_variant_id', true);
+                $product_ids = fetch_details('product_variants', '',  'product_id', '', '', '', '', 'id', $product_variant_ids);
+                $product_ids = (!empty($product_ids)) ? array_column($product_ids, 'product_id') : [];
+                $product_ids = (!empty($product_ids)) ? implode(",", $product_ids) : "";
+                $product_attachments = fetch_details('products', '',  'is_attachment_required', '', '', '', '', 'id', $product_ids);
+
+                $is_attachment_required = false;
+                if (!empty($product_attachments))
+                    foreach ($product_attachments as $attachment) {
+                        if ($attachment['is_attachment_required'] == 1) {
+                            $is_attachment_required = true;
+                            break;
+                        }
+                    }
+                /* ends checking if any of the product requires the media file or not */
+
+                if (empty($_FILES['documents']['name'][0]) && $is_attachment_required) {
                     $this->response['error'] = true;
-                    $this->response['message'] = "Please Turn On Upload Media Setting";
+                    $this->response['message'] = "Some of your products in cart require at least one media file to be uploaded!";
                     print_r(json_encode($this->response));
                     return;
                 }
-                if (isset($upload_attachments) && $upload_attachments == 1) {
-                    /* checking if any of the product requires the media file or not */
-                    $product_variant_ids = $this->input->post('product_variant_id', true);
-                    $product_ids = fetch_details('product_variants', '',  'product_id', '', '', '', '', 'id', $product_variant_ids);
-                    $product_ids = (!empty($product_ids)) ? array_column($product_ids, 'product_id') : [];
-                    $product_ids = (!empty($product_ids)) ? implode(",", $product_ids) : "";
-                    $product_attachments = fetch_details('products', '',  'is_attachment_required', '', '', '', '', 'id', $product_ids);
-
-                    $is_attachment_required = false;
-                    if (!empty($product_attachments))
-                        foreach ($product_attachments as $attachment) {
-                            if ($attachment['is_attachment_required'] == 1) {
-                                $is_attachment_required = true;
-                                break;
-                            }
-                        }
-                    /* ends checking if any of the product requires the media file or not */
-
-                    if (empty($_FILES['documents']['name'][0]) && $is_attachment_required) {
-                        $this->response['error'] = true;
-                        $this->response['message'] = "Some of your products in cart require at least one media file to be uploaded!";
-                        print_r(json_encode($this->response));
-                        return;
+                if ($limit >= 0) {
+                    if (!file_exists(FCPATH . ORDER_ATTACHMENTS)) {
+                        mkdir(FCPATH . ORDER_ATTACHMENTS, 0777);
                     }
-                    if ($limit <= $upload_limit) {
-                        if (!file_exists(FCPATH . ORDER_ATTACHMENTS)) {
-                            mkdir(FCPATH . ORDER_ATTACHMENTS, 0777);
-                        }
-                        $temp_array = array();
-                        $files = $_FILES;
-                        $images_info_error = "";
-                        $allowed_media_types = 'jpg|png|jpeg|pdf|doc|docs|txt';
-                        $config = [
-                            'upload_path' =>  FCPATH . ORDER_ATTACHMENTS,
-                            'allowed_types' => $allowed_media_types,
-                            'max_size' => 8000,
-                        ];
-                        if (!empty($_FILES['documents']['name'][0]) && isset($_FILES['documents']['name'])) {
-                            $other_image_cnt = count($_FILES['documents']['name']);
-                            $other_img = $this->upload;
-                            $other_img->initialize($config);
+                    $temp_array = array();
+                    $files = $_FILES;
+                    $images_info_error = "";
+                    $allowed_media_types = 'jpg|png|jpeg|pdf|doc|docs|txt';
+                    $config = [
+                        'upload_path' =>  FCPATH . ORDER_ATTACHMENTS,
+                        'allowed_types' => $allowed_media_types,
+                        'max_size' => 8000,
+                    ];
+                    if (!empty($_FILES['documents']['name'][0]) && isset($_FILES['documents']['name'])) {
+                        $other_image_cnt = count($_FILES['documents']['name']);
+                        $other_img = $this->upload;
+                        $other_img->initialize($config);
 
-                            for ($i = 0; $i < $other_image_cnt; $i++) {
+                        for ($i = 0; $i < $other_image_cnt; $i++) {
 
-                                if (!empty($_FILES['documents']['name'][$i])) {
+                            if (!empty($_FILES['documents']['name'][$i])) {
 
-                                    $_FILES['temp_image']['name'] = $files['documents']['name'][$i];
-                                    $_FILES['temp_image']['type'] = $files['documents']['type'][$i];
-                                    $_FILES['temp_image']['tmp_name'] = $files['documents']['tmp_name'][$i];
-                                    $_FILES['temp_image']['error'] = $files['documents']['error'][$i];
-                                    $_FILES['temp_image']['size'] = $files['documents']['size'][$i];
-                                    if (!$other_img->do_upload('temp_image')) {
-                                        $images_info_error = 'documents :' . $images_info_error . ' ' . $other_img->display_errors();
-                                    } else {
-                                        $temp_array = $other_img->data();
-                                        resize_review_images($temp_array, FCPATH . ORDER_ATTACHMENTS);
-                                        $images_new_name_arr[$i] = ORDER_ATTACHMENTS . $temp_array['file_name'];
-                                    }
+                                $_FILES['temp_image']['name'] = $files['documents']['name'][$i];
+                                $_FILES['temp_image']['type'] = $files['documents']['type'][$i];
+                                $_FILES['temp_image']['tmp_name'] = $files['documents']['tmp_name'][$i];
+                                $_FILES['temp_image']['error'] = $files['documents']['error'][$i];
+                                $_FILES['temp_image']['size'] = $files['documents']['size'][$i];
+                                if (!$other_img->do_upload('temp_image')) {
+                                    $images_info_error = 'documents :' . $images_info_error . ' ' . $other_img->display_errors();
                                 } else {
-                                    $_FILES['temp_image']['name'] = $files['documents']['name'][$i];
-                                    $_FILES['temp_image']['type'] = $files['documents']['type'][$i];
-                                    $_FILES['temp_image']['tmp_name'] = $files['documents']['tmp_name'][$i];
-                                    $_FILES['temp_image']['error'] = $files['documents']['error'][$i];
-                                    $_FILES['temp_image']['size'] = $files['documents']['size'][$i];
-                                    if (!$other_img->do_upload('temp_image')) {
-                                        $images_info_error = $other_img->display_errors();
-                                    }
+                                    $temp_array = $other_img->data();
+                                    resize_review_images($temp_array, FCPATH . ORDER_ATTACHMENTS);
+                                    $images_new_name_arr[$i] = ORDER_ATTACHMENTS . $temp_array['file_name'];
                                 }
-                            }
-                            //Deleting Uploaded attachments if any overall error occured
-                            if ($images_info_error != NULL || !$this->form_validation->run()) {
-                                if (isset($images_new_name_arr) && !empty($images_new_name_arr || !$this->form_validation->run())) {
-                                    foreach ($images_new_name_arr as $key => $val) {
-                                        unlink(FCPATH . ORDER_ATTACHMENTS . $images_new_name_arr[$key]);
-                                    }
+                            } else {
+                                $_FILES['temp_image']['name'] = $files['documents']['name'][$i];
+                                $_FILES['temp_image']['type'] = $files['documents']['type'][$i];
+                                $_FILES['temp_image']['tmp_name'] = $files['documents']['tmp_name'][$i];
+                                $_FILES['temp_image']['error'] = $files['documents']['error'][$i];
+                                $_FILES['temp_image']['size'] = $files['documents']['size'][$i];
+                                if (!$other_img->do_upload('temp_image')) {
+                                    $images_info_error = $other_img->display_errors();
                                 }
                             }
                         }
-                        if ($images_info_error != NULL) {
-                            $this->response['error'] = true;
-                            $this->response['message'] =  $images_info_error;
-                            print_r(json_encode($this->response));
-                            return false;
+                        //Deleting Uploaded attachments if any overall error occured
+                        if ($images_info_error != NULL || !$this->form_validation->run()) {
+                            if (isset($images_new_name_arr) && !empty($images_new_name_arr || !$this->form_validation->run())) {
+                                foreach ($images_new_name_arr as $key => $val) {
+                                    unlink(FCPATH . ORDER_ATTACHMENTS . $images_new_name_arr[$key]);
+                                }
+                            }
                         }
-                    } else {
-                        $this->response['error'] = true;
-                        $this->response['message'] = "You Can Not Upload More Then $upload_limit Images !";
-                        print_r(json_encode($this->response));
-                        return;
                     }
-
-                    $attachments = $images_new_name_arr;
+                    if ($images_info_error != NULL) {
+                        $this->response['error'] = true;
+                        $this->response['message'] =  $images_info_error;
+                        print_r(json_encode($this->response));
+                        return false;
+                    }
+                } else {
+                    $this->response['error'] = true;
+                    $this->response['message'] = "You Can Not Upload More Then one Images !";
+                    print_r(json_encode($this->response));
+                    return;
                 }
+
+                $attachments = $images_new_name_arr;
                 //checking for product availability 
                 if (isset($_POST['product_type']) && $_POST['product_type'] != 'digital_product') {
-                    $area_id = fetch_details('addresses', ['id' => $_POST['address_id']], ['area_id', 'area', 'pincode']);
+
+                    $area_id = fetch_details('addresses', ['id' => $_POST['address_id']], ['area_id', 'area', 'pincode', 'city', 'city_id']);
                     $zipcode = $area_id[0]['pincode'];
                     $zipcode_id = fetch_details('zipcodes', ['zipcode' => $zipcode], 'id')[0];
-                    $product_delivarable = check_cart_products_delivarable($_POST['user_id'], $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
+
+                    $city = $area_id[0]['city'];
+                    // print_r($area_id);
+                    // print_r($city);
+                    $city_id = fetch_details('cities', ['name' => $city], 'id');
+                    $city_id = $city_id[0]['id'];
+
+                    if ((isset($system_settings['pincode_wise_deliverability']) && $system_settings['pincode_wise_deliverability'] == 1) || (isset($shipping_settings['local_shipping_method']) && isset($shipping_settings['shiprocket_shipping_method']) && $shipping_settings['local_shipping_method'] == 1 && $shipping_settings['shiprocket_shipping_method'] == 1)) {
+                        $product_delivarable = check_cart_products_delivarable($_POST['user_id'], $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
+                    }
+                    if (isset($system_settings['city_wise_deliverability']) && $system_settings['city_wise_deliverability'] == 1 && $shipping_settings['shiprocket_shipping_method'] != 1) {
+                        $product_delivarable = check_cart_products_delivarable($_POST['user_id'], $area_id[0]['area_id'], '', '', $city, $city_id);
+                    }
+
+                    // $product_delivarable = check_cart_products_delivarable($_POST['user_id'], $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
+                    // print_r($product_delivarable);
+                    // die;
                     if (!empty($product_delivarable)) {
                         $product_not_delivarable = array_filter($product_delivarable, function ($var) {
                             return ($var['is_deliverable'] == false && $var['product_id'] != null);
@@ -652,8 +697,8 @@ class Cart extends CI_Controller
                         }
                     }
                 }
+                $product_variant_id = explode(',', $_POST['product_variant_id']);
                 if ($_POST['payment_method'] == 'COD') {
-                    $product_variant_id = explode(',', $_POST['product_variant_id']);
                     for ($i = 0; $i < count($product_variant_id); $i++) {
                         $product_id = fetch_details("product_variants", ['id' => $product_variant_id[$i]], 'product_id');
                         $is_allowed = fetch_details("products", ['id' => $product_id[0]['product_id']], 'cod_allowed,name');
@@ -722,19 +767,8 @@ class Cart extends CI_Controller
                     }
                 }
 
-                $promo_discount = 0;
-                if (isset($_POST['promo_code']) && !empty($_POST['promo_code'])) {
-                    $validate = validate_promo_code($_POST['promo_code'], $this->data['user']->id, $cart['total_arr']);
-                    if ($validate['error']) {
-                        $this->response['error'] = true;
-                        $this->response['message'] = $validate['message'];
-                        print_r(json_encode($this->response));
-                        return false;
-                    } else {
-                        $promo_discount = $validate['data'][0]['final_discount'];
-                    }
-                }
-                $_POST['final_total'] = $cart['overall_amount'] - $_POST['wallet_balance_used'] - $promo_discount;
+                
+                $_POST['final_total'] = $cart['overall_amount'] - $_POST['wallet_balance_used'];
                 if ($_POST['payment_method'] == "Razorpay") {
                     if (!verify_payment_transaction($_POST['razorpay_payment_id'], 'razorpay')) {
                         $this->response['error'] = true;
@@ -759,6 +793,11 @@ class Cart extends CI_Controller
                     $data['status'] = "success";
                     $data['txn_id'] = $_POST['instamojo_payment_id'];
                     $data['message'] = "Order Placed Successfully";
+                } elseif ($_POST['payment_method'] == "phonepe") {
+                    $data['status'] = "awaiting";
+                    $_POST['active_status'] = "draft";
+                    $data['txn_id'] = $_POST['phonepe_transaction_id'];
+                    $data['message'] = "Payment is Not Done Yet";
                 } elseif ($_POST['payment_method'] == "Flutterwave") {
                     if (!verify_payment_transaction($_POST['flutterwave_transaction_id'], 'flutterwave')) {
                         $this->response['error'] = true;
@@ -987,7 +1026,7 @@ class Cart extends CI_Controller
                     $overall_amount = $overall_amount - $validate['data'][0]['final_discount'];
                 }
             }
-            if ($_POST['payment_method'] == "Razorpay") {
+            if ($_POST['payment_method'] == "   ") {
                 $order = $this->razorpay->create_order(($overall_amount * 100));
                 if (!isset($order['error'])) {
                     $this->response['order_id'] = $order['id'];
@@ -1007,7 +1046,8 @@ class Cart extends CI_Controller
                 $this->response['client_secret'] = $order['client_secret'];
                 $this->response['id'] = $order['id'];
             } elseif ($_POST['payment_method'] == "my_fatoorah") {
-                // print_r($validate);
+                // echo "here";
+                // print_r($overall_amount);
                 // return false;
                 $order_id = $_POST['my_fatoorah_order_id'];
                 $amount = fetch_details('orders', ['id' => $order_id], 'total_payable');
@@ -1097,6 +1137,8 @@ class Cart extends CI_Controller
     public function get_delivery_charge()
     {
         $settings = get_settings('shipping_method', true);
+        $system_settings = $this->data['settings'];
+
         $cart = $this->cart_model->get_user_cart($this->data['user']->id);
         if ($cart[0]['type'] == 'digital_product') {
             $this->response['delivery_charge_with_cod'] = '0';
@@ -1109,10 +1151,33 @@ class Cart extends CI_Controller
         $address_id = $this->input->post('address_id', true);
 
         if (isset($address_id) && !empty($address_id)) {
-            $area_id = fetch_details('addresses', ['id' => $address_id], ['area_id', 'area', 'pincode']);
+
+            $area_id = fetch_details('addresses', ['id' => $address_id], ['area_id', 'area', 'pincode', 'city']);
+            // print_R($address_id);
+            // print_R($area_id);
             $zipcode = $area_id[0]['pincode'];
             $zipcode_id = fetch_details('zipcodes', ['zipcode' => $zipcode], 'id')[0];
-            $product_availability = check_cart_products_delivarable($this->data['user']->id, $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
+
+            $city = $area_id[0]['city'];
+            $city_id = fetch_details('cities', ['name' => $city], 'id');
+            $city_id = $city_id[0]['id'];
+            // echo "<pre>";
+            // print_R($system_settings);
+            // print_R($settings);
+            // die;
+            if ((isset($system_settings['pincode_wise_deliverability']) && $system_settings['pincode_wise_deliverability'] == 1) ||
+                (isset($settings['local_shipping_method']) && isset($settings['shiprocket_shipping_method']) &&
+                    $settings['local_shipping_method'] == 1 && $settings['shiprocket_shipping_method'] == 1)
+            ) {
+                // print_r("in pincode");
+                $product_availability = check_cart_products_delivarable($this->data['user']->id, $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
+            }
+            if (isset($system_settings['city_wise_deliverability']) && $system_settings['city_wise_deliverability'] == 1 && $settings['shiprocket_shipping_method'] != 1) {
+                // print_r("in city");
+                $product_availability = check_cart_products_delivarable($this->data['user']->id, $area_id[0]['area_id'], '', '', $city, $city_id);
+            }
+
+            // $product_availability = check_cart_products_delivarable($this->data['user']->id, $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
 
             $product_not_delivarable = array_filter((array)$product_availability, function ($product) {
                 return ($product['is_deliverable'] == false);
@@ -1158,6 +1223,8 @@ class Cart extends CI_Controller
             }
 
             $this->response['data'] = $cart;
+            $this->response['csrfName'] = $this->security->get_csrf_token_name();
+            $this->response['csrfHash'] = $this->security->get_csrf_hash();
             $this->response['availability_data'] = $product_availability;
         } else {
             $this->response['error'] = true;
@@ -1169,7 +1236,11 @@ class Cart extends CI_Controller
 
     public function send_bank_receipt()
     {
+        // print_r($_FILES);
+        // die;
         $this->form_validation->set_rules('order_id', 'Order Id', 'trim|required|numeric|xss_clean');
+        // $this->form_validation->set_rules('attachments[]', 'Bank Transfer Receipt', 'trim|required|xss_clean');
+        // $this->form_validation->set_rules('attachments', 'Bank Transfer Receipt', 'trim|required|xss_clean', array('required' => 'Bank Transfer Receipt is required'));
 
         if (!$this->form_validation->run()) {
             $this->response['error'] = true;
@@ -1242,6 +1313,12 @@ class Cart extends CI_Controller
                         }
                     }
                 }
+            } else {
+                $this->response['error'] = true;
+                $this->response['message'] = "Please Upload Bank transfer receipt.";
+                $this->response['data'] = [];
+                print_r(json_encode($this->response));
+                return true;
             }
             if ($images_info_error != NULL) {
                 $this->response['error'] = true;
@@ -1256,7 +1333,7 @@ class Cart extends CI_Controller
             if ($this->Order_model->add_bank_transfer_proof($data)) {
 
                 /* Send notification */
-                $settings = get_settings('system_settings', true);
+                $settings = $this->data['settings'];
                 $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                 $user_roles = fetch_details("user_permissions", "", '*', '',  '', '', '');
                 foreach ($user_roles as $user) {
@@ -1270,15 +1347,14 @@ class Cart extends CI_Controller
                 // print_R($admin_email[0]);
                 // print_R($admin_mobile[0]);
                 // print_R($order_id);
-                if (!empty($admin_email) && !empty($admin_mobile)) {
-                    // print_r("in event ");
-                     notify_event(
-                        "bank_transfer_proof",
-                        ["admin" => [$admin_email]],
-                        ["admin" => [$admin_mobile]],
-                        ["orders.id" => $order_id]
-                    );
-                }
+                // if (!empty($admin_email) && !empty($admin_mobile)) {
+                //     notify_event(
+                //         "bank_transfer_proof",
+                //         ["admin" => [$admin_email]],
+                //         ["admin" => [$admin_mobile]],
+                //         ["orders.id" => $order_id]
+                //     );
+                // }
                 //custom message
                 if (!empty($fcm_ids)) {
                     $custom_notification = fetch_details('custom_notifications', ['type' => "bank_transfer_proof"], '');
@@ -1294,7 +1370,12 @@ class Cart extends CI_Controller
                         'body' =>   $customer_msg,
                         'type' => "bank_transfer_proof",
                     );
-                    send_notification($fcmMsg, $fcm_ids);
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
+                    // print_r($registrationIDs_chunks_user); 
+                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                    }
                 }
                 $this->response['error'] = false;
                 $this->response['message'] =  'Bank Payment Receipt Added Successfully!';
@@ -1324,10 +1405,23 @@ class Cart extends CI_Controller
         } else {
             $product_delivarable = array();
             $address_id = $this->input->post('address_id', true);
+
             $area_id = fetch_details('addresses', ['id' => $address_id], ['area_id', 'area', 'pincode']);
             $zipcode = $area_id[0]['pincode'];
             $zipcode_id = fetch_details('zipcodes', ['zipcode' => $zipcode], 'id')[0];
-            $product_delivarable = check_cart_products_delivarable($this->data['user']->id, $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
+
+            $city = $area_id[0]['city'];
+            $city_id = fetch_details('cities', ['name' => $city], 'id');
+            $city_id = $city_id[0]['id'];
+
+            if ((isset($system_settings['pincode_wise_deliverability']) && $system_settings['pincode_wise_deliverability'] == 1) || (isset($settings['local_shipping_method']) && isset($settings['shiprocket_shipping_method']) && $settings['local_shipping_method'] == 1 && $settings['shiprocket_shipping_method'] == 1)) {
+                $product_delivarable = check_cart_products_delivarable($this->data['user']->id, $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
+            }
+            if (isset($system_settings['city_wise_deliverability']) && $system_settings['city_wise_deliverability'] == 1 && $system_settings['shiprocket_shipping_method'] != 1) {
+                $product_delivarable = check_cart_products_delivarable($this->data['user']->id, $area_id[0]['area_id'], '', '', $city, $city_id);
+            }
+
+            // $product_delivarable = check_cart_products_delivarable($this->data['user']->id, $area_id[0]['area_id'], $zipcode, $zipcode_id['id']);
             if (!empty($product_delivarable)) {
                 $product_not_delivarable = array_filter($product_delivarable, function ($var) {
                     return ($var['is_deliverable'] == false);
@@ -1366,6 +1460,26 @@ class Cart extends CI_Controller
                 $this->response['final_amount'] = $_POST['amount'];
                 $this->response['error'] = false;
                 $this->response['message'] = "Client Secret Get Successfully.";
+                print_r(json_encode($this->response));
+                return false;
+            }
+
+            if ($_POST['payment_method'] == "phonepe") {
+                $user_id = $this->data['user']->user_id;
+                $this->response['phonepe_transaction_id'] = $_POST['order_id'];
+                $this->response['error'] = false;
+                $this->response['message'] = "Client Secret Get Successfully.";
+
+                $data['transaction_type'] = "wallet";
+                $data['user_id'] = $user_id;
+                $data['type'] = "credit";
+                $data['txn_id'] = $_POST['order_id'];
+                $data['amount'] = $_POST['amount'];
+                $data['status'] = "awaiting";
+                $data['message'] = "waiting for payment";
+
+                $this->transaction_model->add_transaction($data);
+
                 print_r(json_encode($this->response));
                 return false;
             }

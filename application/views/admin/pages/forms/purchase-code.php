@@ -45,10 +45,7 @@
                                 </div> -->
 
                             </div>
-                            <!-- <div class="d-flex justify-content-center">
-                                <div class="form-group" id="error_box">
-                                </div>
-                            </div> -->
+
                         </form>
                         <?php $doctor_brown = get_settings('doctor_brown', true);
                         if (!empty($doctor_brown) && isset($doctor_brown['code_bravo'])) { ?>

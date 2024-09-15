@@ -33,7 +33,7 @@ class Offer_model extends CI_Model
             $offer_data['link'] = $image_name['link'];
             $offer_data['type_id'] = 0;
         }
-        if (isset($image_name['edit_offer'])) {
+        if (isset($image_name['edit_offer']) && !empty($image_name['edit_offer'])) {
             if (empty($image_name['image'])) {
                 unset($offer_data['image']);
             }
@@ -49,7 +49,7 @@ class Offer_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
 
 
@@ -104,9 +104,21 @@ class Offer_model extends CI_Model
 
         foreach ($offer_search_res as $row) {
             $row = output_escaping($row);
-            $operate = ' <a href="' . base_url('admin/offer?edit_id=' . $row['id']) . '" class="btn btn-success action-btn btn-xs ml-1 mr-1 mb-1"  title="Edit" data-id="' . $row['id'] . '" data-url="admin/offer/"><i class="fa fa-pen"></i></a>';
+            // $operate = ' <a href="' . base_url('admin/offer?edit_id=' . $row['id']) . '" class="btn btn-success action-btn btn-xs ml-1 mr-1 mb-1"  title="Edit" data-id="' . $row['id'] . '" data-url="admin/offer/"><i class="fa fa-pen"></i></a>';
+            $operate = ' <a href="' . base_url('admin/offer/manage_offer?edit_id=' . $row['id']) . '" class="btn btn-success edit_offer action-btn btn-xs ml-1 mr-1 mb-1"  title="Edit" data-id="' . $row['id'] . '" data-target="#add_offer" data-toggle="modal"><i class="fa fa-pen"></i></a>';
             $operate .= ' <a href="javaScript:void(0)" id="delete-offer" class="btn btn-danger btn-xs action-btn mr-1 mb-1 ml-1" title="Delete" data-id="' . $row['id'] . '"><i class="fa fa-trash"></i></a>';
 
+
+            if (isset($row['type_id']) && !empty($row['type_id']) && $row['type'] == 'products') {
+                $product = fetch_details('products', ['id' => $row['type_id']], 'name');
+                $tempRow['name'] = $product[0]['name'];
+            } elseif (isset($row['type_id']) && !empty($row['type_id']) && $row['type'] == 'categories') {
+                $categories = fetch_details('categories', ['id' => $row['type_id']], 'name');
+                $tempRow['name'] = $categories[0]['name'];
+            }else{
+               $tempRow['name'] = ''; 
+            }
+            
             $tempRow['id'] = $row['id'];
             $tempRow['type'] = $row['type'];
             $tempRow['type_id'] = $row['type_id'];

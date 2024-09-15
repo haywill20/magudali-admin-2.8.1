@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2>Orders</h2>
         <nav aria-label="breadcrumb">
@@ -52,12 +52,30 @@
                                     <div class="col">
                                         <p class="text-muted"> <?= !empty($this->lang->line('order_id')) ? $this->lang->line('order_id') : 'Order ID' ?> <span class="font-weight-bold text-dark"> : <?= $row['id'] ?></span></p>
                                         <p class="text-muted"> <?= !empty($this->lang->line('place_on')) ? $this->lang->line('place_on') : 'Place On' ?> <span class="font-weight-bold text-dark"> : <?= $row['date_added'] ?></span> </p>
-                                        <?php if ($row['otp'] != 0) { ?>
-                                            <p class="text-muted"> <?= !empty($this->lang->line('otp')) ? $this->lang->line('otp') : 'OTP' ?> <span class="font-weight-bold text-dark"> : <?= $row['otp'] ?></span> </p>
-                                        <?php } ?>
+                                        <!-- <?//php if ($row['otp'] != 0) { ?>
+                                            <p class="text-muted"> <?//= !empty($this->lang->line('otp')) ? $this->lang->line('otp') : 'OTP' ?> <span class="font-weight-bold text-dark"> : <?= $row['otp'] ?></span> </p>
+                                        <?//php } ?> -->
                                     </div>
-                                    <div class="flex-col my-auto">
-                                        <h6 class="ml-auto mr-3"> <a href="<?= base_url('my-account/order-details/' . $row['id']) ?>" class='button button-primary-outline'><?= !empty($this->lang->line('view_details')) ? $this->lang->line('view_details') : 'View Details' ?></a> </h6>
+                                    <div class="flex-col my-auto d-flex gap-2">
+                                        <!-- <h6 class="ml-auto mr-3"> -->
+                                        <a href="<?= base_url('my-account/order-details/' . $row['id']) ?>" class='button button-primary-outline'><?= !empty($this->lang->line('view_details')) ? $this->lang->line('view_details') : 'View Details' ?></a>
+                                        <!-- </h6> -->
+
+                                        <?php
+                                        $items = $row["order_items"];
+                                        $variants = "";
+                                        $qty = "";
+                                        foreach ($items as $item) {
+                                            if ($variants != "") {
+                                                $variants .= ",";
+                                                $qty .= ",";
+                                            }
+                                            $variants .= $item["product_variant_id"];
+                                            $qty .= $item["quantity"];
+                                        }
+
+                                        ?>
+                                        <button class="button button-secondary button-sm reorder-btn" data-variants="<?= $variants ?>" data-quantity="<?= $qty ?>"><?= !empty($this->lang->line('reorder')) ? $this->lang->line('reorder') : 'Reorder' ?></button>
                                     </div>
                                 </div>
                             </div>
@@ -66,6 +84,25 @@
                                     <div class="media-body ">
                                         <?php foreach ($row['order_items'] as $key => $item) {  ?>
                                             <h5 class="bold mt-1"><?= ($key + 1) . '. ' . $item['name'] ?></h5>
+                                            <?php
+                                            if (!empty($item['variant_values'])) {
+                                                $values = explode(', ', $item['variant_values']);
+                                                $attributes = explode(', ', $item['attr_name']);
+                                                // Initialize an empty string to store the final output
+                                                $output = '';
+                                                // Iterate through both arrays simultaneously
+                                                foreach ($attributes as $key => $attribute) {
+                                                    // Append the attribute name and corresponding value to the output string
+                                                    $output .= '<p class="mb-0 text-dark">' . $attribute . ': ' . $values[$key] . '</p>';
+                                                    // Add line break if it's not the last attribute
+                                                    if ($key < count($attributes) - 1) {
+                                                        $output .= ",";
+                                                    }
+                                                }
+
+                                            ?>
+                                                <div class="d-flex gap-2 mb-0 text-dark"><?= $output ?></div>
+                                            <?php } ?>
                                             <p class="text-muted"> <?= !empty($this->lang->line('quantity')) ? $this->lang->line('quantity') : 'Quantity' ?> : <?= $item['quantity'] ?></p>
                                             <div class="col-md-12 pl-0 product-rating-small" dir="ltr">
                                                 <input type="text" class="kv-fa rating-loading" value="<?= $item['product_rating'] ?>" data-size="xs" title="" readonly>
@@ -116,7 +153,7 @@
                                     <?php if ($row['payment_method'] == 'Bank Transfer') { ?>
                                         <div class="col my-auto ">
                                             <h5>
-                                                <a class="block button-sm buttons btn-6-5 mt-3 m-0" href="<?= base_url('my-account/order-details/' . $row['id']) ?>"> Send Bank Payment Receipt</i>
+                                                <a class="block button-sm buttons btn-6-5 mt-3 m-0" href="<?= base_url('my-account/order-details/' . $row['id']) ?>"> <?= !empty($this->lang->line('send_bank_payment_receipt')) ? $this->lang->line('send_bank_payment_receipt') : 'Send Bank Payment Receipt' ?></i>
                                                     <!-- <input type="file"  name="receipt" class="form-control"/>  -->
                                                 </a>
                                             </h5>

@@ -94,6 +94,28 @@ Defined API Methods:-
         57. get_withdrawal_request
         
         58. delete_user
+        59. razorpay_create_order
+        60. update_order_status
+        61. get_invoice_html
+        62. update_fcm
+        63. paypal_transaction_webview
+        64. is_product_delivarable
+        65. check_cart_products_delivarable
+        66. create_midtrans_transaction
+        67. get_midtrans_transaction_status
+        68. sign_up
+        69. download_link_hash
+        70. check_shiprocket_serviceability
+        71. check_user_status
+        72. delete_social_account
+        73. instamojo_webview
+        74. verify_otp
+        75. resend_otp
+        76. get_brands_data
+
+        // consignment
+        77. order_consignment
+        78. get_consignment_invoice_html
 ------------------------------------------
 What parameters to be Passed?  See here >>
 ------------------------------------------
@@ -111,17 +133,21 @@ Use POST method to pass the parameters
     order:DESC/ASC      // { default - DESC } optional
     has_child_or_item: true { default - false}  optional
 
-2. get_cities
+//2.get_areas_by_city_id
+//change API name get_areas_by_city_id to get_zipcode_by_city_id
+2. get_zipcode_by_city_id
+
+        id:'57' 
+        limit:25            // { default - 25 } optional
+        offset:0            // { default - 0 } optional
+        sort:               // { a.name / a.id } optional
+        order:DESC/ASC      // { default - ASC } optional
+        search:value        // {optional} 
+
+3. get_cities
 
         sort:               // { c.name / c.id } optional
         order:DESC/ASC      // { default - ASC } optional
-        search:value        // {optional}
-        limit:25            // { default - 25 } optional
-        offset:0            // { default - 0 } optional
-    
-3. get_areas_by_city_id
-
-        id='57'
         search:value        // {optional}
         limit:25            // { default - 25 } optional
         offset:0            // { default - 0 } optional
@@ -129,22 +155,26 @@ Use POST method to pass the parameters
 4. get_products
         id:101              // optional
         category_id:29      // optional
+        user_id:15          // optional
         search:keyword      // optional
         tags:multiword tag1, tag2, another tag      // optional
-        attribute_value_ids : 34,23,12 // { Use only for filteration } optional 
+        attribute_value_ids : 34,23,12 // { Use only for filteration } optional
         limit:25            // { default - 25 } optional
         offset:0            // { default - 0 } optional
         sort:p.id / p.date_added / pv.price
-                        // { default - p.id } optional
-        order:DESC/ASC      // { default - DESC } optional 
+                            // { default - p.id } optional
+        order:DESC/ASC      // { default - DESC } optional
         is_similar_products:1 // { default - 0 } optional
-        discount: 5 // { default - 5 } optional
+        top_rated_product: 1 // { default - 0 } optional
+        discount: 5             // optional
         min_price:10000          // optional
         max_price:50000          // optional
         seller_id:1255           //{optional}
-        zipcode:1          // optional
+        zipcode:1           //{optional}
         product_ids: 19,20             // optional
         product_variant_ids: 44,45,40             // optional
+        is_detailed_data: 1 //optionaal(if details required)
+
 
 5. get_settings
 
@@ -181,10 +211,12 @@ Use POST method to pass the parameters
         payment_method: Paypal / Payumoney / COD / PAYTM / bank_transfer
         address_id:12
         delivery_time:Today - Evening (4:00pm to 7:00pm)
+        delivery_date:10/12/2012
         is_wallet_used:1 {By default 0}
         wallet_balance_used:160
         order_note:text      //{optional}
         documents[]:FILES   
+        email:testmail123@gmail.com // only enter when ordered product is digital product and one of them is not downloadable(download_allowed = 0)
 
     - add_transaction
         transaction_type : transaction / wallet  // { optional - default is transaction }
@@ -232,10 +264,6 @@ Use POST method to pass the parameters
         sort: type   			// { default - type } optional
         order:DESC/ASC          // { default - DESC } optional
 
-        product_id : 12
-        limit:25                // { default - 25 } optional
-        offset:0                // { default - 0 } optional
-
 14. add_address
         user_id:3
         type:Home/Office/Others {optional}
@@ -247,6 +275,9 @@ Use POST method to pass the parameters
         landmark:Bhuj-Mirzapar Highway {optional}
         area_id:1 {optional}
         city_id:2 {optional}
+        city_name:bhuj {optional}
+        area_name:jay nagar {optional}
+        pincode_name:370001 {optional}
         pincode:0123456 {optional}
         state:Gujarat {optional}
         country:India {optional}
@@ -263,6 +294,9 @@ Use POST method to pass the parameters
         landmark:Bhuj-Mirzapar Highway {optional}
         area_id:1 {optional}
         city_id:2 {optional}
+        city_name:bhuj {optional}
+        area_name:jay nagar {optional}
+        pincode_name:370001 {optional}
         pincode:0123456 {optional}
         state:Gujarat {optional}
         country:India {optional}
@@ -278,7 +312,10 @@ Use POST method to pass the parameters
 
 18. get_user_cart
         user_id:2
-         is_saved_for_later: 1 { default:0 }
+        delivery_pincode:370001 //optional when standard shipping is on
+        only_delivery_charge:0 (default:0)// if 1 it's only returen shiprocket delivery charge OR return all cart information
+        address_id:2 // only when only_delivery_charge is 1
+        is_saved_for_later: 1 { default:0 }
 
 19. remove_from_cart // Deleted API        
 
@@ -290,11 +327,13 @@ Use POST method to pass the parameters
 
 21. verify_user
         mobile: 9874565478
+        email: test@gmail.com {optional}
 
 22. register_user
         name:gk 
         email:gurnanikaran67@gmail.com 
         mobile:9874565478 
+        country_code:91
         dob:1998/11/12 {optional}
         city:bhuj {optional}
         area:ravalwadi {optional}
@@ -450,102 +489,186 @@ Use POST method to pass the parameters
 43. get_ticket_types
 
 44. add_ticket
-    ticket_type_id:1
-    subject:product_image not displying
-    email:test@gmail.com
-    description:its not showing images of products in web
-    user_id:1
+        ticket_type_id:1
+        subject:product_image not displying
+        email:test@gmail.com
+        description:its not showing images of products in web
+        user_id:1
 
 45. edit_ticket
-    ticket_id:1
-    ticket_type_id:1
-    subject:product_image not displying
-    email:test@gmail.com
-    description:its not showing images of products in web
-    user_id:1
-    status:3 or 5 [3 -> resolved, 5 -> reopened]
+        ticket_id:1
+        ticket_type_id:1
+        subject:product_image not displying
+        email:test@gmail.com
+        description:its not showing images of products in web
+        user_id:1
+        status:3 or 5 [3 -> resolved, 5 -> reopened]
 
 46. send_message
-    user_type:user
-    user_id:1
-    ticket_id:1	
-    message:test	
-    attachments[]:files  {optional} {type allowed -> image,video,document,spreadsheet,archive}
+        user_type:user
+        user_id:1
+        ticket_id:1	
+        message:test	
+        attachments[]:files  {optional} {type allowed -> image,video,document,spreadsheet,archive}
 
 47. get_tickets
-    ticket_id: 1001                // { optional}
-    ticket_type_id: 1001                // { optional}
-    user_id: 1001                // { optional}
-    status:   [1 -> pending, 2 -> opened, 3 -> resolved, 4 -> closed, 5 -> reopened]// { optional}
-    search : Search keyword // { optional }
-    limit:25                // { default - 25 } optional
-    offset:0                // { default - 0 } optional
-    sort: id | date_created | last_updated                // { default - id } optional
-    order:DESC/ASC          // { default - DESC } optional
+        ticket_id: 1001                // { optional}
+        ticket_type_id: 1001                // { optional}
+        user_id: 1001                // { optional}
+        status:   [1 -> pending, 2 -> opened, 3 -> resolved, 4 -> closed, 5 -> reopened]// { optional}
+        search : Search keyword // { optional }
+        limit:25                // { default - 25 } optional
+        offset:0                // { default - 0 } optional
+        sort: id | date_created | last_updated                // { default - id } optional
+        order:DESC/ASC          // { default - DESC } optional
 
 48. get_messages
-    ticket_id: 1001            
-    user_type: 1001                // { optional}
-    user_id: 1001                // { optional}
-    search : Search keyword // { optional }
-    limit:25                // { default - 25 } optional
-    offset:0                // { default - 0 } optional
-    sort: id | date_created | last_updated                // { default - id } optional
-    order:DESC/ASC          // { default - DESC } optional
+        ticket_id: 1001            
+        user_type: 1001                // { optional}
+        user_id: 1001                // { optional}
+        search : Search keyword // { optional }
+        limit:25                // { default - 25 } optional
+        offset:0                // { default - 0 } optional
+        sort: id | date_created | last_updated                // { default - id } optional
+        order:DESC/ASC          // { default - DESC } optional
 
 49. send_bank_transfer_proof
-    order_id:1
-    attachments:file  {optional} {type allowed -> image,video,document,spreadsheet,archive}
+        order_id:1
+        attachments:file  {optional} {type allowed -> image,video,document,spreadsheet,archive}
 
 50. get_zipcodes
-    limit:10 {optional}
-    offset:0 {optional}
+        limit:10 {optional}
+        offset:0 {optional}
 
 51. get_sellers
-    zipcode:1  //{optional}
-    limit:25                // { default - 25 } optional
-    offset:0                // { default - 0 } optional
-    sort: id | date_created | last_updated                // { default - id } optional
-    order:DESC/ASC          // { default - DESC } optional
-    search:Search keyword // { optional }
+        zipcode:1  //{optional}
+        limit:25                // { default - 25 } optional
+        offset:0                // { default - 0 } optional
+        sort: id | date_created | last_updated                // { default - id } optional
+        order:DESC/ASC          // { default - DESC } optional
+        search:Search keyword // { optional }
 
 52. get_promo_codes
 
-    limit:25            // { default - 25 } optional
-    offset:0            // { default - 0 } optional
-    sort:id               id / name
-    order:DESC/ASC      // { default - DESC } optional  
-    search:value        //{optional}   
+        limit:25            // { default - 25 } optional
+        offset:0            // { default - 0 } optional
+        sort:id               id / name
+        order:DESC/ASC      // { default - DESC } optional  
+        search:value        //{optional}   
 
 53. upload_media
-    documents[]:FILES
+        documents[]:FILES
 
 54. add_product_faqs
-    product_id:25   
-    user_id:1      
-    question:test
+        product_id:25   
+        user_id:1      
+        question:test
 
 55. get_product_faqs
-    id:2    // {optional}
-    product_id:25   // {optional}
-    user_id:1       // {optional}
-    search : Search keyword // { optional }
-    limit:25                // { default - 10 } optional
-    offset:0                // { default - 0 } optional
-    sort: id                // { default - id } optional
-    order:DESC/ASC          // { default - DESC } optional
+        id:2    // {optional}
+        product_id:25   // {optional}
+        user_id:1       // {optional}
+        search : Search keyword // { optional }
+        limit:25                // { default - 10 } optional
+        offset:0                // { default - 0 } optional
+        sort: id                // { default - id } optional
+        order:DESC/ASC          // { default - DESC } optional
 
 56. send_withdrawal_request
-    user_id:15
-    payment_address: 12343535
-    amount: 560
+        user_id:15
+        payment_address: 12343535
+        amount: 560
 
 57. get_withdrawal_request
-    user_id:15
-    limit:10
-    offset:10
+        user_id:15
+        limit:10
+        offset:10
 
 58. delete_user
-    user_id:15
-    mobile:9874563214
-    password:12345695
+        user_id:15
+        mobile:9874563214
+        password:12345695
+
+59. razorpay_create_order
+        order_id:15
+
+60. update_order_status
+        status: cancelled / returned
+        order_id:1201
+
+61. get_invoice_html
+        order_id:214
+      
+62.update_fcm
+        user_id:12
+        fcm_id: FCM_ID
+    
+63. paypal_transaction_webview
+        user_id : 2
+        order_id : 1
+        amount : 1000
+
+64. is_product_delivarable
+        product_id:10 
+        zipcode:132456
+
+ 65. check_cart_products_delivarable
+        address_id:10 
+        user_id:12
+
+66. create_midtrans_transaction
+        order_id : 122
+        amount:1000
+
+67. get_midtrans_transaction_status
+        order_id:122
+
+68. sign_up
+        mobile:9876543210
+        email:abc123@gmail.com
+        fcm_id:FCM_ID
+        name:seema
+        type:mobile
+        country_code:91
+        referral_code:REF_CODE
+        friends_code:FRIENDS_CODE
+        laitude:69.654564654654
+        longitude:23.64654564545
+        active:1
+
+69. download_link_hash
+        order_item_id : 100 
+        user_id : 100
+
+70. check_shiprocket_serviceability
+        product_variant_id:15
+        delivery_pincode:370001
+
+71. check_user_status
+        user_id:15
+
+72. delete_social_account
+        user_id:15
+
+73. instamojo_webview
+        user_id:73
+        order_id:101 
+        amount:100 // only pass while wallet refill
+
+74. verify_otp
+        otp: 123456
+        phone number: 9876543210
+
+75. resend_otp
+        mobile:9876543210
+
+76. get_brands_data
+        limit:10
+        offset:10
+        search:value        //{optional}   
+
+77. order_consignment    // to get consignments of order
+        order_id:3238
+
+78. get_consignment_invoice_html   // to get consignment invioce
+        consignment_id:214

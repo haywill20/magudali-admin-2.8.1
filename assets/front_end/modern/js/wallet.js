@@ -834,7 +834,6 @@ $(document).on('click', '#withdraw_amount', function () {
         dataType: 'json',
         url: base_url + 'my_account/withdraw_money',
         success: function (result) {
-
             csrfName = result['csrfName'];
             csrfHash = result['csrfHash'];
             if (result.error == false) {
@@ -848,10 +847,17 @@ $(document).on('click', '#withdraw_amount', function () {
 
 
             } else {
-                Toast.fire({
-                    icon: 'error',
-                    title: result.message
-                })
+                $.each(result.message, function (key, errorMessage) {
+                    if (errorMessage.trim() !== "") {
+                        error_box.append("<p>" + errorMessage.trim() + "</p>");
+                        // Show each error message in a separate iziToast
+                        Toast.fire({
+                            icon: 'error',
+                            title: errorMessage.trim()
+                        })
+                        allMessages += errorMessage.trim() + "\n";
+                    }
+                });
             }
         }
     })

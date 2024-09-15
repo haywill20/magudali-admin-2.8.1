@@ -32,8 +32,8 @@
                                         <th data-field="id" data-sortable="true" data-align='center'>ID</th>
                                         <th data-field="order_id" data-sortable="true" data-align='center'>Order ID</th>
                                         <th data-field="order_item_id" data-sortable="false" data-align='center'>Order Item ID</th>
-                                        <th data-field="courier_agency" data-sortable="false" data-align='center'>courier_agency</th>
-                                        <th data-field="tracking_id" data-sortable="false" data-align='center'>tracking_id</th>
+                                        <th data-field="courier_agency" data-sortable="false" data-align='center'>Courier agency</th>
+                                        <th data-field="tracking_id" data-sortable="false" data-align='center'>Tracking Id</th>
                                         <th data-field="url" data-sortable="false" data-align='center'>URL</th>
                                         <th data-field="date" data-sortable="false" data-align='center'>Date</th>
                                         <th data-field="operate" data-sortable="false" data-align='center'>Actions</th>

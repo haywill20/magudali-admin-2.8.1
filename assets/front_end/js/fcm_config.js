@@ -5,8 +5,9 @@ var config = {
 	projectId: "%PROJECTID%",
 	storageBucket: "%STRORAGEBUCKET%",
 	messagingSenderId: "%MESSAGINGSENDERID%",
-    appId: "%APPID%",
-    measurementId: "%MEASUREMENTID%",
+    appId: "%APPID%"
 };
 
 firebase.initializeApp(config);
+var notification = [];
+var icon = '';

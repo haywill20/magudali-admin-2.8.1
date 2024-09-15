@@ -1,4 +1,4 @@
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('about_us')) ? $this->lang->line('about_us') : 'About Us' ?></h2>
         <nav aria-label="breadcrumb">
@@ -9,7 +9,7 @@
         </nav>
     </div>
 </section>
-<section class="main-content py-5 my-4">
+<section class="main-content py-5 my-4 px-5">
     <div class="text-center">
         <h1 class="h2"><?= !empty($this->lang->line('about_us')) ? $this->lang->line('about_us') : 'About Us' ?></h1>
     </div>

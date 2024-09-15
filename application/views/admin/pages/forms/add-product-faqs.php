@@ -28,7 +28,7 @@
                                     <label for="attributes" class="col-sm-2 col-form-label">Select Product <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
 
-                                        <select name="product_id" class="search_admin_product w-100" data-placeholder=" Type to search and select products">
+                                        <select name="product_id" class="search_admin_faq_product w-100" data-placeholder=" Type to search and select products" required>
                                             <?php
                                             foreach ($product_details as $row) {  ?>
                                                 <option value="<?= $row['id'] ?>" selected><?= $row['name'] ?></option>
@@ -55,8 +55,8 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-center">
-                                <div class="form-group" id="error_box">
-                                </div>
+                                <!-- <div class="form-group" id="error_box">
+                                </div> -->
                             </div>
                         </form>
                     </div>

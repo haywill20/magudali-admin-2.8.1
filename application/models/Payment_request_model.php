@@ -16,7 +16,7 @@ class Payment_request_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'pr.id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
 
         if (isset($_GET['offset']))

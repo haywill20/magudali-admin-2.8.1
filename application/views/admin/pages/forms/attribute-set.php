@@ -36,7 +36,7 @@
 
                   <!-- test code -->
 
-                  
+
                 </div>
                 <div class="form-group">
                   <button type="reset" class="btn btn-warning">Reset</button>
@@ -46,10 +46,7 @@
 
 
 
-              <div class="d-flex justify-content-center">
-                <div class="form-group" id="error_box">
-                </div>
-              </div>
+
             </form>
           </div>
           <!--/.card-->

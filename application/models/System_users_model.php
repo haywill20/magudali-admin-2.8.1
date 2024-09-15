@@ -76,7 +76,7 @@ class System_users_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
 
 

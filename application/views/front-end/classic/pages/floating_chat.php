@@ -7,6 +7,12 @@
     <?php $this->load->view('front-end/' . THEME . '/include-css', $data); ?>
     <script type="module" src="<?= base_url('assets/front_end/classic/js/components-chat-box.js') ?>"></script>
     <script src="<?= THEME_ASSETS_URL . 'js/select2.full.min.js' ?>"></script>
+    <script src="<?= THEME_ASSETS_URL . 'js/stisla.js' ?>"></script>
+
+    <!-- Markdown -->
+    <script src="<?= THEME_ASSETS_URL . 'js/Markdown.Converter.js' ?>"></script>
+    <script src="<?= THEME_ASSETS_URL . 'js/Markdown.Sanitizer.js' ?>"></script>
+    <script src="<?= THEME_ASSETS_URL . 'js/Markdown.Editor.js' ?>"></script>
     <?php $this->load->view('front-end/' . THEME . '/include-script'); ?>
 </head>
 
@@ -22,7 +28,7 @@
                 <div class="card chat-theme-light chat-scroll chat-min">
                     <select name="select_user_id[]" id="chat_user" class="search_user w-100" multiple data-placeholder=" Type to search and select users" onload="multiselect()">
                         <?php
-                        $user_details = fetch_details('users', ['active' => 1],);
+                        $user_details = fetch_details('users', ['active' => 1]);
                         if (!empty($user_details)) {
                         ?>
                             <option value="<?= $user_details[0]['id'] ?>"> <?= $user_details[0]['username'] ?></option>
@@ -33,7 +39,7 @@
                     </select>
                     <div id="add-scroll-js ">
                         <div class="card-header chat-card-header text-color mt-4">
-                            <h4>Personal Chat</h4>
+                            <h4><?= !empty($this->lang->line('personal_chat')) ? $this->lang->line('personal_chat') : 'Personal Chat'; ?></h4>
                         </div>
                         <div class="chat-card-body">
                             <ul class="list-unstyled list-unstyled-border chat-list-unstyled-border">
@@ -44,13 +50,13 @@
                                 ?>
                                             <li class="media">
                                                 <div class="media-body">
-                                                    <div class="chat-person" data-picture="" data-type="person" data-id="<?= $user['id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fa fa-circle text-success' : 'fa fa-circle'; ?> "></i> <?= $user['username'] ?> (You)</div>
+                                                    <div class="chat-person" data-picture="" data-type="person" data-id="<?= $user['opponent_user_id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fa fa-circle text-success' : 'fa fa-circle'; ?> "></i> <?= $user['opponent_username'] ?> (You)</div>
                                                 </div>
                                             </li>
                                     <?php }
                                     }
                                 } else { ?>
-                                    <p class="card-body p-0 px-5 text-muted">It seems there are no chats available at the moment</p>
+                                    <p class="card-body p-0 px-5 text-muted"><?= !empty($this->lang->line('it_seems_there_are_no_chats_available_at_the_moment')) ? $this->lang->line('it_seems_there_are_no_chats_available_at_the_moment') : 'It seems there are no chats available at the moment'; ?></p>
                                 <?php } ?>
 
 
@@ -59,7 +65,7 @@
                                         if (isset($user['id']) && !empty($user['id']) && $user['id'] != '' && $user['id'] != $_SESSION['user_id']) { ?>
                                             <li class="media">
                                                 <div class="media-body">
-                                                    <div data-unread_msg="<?= $user['unread_msg'] ?>" class="chat-person <?= ($user['unread_msg'] > 0) ? 'new-msg-rcv' : ''; ?>" data-picture="<?= $user['picture'] ?>" data-type="person" data-id="<?= $user['id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fa fa-circle text-success' : 'fa fa-circle'; ?> "></i> <?= $user['username'] ?>
+                                                    <div data-unread_msg="<?= $user['unread_msg'] ?>" class="chat-person <?= ($user['unread_msg'] > 0) ? 'new-msg-rcv' : ''; ?>" data-picture="<?= $user['picture'] ?>" data-type="person" data-id="<?= $user['opponent_user_id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fa fa-circle text-success' : 'fa fa-circle'; ?> "></i> <?= $user['opponent_username'] ?>
                                                         <?= ($user['unread_msg'] > 0) ? (($user['unread_msg'] > 9) ? '<div class="badge-chat">9 +</div>' : '<div class="badge-chat">' . $user['unread_msg'] . '</div>') : ''; ?>
                                                     </div>
                                                 </div>
@@ -104,7 +110,7 @@
 
                                     <?php }
                                 } else { ?>
-                                    <p class="card-body p-0 px-5 text-muted">No support team available </p>
+                                    <p class="card-body p-0 px-5 text-muted"><?= !empty($this->lang->line('no_support_team_available')) ? $this->lang->line('no_support_team_available') : 'No support team available'; ?> </p>
                                 <?php } ?>
                             </ul>
                         </div>
@@ -148,7 +154,7 @@
                     <div class="card-body d-none" id="chat-dropbox">
                         <div class="dropzone" id="myAlbum"></div>
                         <div class="text-center mt-3">
-                            <button class="btn btn-danger shadow-none" onclick="closeDropZone();"><?= !empty($this->lang->line('label_close')) ? $this->lang->line('label_close') : 'Close'; ?>
+                            <button class="btn btn-danger shadow-none" onclick="closeDropZone();"><?= !empty($this->lang->line('close')) ? $this->lang->line('close') : 'Close'; ?>
                             </button>
                         </div>
                     </div>
@@ -166,8 +172,6 @@
                             <div class="row mt-2">
                                 <span class="input-group-append ">
                                     <div class="form-group">
-
-                                        <!-- <a Class="chat-preview-btn d-none" id="chat-preview-btn"><?= !empty($this->lang->line('label_preview')) ? $this->lang->line('label_preview') : 'Preview'; ?></a> -->
 
                                         <a class="bg-success go-to-bottom-btn text-center">
                                             <i class="fa fa-arrow-down"></i>

@@ -42,7 +42,7 @@
                                     <div class="form-group">
                                         <label for="mobile" class="control-label">Mobile <span class='text-danger text-sm'>*</span></label>
                                         <div class="col-md-12">
-                                            <input type="number" class="form-control" name="mobile" id="mobile" value="<?= (isset($fetched_data[0]['mobile'])) ?  $fetched_data[0]['mobile'] : ' ' ?>">
+                                            <input type="text" maxlength="16" oninput="validateNumberInput(this)" class="form-control" name="mobile" id="mobile" value="<?= (isset($fetched_data[0]['mobile'])) ?  $fetched_data[0]['mobile'] : ' ' ?>">
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -84,8 +84,8 @@
                                     </div>
                                     <?php if (!isset($fetched_data[0]['id'])) { ?>
                                         <div class="d-flex justify-content-center">
-                                            <div class="form-group" id="error_box">
-                                            </div>
+                                            <!-- <div class="form-group" id="error_box">
+                                            </div> -->
                                         </div>
                                         <div class="form-group">
                                             <button type="reset" class="btn btn-warning">Reset</button>
@@ -157,8 +157,8 @@
 
                                     <?php if (isset($fetched_data[0]['id'])) { ?>
                                         <div class="d-flex justify-content-center">
-                                            <div class="form-group" id="error_box">
-                                            </div>
+                                            <!-- <div class="form-group" id="error_box">
+                                            </div> -->
                                         </div>
                                         <div class="form-group">
                                             <button type="submit" class="btn btn-success" id="submit_btn">Update User</button>

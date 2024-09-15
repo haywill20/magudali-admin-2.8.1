@@ -22,15 +22,15 @@ class Delivery_boy_model extends CI_Model
             'address' => $data['address'],
             'bonus_type' => $data['bonus_type'],
             'bonus' => $bonus,
-            'status' => $data['status'],
             'serviceable_zipcodes' => $data['serviceable_zipcodes'],
+            'serviceable_cities' => $data['serviceable_cities'],
             'driving_license' => $data['driving_license'],
+            'status' => $data['status'],
         ];
         $this->db->set($delivery_boy_data)->where('id', $data['edit_delivery_boy'])->update('users');
-        
     }
 
-    function get_delivery_boys_list()
+    function get_delivery_boys_list($get_delivery_boy_status = "")
     {
         $offset = 0;
         $limit = 10;
@@ -69,6 +69,12 @@ class Delivery_boy_model extends CI_Model
             $where['ug.group_id'] = '3';
             $count_res->where($where);
         }
+        if ($get_delivery_boy_status == "approved") {
+            $count_res->where('u.status', '1');
+        }
+        if ($get_delivery_boy_status == "not_approved") {
+            $count_res->where('u.status', '0');
+        }
 
         $offer_count = $count_res->get('users u')->result_array();
 
@@ -86,6 +92,12 @@ class Delivery_boy_model extends CI_Model
             $where['ug.group_id'] = '3';
             $search_res->where($where);
         }
+        if ($get_delivery_boy_status == "approved") {
+            $search_res->where('u.status', '1');
+        }
+        if ($get_delivery_boy_status == "not_approved") {
+            $search_res->where('u.status', '0');
+        }
 
         $offer_search_res = $search_res->order_by($sort, "asc")->limit($limit, $offset)->get('users u')->result_array();
         $bulkData = array();
@@ -101,7 +113,7 @@ class Delivery_boy_model extends CI_Model
 
             $tempRow['id'] = $row['id'];
             $tempRow['name'] = $row['username'];
-            
+
             if (isset($row['email']) && !empty($row['email']) && $row['email'] != "" && $row['email'] != " ") {
                 $tempRow['email'] = (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) ? str_repeat("X", strlen($row['email']) - 3) . substr($row['email'], -3) : ucfirst($row['email']);
             } else {
@@ -109,22 +121,24 @@ class Delivery_boy_model extends CI_Model
             }
             if (isset($row['mobile']) && !empty($row['mobile']) && $row['mobile'] != "" && $row['mobile'] != " ") {
                 $tempRow['mobile'] =  (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) ? str_repeat("X", strlen($row['mobile']) - 3) . substr($row['mobile'], -3) : $row['mobile'];
-            }else{
+            } else {
                 $tempRow['mobile'] = "";
             }
-            $tempRow['address'] = $row['address'];
-            $tempRow['bonus_type'] = ucwords(str_replace('_'," ",$row['bonus_type']));
-            $tempRow['bonus'] = $row['bonus'];
-            $tempRow['cash_received'] = $row['cash_received'];
-            $tempRow['balance'] =  $row['balance'] == null || $row['balance'] == 0 || empty($row['balance']) ? "0" : number_format($row['balance'], 2);
 
-            if ($row['status'] == 1)
+            // delivery boy status
+            if ($row['status'] == 0) {
+                $tempRow['status'] = "<label class='badge badge-warning'>Not-Approved</label>";
+            } else if ($row['status'] == 1) {
                 $tempRow['status'] = "<label class='badge badge-success'>Approved</label>";
-            else if ($row['status'] == 0)
-                $tempRow['status'] = "<label class='badge badge-danger'>Not-Approved</label>";
-            
+            }
 
-            $tempRow['date'] = $row['created_at'];
+            $tempRow['address'] = $row['address'];
+            $tempRow['bonus_type'] = ucwords(str_replace('_', " ", $row['bonus_type']));
+            $tempRow['bonus'] = $row['bonus'];
+            $tempRow['balance'] = $row['balance'];
+            $tempRow['cash_received'] = $row['cash_received'];
+            $tempRow['balance'] =  $row['balance'] == null || $row['balance'] == 0 || empty($row['balance']) ? "0" : $row['balance'];
+            $tempRow['date'] = date('d-m-Y', strtotime($row['created_at']));
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }
@@ -146,7 +160,7 @@ class Delivery_boy_model extends CI_Model
         }
         return $this->db->where('id', $delivery_boy_id)->update('users');
     }
-    public function get_delivery_boys($id, $search, $offset, $limit, $sort, $order)
+    public function get_delivery_boys($id, $search, $offset, $limit, $sort, $order, $get_delivery_boy_status)
     {
         $multipleWhere = '';
         $where['ug.group_id'] =  3;
@@ -166,13 +180,18 @@ class Delivery_boy_model extends CI_Model
             $count_res->or_like($multipleWhere);
             $count_res->group_end();
         }
+        if ($get_delivery_boy_status == "approved") {
+            $count_res->where('u.status', '1');
+        }
+        if ($get_delivery_boy_status == "not_approved") {
+            $count_res->where('u.status', '0');
+        }
         if (isset($where) && !empty($where)) {
             $count_res->where($where);
         }
         $count_res->join('`users_groups` `ug`', '`u`.`id` = `ug`.`user_id`');
 
         $cat_count = $count_res->get('users u')->result_array();
-
         foreach ($cat_count as $row) {
             $total = $row['total'];
         }
@@ -182,6 +201,12 @@ class Delivery_boy_model extends CI_Model
             $search_res->group_start();
             $search_res->or_like($multipleWhere);
             $search_res->group_end();
+        }
+        if ($get_delivery_boy_status == "approved") {
+            $search_res->where('u.status', '1');
+        }
+        if ($get_delivery_boy_status == "not_approved") {
+            $search_res->where('u.status', '0');
         }
         if (isset($where) && !empty($where)) {
             $search_res->where($where);
@@ -214,7 +239,8 @@ class Delivery_boy_model extends CI_Model
                 $tempRow['area'] = $row['area_name'];
                 $tempRow['street'] = $row['street'];
                 $tempRow['status'] = $row['active'];
-                $tempRow['date'] = $row['created_at'];
+                // $tempRow['date'] = $row['created_at'];
+                $tempRow['date'] = date('d-m-Y', strtotime($row['created_at']));
 
                 $rows[] = $tempRow;
             }
@@ -328,8 +354,9 @@ class Delivery_boy_model extends CI_Model
             $tempRow['type'] = (isset($row['type']) && $row['type'] == "delivery_boy_cash") ? '<label class="badge badge-danger">Received</label>' : '<label class="badge badge-success">Collected</label>';
             $tempRow['amount'] = $row['amount'];
             $tempRow['message'] = $row['message'];
-            $tempRow['txn_date'] = $row['transaction_date'];
-            $tempRow['date'] = $row['date_created'];
+            // $tempRow['txn_date'] = $row['transaction_date'];
+            $tempRow['txn_date'] =  date('d-m-Y', strtotime($row['transaction_date']));
+            $tempRow['date'] =  date('d-m-Y', strtotime($row['date_created']));
 
             $rows[] = $tempRow;
         }
@@ -352,6 +379,8 @@ class Delivery_boy_model extends CI_Model
         if (isset($filter['delivery_boy_id']) && !empty($filter['delivery_boy_id'])) {
             $user_where = ['users.id' => $filter['delivery_boy_id']];
         }
+        // print_r($search);
+        // print_R("<br>");
 
         $count_res = $this->db->select(' COUNT(transactions.id) as `total` ')->join('users', ' transactions.user_id = users.id', 'left')->where('transactions.status = 1');
 
@@ -388,7 +417,7 @@ class Delivery_boy_model extends CI_Model
         }
         $search_res->join('users', ' transactions.user_id = users.id', 'left')->where('transactions.status = 1');
         $txn_search_res = $search_res->order_by($sort, $order)->limit($limit, $offset)->get('transactions')->result_array();
-
+        // print_r($txn_search_res);
         $bulkData = array();
         $bulkData = array();
         $bulkData['error'] = (empty($txn_search_res)) ? true : false;
@@ -396,7 +425,7 @@ class Delivery_boy_model extends CI_Model
         $bulkData['total'] = (empty($txn_search_res)) ? 0 : $total;
         $rows = array();
         $tempRow = array();
-
+        // echo $this->db->last_query();
         foreach ($txn_search_res as $row) {
             $row = output_escaping($row);
             $tempRow['id'] = $row['id'];
@@ -408,7 +437,7 @@ class Delivery_boy_model extends CI_Model
             $tempRow['amount'] = $row['amount'];
             $tempRow['message'] = $row['message'];
             $tempRow['transaction_date'] = $row['transaction_date'];
-            $tempRow['date'] = $row['date_created'];
+            $tempRow['date'] =  date('d-m-Y', strtotime($row['date_created']));
 
             $rows[] = $tempRow;
         }

@@ -43,14 +43,18 @@ class Category_model extends CI_Model
         $count_res = $this->db->count_all_results('categories c1');
         $i = 0;
         foreach ($categories as $p_cat) {
+            // echo "<pre>";
+            // die;
             $categories[$i]->children = $this->sub_categories($p_cat->id, $level);
             $categories[$i]->text = output_escaping($p_cat->name);
             $categories[$i]->name = output_escaping($categories[$i]->name);
             $categories[$i]->state = ['opened' => true];
             $categories[$i]->icon = "jstree-folder";
             $categories[$i]->level = $level;
+            $categories[$i]->relative_path = $categories[$i]->image;
             $categories[$i]->image = get_image_url($categories[$i]->image, 'thumb', 'sm');
             $categories[$i]->banner = get_image_url($categories[$i]->banner, 'thumb', 'md');
+            // print_r($categories[$i]);
             $i++;
         }
         if (isset($categories[0])) {
@@ -67,7 +71,7 @@ class Category_model extends CI_Model
         $this->db->where($where);
         $result = $this->db->get('seller_data')->result_array();
         $count_res = $this->db->count_all_results('seller_data');
-        $result = explode(",", $result[0]['category_ids']);
+        $result = explode(",", (string)$result[0]['category_ids']);
         $categories =  fetch_details('categories', "status = 1", '*', "", "", "", "", "id", $result);
         $i = 0;
         foreach ($categories as $p_cat) {
@@ -78,6 +82,7 @@ class Category_model extends CI_Model
             $categories[$i]['icon'] = "jstree-folder";
             $categories[$i]['level'] = $level;
             $categories[$i]['image'] = get_image_url($categories[$i]['image'], 'thumb', 'md');
+            $categories[$i]['relative_path'] = $categories[$i]['image'];
             $categories[$i]['banner'] = get_image_url($categories[$i]['banner'], 'thumb', 'md');
             $i++;
         }
@@ -97,11 +102,13 @@ class Category_model extends CI_Model
         $categories = $child->result();
         $i = 0;
         foreach ($categories as $p_cat) {
-
+            // echo "<pre>";
+            // print_r($categories[$i]->image);
             $categories[$i]->children = $this->sub_categories($p_cat->id, $level);
             $categories[$i]->text = output_escaping($p_cat->name);
             $categories[$i]->state = ['opened' => true];
             $categories[$i]->level = $level;
+            $categories[$i]->relative_path = $categories[$i]->image;
             $categories[$i]->image = get_image_url($categories[$i]->image, 'thumb', 'md');
             $categories[$i]->banner = get_image_url($categories[$i]->banner, 'thumb', 'md');
             $i++;
@@ -131,75 +138,83 @@ class Category_model extends CI_Model
         $limit = 10;
         $sort = 'id';
         $order = 'ASC';
-        $multipleWhere = '';
+        $multipleWhere = [];
         $where = ['status !=' => NULL];
 
-        if (isset($_GET['id']))
+        if (isset($_GET['id'])) {
             $where['parent_id'] = $_GET['id'];
-        if (isset($_GET['offset']))
-            $offset = $_GET['offset'];
-        if (isset($_GET['limit']))
-            $limit = $_GET['limit'];
-
-        if (isset($_GET['sort']))
-            if ($_GET['sort'] == 'id') {
-                $sort = "id";
-            } else {
-                $sort = $_GET['sort'];
-            }
-        if (isset($_GET['order']))
-            $order = $_GET['order'];
-
-        if (isset($_GET['search']) and $_GET['search'] != '') {
-            $search = $_GET['search'];
-            $multipleWhere = ['`id`' => $search, '`name`' => $search];
         }
+        if (isset($_GET['offset'])) {
+            $offset = $_GET['offset'];
+        }
+        if (isset($_GET['limit'])) {
+            $limit = $_GET['limit'];
+        }
+        if (isset($_GET['sort'])) {
+            $sort = $_GET['sort'];
+        }
+        if (isset($_GET['order'])) {
+            $order = $_GET['order'];
+        }
+        if (isset($_GET['search']) && $_GET['search'] != '') {
+            $search = $_GET['search'];
+            $multipleWhere = [
+                'id' => $search,
+                'name' => $search
+            ];
+        }
+
         if (isset($seller_id) && $seller_id != "") {
             $this->db->select('category_ids');
-            $where1 = 'user_id = ' . $seller_id;
-            $this->db->where($where1);
-            $result = $this->db->get('seller_data')->result_array();
-            $cat_ids = explode(',', $result[0]['category_ids']);
+            $this->db->where('user_id', $seller_id);
+            $result = $this->db->get('seller_data')->row_array();
+            $cat_ids = isset($result['category_ids']) ? explode(',', $result['category_ids']) : [];
         }
 
-        $count_res = $this->db->select(' COUNT(id) as `total` ');
-
-        if (isset($multipleWhere) && !empty($multipleWhere)) {
-            $count_res->or_like($multipleWhere);
+        $this->db->select('COUNT(id) as total');
+        if (!empty($multipleWhere)) {
+            $this->db->group_start();
+            foreach ($multipleWhere as $key => $value) {
+                $this->db->or_like($key, $value);
+            }
+            $this->db->group_end();
         }
-
-        if (isset($seller_id) && $seller_id != "") {
-            $count_res->where_in('id', $cat_ids);
+        if (!empty($where)) {
+            $this->db->where($where);
         }
-
-        $cat_count = $count_res->get('categories')->result_array();
-        foreach ($cat_count as $row) {
-            $total = $row['total'];
+        if (isset($cat_ids) && !empty($cat_ids)) {
+            $this->db->where_in('id', $cat_ids);
         }
+        $cat_count = $this->db->get('categories')->row_array();
+        $total = $cat_count['total'];
 
-        $search_res = $this->db->select(' * ');
-        if (isset($multipleWhere) && !empty($multipleWhere)) {
-            $search_res->or_like($multipleWhere);
+        $this->db->select('*');
+        if (!empty($multipleWhere)) {
+            $this->db->group_start();
+            foreach ($multipleWhere as $key => $value) {
+                $this->db->or_like($key, $value);
+            }
+            $this->db->group_end();
         }
-        if (isset($where) && !empty($where)) {
-            $search_res->where($where);
+        if (!empty($where)) {
+            $this->db->where($where);
         }
+        if (isset($cat_ids) && !empty($cat_ids)) {
+            $this->db->where_in('id', $cat_ids);
+        }
+        $cat_search_res = $this->db->order_by($sort, $order)->limit($limit, $offset)->get('categories')->result_array();
 
-        if (isset($seller_id) && $seller_id != "") {
-            $count_res->where_in('id', $cat_ids);
-        }
-
-        $cat_search_res = $search_res->order_by($sort, "asc")->limit($limit, $offset)->get('categories')->result_array();
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
-        $tempRow = array();
+
         if (!empty($cat_search_res)) {
             foreach ($cat_search_res as $row) {
-
+                $tempRow = array();
+                $operate = '';
                 if (!$this->ion_auth->is_seller()) {
                     $operate = '<a href="' . base_url('admin/category/create_category' . '?edit_id=' . $row['id']) . '" class=" btn action-btn btn-success btn-xs mr-1 mb-1" title="Edit" data-id="' . $row['id'] . '" data-url="admin/category/create_category"><i class="fa fa-pen"></i></a>';
-                    $operate .= '<a class="delete-categoty btn action-btn btn-danger btn-xs mr-1 mb-1 ml-1" title="Delete" href="javascript:void(0)" data-id="' . $row['id'] . '" ><i class="fa fa-trash"></i></a>';
+                    $operate .= '<a class="delete-category btn action-btn btn-danger btn-xs mr-1 mb-1 ml-1" title="Delete" href="javascript:void(0)" data-id="' . $row['id'] . '" ><i class="fa fa-trash"></i></a>';
                 }
                 if ($row['status'] == '1') {
                     $tempRow['status'] = '<a class="badge badge-success text-white" >Active</a>';
@@ -216,7 +231,7 @@ class Category_model extends CI_Model
                 $tempRow['id'] = $row['id'];
                 $tempRow['name'] = '<a href="' . base_url() . 'admin/category?id=' . $row['id'] . '">' . output_escaping($row['name']) . '</a>';
 
-                if (empty($row['image']) || file_exists(FCPATH  . $row['image']) == FALSE) {
+                if (empty($row['image']) || !file_exists(FCPATH . $row['image'])) {
                     $row['image'] = base_url() . NO_IMAGE;
                     $row['image_main'] = base_url() . NO_IMAGE;
                 } else {
@@ -225,7 +240,7 @@ class Category_model extends CI_Model
                 }
                 $tempRow['image'] = "<div class='image-box-100' ><a href='" . $row['image_main'] . "' data-toggle='lightbox' data-gallery='gallery'> <img class='rounded' src='" . $row['image'] . "' ></a></div>";
 
-                if (empty($row['banner']) || file_exists(FCPATH  . $row['banner']) == FALSE) {
+                if (empty($row['banner']) || !file_exists(FCPATH . $row['banner'])) {
                     $row['banner'] = base_url() . NO_IMAGE;
                     $row['banner_main'] = base_url() . NO_IMAGE;
                 } else {
@@ -239,21 +254,37 @@ class Category_model extends CI_Model
                 }
                 $rows[] = $tempRow;
             }
-            $bulkData['rows'] = $rows;
         }
-        print_r(json_encode($bulkData));
+        $bulkData['rows'] = $rows;
+        echo json_encode($bulkData);
     }
 
     public function add_category($data)
     {
         $data = escape_array($data);
 
-        $cat_data = [
-            'name' => $data['category_input_name'],
-            'parent_id' => ($data['category_parent'] == NULL && isset($data['category_parent'])) ? '0' : $data['category_parent'],
-            'slug' => create_unique_slug($data['category_input_name'], 'categories'),
-            'status' => '1',
-        ];
+        if (isset($data['edit_category'])) {
+            $category_id = fetch_details('categories', ['id' => $data['edit_category']]);
+            $category_name = $category_id[0]['name'];
+        } else {
+            $category_id = "";
+            $category_name = "";
+        }
+        if ($category_name != $data['category_input_name']) {
+            $cat_data = [
+                'name' => $data['category_input_name'],
+                'parent_id' => ($data['category_parent'] == NULL && isset($data['category_parent'])) ? '0' : $data['category_parent'],
+                'slug' => create_unique_slug($data['category_input_name'], 'categories'),
+                'status' => '1',
+            ];
+        } else {
+            $cat_data = [
+                'name' => $data['category_input_name'],
+                'parent_id' => ($data['category_parent'] == NULL && isset($data['category_parent'])) ? '0' : $data['category_parent'],
+                // 'slug' => create_unique_slug($data['category_input_name'], 'categories'),
+                'status' => '1',
+            ];
+        }
 
         if (isset($data['edit_category'])) {
             unset($cat_data['status']);
@@ -278,13 +309,29 @@ class Category_model extends CI_Model
     public function top_category()
     {
         $query = $this->db->select('*')
+            ->where('status', 1)
             ->limit('4')
             ->order_by('clicks', 'Desc')
             ->get('categories');
 
         $data['total'] = $query->num_rows();
-        $data['rows'] = $query->result_array();
+        $categories = $query->result_array();
+        $rows = array();
 
-        print_r(json_encode($data));
+        $bulkData = array();
+        $bulkData['total'] = $data['total'];
+        $rows = array();
+
+        if (!empty($query)) {
+            foreach ($categories as $category) {
+                $tempRow = array();
+                $tempRow['id'] = $category['id'];
+                $tempRow['name'] = str_replace('\\', '', $category['name']);
+                $tempRow['clicks'] = $category['clicks'];
+                $rows[] = $tempRow;
+            }
+        }
+        $data['rows'] = $rows;
+        echo json_encode($data);
     }
 }

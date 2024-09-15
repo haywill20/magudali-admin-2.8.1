@@ -8,7 +8,7 @@ class Promo_code_model extends CI_Model
         parent::__construct();
         $this->load->database();
         $this->load->library(['ion_auth', 'form_validation']);
-        $this->load->helper(['url', 'language', 'function_helper']);
+        $this->load->helper(['url', 'language', 'function_helper', 'sms_helper']);
     }
 
     public function get_promo_code_list($offset = 0, $limit = 10, $sort = 'id', $order = 'ASC')
@@ -70,7 +70,8 @@ class Promo_code_model extends CI_Model
             $row = output_escaping($row);
 
             $operate = '<a href="javascript:void(0)" class="view_btn btn btn-primary action-btn btn-xs mr-1 mb-1 ml-1"  title="view" data-id="' . $row['id'] . '" data-url="admin/promo_code" ><i class="fa fa-eye" ></i></a>';
-            $operate .= '<a href="javascript:void(0)" class="edit_btn btn btn-success action-btn btn-xs ml-1 mr-1 mb-1" title="Edit" data-id="' . $row['id'] . '" data-url="admin/promo_code"><i class="fa fa-pen"></i></a>';
+            $operate .= ' <a href="' . base_url('admin/promo_code/manage_promo_code?edit_id=' . $row['id']) . '" class="btn btn-success edit_promocode action-btn btn-xs ml-1 mr-1 mb-1"  title="Edit" data-id="' . $row['id'] . '" data-target="#add_promocode" data-toggle="modal"><i class="fa fa-pen"></i></a>';
+            // $operate .= '<a href="javascript:void(0)" class="edit_btn btn btn-success action-btn btn-xs ml-1 mr-1 mb-1" title="Edit" data-id="' . $row['id'] . '" data-url="admin/promo_code"><i class="fa fa-pen"></i></a>';
             $operate .= '<a class="btn btn-danger action-btn btn-xs ml-1 mr-1 mb-1" href="javascript:void(0)" id="delete-promo-code" title="Delete" data-id="' . $row['id'] . '" ><i class="fa fa-trash"></i></a>';
 
             $tempRow['id'] = $row['id'];
@@ -189,7 +190,7 @@ class Promo_code_model extends CI_Model
         if ($data['repeat_usage'] == '1') {
             $promo_data['no_of_repeat_usage'] = $data['no_of_repeat_usage'];
         }
-        if (isset($data['edit_promo_code'])) {
+        if (isset($data['edit_promo_code']) && !empty($data['edit_promo_code'])) {
             $this->db->set($promo_data)->where('id', $data['edit_promo_code'])->update('promo_codes');
         } else {
             $this->db->insert('promo_codes', $promo_data);
@@ -258,13 +259,15 @@ class Promo_code_model extends CI_Model
                 $user_ids = array_values(array_unique(array_column($data, "user_id")));
                 foreach ($user_ids as $user) {
                     $settings = get_settings('system_settings', true);
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
                     //custom message
                     $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                     $user_res = fetch_details('users', ['id' => $user], 'username,fcm_id,email,mobile');
                     $custom_notification =  fetch_details('custom_notifications', ['type' => "settle_cashback_discount"], '');
                     $hashtag_cutomer_name = '< cutomer_name >';
                     $hashtag_application_name = '< application_name >';
-                    $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
+                    $string = json_encode(isset($custom_notification[0]['message'])? $custom_notification[0]['message'] : '', JSON_UNESCAPED_UNICODE);
                     $hashtag = html_entity_decode($string);
                     $data = str_replace(array($hashtag_cutomer_name, $hashtag_application_name), array($user_res[0]['username'], $app_name), $hashtag);
                     $message = output_escaping(trim($data, '"'));
@@ -272,20 +275,20 @@ class Promo_code_model extends CI_Model
                     $customer_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $user_res[0]['username'] . 'Discounted Amount Credited, which orders are delivered. Please take note of it! Regards' . $app_name . '';
                     send_mail($user_res[0]['email'], $customer_title,  $customer_msg);
                     (notify_event(
-                        "settle_seller_commission",
+                        "settle_cashback_discount",
                         ["customer" => [$user_res[0]['email']]],
                         ["customer" => [$user_res[0]['mobile']]],
                         ["users.mobile" => $user_res[0]['mobile']]
                     ));
                     $fcm_ids = array();
-                    if (!empty($user_res[0]['fcm_id'])) {
+                    if (!empty($user_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                         $fcmMsg = array(
                             'title' => $customer_title,
                             'body' => $customer_msg,
                             'type' => "Discounted",
                         );
                         $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                        send_notification($fcmMsg, $fcm_ids);
+                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                     }
                 }
             } else {

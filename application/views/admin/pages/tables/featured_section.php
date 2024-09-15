@@ -31,13 +31,13 @@
                                 <div class="form-group row">
                                     <label for="title" class="control-label">Title for section <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-md-12">
-                                        <input type="text" class="form-control" name="title" id="title" value="<?= (isset($fetched_data[0]['title']) ? $fetched_data[0]['title'] : '') ?>" placeholder="Title">
+                                        <input type="text" class="form-control" name="title" id="title" value="<?= (isset($fetched_data[0]['title']) ? stripslashes($fetched_data[0]['title']) : '') ?>" placeholder="Title">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="short_description" class="control-label">Short description <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-md-12">
-                                        <input type="text" class="form-control" name="short_description" id="short_description" value="<?= (isset($fetched_data[0]['short_description']) ? $fetched_data[0]['short_description'] : '') ?>" placeholder="Short description">
+                                        <input type="text" class="form-control" name="short_description" id="short_description" value="<?= (isset($fetched_data[0]['short_description']) ? stripslashes($fetched_data[0]['short_description']) : '') ?>" placeholder="Short description">
                                     </div>
                                 </div>
                                 <div class="form-group row select-categories">
@@ -74,7 +74,7 @@
 
                                 <div class="form-group row">
                                     <?php
-                                    $product_type = ['new_added_products', 'products_on_sale', 'top_rated_products', 'most_selling_products', 'custom_products','digital_product'];
+                                    $product_type = ['new_added_products', 'products_on_sale', 'top_rated_products', 'most_selling_products', 'custom_products', 'digital_product'];
                                     ?>
                                     <label for="product_type" class="control-label">Product Types <span class='text-danger text-sm'> * </span></label>
                                     <div class="col-md-12">
@@ -120,9 +120,9 @@
                                             <?php
                                             if (isset($fetched_data[0]['id'])) {
                                                 $product_id = explode(",", $fetched_data[0]['product_ids']);
-                                               
+
                                                 foreach ($product_details as $row) {
-                                                    
+
                                             ?>
                                                     <option value="<?= $row['id'] ?>" selected><?= $row['name'] ?></option>
                                             <?php
@@ -139,10 +139,7 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Fetured Section' : 'Add Fetured Section' ?></button>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-center form-group">
-                                <div id="error_box">
-                                </div>
-                            </div>
+
                         </form>
                     </div>
                 </div>
@@ -180,7 +177,7 @@
                                     <th data-field="product_ids" data-sortable="true">Product ids</th>
                                     <th data-field="product_type" data-sortable="true">Product Type</th>
                                     <th data-field="date" data-sortable="true">Date</th>
-                                    <th data-field="operate">Actions</th>
+                                    <th data-field="operate" data-sortable="false">Actions</th>
                                 </tr>
                             </thead>
                         </table>

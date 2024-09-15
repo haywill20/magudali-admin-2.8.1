@@ -8,9 +8,8 @@
     <!-- Bootstrap Switch -->
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/bootstrap-switch.min.css') ?>">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="<?= base_url('assets/admin/css/all.min.css') ?>">    
+    <link rel="stylesheet" href="<?= base_url('assets/admin/css/all.min.css') ?>">
     <!-- Ionicons -->
-    <link rel="stylesheet" href="<?= base_url('assets/admin/css/ionicons.min.css') ?>">
     <!-- Tempusdominus Bbootstrap 4 -->
     <link rel="stylesheet" href="<?= base_url('assets/admin/css/tempusdominus-bootstrap-4.min.css') ?>">
     <!-- iCheck -->

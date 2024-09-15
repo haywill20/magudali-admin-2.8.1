@@ -22,6 +22,7 @@ class Web_setting extends CI_Controller
             $this->data['main_page'] = FORMS . 'web-settings';
             $settings = get_settings('system_settings', true);
             $this->data['logo'] = get_settings('web_logo');
+            $this->data['footer_logo'] = get_settings('web_footer_logo');
             $this->data['favicon'] = get_settings('web_favicon');
             $this->data['title'] = 'Web Settings | ' . $settings['app_name'];
             $this->data['meta_description'] = 'Web Settings | ' . $settings['app_name'];

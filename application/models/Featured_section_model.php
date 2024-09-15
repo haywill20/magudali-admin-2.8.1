@@ -40,7 +40,7 @@ class Featured_section_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'u.id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
 
         if (isset($_GET['offset']))
@@ -102,7 +102,7 @@ class Featured_section_model extends CI_Model
             $tempRow['product_ids'] = $row['product_ids'];
             $tempRow['categories'] = $row['categories'];
             $tempRow['product_type'] = ucwords(str_replace('_', ' ', $row['product_type']));
-            $tempRow['date'] = $row['date_added'];
+            $tempRow['date'] =  date('d-m-Y', strtotime($row['date_added']));
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }

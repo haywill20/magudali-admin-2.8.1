@@ -34,7 +34,7 @@ class Fund_transfers_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = $where = '';
 
         if (isset($_GET['offset']))
@@ -97,7 +97,7 @@ class Fund_transfers_model extends CI_Model
             $tempRow['amount'] = $row['amount'];
             $tempRow['status'] = $row['status'];
             $tempRow['message'] = $row['message'];
-            $tempRow['date'] = $row['date_created'];
+            $tempRow['date'] = date('d-m-Y', strtotime($row['date_created']));
             $rows[] = $tempRow;
         }
         $bulkData['rows'] = $rows;

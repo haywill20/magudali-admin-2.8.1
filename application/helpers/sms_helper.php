@@ -70,7 +70,15 @@ function notify_event(string $event,array $emails = [], array $phone = [],  $whe
     }
 
     $title = parseSmsString($template[0]["title"], $data);
-    $message = parseSmsString($template[0]["message"], $data);
+    $msg = parseSmsString($template[0]["message"], $data);
+    $message = nl2br(str_replace('\n', PHP_EOL, $msg),true);
+    $message = str_replace('\r', '', $message);
+    $message = str_replace('<br />', '', $message);
+
+    // $message = nl2br($msg, true);
+    // echo "<pre>";
+    // print_r($message);
+    // die;
 
     $sendEmail = [];
     $sendPhone = [];
@@ -213,5 +221,6 @@ function curl_sms($url, $method = 'GET', $data = [], $headers = [])
         'body' => json_decode(curl_exec($ch), true),
         'http_code' => curl_getinfo($ch, CURLINFO_HTTP_CODE),
     );
+    // print_r($result);
     return $result;
 }

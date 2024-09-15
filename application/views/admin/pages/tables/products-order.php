@@ -32,7 +32,7 @@
                                     <div class=" col-md-4">
                                         <label for="subcategory_id" class="col-form-label">Category</label>
                                         <select name="category_parent" id="category_parent" class="form-control col-12">
-                                            <option value="">--Select Category--</option>
+                                            <option value="">--<?= !empty($this->lang->line('select_category')) ? $this->lang->line('select_category') : 'Select Category' ?>--</option>
                                             <option value="0" selected="">All</option>
                                             <?php
                                             echo get_categories_option_html($categories);
@@ -41,7 +41,7 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4 d-flex align-items-center pt-4">
-                                        <button type="button" class="btn btn-outline-primary btn-sm" id="row_order_search" onclick="search_category_wise_products()">Filter</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="row_order_search" onclick="search_category_wise_products()">Search</button>
                                     </div>
                                 </div>
                             </div>
@@ -56,14 +56,13 @@
                         <div class="card-innr">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-8 col-12 offset-md-2">
+                                    <div class="col-md-6 col-12 offset-md-3">
                                         <label for="subcategory_id" class="col-form-label">Products List</label>
                                         <div class="row font-weight-bold">
-                                            <!-- <div class="col-1">No.</div> -->
-                                            <div class="col-2">Order</div>
-                                            <div class="col-4">Product</div>
-                                            <div class="col-3">Image</div>
-                                            <div class="col-3">Status</div>
+                                            <div class="col-1">No.</div>
+                                            <div class="col-3">Row Order Id</div>
+                                            <div class="col-4">Product Name</div>
+                                            <div class="col-4">Image</div>
                                         </div>
                                         <ul class="list-group bg-grey move order-container" id="sortable">
                                             <?php
@@ -71,13 +70,12 @@
                                             foreach ($product_result as $row) {
                                             ?>
                                                 <li class="list-group-item d-flex bg-gray-light align-items-center h-25" id="product_id-<?= $row['id'] ?>">
-                                                    <!-- <div class="col-md-1"><span> <?= $i ?> </span></div> -->
-                                                    <div class="col-md-2"><span> <?= $row['row_order'] ?> </span></div>
+                                                    <div class="col-md-1"><span> <?= $i ?> </span></div>
+                                                    <div class="col-md-3"><span> <?= $row['row_order'] ?> </span></div>
                                                     <div class="col-md-4"><span><?= $row['name'] ?></span></div>
-                                                    <div class="col-md-3">
+                                                    <div class="col-md-4">
                                                         <img src="<?= base_url() . $row['image'] ?>" class="image-box-100">
                                                     </div>
-                                                    <div class="col-md-3"><span><?= $row['status']==1?'<span class="badge badge-success">Active</span>':'<span class="badge badge-danger">Deactive</span>' ?></span></div>
                                                 </li>
                                             <?php
                                                 $i++;

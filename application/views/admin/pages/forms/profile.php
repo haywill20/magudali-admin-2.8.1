@@ -26,7 +26,7 @@
                                     <?php } else { ?>
                                         <label for="mobile" class="col-sm-2 col-form-label">Mobile <span class='text-danger text-xs'>*</span></label>
                                         <div class="col-sm-10">
-                                            <input type="number" class="form-control" id="mobile" placeholder="Type Mobile Number here" name="mobile" value="<?= $users->mobile ?>">
+                                            <input type="text" class="form-control" maxlength="16" oninput="validateNumberInput(this)" id="mobile" placeholder="Type Mobile Number here" name="mobile" value="<?= $users->mobile ?>">
                                         </div>
                                     <?php } ?>
                                 </div>
@@ -54,10 +54,7 @@
                                 </div>
 
                             </div>
-                            <div class="d-flex justify-content-center">
-                                <div class="form-group" id="error_box">
-                                </div>
-                            </div>
+
 
                             <!-- /.card-footer -->
                         </form>

@@ -40,6 +40,12 @@ class Media_model extends CI_Model
         return $q->result_array();
     }
 
+    public function delete_media($ids) {
+        // Example: Delete media items from database where id in $ids array
+        $this->db->where_in('id', $ids);
+        return $this->db->delete('media'); // Replace with your actual table name
+    }
+
 
     public function fetch_media($fromSeller = false)
     {

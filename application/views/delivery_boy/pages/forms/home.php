@@ -62,7 +62,7 @@
                              <div class="gaps-1-5x row d-flex adjust-items-center">
                                  <div class="row col-md-12">
                                      <div class="form-group col-md-4">
-                                         <label>Date range:</label>
+                                         <label>Date and time range:</label>
                                          <div class="input-group col-md-12">
                                              <div class="input-group-prepend">
                                                  <span class="input-group-text"><i class="far fa-clock"></i></span>
@@ -104,12 +104,12 @@
                                              </select>
                                          </div>
                                      </div>
-                                     <div class="form-group col-md-1 d-flex align-items-center pt-4">
-                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="status_date_wise_search()">Filter</button>
-                                    </div>
+                                     <div class="form-group col-md-4 d-flex align-items-center pt-4">
+                                         <button type="button" class="btn btn-outline-primary btn-sm" onclick="status_date_wise_search()">Filter</button>
+                                     </div>
                                  </div>
                              </div>
-                             <table class='table-striped' data-toggle="table" data-url="<?= base_url('delivery_boy/orders/view_orders') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="o.id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel","csv"]' data-export-options='{
+                             <table class='table-striped' data-toggle="table" data-url="<?= base_url('delivery_boy/orders/view_orders') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel","csv"]' data-export-options='{
                         "fileName": "orders-list",
                         "ignoreColumn": ["state"] 
                         }' data-query-params="home_query_params">
@@ -135,7 +135,7 @@
                                          <th data-field="status" data-sortable='true' data-visible='false'>Status</th>
                                          <th data-field="active_status" data-sortable='true' data-visible='true'>Active Status</th>
                                          <th data-field="date_added" data-sortable='true'>Order Date</th>
-                                         <th data-field="operate">Action</th>
+                                         <th data-field="operate" data-sortable="false">Action</th>
                                      </tr>
                                  </thead>
                              </table>

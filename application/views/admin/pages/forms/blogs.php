@@ -87,16 +87,13 @@
                                 </div>
                                 <div class="form-group">
                                     <textarea name="blog_description" class="textarea addr_editor" placeholder="Place some text here"><?= (isset($fetched_data[0]['description'])) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $fetched_data[0]['description'])) : ''; ?></textarea>
-                                    <div class="form-group">
+                                    <div class="form-group mt-3">
                                         <button type="reset" class="btn btn-warning">Reset</button>
                                         <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Blog' : 'Add Blog' ?></button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-center">
-                                <div class="form-group" id="error_box">
-                                </div>
-                            </div>
+
                     </div>
                     <!-- /.card-footer -->
                     </form>

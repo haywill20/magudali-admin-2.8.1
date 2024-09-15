@@ -12,14 +12,6 @@ class Chat_model extends CI_Model
         $this->load->helper(['url', 'language']);
     }
 
-    // function create_group($data)
-    // {
-    //     if ($this->db->insert('chat_groups', $data))
-    //         return $this->db->insert_id();
-    //     else
-    //         return false;
-    // }
-
     function make_me_online($id, $data)
     {
         $this->db->where('id', $id);
@@ -28,104 +20,6 @@ class Chat_model extends CI_Model
         else
             return false;
     }
-
-    // function edit_group($data, $id)
-    // {
-    //     $this->db->where('id', $id);
-    //     if ($this->db->update('chat_groups', $data))
-    //         return true;
-    //     else
-    //         return false;
-    // }
-
-    // function add_group_members($data)
-    // {
-
-    //     $query = $this->db->query("SELECT count(id) as total FROM chat_group_members WHERE group_id=" . $data['group_id'] . " AND user_id=" . $data['user_id'] . " ");
-    //     $result = $query->result_array();
-    //     $result = $result[0]['total'];
-
-    //     if ($result == 0) {
-    //         if ($this->db->insert('chat_group_members', $data))
-    //             return $this->db->insert_id();
-    //         else
-    //             return false;
-    //     }
-    // }
-
-    // function remove_all_group_members($id, $user_id)
-    // {
-    //     $user_id = implode(",", $user_id);
-    //     if ($this->db->query("DELETE FROM chat_group_members WHERE group_id = $id AND user_id NOT IN ($user_id) "))
-    //         return true;
-    //     else
-    //         return false;
-    // }
-
-    // function make_group_admin($id, $user_id)
-    // {
-    //     $user_id = implode(",", $user_id);
-
-    //     if ($this->db->query("UPDATE chat_group_members SET is_admin=1 WHERE group_id = $id AND is_admin=0 AND user_id IN ($user_id) "))
-    //         if ($this->db->query("UPDATE chat_group_members SET is_admin=0 WHERE group_id = $id AND is_admin=1 AND user_id NOT IN ($user_id) "))
-    //             return true;
-    //         else
-    //             return false;
-    //     else
-    //         return false;
-    // }
-
-    // function get_group_members($group_id)
-    // {
-    //     $query = $this->db->query("SELECT gm.*,u.username,u.image,g.title,g.description FROM chat_group_members gm 
-    //     LEFT JOIN chat_groups g ON gm.group_id = g.id
-    //     LEFT JOIN users u ON gm.user_id = u.id
-    //     WHERE gm.group_id=$group_id ");
-    //     return $query->result_array();
-    // }
-
-    // function check_group_admin($group_id, $user_id)
-    // {
-
-    //     $query = $this->db->query("SELECT * FROM chat_group_members WHERE group_id=$group_id AND user_id=$user_id AND is_admin=1 ");
-    //     $data = $query->result_array();
-
-    //     if (!empty($data))
-    //         return true;
-    //     else
-    //         return false;
-    // }
-
-    // function delete_group($group_id, $user_id)
-    // {
-
-    //     $query = $this->db->query("SELECT * FROM messages WHERE to_id=$group_id AND type='group' ");
-    //     $messages = $query->result_array();
-
-    //     if (!empty($messages)) {
-    //         $abspath = getcwd();
-    //         foreach ($messages as $message) {
-    //             $query = $this->db->query("SELECT * FROM chat_media WHERE message_id=" . $message['id']);
-    //             $chat_media = $query->result_array();
-    //             if (!empty($chat_media)) {
-    //                 foreach ($chat_media as $media) {
-    //                     unlink('uploads/chat_media/' . $media['file_name']);
-    //                 }
-    //             }
-    //             $this->db->delete('chat_media', array('message_id' => $message['id']));
-    //         }
-    //     }
-
-    //     $this->db->delete('chat_group_members', array('group_id' => $group_id));
-
-    //     $this->db->delete('chat_groups', array('id' => $group_id));
-
-    //     if ($this->db->delete('messages', array('to_id' => $group_id, 'type' => 'group'))) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
 
     function delete_msg($from_id, $msg_id)
     {
@@ -149,7 +43,6 @@ class Chat_model extends CI_Model
 
     function get_members($user_id)
     {
-
         $this->db->from('users');
         $this->db->where_in('id', $user_id);
         $this->db->order_by("username", "asc");
@@ -182,32 +75,11 @@ class Chat_model extends CI_Model
         return $supporters;
     }
 
-    // function get_groups_all($user_id)
-    // {
-    //     $group_ids = array();
-    //     $my_groups = $this->get_groups($user_id);
-    //     foreach ($my_groups as $my_group) {
-    //         $group_ids[] =  $my_group['group_id'];
-    //     }
-
-    //     if (!empty($group_ids)) {
-    //         $group_ids = implode(",", $group_ids);
-
-    //         $sql = "SELECT * FROM chat_groups WHERE id NOT IN ($group_ids) ORDER BY title ASC";
-    //         $query = $this->db->query($sql);
-    //         $groups =  $query->result_array();
-    //         return $groups;
-    //     }
-    // }
-
     function get_unread_msg_count($type, $from_id, $to_id)
     {
-        // print_r($from_id);
         $query1 = "SELECT count(id) as total FROM messages WHERE type='$type' AND is_read=1 AND from_id=$from_id AND to_id=$to_id";
         $query1 = $this->db->query($query1);
         $total = $query1->result_array();
-        // echo $this->db->last_query();
-        // die;
         return $total[0]['total'];
     }
 
@@ -257,12 +129,12 @@ class Chat_model extends CI_Model
         //     else
         //         return false;
         // } 
-        else {
-            if ($this->db->query("UPDATE chat_group_members SET is_read=0 WHERE is_read=1 AND group_id=$from_id AND user_id=$to_id"))
-                return true;
-            else
-                return false;
-        }
+        // else {
+        //     if ($this->db->query("UPDATE chat_group_members SET is_read=0 WHERE is_read=1 AND group_id=$from_id AND user_id=$to_id"))
+        //         return true;
+        //     else
+        //         return false;
+        // }
     }
 
     // function set_group_msg_as_unread($group_id, $my_id)
@@ -449,8 +321,6 @@ class Chat_model extends CI_Model
             $query = $this->db->query("SELECT * FROM chat_groups WHERE id=$user_or_group_id ");
         }
 
-        // print_r($user_or_group_id);
-        // echo $this->db->last_query();
         $messages =  $query->result_array();
         return $messages;
     }

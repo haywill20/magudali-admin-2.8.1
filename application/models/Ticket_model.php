@@ -65,7 +65,8 @@ class Ticket_model extends CI_Model
     function add_ticket_message($data)
     {
         $data = escape_array($data);
-
+        $firebase_project_id = get_settings('firebase_project_id');
+        $service_account_file = get_settings('service_account_file');
         $ticket_msg_data = [
             'user_type' => $data['user_type'],
             'user_id' => $data['user_id'],
@@ -76,8 +77,31 @@ class Ticket_model extends CI_Model
             $ticket_msg_data['attachments'] = json_encode($data['attachments']);
         }
 
+        $ticket_user_id =  $this->db->select('*')->where('id', $data['ticket_id'])->get('tickets')->result_array();
+
+        // print_r($ticket_msg_data);
+        
         $this->db->insert('ticket_messages', $ticket_msg_data);
+        
         $insert_id = $this->db->insert_id();
+        
+        // $fcm_id = $user_fcm_id[0]['fcm_id'];
+
+        if ($ticket_msg_data['user_type'] != 'user') {
+            $user_fcm_id = fetch_details('users', ['id' => $ticket_user_id[0]['user_id']], 'fcm_id');
+            $fcm_ids[0][] = $user_fcm_id[0]['fcm_id'];
+            // print_r($data['user_id']);
+            // print_r($fcm_ids);
+            if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                $fcmMsg = array(
+                    'title' => 'Ticket Message',
+                    'body' => $data['message'],
+                    'type' => "ticket_message",
+                    'type_id' => $data['ticket_id'],
+                );
+                send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
+            }
+        }
         if (!empty($insert_id)) {
             return  $insert_id;
         } else {
@@ -90,7 +114,7 @@ class Ticket_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 't.id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
 
         if (isset($_GET['offset']))
@@ -473,7 +497,7 @@ class Ticket_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'ASC';
+        $order = 'DESC';
         $multipleWhere = '';
 
         if (isset($_GET['offset']))

@@ -34,7 +34,8 @@ class Payment_settings extends CI_Controller
 
     public function update_payment_settings()
     {
-
+        // print_R($_POST);
+        // return false;
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
             if (print_msg(!has_permissions('update', 'payment_settings'), PERMISSION_ERROR_MSG, 'payment_settings')) {
                 return false;
@@ -48,7 +49,20 @@ class Payment_settings extends CI_Controller
             }
             $_POST['temp'] = '1';
             $this->form_validation->set_rules('temp', '', 'trim|required|xss_clean');
-
+            if (
+                empty($_POST['paypal_payment_method']) && empty($_POST['payumoney_payment_method']) && empty($_POST['razorpay_payment_method'])
+                && empty($_POST['paystack_payment_method']) && empty($_POST['flutterwave_payment_method']) && empty($_POST['stripe_payment_method'])
+                && empty($_POST['paytm_payment_method']) && empty($_POST['midtrans_payment_method']) && empty($_POST['myfaoorah_payment_method'])
+                && empty($_POST['myfaoorah_payment_method']) && empty($_POST['instamojo_payment_method']) && empty($_POST['phonepe_payment_method'])
+                && empty($_POST['direct_bank_transfer']) && empty($_POST['cod_method'])
+            ) {
+                $this->response['error'] = true;
+                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                $this->response['message'] = 'Please select at least one payment method.';
+                print_r(json_encode($this->response));
+                return false;
+            }
             if (isset($_POST['paypal_payment_method'])) {
                 $this->form_validation->set_rules('paypal_mode', 'Payyou Payment Mode', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('paypal_business_email', 'Paypal Business Email', 'trim|required|xss_clean|valid_email');
@@ -75,6 +89,7 @@ class Payment_settings extends CI_Controller
                 $this->form_validation->set_rules('flutterwave_public_key', 'Flutterwave Public Key', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('flutterwave_secret_key', 'Flutterwave Secret Key', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('flutterwave_encryption_key', 'Flutterwave Encryption Key', 'trim|required|xss_clean');
+                $this->form_validation->set_rules('flutterwave_currency_code', 'Flutterwave Currency code', 'trim|required|xss_clean');
             }
 
             if (isset($_POST['stripe_payment_method'])) {
@@ -113,14 +128,13 @@ class Payment_settings extends CI_Controller
                 $this->form_validation->set_rules('instamojo_payment_mode', 'Instamojo Payment  Mode', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('instamojo_client_id', 'Instamojo client id', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('instamojo_client_secret', 'Instamojo client secret', 'trim|required|xss_clean');
-               
             }
             if (isset($_POST['phonepe_payment_method'])) {
                 $this->form_validation->set_rules('phonepe_payment_mode', 'phonepe Payment Mode', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('phonepe_marchant_id', 'phonepe marchant id', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('phonepe_salt_key', 'phonepe salt key', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('phonepe_salt_index', 'phonepe salt index', 'trim|required|xss_clean');
-                $this->form_validation->set_rules('phonepe_app_id', 'phonepe app id', 'trim|required|xss_clean');
+                // $this->form_validation->set_rules('phonepe_app_id', 'phonepe app id', 'trim|required|xss_clean');
             }
             if (isset($_POST['direct_bank_transfer'])) {
                 $this->form_validation->set_rules('account_name', 'Account Name', 'trim|required|xss_clean');

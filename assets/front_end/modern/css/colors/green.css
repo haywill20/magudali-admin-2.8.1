@@ -56,6 +56,7 @@ a:hover,
 .timeline .timeline-item .timeline-marker,
 .nav-tabs.nav-tabs-basic .nav-link.active {
   color: #45c4a0;
+  border-color: #45c4a0;
 }
 .link-dark:hover,
 .text-primary,

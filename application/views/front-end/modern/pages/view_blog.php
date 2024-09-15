@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<div class="content-wrapper">
+<div class="content-wrapper deeplink_wrapper">
     <section class="wrapper bg-soft-grape">
         <div class="container py-3 py-md-5">
             <nav class="d-inline-block" aria-label="breadcrumb">
@@ -36,7 +36,7 @@
                         </div>
                         <div class="card-body">
                             <h2 class="view-blog-title mb-2 mt-2"><?= $blog[0]['title'] ?></h2>
-                            <p class="card-text mt-5"><?= str_replace('\r\n', '&#13;&#10;', $blog[0]['description']) ?></p>
+                            <p class="card-text mt-5"><?= str_replace('\"', '', str_replace('\r\n', '&#13;&#10;', $blog[0]['description'])) ?></p>
                         </div>
                     </div>
                 <!-- </div> -->

@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2><?= isset($page_main_bread_crumb) ? $page_main_bread_crumb : 'Blogs Listing' ?></h2>
         <nav aria-label="breadcrumb">
@@ -51,7 +51,7 @@
                                 <div class="form-group col-md-6 pl-0">
                                     <label for="product_sort_by"></label>
                                     <select class='form-control' name='category_parent' id="category_parent">
-                                        <option value="">Select Category</option>
+                                        <option value=""><?= !empty($this->lang->line('select_category')) ? $this->lang->line('select_category') : 'Select Category' ?></option>
                                         <?php foreach ($fetched_data as $categories) { ?>
                                             <option value="<?= $categories['id'] ?>" <?= ($this->input->get('category_id') == $categories['id']) ? 'selected' : '' ?>><?= $categories['name'] ?></option>
                                         <?php } ?>
@@ -59,7 +59,7 @@
                                 </div>
                                 <div class="form-group col-md-6 mt-2">
                                     <label for="seller_search"></label>
-                                    <input type="search" name="blog_search" class="form-control" id="blog_search" value="<?= (isset($blog_search) && !empty($blog_search)) ? $blog_search : "" ?>" placeholder="Search your blog">
+                                    <input type="search" name="blog_search" class="form-control" id="blog_search" value="<?= (isset($blog_search) && !empty($blog_search)) ? $blog_search : "" ?>" placeholder="<?= !empty($this->lang->line('search_blog')) ? $this->lang->line('search_blog') : 'Search Blog' ?>">
                                 </div>
                             </div>
                         </div>
@@ -74,7 +74,7 @@
 
                     <div class="row w-100">
                         <?php foreach ($blogs['data'] as $row) { ?>
-                            <div class="col-md-6 mb-4">
+                            <div class="col-md-3 mb-4">
                                 <div class="blog-card">
                                     <div class="blog-card-img">
                                         <a href="<?= base_url("blogs/view_detail/" . $row['slug']) ?>">
@@ -83,7 +83,7 @@
                                     </div>
 
                                     <div class="card-body">
-                                        
+
                                         <h2 class="blog-title mb-2">
                                             <a class="link-dark text-decoration-none" href="<?= base_url("blogs/view_detail/" . $row['slug']) ?>"><?= $row['title'] ?>
                                             </a>
@@ -92,9 +92,9 @@
                                         <h6 class="card-text blog-discription">
                                             <?= description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', $row['description']))) ?>
                                         </h6>
-                                        <a href="<?= base_url("blogs/view_detail/" . $row['id'] . "/" . $row['slug'])
+                                        <a href="<?= base_url("blogs/view_detail/" . $row['slug'])
                                                     ?>" class="text-primary float-left">
-                                            <h3>Read more >></h3>
+                                            <h3><?= !empty($this->lang->line('read_more')) ? $this->lang->line('read_more') : 'Read more >>' ?></h3>
                                         </a>
                                     </div>
                                 </div>

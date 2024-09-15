@@ -569,7 +569,7 @@ $(document).ready(function () {
             }, "json");
         } else if (payment_methods == "Flutterwave") {
             flutterwave_payment();
-        }else if (payment_methods == 'phonepe') {
+        } else if (payment_methods == 'phonepe') {
             var amount = $('#amount').val()
             var user_id = $('#user_id').val()
             var address_id = $('#address_id').val()
@@ -644,7 +644,10 @@ $(document).ready(function () {
             place_order().done(function (result) {
 
                 if (result.error == false) {
-                    window.location.reload();
+                    // window.location.reload();
+                    setTimeout(function () {
+                        location.href = base_url + 'payment/success';
+                    }, 3000);
                 } else {
                     Toast.fire({
                         icon: 'error',
@@ -654,6 +657,14 @@ $(document).ready(function () {
 
             });
 
+        } else {
+            // console.log("here");
+            $('#place_order_btn').attr('disabled', false).html(btn_html);
+            return Toast.fire({
+                icon: 'error',
+                title: 'Please select Payment method.'
+            })
+            // return false;
         }
 
     });
@@ -780,13 +791,28 @@ $(document).ready(function () {
                     } else {
                         delivery_charge = delivery_charge.replace(',', '');
                     }
+                    var is_cashback = data.data[0].is_cashback;
                     var final_total = data.data[0].final_total;
-                    final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge);
                     var final_discount = parseFloat(data.data[0].final_discount);
+                    // console.log(final_discount);
+                    // console.log(final_total);
+                    // console.log(wallet_used);
+                    // console.log(delivery_charge);
+                    
+                    // if (is_cashback == 1) {
+                    //     console.log(is_cashback);
+                    //     final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge)
+                    //     console.log(final_total);
+                    // }else{
+                    //     final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge)
+                    //     console.log(final_total);
+                    // }
+                    final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge);
                     $('#promocode_div').removeClass('d-none');
                     $('#promocode').text('(' + data.data[0].promo_code + ')');
                     $('#promocode_amount').text(final_discount.toLocaleString(undefined, { maximumFractionDigits: 2 }));
                     $('#final_total').text(final_total.toLocaleString(undefined, { maximumFractionDigits: 2 }));
+                    $('#promo_is_cashback').val(is_cashback);
                     $('#amount').val(final_total);
                     $('#clear_promo_btn').removeClass('d-none');
                     $('#redeem_btn').hide();
@@ -916,13 +942,19 @@ $(document).ready(function () {
                             html += '<label for="promo-code-' + e.id + '"><li class="list-group-item d-flex justify-content-between lh-condensed mt-3">' +
                                 '<img src="' + e.image + '" style="max-width:80px;max-height:80px;"/>' +
                                 '<div class="col-11 row pl-2">' +
-                                '<div class="col-6 text-dark" title="Copy promocode" id="redeem_promocode" data-value = ' + e.promo_code  + '>' + e.promo_code + '</div>' +
+                                '<div class="col-6 text-dark" title="Copy promocode" id="redeem_promocode" data-value = ' + e.promo_code + '>' + e.promo_code + '</div>' +
                                 '<small class="col-12 text-muted">' + e.message + '</small>' +
                                 '</div>' +
                                 '</li></label>';
                         });
                     } else {
-                        html += '<div class="col-12 text-dark d-flex justify-content-center">Opps...No Offers Avilable</small>';
+                        // html += '<div class="col-12 text-dark d-flex justify-content-center">Opps...No Offers Avilable</small>';
+                        html += '<div class="align-items-center d-flex flex-column">' +
+                        '<div class="empty-compare">' +
+                        '<img src="' + base_url + '/assets/front_end/classic/images/no-offer-2.jpeg" alt="Opps...No Offers Avilable">' +
+                        '</div>' +
+                        '<div class="h5">Opps...No Offers Avilable</div>' +
+                        '</div>';
                     }
                     $('#promocode-list').html(html);
                 }
@@ -946,7 +978,7 @@ $(document).ready(function () {
             promocode_amount = promocode_amount.replace(',', '');
         }
         $('#address-name-type').html(address.name + ' - ' + address.type);
-        $('#address-full').html(address.area + ' , ' + address.city);
+        $('#address-full').html(address.address + ' , ' + address.area + ' , ' + address.city);
         $('#address-country').html(address.state + ' , ' + address.country + ' - ' + address.pincode);
         $('#address-mobile').html(address.mobile);
         $('#address_id').val(address.id);
@@ -988,52 +1020,67 @@ $(document).ready(function () {
                     }
                 })
 
-                $('.shipping_method').html(result.shipping_method)
-                $('.delivery-charge').html(result.delivery_charge_with_cod)
-                $('.delivery_charge_with_cod').html(result.delivery_charge_with_cod)
-                $('.delivery_charge_with_cod').val(result.delivery_charge_with_cod)
-                $('.delivery_charge_without_cod').html(result.delivery_charge_without_cod)
-                $('.delivery_charge_without_cod').val(result.delivery_charge_without_cod)
-                $('.estimate_date').html(result.estimate_date)
-                var shipping_method = result.shipping_method
-                var delivery_charge = result.delivery_charge_with_cod
-                var delivery_charge_with_cod = result.delivery_charge_with_cod
-                var delivery_charge_without_cod = result.delivery_charge_without_cod
-                result.availability_data.forEach(product => {
-                    if (product.delivery_by == 'standard_shipping') {
-                        $('.date-time-label').addClass('d-none')
-                        $('.date-time-picker').addClass('d-none')
-                        $('.time-slot').addClass('d-none')
+                $('input[type=radio][name=payment_method]').change(function () {
+                    var selectedPaymentMethod = $('input[type=radio][name=payment_method]:checked').val();
+                    var delivery_charge = 0;
+                    if (selectedPaymentMethod === 'COD') {
+                        delivery_charge = parseFloat(result.delivery_charge_with_cod);
+                        console.log(delivery_charge);
                     } else {
-                        $('.date-time-label').removeClass('d-none')
-                        $('.date-time-picker').removeClass('d-none')
-                        $('.time-slot').removeClass('d-none')
+                        delivery_charge = parseFloat(result.delivery_charge_without_cod);
+                        console.log(delivery_charge);
                     }
+
+                    console.log(delivery_charge);
+
+                    $('.shipping_method').html(result.shipping_method)
+                    $('.delivery-charge').html(result.delivery_charge_with_cod)
+                    $('.delivery_charge_with_cod').html(result.delivery_charge_with_cod)
+                    $('.delivery_charge_with_cod').val(result.delivery_charge_with_cod)
+                    $('.delivery_charge_without_cod').html(result.delivery_charge_without_cod)
+                    $('.delivery_charge_without_cod').val(result.delivery_charge_without_cod)
+                    $('.estimate_date').html(result.estimate_date)
+                    var shipping_method = result.shipping_method
+                    var delivery_charge = result.delivery_charge_with_cod
+                    var delivery_charge_with_cod = result.delivery_charge_with_cod
+                    var delivery_charge_without_cod = result.delivery_charge_without_cod
+                    result.availability_data.forEach(product => {
+                        if (product.delivery_by == 'standard_shipping') {
+                            $('.date-time-label').addClass('d-none')
+                            $('.date-time-picker').addClass('d-none')
+                            $('.time-slot').addClass('d-none')
+                        } else {
+                            $('.date-time-label').removeClass('d-none')
+                            $('.date-time-picker').removeClass('d-none')
+                            $('.time-slot').removeClass('d-none')
+                        }
+                    })
+                    var final_total = parseFloat(sub_total) + parseFloat(delivery_charge);
+                    var wallet_used = $('.wallet_used').text();
+                    if (wallet_used == '') {
+                        wallet_used = 0;
+                    } else {
+                        wallet_used = wallet_used.replace(',', '');
+                    }
+                    var final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(wallet_used) - parseFloat(promocode_amount);
+                    final_total = final_total.toLocaleString(undefined, { maximumFractionDigits: 2 });
+                    $('#final_total').html(final_total);
+                    var final_total = final_total.replace(',', '');
+                    $('#amount').val(final_total);
+                    if (final_total != 0) {
+                        $('#cod').prop('required', true);
+                        $('#paypal').prop('required', true);
+                        $('#razorpay').prop('required', true);
+                        $('#paystack').prop('required', true);
+                        $('#payumoney').prop('required', true);
+                        $('#flutterwave').prop('required', true);
+                        $('#stripe').prop('required', true);
+                        $('#paytm').prop('required', true);
+                        $('#bank_transfer').prop('required', true);
+                        $('.payment-methods').show();
+                    }
+
                 })
-                var final_total = parseFloat(sub_total) + parseFloat(delivery_charge);
-                var wallet_used = $('.wallet_used').text();
-                if (wallet_used == '') {
-                    wallet_used = 0;
-                } else {
-                    wallet_used = wallet_used.replace(',', '');
-                }
-                var final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(wallet_used) - parseFloat(promocode_amount);
-                final_total = final_total.toLocaleString(undefined, { maximumFractionDigits: 2 });
-                $('#final_total').html(final_total);
-                var final_total = final_total.replace(',', '');
-                $('#amount').val(final_total);
-                if (final_total != 0) {
-                    $('#cod').prop('required', true);
-                    $('#paypal').prop('required', true);
-                    $('#razorpay').prop('required', true);
-                    $('#paystack').prop('required', true);
-                    $('#payumoney').prop('required', true);
-                    $('#flutterwave').prop('required', true);
-                    $('#stripe').prop('required', true);
-                    $('#paytm').prop('required', true);
-                    $('#bank_transfer').prop('required', true);
-                    $('.payment-methods').show();
-                }
             }
         });
         // $.ajax({
@@ -1190,7 +1237,7 @@ $(document).ready(function () {
             } else {
                 var final_total = parseFloat(sub_total) + parseFloat(delivery_charge)
             }
-           
+
             $("#amount").val(final_total);
             final_total = final_total.toLocaleString(undefined, { maximumFractionDigits: 2 });
             $('#final_total').html(final_total);
@@ -1203,7 +1250,10 @@ $(document).on('click', '#wallet_balance', function () {
     var current_wallet_balance = $('#current_wallet_balance').val();
     var wallet_balance = current_wallet_balance.replace(",", "");
     var final_total = $('#final_total').text();
+    var is_cashback = $('#promo_is_cashback').val();
     final_total = final_total.replace(",", "");
+    // console.log(final_total);
+    // console.log(is_cashback);
 
     var sub_total = $("#sub_total").val();
     var delivery_charge = $(".delivery_charge_with_cod").val();
@@ -1279,7 +1329,17 @@ $(document).on('click', '#wallet_balance', function () {
 
     } else {
         $("#wallet_used").val(1);
-        var final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(promocode_amount);
+
+        if (is_cashback == 1) {                        
+            // console.log(is_cashback);
+            final_total = parseFloat(sub_total) + parseFloat(delivery_charge)
+            // console.log(final_total);
+        }else{
+            final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(promocode_amount);
+            // console.log(final_total);
+        }
+
+        // var final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(promocode_amount);
 
         $(".wallet_used").html('0.00');
         $('#final_total').html(final_total.toLocaleString(undefined, { maximumFractionDigits: 2 }));

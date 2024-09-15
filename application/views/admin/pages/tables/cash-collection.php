@@ -87,7 +87,7 @@
                             <div class="gaps-1-5x"></div>
                             <div class="row col-md-12">
                                 <div class="form-group col-md-3">
-                                    <label>Date range:</label>
+                                    <label>Date and time range:</label>
                                     <div class="input-group col-md-12">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="far fa-clock"></i></span>

@@ -39,10 +39,7 @@
                     <label for="answer" class="col-form-label">Answer <span class='text-danger text-xs'>*</span></label>
                     <textarea class="form-control" name="answer"></textarea>
                   </div>
-                  <div class="d-flex justify-content-center">
-                    <div class="form-group" id="error_box">
-                    </div>
-                  </div>
+
 
                 </div>
                 <div class="modal-footer">

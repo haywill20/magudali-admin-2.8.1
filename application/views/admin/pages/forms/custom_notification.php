@@ -34,18 +34,21 @@
                             ?>
                             <div class=" card-body">
                                 <?php
-                                $type = ['place_order', 'settle_cashback_discount', 'settle_seller_commission',  'customer_order_received', 'customer_order_processed', 'customer_order_shipped', 'customer_order_delivered', 'customer_order_cancelled', 'customer_order_returned','customer_order_returned_request_decline','customer_order_returned_request_approved', 'delivery_boy_order_deliver', 'wallet_transaction', 'ticket_status', 'ticket_message', 'bank_transfer_receipt_status', 'bank_transfer_proof'];
+                                // echo "<pre>";
+                                // print_r($notification_modules);
+                                // $type = ['place_order', 'settle_cashback_discount', 'settle_seller_commission',  'customer_order_received', 'customer_order_processed', 'customer_order_shipped', 'customer_order_delivered', 'customer_order_cancelled', 'customer_order_returned', 'customer_order_returned_request_decline', 'customer_order_returned_request_approved', 'delivery_boy_order_deliver', 'wallet_transaction', 'ticket_status', 'ticket_message', 'bank_transfer_receipt_status', 'bank_transfer_proof'];
                                 ?>
                                 <div class="form-group row">
                                     <label for="type" class="col-sm-2 control-label">Types <span class='text-danger text-sm'> * </span></label>
                                     <div class="col-sm-10">
                                         <select name="type" class="form-control type">
                                             <option value=" ">Select Types</option>
-                                            <?php foreach ($type as $row) { ?>
+                                            <?php foreach ($notification_modules as $row => $value) { ?>
                                                 <option value="<?= $row ?>" <?= (isset($fetched_data[0]['id']) &&  $fetched_data[0]['type'] == $row) ? "Selected" : "" ?>><?= ucwords(str_replace('_', ' ', $row)) ?></option>
                                             <?php
                                             } ?>
                                         </select>
+                                        
                                         <?php ?>
                                     </div>
                                 </div>
@@ -68,7 +71,7 @@
                                 <div class="form-group row">
                                     <label for="message" class="col-sm-2 col-form-label">Message<span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <textarea name="message" id="text-box" class="form-control" placeholder="Place some text here"><?= (isset($fetched_data[0]['id'])) ? $fetched_data[0]['message'] : ''; ?></textarea>
+                                        <textarea name="message" id="text-box" class="form-control text-box" placeholder="Place some text here"><?= (isset($fetched_data[0]['id'])) ? $fetched_data[0]['message'] : ''; ?></textarea>
                                     </div>
                                 </div>
                                 <div class="form-group row place_order <?= (isset($fetched_data[0]['id'])  && $fetched_data[0]['type'] == 'place_order') ? '' : 'd-none' ?>">
@@ -236,10 +239,7 @@
                                     <button type="reset" class="btn btn-warning">Reset</button>
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Custom message ' : 'Add Custom message ' ?></button>
                                 </div>
-                                <div class="d-flex justify-content-center">
-                                    <div class="form-group" id="error_box">
-                                    </div>
-                                </div>
+
                             </div>
                         </form>
                     </div>
@@ -266,7 +266,7 @@
                         </div>
                         <div class="card-innr">
                             <div class="gaps-1-5x"></div>
-                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/custom_notification/view_notification') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-export-options='{
+                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/custom_notification/view_notification') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-export-options='{
                         "fileName": "custom-notifications-list",
                         "ignoreColumn": ["operate"] 
                         }' data-query-params="queryParams">
@@ -276,7 +276,7 @@
                                         <th data-field="title" data-sortable="false">Title</th>
                                         <th data-field="type" data-sortable="true">Type</th>
                                         <th data-field="message" data-sortable="true">Message</th>
-                                        <th data-field="operate" data-sortable="true">Action</th>
+                                        <th data-field="operate" data-sortable="false">Action</th>
                                     </tr>
                                 </thead>
                             </table>

@@ -115,9 +115,30 @@ class Category extends CI_Controller
                 return false;
                 exit();
             }
+            $category_id = $this->input->get('id', true);
+            // $seller_categories = fetch_details('seller_data', ['id' => $category_id]);
+            $products = fetch_details('products', ['category_id' => $category_id]);
+            // print_r($products);
+            // die;
+
+            //check category assign to product 
+            if (isset($products) && !empty($products)) {
+                # code...
+                $this->response['error'] = true;
+                $this->response['message'] = 'You cannot delete category , please assign another category to product  ';
+                print_r(json_encode($this->response));
+                return;
+                exit();
+            }
+            // foreach ($products as $product) {
+            //     // print_r($order_item);
+            //     $order_item_status  = $order_item['active_status'];
+            //     if ($order_item_status != 'delivered' || $order_item_status != 'returned' || $order_item_status != 'cancelled') {
+            //     }
+            // }
 
             if ($this->category_model->delete_category($_GET['id']) == TRUE) {
-                $this->response['error'] = true;
+                $this->response['error'] = false;
                 $this->response['csrfName'] = $this->security->get_csrf_token_name();
                 $this->response['csrfHash'] = $this->security->get_csrf_hash();
                 $this->response['message'] = 'Deleted Succesfully';
@@ -141,6 +162,7 @@ class Category extends CI_Controller
 
     public function add_category()
     {
+        // print_r($_POST);
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
 
             if (isset($_POST['edit_category'])) {
@@ -172,6 +194,24 @@ class Category extends CI_Controller
                 $this->response['message'] = validation_errors();
                 print_r(json_encode($this->response));
             } else {
+                if (is_exist(['name' => $_POST['category_input_name']], 'categories')) {
+                    $response["error"]   = true;
+                    $response['csrfName'] = $this->security->get_csrf_token_name();
+                    $response['csrfHash'] = $this->security->get_csrf_hash();
+                    $response["message"] = "Category Already exist you should use a different name";
+                    $response["data"] = array();
+                    echo json_encode($response);
+                    return false;
+                }
+                if (is_exist(['name' => $_POST['category_input_name'], 'parent_id' => $_POST['category_parent']], 'categories')) {
+                    $response["error"]   = true;
+                    $response['csrfName'] = $this->security->get_csrf_token_name();
+                    $response['csrfHash'] = $this->security->get_csrf_hash();
+                    $response["message"] = "This Category Already exist as a child category.";
+                    $response["data"] = array();
+                    echo json_encode($response);
+                    return false;
+                }
 
                 $this->category_model->add_category($_POST);
                 $this->response['error'] = false;

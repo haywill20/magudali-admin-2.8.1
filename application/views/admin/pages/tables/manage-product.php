@@ -98,10 +98,7 @@
                                         <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Product Faq' : 'Add Product FAQ' ?></button>
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-center">
-                                    <div class="form-group" id="error_box">
-                                    </div>
-                                </div>
+
                             </form>
                         </div>
                     </div>
@@ -148,7 +145,7 @@
                     <div class="card-innr">
                         <div class="row">
                             <div class="col-md-3">
-                                <label for="zipcode" class="col-form-label">Filter By Product Category</label>
+                                <label for="category_parent" class="col-form-label">Filter By Product Category</label>
                                 <select id="category_parent" name="category_parent">
                                     <option value=""><?= (isset($categories) && empty($categories)) ? 'No Categories Exist' : 'Select Categories' ?>
                                     </option>
@@ -167,12 +164,9 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label for="zipcode" class="col-form-label">Filter By Seller</label>
+                                <label for="seller_filter" class="col-form-label">Filter By Seller</label>
                                 <select class='form-control' name='seller_id' id="seller_filter">
-                                    <option value="">Select Seller </option>
-                                    <?php foreach ($sellers as $seller) { ?>
-                                        <option value="<?= $seller['seller_id'] ?>" <?= (isset($product_details[0]['seller_id']) && $product_details[0]['seller_id'] == $seller['seller_id']) ? 'selected' : "" ?>><?= $seller['seller_name'] ?></option>
-                                    <?php } ?>
+                                    <option value=""><?= (isset($sellers) && empty($sellers)) ? 'No Seller Exist' : 'Select Seller' ?>
                                 </select>
                             </div>
                         </div>
@@ -199,7 +193,6 @@
             </div>
         </div>
         <!-- /.row -->
-</div><!-- /.container-fluid -->
-</section>
-<!-- /.content -->
+    </section>
+    <!-- /.content -->
 </div>

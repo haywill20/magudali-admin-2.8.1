@@ -1,8 +1,8 @@
-<section class="main-content mt-md-5 mt-sm-0 mb-5">
+<section class="main-content mt-md-5 mt-sm-0 mb-5cdeeplink_wrapper">
     <div class="category-section container-fluid text-center">
         <div class='my-4 featured-section-title'>
             <div class='col-md-12'>
-                <h3 class='section-title text-white'><?= !empty($this->lang->line('brands')) ? $this->lang->line('brands') : 'Brands' ?></h3>
+                <h3 class='section-title'><?= !empty($this->lang->line('brands')) ? $this->lang->line('brands') : 'Brands' ?></h3>
             </div>
             <hr>
         </div>
@@ -12,7 +12,7 @@
                     <div class="brand_container">
                         <a href="<?= base_url('products?brand=' . html_escape($row['brand_slug'])) ?>">
                             <div class="brand_image d-flex align-items-center">
-                                <img src="<?= base_url($row['brand_img']) ?>" class="brand_img">
+                                <img src="<?= base_url('media/image?path='. $row['brand_img'] .'&width=110&quality=80') ?>" class="brand_img">
                             </div>
                         </a>
                         <div class="">

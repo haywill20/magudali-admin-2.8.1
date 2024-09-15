@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<div class="content-wrapper">
+<div class="content-wrapper deeplink_wrapper">
     <section class="wrapper bg-soft-grape">
         <div class="container py-3 py-md-5">
             <nav class="d-inline-block" aria-label="breadcrumb">
@@ -23,7 +23,7 @@
 
 
 <!-- /section -->
-<section class="wrapper bg-light">
+<section class="wrapper bg-light my-10">
     <div class="container mb-15">
         <div class="col-12 pl-0">
             <div class="dropdown">
@@ -40,7 +40,7 @@
                     <div class="form-group col-md-5 pl-0 blog_category">
                         <label for="product_sort_by"></label>
                         <select class='form-control' name='category_parent' id="category_parent">
-                            <option value="">Select Category</option>
+                            <option value=""><?= !empty($this->lang->line('select_category')) ? $this->lang->line('select_category') : 'Select Category' ?></option>
                             <?php foreach ($fetched_data as $categories) { ?>
                                 <option value="<?= $categories['id'] ?>" <?= ($this->input->get('category_id') == $categories['id']) ? 'selected' : '' ?>><?= $categories['name'] ?></option>
                             <?php } ?>
@@ -48,7 +48,7 @@
                     </div>
                     <div class="form-group col-md-4">
                         <label for="seller_search"></label>
-                        <input type="search" name="blog_search" class="form-control" id="blog_search" value="<?= (isset($blog_search) && !empty($blog_search)) ? $blog_search : "" ?>" placeholder="Search your blog">
+                        <input type="search" name="blog_search" class="form-control" id="blog_search" value="<?= (isset($blog_search) && !empty($blog_search)) ? $blog_search : "" ?>" placeholder="<?= !empty($this->lang->line('search_blog')) ? $this->lang->line('search_blog') : 'Search Blog' ?>">
                     </div>
                     <div class="dropdown float-md-right mb-4 col-md-3 form-select-wrapper">
                         <div class="d-flex align-items-baseline mt-5">
@@ -82,7 +82,7 @@
                             <figure class="card-img-top overlay overlay-1 hover-scale">
                                 <a href="<?= base_url("blogs/view_detail/" . $row['slug']) ?>"> <img src="<?= base_url() . $row['image'] ?>" alt="" style="object-fit: cover;" /></a>
                                 <figcaption>
-                                    <h5 class="from-top mb-0"><?= labels('read_more','Read More') ?></h5>
+                                    <h5 class="from-top mb-0"><?= labels('read_more', 'Read More') ?></h5>
                                 </figcaption>
                             </figure>
                             <div class="card-body p-4">

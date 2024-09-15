@@ -8,7 +8,7 @@ class Home extends CI_Controller
         parent::__construct();
         $this->load->database();
         $this->load->helper(['url', 'language', 'function_helper', 'bootstrap_table_helper', 'file']);
-        $this->load->model(['Home_model', 'Order_model']);
+        $this->load->model(['Home_model', 'Order_model', 'Cart_model']);
     }
 
     public function index()
@@ -20,7 +20,7 @@ class Home extends CI_Controller
             $this->data['title'] = 'Admin Panel | ' . $settings['app_name'];
             $this->data['meta_description'] = 'Admin Panel | ' . $settings['app_name'];
             $this->data['curreny'] = get_settings('currency');
-            $this->data['order_counter'] = $this->Home_model->count_new_orders();
+            $this->data['order_counter'] = $this->Home_model->count_dashboard_orders();
             $this->data['user_counter'] = $this->Home_model->count_new_users();
             $this->data['delivery_boy_counter'] = $this->Home_model->count_delivery_boys();
             $this->data['product_counter'] = $this->Home_model->count_products();
@@ -36,6 +36,9 @@ class Home extends CI_Controller
             $orders_count['delivered'] = orders_count("delivered");
             $orders_count['cancelled'] = orders_count("cancelled");
             $orders_count['returned'] = orders_count("returned");
+            $orders_count['draft'] = orders_count("draft");
+            $orders_count['return_request_approved'] = orders_count("return_request_approved");
+            $orders_count['return_request_pending'] = orders_count("return_request_pending");
             $this->data['status_counts'] = $orders_count;
             $this->data['approved_sellers'] = $this->Home_model->approved_seller();
             $this->data['count_approved_sellers'] = $this->Home_model->count_approved_seller();
@@ -55,6 +58,12 @@ class Home extends CI_Controller
             mobile_no:7894561235            
             new: pass@123
         */
+        if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
+            $this->response['error'] = true;
+            $this->response['message'] = DEMO_VERSION_MSG;
+            echo json_encode($this->response);
+            return false;
+        }
         $this->form_validation->set_rules('mobile', 'Mobile No', 'trim|numeric|required|xss_clean|max_length[16]');
         $this->form_validation->set_rules('new_password', 'New Password', 'trim|required|xss_clean');
 
@@ -255,6 +264,18 @@ class Home extends CI_Controller
         $response['notifications'] = $notifications;
 
         print_r(json_encode($response));
+    }
+
+    public function test_notification(){
+        return $this->Cart_model->cart_item_remainder();
+
+        // foreach ($old_cart_items as $item) {
+        //     echo "<pre>";
+        //     print_r($item);
+
+        //     // $this->send_notification($item['user_id'], $item['product_varient_id']);
+        // }
+        // die;
     }
 
     
