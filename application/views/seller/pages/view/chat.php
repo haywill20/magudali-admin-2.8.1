@@ -13,7 +13,7 @@
                                         $user_details = fetch_details('users', ['active' => 1],);
                                         if (!empty($user_details)) {
                                         ?>
-                                            <option value="<?= $user_details[0]['id'] ?>"> <?= $user_details[0]['username'] ?></option>
+                                            <option value="<?= $user_details[0]['id'] ?>"> <?= $user_details[0]['opponent_username'] ?></option>
                                         <?php
                                         }
 
@@ -31,7 +31,7 @@
                                                         if ($user['opponent_user_id'] == $_SESSION['user_id']) { ?>
                                                             <li class="media">
                                                                 <div class="media-body">
-                                                                    <div class="chat-person" data-picture="" data-type="person" data-id="<?= $user['opponent_user_id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fas fa-circle text-success' : 'far fa-circle'; ?> "></i> <?= $user['username'] ?> (You)</div>
+                                                                    <div class="chat-person" data-picture="" data-type="person" data-id="<?= $user['opponent_user_id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fas fa-circle text-success' : 'far fa-circle'; ?> "></i> <?= $user['opponent_username'] ?> (You)</div>
                                                                 </div>
                                                             </li>
                                                 <?php }

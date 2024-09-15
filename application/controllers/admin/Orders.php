@@ -503,6 +503,7 @@ class Orders extends CI_Controller
                 }
                 $items = [];
                 foreach ($res as $row) {
+                    // echo "<pre>";
                     // print_R($row);
                     $multipleWhere = ['seller_id' => $row['seller_id'], 'order_id' => $row['id']];
                     $order_charge_data = $this->db->where($multipleWhere)->get('order_charges')->result_array();
@@ -543,9 +544,11 @@ class Orders extends CI_Controller
                     $temp['product_slug'] = $row['product_slug'];
                     $temp['sku'] = isset($row['product_sku']) && !empty($row['product_sku']) ? $row['product_sku'] : $row['sku'];
                     $temp['address_number'] = $address_number[0]['mobile'];
+                    $temp['county_code'] = $row[0]['county_code'];
                     array_push($items, $temp);
                 }
-
+// echo "<pre>";
+// print_r($res[0]['country_code']);
                 $this->data['order_detls'] = $res;
                 $this->data['bank_transfer'] = $bank_transfer;
                 $this->data['items'] = $items;

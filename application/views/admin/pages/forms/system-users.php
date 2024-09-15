@@ -74,10 +74,11 @@
                                         <div class="col-md-12">
                                             <select class="form-control system-user-role" name="role">
                                                 <option value=" ">---Select role---</option>
-                                                <option value="0" <?= (isset($fetched_data[0]['role']) && $fetched_data[0]['role'] == '0') ?  'selected' : ' ' ?>>Super Admin</option>
-                                                <option value="1" <?= (isset($fetched_data[0]['role']) && $fetched_data[0]['role'] == '1') ?  'selected' : ' ' ?>>Admin</option>
-                                                <option value="2" <?= (isset($fetched_data[0]['role']) && $fetched_data[0]['role'] == '2') ?  'selected' : ' ' ?>>Editor</option>
-                                                <option value="3" <?= (isset($fetched_data[0]['role']) && $fetched_data[0]['role'] == '3') ?  'selected' : ' ' ?>>Supporter</option>
+                                                <?php
+                                                foreach ($user_roles as $key => $value) { ?>
+                                                    <option value="<?= $key ?>" <?= (isset($fetched_data[0]['role']) &&  $fetched_data[0]['role'] == $key) ? "Selected" : "" ?>><?= ucwords(str_replace('_', ' ', $value)) ?></option>
+                                                <?php
+                                                } ?>
                                             </select>
                                         </div>
                                     </div>

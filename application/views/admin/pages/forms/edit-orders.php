@@ -414,50 +414,50 @@
                                                                     }
 
                                                                     //send notification while shiprocket order status changed
-                                    if (isset($type) && !empty($type)) {
-                                        $settings = get_settings('system_settings', true);
-                                        $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
-                                        $custom_notification = fetch_details('custom_notifications', $type, '');
-                                        $hashtag_cutomer_name = '< cutomer_name >';
-                                        $hashtag_order_id = '< order_item_id >';
-                                        $hashtag_application_name = '< application_name >';
-                                        $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
-                                        $hashtag = html_entity_decode($string);
-                                        $data = str_replace(array($hashtag_cutomer_name, $hashtag_order_id, $hashtag_application_name), array($order_detls[0]['uname'], $order_detls[0]['id'], $app_name), $hashtag);
-                                        $message = output_escaping(trim($data, '"'));
-                                        $customer_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $order_detls[0]['uname'] . ' Order status updated to' . $order_status . ' for order ID #' . $order_detls[0]['id'] . ' please take note of it! Thank you. Regards ' . $app_name . '';
-                                        $seller_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $seller_data[0]['username'] . ' Order status updated to' . $order_status . ' for order ID #' . $order_detls[0]['id'] . ' please take note of it! Thank you. Regards ' . $app_name . '';
-                                        $fcmMsg = array(
-                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
-                                            'body' =>  $customer_msg,
-                                            'type' => "order",
-                                        );
-                                        $seller_fcmMsg = array(
-                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
-                                            'body' =>  $seller_msg,
-                                            'type' => "order",
-                                        );
-                                        $user_res = fetch_details('users', ['id' => $order_detls[0]['user_id']], 'fcm_id');
-                                        $fcm_ids = $seller_fcm_ids =  array();
+                                                                    if (isset($type) && !empty($type)) {
+                                                                        $settings = get_settings('system_settings', true);
+                                                                        $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
+                                                                        $custom_notification = fetch_details('custom_notifications', $type, '');
+                                                                        $hashtag_cutomer_name = '< cutomer_name >';
+                                                                        $hashtag_order_id = '< order_item_id >';
+                                                                        $hashtag_application_name = '< application_name >';
+                                                                        $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
+                                                                        $hashtag = html_entity_decode($string);
+                                                                        $data = str_replace(array($hashtag_cutomer_name, $hashtag_order_id, $hashtag_application_name), array($order_detls[0]['uname'], $order_detls[0]['id'], $app_name), $hashtag);
+                                                                        $message = output_escaping(trim($data, '"'));
+                                                                        $customer_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $order_detls[0]['uname'] . ' Order status updated to' . $order_status . ' for order ID #' . $order_detls[0]['id'] . ' please take note of it! Thank you. Regards ' . $app_name . '';
+                                                                        $seller_msg = (!empty($custom_notification)) ? $message :  'Hello Dear ' . $seller_data[0]['username'] . ' Order status updated to' . $order_status . ' for order ID #' . $order_detls[0]['id'] . ' please take note of it! Thank you. Regards ' . $app_name . '';
+                                                                        $fcmMsg = array(
+                                                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
+                                                                            'body' =>  $customer_msg,
+                                                                            'type' => "order",
+                                                                        );
+                                                                        $seller_fcmMsg = array(
+                                                                            'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Order status updated",
+                                                                            'body' =>  $seller_msg,
+                                                                            'type' => "order",
+                                                                        );
+                                                                        $user_res = fetch_details('users', ['id' => $order_detls[0]['user_id']], 'fcm_id');
+                                                                        $fcm_ids = $seller_fcm_ids =  array();
 
-                                        //send notification to customer
-                                        if (!empty($user_res[0]['fcm_id'])) {
-                                            $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                                            send_notification($fcmMsg, $fcm_ids);
-                                        }
-                                        (notify_event(
-                    $type['type'],
-                    ["customer" => [$order_detls[0]['email']], "seller" => [$seller_data[0]['email']]],
-                    ["customer" => [$order_detls[0]['mobile']],  "seller" => [$seller_data[0]['mobile']]],
-                    ["orders.id" => $order_detls[0]['id']]
-                ));
+                                                                        //send notification to customer
+                                                                        if (!empty($user_res[0]['fcm_id'])) {
+                                                                            $fcm_ids[0][] = $user_res[0]['fcm_id'];
+                                                                            send_notification($fcmMsg, $fcm_ids);
+                                                                        }
+                                                                        (notify_event(
+                                                                            $type['type'],
+                                                                            ["customer" => [$order_detls[0]['email']], "seller" => [$seller_data[0]['email']]],
+                                                                            ["customer" => [$order_detls[0]['mobile']],  "seller" => [$seller_data[0]['mobile']]],
+                                                                            ["orders.id" => $order_detls[0]['id']]
+                                                                        ));
 
-                                        //send notification to seller
-                                        if (!empty($seller_data[0]['fcm_id'])) {
-                                            $seller_fcm_ids[0][] = $seller_data[0]['fcm_id'];
-                                            send_notification($seller_fcmMsg, $seller_fcm_ids);
-                                        }
-                                    }
+                                                                        //send notification to seller
+                                                                        if (!empty($seller_data[0]['fcm_id'])) {
+                                                                            $seller_fcm_ids[0][] = $seller_data[0]['fcm_id'];
+                                                                            send_notification($seller_fcmMsg, $seller_fcm_ids);
+                                                                        }
+                                                                    }
                                                                 }
                                                             ?>
                                                                 <?php if ($shipping_method['shiprocket_shipping_method'] == 1 && isset($pickup_location[$j]) && !empty($pickup_location[$j]) && $pickup_location[$j] != 'NULL') { ?>
@@ -787,6 +787,13 @@
                                     <td><?php echo date('d-M-Y', strtotime($order_detls[0]['date_added'])); ?></td>
                                 </tr>
                             </table>
+                            <?php 
+                            // echo "<pre>";
+                            // print_R($order_detls) ?>
+                            <?//= ($order_detls[0]['mobile'] != '' && isset($order_detls[0]['mobile'])) ? $order_detls[0]['mobile'] : ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0)  ? str_repeat("X", strlen($mobile_data[0]['mobile']) - 3) . substr($mobile_data[0]['mobile'], -3) : $mobile_data[0]['mobile'])   ?>
+
+
+                            <a href="https://api.whatsapp.com/send?phone=<?= ($order_detls[0]['country_code'])?><?= ($order_detls[0]['mobile'] != '' && isset($order_detls[0]['mobile'])) ? $order_detls[0]['mobile'] : ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0)  ? str_repeat("X", strlen($mobile_data[0]['mobile']) - 3) . substr($mobile_data[0]['mobile'], -3) : $mobile_data[0]['mobile'])   ?>&amp;text=Hello <?= $order_detls[0]['uname'] ?>, Your order with ID : <?= $order_detls[0]['order_id'] ?> and is <?= $order_detls[0]['oi_active_status'] ?>. Please take a note of it. If you have further queries feel free to contact us. Thank you." target="_blank" title="Send Whatsapp Notification For Order" class="btn btn-success"><img src="<?= base_irl ?>" ><i class="fa fa-whatsapp"></i> Send Whatsapp Notification</a>
                         </div>
                     </div>
                     <!--/.card-->

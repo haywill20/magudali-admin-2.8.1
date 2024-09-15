@@ -12616,7 +12616,7 @@ div#img_01-zoomContainer {
     position: fixed;
     bottom: 32px;
     right: 83px;
-    padding: 10px;
+    padding: 11px;
     background-color: #3cc766;
     color: #fff;
     font-size: 20px;
@@ -12631,4 +12631,31 @@ div#img_01-zoomContainer {
 
 #floating_chat_view{
     margin: 22px;
+}
+
+.seller-profile-card {
+    border-radius: 50%;
+    width: 150px;
+    /* background-color: antiquewhite; */
+    height: 150px;
+
+}
+
+.seller-profile-card img{
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50%;
+}
+
+.gap-4 {
+    gap: 1rem !important;
+}
+
+.seller_card {
+    box-shadow: 0 0 0 0.05rem rgba(8, 60, 130, 0.06), 0rem 0rem 1.25rem rgba(30, 34, 40, 0.04);
+    border: 0;
+}
+.page-item.disabled .page-link {
+    color: #ffffff !important;
 }

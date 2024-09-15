@@ -42,7 +42,7 @@ $(document).ready(function () {
             const messaging = getMessaging();
 
             requestPermission();
-           
+
             getToken(messaging, { vapidKey: 'BFEiHMx_xNqwKyUpJWziDBrlNc4bvUWVp0LeHfG1KTWK5kz1cXljFut7791iQ712nNQf2Syki3JzXIK0eaP_tj4' }).then((currentToken) => {
                 console.log("Inside get Token");
                 if (currentToken) {
@@ -58,9 +58,9 @@ $(document).ready(function () {
                 // ...
             });
             var typing_timer = [];
-             onMessage(messaging, (payload) => {
+            onMessage(messaging, (payload) => {
                 var notification = JSON.parse(payload.data.data);
-            
+
                 if (notification.type == 'typing') {
                     console.log("in typing");
                     var from_id_fmc = notification.from_id;
@@ -273,35 +273,38 @@ function getOnlineMemebers() {
         success: function (result) {
             var data = JSON.parse(result);
 
-            $.each(data.data.members, function (key, val) {
+            if (data.length > 0) {
 
-                var i = $("li").find("[data-id='" + val.id + "'][data-type='person'] i");
-                if (val.is_online == 1) {
-                    i.removeClass("fa");
-                    i.addClass("fa text-success");
-                } else {
-                    i.removeClass("fa text-success");
-                    i.addClass("fa");
-                }
-                i = $("li").find("[data-id='" + val.id + "'][data-type='person']");
-                old_unread_msg = (i.data("unread_msg") !== 0) ? i.data("unread_msg") : 0;
+                $.each(data?.data?.members, function (key, val) {
 
-                if (val.unread_msg > 0 && val.unread_msg > old_unread_msg) {
-                    if (window_is_focused == false) {
-                        newLoadChat(val.id, 'person');
-                    }
-                    i.find(".badge-chat").remove();
-                    if (val.unread_msg > 9) {
-                        i.append('<div class="badge-chat">9 +</div>');
+                    var i = $("li").find("[data-id='" + val.id + "'][data-type='person'] i");
+                    if (val.is_online == 1) {
+                        i.removeClass("fa");
+                        i.addClass("fa text-success");
                     } else {
-                        i.append('<div class="badge-chat">' + val.unread_msg + '</div>');
+                        i.removeClass("fa text-success");
+                        i.addClass("fa");
                     }
-                    i.data("unread_msg", val.unread_msg);
-                } else if (val.unread_msg == 0) {
-                    i.find(".badge-chat").remove();
-                }
+                    i = $("li").find("[data-id='" + val.id + "'][data-type='person']");
+                    old_unread_msg = (i.data("unread_msg") !== 0) ? i.data("unread_msg") : 0;
 
-            });
+                    if (val.unread_msg > 0 && val.unread_msg > old_unread_msg) {
+                        if (window_is_focused == false) {
+                            newLoadChat(val.id, 'person');
+                        }
+                        i.find(".badge-chat").remove();
+                        if (val.unread_msg > 9) {
+                            i.append('<div class="badge-chat">9 +</div>');
+                        } else {
+                            i.append('<div class="badge-chat">' + val.unread_msg + '</div>');
+                        }
+                        i.data("unread_msg", val.unread_msg);
+                    } else if (val.unread_msg == 0) {
+                        i.find(".badge-chat").remove();
+                    }
+
+                });
+            }
 
             // $.each(data.data.groups, function (key, val) {
 
@@ -363,7 +366,7 @@ $(document).on('keyup', '#chat-input-textarea', function () {
             var type = 'typing';
             var msg_type = $("#chat_type").val();
             sendFCM(receiver_id, title, msg, type, msg_type);
-            
+
         }
     } else {
         $('#chat-preview-btn').removeClass("d-none");
@@ -462,13 +465,13 @@ $(document).on("dragenter", "#chat-box-content", function (e) {
     showDropZone();
 })
 
-window.closeDropZone = function() {
+window.closeDropZone = function () {
     $('#chat-box-content').show();
     $('#chat-dropbox').addClass("d-none");
     Dropzone.forElement("#myAlbum").removeAllFiles(true);
 }
 
-window.showDropZone = function() {
+window.showDropZone = function () {
     $('#chat-dropbox').removeClass("d-none");
     $('#chat-box-content').hide();
 
@@ -527,9 +530,9 @@ function getUserPicture(user_id) {
 // sending msg
 $(document).on('submit', '#chat-form2', function (e) {
     e.preventDefault();
-   
+
     var drop_file_count = myDropzone.files.length;
-  
+
 
     var to_id = $("#opposite_user_id").val();
     var type = $("#chat_type").val();
@@ -951,7 +954,7 @@ function sendFCM(receiver_id, title, msg, type, message_type = '') {
         },
         dataTpe: 'json',
         success: function (result) {
-            }
+        }
     });
 }
 

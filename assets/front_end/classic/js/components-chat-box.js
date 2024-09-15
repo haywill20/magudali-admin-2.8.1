@@ -273,7 +273,7 @@ function getOnlineMemebers() {
         success: function (result) {
             var data = JSON.parse(result);
 
-            $.each(data.data.members, function (key, val) {
+            $.each(data?.data?.members, function (key, val) {
 
                 var i = $("li").find("[data-id='" + val.id + "'][data-type='person'] i");
                 if (val.is_online == 1) {
@@ -303,22 +303,22 @@ function getOnlineMemebers() {
 
             });
 
-            $.each(data.data.groups, function (key, val) {
+            // $.each(data.data.groups, function (key, val) {
 
-                if (val.is_read != 0) {
-                    if (window_is_focused == false) {
-                        newLoadChat(val.group_id, 'group');
-                    }
-                    var i = $("li").find("[data-id='" + val.group_id + "'][data-type='group']");
-                    i.addClass("new-msg-rcv");
-                    i.find(".badge-group-chat").remove();
-                    i.append('<div class="badge-chat badge-group-chat">New</div>');
-                }
+            //     if (val.is_read != 0) {
+            //         if (window_is_focused == false) {
+            //             newLoadChat(val.group_id, 'group');
+            //         }
+            //         var i = $("li").find("[data-id='" + val.group_id + "'][data-type='group']");
+            //         i.addClass("new-msg-rcv");
+            //         i.find(".badge-group-chat").remove();
+            //         i.append('<div class="badge-chat badge-group-chat">New</div>');
+            //     }
 
 
-            });
+            // });
 
-            setTimeout(getOnlineMemebers, 10000);
+            // setTimeout(getOnlineMemebers, 10000);
 
         }
     });
@@ -788,6 +788,7 @@ $(document).on('click', '.chat-person', function () {
     $(".floating-chat-users").addClass("d-none");
     $(".go-to-bottom-btn").hide();
     var oppo_user_id = $(this).data("id");
+    console.log($(this)[0]);
     var type = $(this).data("type");
     $('.chat-person').removeClass("active");
     $("#opposite_user_id").val(oppo_user_id);
@@ -1023,7 +1024,7 @@ function printChat(chats, id_of_user) {
 
 
 function switchChat(from_id, type) {
-
+console.log(from_id);
     $.ajax({
         url: base_url + "my-account/switch_chat",
         type: "POST",
@@ -1037,7 +1038,7 @@ function switchChat(from_id, type) {
             var person = JSON.parse(result);
 
             if (type == 'person') {
-                $("#chat_title").text(person[0].username);
+                $("#chat_title").text(person[0]?.username);
 
                 var html = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
 
@@ -1050,7 +1051,7 @@ function switchChat(from_id, type) {
                 // }
 
 
-                if (person[0].is_online == 1) {
+                if (person[0]?.is_online == 1) {
                     $("#chat_online_status").addClass("text-success");
                     $("#chat_online_status").html("<i class='fas fa-circle'></i> Online <span class='text-info' id='chat_typing' style='display: none;'> Typing...</span>");
                 } else {
@@ -1313,7 +1314,7 @@ myDropzone.on('successmultiple', function (file, response) {
 $(document).on('change', '#chat_user', function () {
 
     console.log("here");
-
+console.log($("#chat_user")[0]);
     var oppo_user_id = JSON.parse($("#chat_user").val())
     var type = 'person';
     if ($(this).data("not_in_group") == true) {

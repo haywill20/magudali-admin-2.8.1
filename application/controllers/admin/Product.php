@@ -939,10 +939,10 @@ class Product extends CI_Controller
                             $data['deliverable_type'] = $row[27]; //in csv its 28th
                             $data['deliverable_zipcodes'] = $row[28]; // in csv its 29th
                             $data['seller_id'] = $row[29]; // in csv its 29th
-                            $data['brand'] = isset($row[37]) ? $row[37] : '';
-                            $data['hsn_code'] = isset($row[38]) ? $row[38] : '';
-                            $data['pickup_location'] = isset($row[39]) ? $row[39] : '';
-                            $data['extra_description'] = isset($row[40]) ? $row[40] : '';
+                            // $data['brand'] = isset($row[37]) ? $row[37] : '';
+                            // $data['hsn_code'] = isset($row[38]) ? $row[38] : '';
+                            // $data['pickup_location'] = isset($row[39]) ? $row[39] : '';
+                            // $data['extra_description'] = isset($row[40]) ? $row[40] : '';
                            
 
                             $this->db->insert('products', $data);
@@ -1327,26 +1327,26 @@ class Product extends CI_Controller
                                 } else {
                                     $data['seller_id'] = $product[0]['seller_id'];
                                 }
-                                if ($row[36] != '') {
-                                    $data['brand'] = $row[36];
-                                } else {
-                                    $data['brand'] = $product[0]['brand'];
-                                }
-                                if ($row[37] != '') {
-                                    $data['hsn_code'] = $row[37];
-                                } else {
-                                    $data['hsn_code'] = $product[0]['hsn_code'];
-                                }
-                                if ($row[38] != '') {
-                                    $data['pickup_location'] = $row[38];
-                                } else {
-                                    $data['pickup_location'] = $product[0]['pickup_location'];
-                                }
-                                if ($row[39] != '') {
-                                    $data['extra_description'] = $row[39];
-                                } else {
-                                    $data['extra_description'] = $product[0]['extra_description'];
-                                }
+                                // if ($row[36] != '') {
+                                //     $data['brand'] = $row[36];
+                                // } else {
+                                //     $data['brand'] = $product[0]['brand'];
+                                // }
+                                // if ($row[37] != '') {
+                                //     $data['hsn_code'] = $row[37];
+                                // } else {
+                                //     $data['hsn_code'] = $product[0]['hsn_code'];
+                                // }
+                                // if ($row[38] != '') {
+                                //     $data['pickup_location'] = $row[38];
+                                // } else {
+                                //     $data['pickup_location'] = $product[0]['pickup_location'];
+                                // }
+                                // if ($row[39] != '') {
+                                //     $data['extra_description'] = $row[39];
+                                // } else {
+                                //     $data['extra_description'] = $product[0]['extra_description'];
+                                // }
                                
                                
 

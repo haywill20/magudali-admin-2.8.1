@@ -703,7 +703,7 @@ var theme = {
     }
     // Fixes jumping of page progress caused by modal
     var innerWidth = window.innerWidth;
-    var clientWidth = document.body.clientWidth;
+    var clientWidth = document.body?.clientWidth;
     var scrollSize = innerWidth - clientWidth;
     var myModalEl = document.querySelectorAll('.modal');
     var navbarFixed = document.querySelector('.navbar.fixed');

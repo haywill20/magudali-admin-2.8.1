@@ -449,6 +449,8 @@ class Chat_model extends CI_Model
             $query = $this->db->query("SELECT * FROM chat_groups WHERE id=$user_or_group_id ");
         }
 
+        // print_r($user_or_group_id);
+        // echo $this->db->last_query();
         $messages =  $query->result_array();
         return $messages;
     }

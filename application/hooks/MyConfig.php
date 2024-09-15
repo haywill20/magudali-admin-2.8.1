@@ -175,14 +175,13 @@ class MyConfig
 
     function language()
     {
-        $config =& get_config();
         $ci = &get_instance();
         $ci->load->helper(['language']);
         $siteLang = $ci->input->cookie('language', TRUE);
         if ($siteLang) {
             $ci->lang->load('web_labels_lang', $siteLang);
         } else {
-            $ci->lang->load('web_labels_lang', $config['language']);
+            $ci->lang->load('web_labels_lang', 'english');
         }
     }
 
@@ -312,6 +311,124 @@ class MyConfig
                     }
                 }
             }
+        }
+    }
+    function maintenance_mode_web()
+    {
+        $include_uris = array(
+            base_url(),
+            base_url("products"),
+            base_url("cart"),
+            base_url("cart/manage"),
+            base_url("cart/remove"),
+            base_url("cart/clear"),
+            base_url("cart/get_user_cart"),
+            base_url("cart/checkout"),
+            base_url("cart/place-order"),
+            base_url("cart/validate-promo-code"),
+            base_url("cart/pre-payment-setup"),
+            base_url("cart/get-delivery-charge"),
+            base_url("cart/send-bank-receipt"),
+            base_url("cart/check-product-availability"),
+            base_url("home/contact-us"),
+            base_url("home/categories"),
+            base_url("home/get-products"),
+            base_url("home/address-list"),
+            base_url("home/checkout"),
+            base_url("home/terms-and-conditions"),
+            base_url("home/about-us"),
+            base_url("home/faq"),
+            base_url("home/privacy-policy"),
+            base_url("home/login"),
+            base_url("home/lang"),
+            base_url("home/reset-password"),
+            base_url("home/send-contact-us-email"),
+            base_url("login"),
+            base_url("login/login-check"),
+            base_url("login/logout"),
+            base_url("login/update-user"),
+            base_url("my-account"),
+            base_url("my-account/profile"),
+            base_url("my-account/orders"),
+            base_url("my-account/order_details"),
+            base_url("my-account/order_invoice"),
+            base_url("my-account/update_order_item_status"),
+            base_url("my-account/update_order"),
+            base_url("my-account/notifications"),
+            base_url("my-account/manage_address"),
+            base_url("my-account/wallet"),
+            base_url("my-account/transactions"),
+            base_url("my-account/add_address"),
+            base_url("my-account/edit_address"),
+            base_url("my-account/delete_address"),
+            base_url("my-account/set_default_address"),
+            base_url("my-account/get_address"),
+            base_url("my-account/get_address_list"),
+            base_url("my-account/get_areas"),
+            base_url("my-account/get_zipcode"),
+            base_url("my-account/favorites"),
+            base_url("my-account/manage_favorites"),
+            base_url("my-account/get_transactions"),
+            base_url("my-account/get_wallet_transactions"),
+            base_url("payment"),
+            base_url("payment/paypal"),
+            base_url("payment/paytm"),
+            base_url("payment/initiate_paytm_transaction"),
+            base_url("payment/paytm_response"),
+            base_url("payment/success"),
+            base_url("payment/cancel"),
+            base_url("payment/app_payment_status"),
+            base_url("payment/do_capture"),
+            base_url("products/category"),
+            base_url("products/details"),
+            base_url("products/get_details"),
+            base_url("products/section"),
+            base_url("products/search"),
+            base_url("products/tags"),
+            base_url("products/save_rating"),
+            base_url("products/delete_rating"),
+            base_url("products/get_rating"),
+            base_url("products/check_zipcode"),
+            base_url("sellers"),
+            base_url("sellers/"),
+        );
+        $system_settings = get_settings('system_settings', true);
+
+        if ((!empty($system_settings) && ($system_settings['is_web_under_maintenance'] == 1)) && !in_array(current_url(), $include_uris)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
+        // } else {
+        //     if ((!empty($doctor_brown) && !in_array(current_url(), $exclude_uris))) {
+        //         /* redirect him to the page where he can enter the purchase code */
+        //         $calculated_time_check = $time_check = '';
+
+        //         $time_check = (isset($doctor_brown["time_check"])) ? trim($doctor_brown["time_check"]) : "";
+        //         $code_bravo = (isset($doctor_brown["code_bravo"])) ? trim($doctor_brown["code_bravo"]) : "";
+        //         $code_adam = (isset($doctor_brown["code_adam"])) ? trim($doctor_brown["code_adam"]) : "";
+        //         $dr_firestone = (isset($doctor_brown["dr_firestone"])) ? trim($doctor_brown["dr_firestone"]) : "";
+        //         $str = $code_bravo . "|" . $code_adam . "|" . $dr_firestone;
+        //         $calculated_time_check = hash('sha256', $str);
+        //         if (empty($calculated_time_check) || empty($time_check)) {
+        //             if (!in_array(current_url(), $exclude_uris)) {
+        //                 redirect(base_url("admin/purchase-code"));
+        //             }
+        //         }
+        //     }
+        //     if ((!empty($web_doctor_brown) && !in_array(current_url(), $exclude_uris))) {
+        //         /* redirect him to the page where he can enter the purchase code */
+        //         $calculated_time_check = $time_check = '';
+        //         $time_check = (isset($web_doctor_brown["time_check"])) ? trim($web_doctor_brown["time_check"]) : "";
+        //         $code_bravo = (isset($web_doctor_brown["code_bravo"])) ? trim($web_doctor_brown["code_bravo"]) : "";
+        //         $code_adam = (isset($web_doctor_brown["code_adam"])) ? trim($web_doctor_brown["code_adam"]) : "";
+        //         $dr_firestone = (isset($web_doctor_brown["dr_firestone"])) ? trim($web_doctor_brown["dr_firestone"]) : "";
+        //         $str = $code_bravo . "|" . $code_adam . "|" . $dr_firestone;
+        //         $calculated_time_check = hash('sha256', $str);
+        //         if (empty($calculated_time_check) || empty($time_check)) {
+        //             if (!in_array(current_url(), $exclude_uris)) {
+        //                 redirect(base_url("admin/purchase-code"));
+        //             }
+        //         }
+        //     }
         }
     }
     public function allow_modification()

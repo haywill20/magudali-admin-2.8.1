@@ -366,4 +366,5 @@ $config['supported_locales_list'] = [
 
 
 $config['decimal_point'] = array("0", "1", "2");
-$config['supported_payment_methods'] = array("paypal", "razorpay", "paystack", "stripe", "flutterwave", "paytm","midtrans",'instamojo');
+$config['supported_payment_methods'] = array("paypal", "razorpay", "paystack", "stripe", "flutterwave", "paytm","midtrans",'instamojo','phonepe');
+$config['system_user_roles'] = array("super_admin", "admin", "editor", "supporter");

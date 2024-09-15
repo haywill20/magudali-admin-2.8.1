@@ -113,7 +113,16 @@ class Chat extends CI_Controller
             redirect('auth', 'refresh');
         } else {
             $response = get_settings('firebase_settings');
-            echo json_encode($response);
+            $configData = json_decode($response, true);
+            $configData['fcm_server_key'] = get_settings('fcm_server_key');
+            $configData['vap_id_Key'] = get_settings('vap_id_Key');
+
+            $data = json_encode($configData);
+
+            // print_r($data);
+            // print_r($configData);
+            // die;
+            echo json_encode($data);
         }
     }
 
@@ -510,7 +519,7 @@ class Chat extends CI_Controller
                     $notification['base_url'] = base_url('chat');
                     $data['data']['data'] = $notification;
                     $data['data']['webpush']['fcm_options']['link'] = base_url('chat');
-                    $data['to'] = isset($user[0]['web_fcm'])? $user[0]['web_fcm'] : '';
+                    $data['to'] = isset($user[0]['web_fcm']) ? $user[0]['web_fcm'] : '';
 
 
 
@@ -868,7 +877,7 @@ class Chat extends CI_Controller
                 'notification' => $fcmMsg,
                 'data' => $fcmMsg,
             );
-// print_r($fcmMsg);
+            // print_r($fcmMsg);
             $headers = array(
                 'Authorization: key=' . get_settings('fcm_server_key'),
                 'Content-Type: application/json'

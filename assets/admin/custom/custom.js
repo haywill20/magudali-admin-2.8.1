@@ -446,6 +446,7 @@ function create_variants(preproccessed_permutation_result = false, from) {
         var response = getPermutation(attributes_values);
     }
     var selected_variant_ids = JSON.stringify(response);
+    console.log(selected_variant_ids);
     var selected_attributes_values = JSON.stringify(attributes_values);
 
     $('.no-variants-added').hide();
@@ -2632,9 +2633,7 @@ $(document).on('select2:select', '#product-type', function () {
 $(document).on('change', '#product_type_menu', function () {
     var value = $(this).val();
     if (value == 'digital_product') {
-        var html = ' <option value=" ">Select Type</option>' +
-            '<option value="simple_product">Simple Product</option>' +
-            '<option value="variable_product">Variable Product</option>';
+        var html = '<option value="digital_product">Digital Product</option>';
 
         $('#product-type').html(html);
         $('#variant_stock_level').hide(200);
@@ -2724,6 +2723,7 @@ $(document).on('click', '#save_attributes', function () {
         showLoaderOnConfirm: true,
         allowOutsideClick: false
     }).then((result) => {
+        console.log(result);
         if (result.value) {
             attribute_flag = 1;
             save_attributes();
@@ -8969,7 +8969,7 @@ $(document).on('change', '#whatsapp_status', function (e, data) {
 });
 
 
-var sms_data = $("#sms_gateway_data").val() ? $("#sms_gateway_data").val() : [];
+var sms_data = $("#sms_gateway_data").val() ? $("#p").val() : [];
 console.log(sms_data);
 if (sms_data.length != 0) {
     var sms_data = JSON.parse(sms_data);

@@ -178,6 +178,7 @@ class Product_model extends CI_Model
             'product_id' => $p_id,
             'attribute_value_ids' => strval($data['attribute_values']),
         ];
+        // print_r($pro_attr_data);
 
 
         if (isset($data['edit_product_id'])) {

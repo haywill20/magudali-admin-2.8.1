@@ -569,6 +569,63 @@ $(document).ready(function () {
             }, "json");
         } else if (payment_methods == "Flutterwave") {
             flutterwave_payment();
+        }else if (payment_methods == 'phonepe') {
+            var amount = $('#amount').val()
+            var user_id = $('#user_id').val()
+            var address_id = $('#address_id').val()
+            if ($('#wallet_balance').is(':checked')) {
+                var wallet_used = 1
+            } else {
+                var wallet_used = 0
+            }
+
+            var promo_set = $('#promo_set').val()
+            var promo_code = ''
+            if (promo_set == 1) {
+                promo_code = $('#promocode_input').val()
+            }
+            // if ($("#datepicker").length > 0 && $("#start_date").val() == "") {
+            //     $("#datepicker").focus();
+            //     Toast.fire({
+            //         icon: 'error',
+            //         title: "Please select delivery date and time!"
+            //     })
+            //     return false;
+            // }
+            $.post(
+                base_url + 'payment/phonepe', {
+                [csrfName]: csrfHash,
+                amount: amount,
+                user_id: user_id,
+                address_id: address_id,
+                wallet_used: wallet_used,
+                promo_code: promo_code,
+            },
+                function (data) {
+                    var url = (data['url']) ? data['url'] : ""
+                    var message = (data['data']['message']) ? data['data']['message'] : ""
+                    $("#phonepe_transaction_id").val((data['transaction_id']) ? data['transaction_id'] : "");
+
+                    if (url != "") {
+                        place_order().done(function (result) {
+                            if (result.error == false) {
+                                window.location.replace(url);
+                            } else {
+                                Toast.fire({
+                                    icon: 'error',
+                                    title: message
+                                })
+                            }
+                        })
+                    } else {
+                        Toast.fire({
+                            icon: 'error',
+                            title: message
+                        })
+                    }
+                },
+                'json'
+            )
         } else if (payment_methods == "COD" || payment_methods == "Direct Bank Transfer") {
             place_order().done(function (result) {
                 if (result.error == false) {

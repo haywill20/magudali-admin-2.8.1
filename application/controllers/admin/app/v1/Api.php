@@ -569,7 +569,7 @@ Defined Methods:-
                 $this->response['data'] = array();
             }
         }
-        print_r(json_encode("$this->response"));
+        print_r(json_encode($this->response));
     }
 
     // 6.get_customers

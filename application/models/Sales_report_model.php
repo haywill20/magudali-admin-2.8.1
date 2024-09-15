@@ -32,12 +32,12 @@ class Sales_report_model extends CI_Model
             ];
         }
         $count_res = $this->db->select(' COUNT(o.id) as `total` ')->join(' `users` u', 'u.id= o.user_id');
+        $count_res->join(' `order_items` oi', 'oi.order_id=o.id');
         if (!empty($_GET['seller_id']) || !empty($_POST['seller_id'])) {
             $seller_id = (!empty($_GET['seller_id']) && isset($_GET['seller_id'])) ? $_GET['seller_id'] : $_POST['seller_id'];
-            $count_res->join(' `order_items` oi', 'oi.order_id=o.id');
             $count_res->where("oi.seller_id=" . $seller_id);
         }
-        
+
         if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
 
             $count_res->where(" DATE(o.date_added) >= DATE('" . $_GET['start_date'] . "') ");
@@ -125,6 +125,9 @@ class Sales_report_model extends CI_Model
         $sort = " o.id ",
         $order = 'ASC'
     ) {
+        // print_r($_GET);
+        // print_r($_POST);
+        // die;
         if (isset($_GET['offset'])) {
             $offset = $_GET['offset'];
         }
@@ -146,8 +149,8 @@ class Sales_report_model extends CI_Model
             ];
         }
         $count_res = $this->db->select(' COUNT(o.id) as `total` ')->join(' `users` u', 'u.id= o.user_id');
-        if (!empty($_GET['seller_id']) || !empty($_POST['seller_id'])) {
-            $seller_id = (!empty($_GET['seller_id']) && isset($_GET['seller_id'])) ? $_GET['seller_id'] : $_POST['seller_id'];
+        if (!empty($_GET['seller_id']) || !empty($_POST['seller_id'] || !empty($_SESSION['user_id']))) {
+            $seller_id = (!empty($_GET['seller_id']) && isset($_GET['seller_id'])) ? $_GET['seller_id'] : $_SESSION['user_id'];
             $count_res->join(' `order_items` oi', 'oi.order_id=o.id');
             $count_res->where("oi.seller_id=" . $seller_id);
         }

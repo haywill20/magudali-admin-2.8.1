@@ -15,7 +15,7 @@
                                         $user_details = fetch_details('users', ['active' => 1],);
                                         if (!empty($user_details)) {
                                         ?>
-                                            <option value="<?= $user_details[0]['id'] ?>"> <?= $user_details[0]['username'] ?></option>
+                                            <option value="<?= $user_details[0]['id'] ?>"> <?= $user_details[0]['opponent_username'] ?></option>
                                         <?php
                                         }
 

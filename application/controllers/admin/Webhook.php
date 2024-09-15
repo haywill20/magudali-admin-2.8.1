@@ -891,4 +891,101 @@ class Webhook extends CI_Controller
             return false;
         }
     }
+
+    // ------------------------------------------------ PHONEPE PAYMENT GATEWAY ------------------------------------------
+
+    public function phonepe_webhook()
+    {
+        $this->load->library(['Phonepe']);
+        $system_settings = get_settings('system_settings', true);
+        $request = file_get_contents('php://input');
+
+        $request = (json_decode($request, 1));
+        $request = (isset($request['response'])) ? $request['response'] : "";
+        log_message('error', 'phonepe file webhook--> ' . var_export($request, true));
+        if (!empty($request)) {
+
+            $request = base64_decode($request);
+            $request = json_decode($request, 1);
+            log_message('error', 'phonepe server webhook--> ' . var_export($_SERVER, true));
+
+            $txn_id = (isset($request['data']['merchantTransactionId'])) ? $request['data']['merchantTransactionId'] : "";
+            if (!empty($txn_id)) {
+                $transaction = fetch_details('transactions', ['txn_id' => $txn_id], '*');
+                $amount = $request['data']['amount'] / 100;
+            } else {
+                $amount = 0;
+            }
+
+            if (!empty($transaction)) {
+                $user_id = $transaction[0]['user_id'];
+                $transaction_type = (isset($transaction[0]['transaction_type'])) ? $transaction[0]['transaction_type'] : "";
+                $order_id = (isset($transaction[0]['order_id'])) ? $transaction[0]['order_id'] : "";
+                log_message('error', 'Phonepe Webhook | transaction_type --> ' . var_export($transaction_type, true));
+                log_message('error', 'Phonepe Webhook | transaction order id --> ' . var_export($order_id, true));
+            } else {
+                log_message('error', 'Phonepe transaction id not found in local database--> ' . var_export($request, true));
+                die;
+            }
+
+            $status = (isset($request['code'])) ? $request['code'] : "";
+
+            $this->load->model('transaction_model');
+
+            $check_status = $this->phonepe->check_status($txn_id);
+            if ($check_status) {
+                if ($status == 'PAYMENT_SUCCESS') {
+                    $data['status'] = "success";
+                    if ($transaction_type == "wallet") {
+                        $data['status'] = "success";
+                        $data['message'] = "Wallet refill successful";
+    
+                        $this->transaction_model->update_transaction($data, $txn_id);
+
+                        $this->load->model('customer_model');
+                        if (!$this->customer_model->update_balance($amount, $user_id, 'add')) {
+
+                            log_message('error', 'Phonepe Webhook | couldn\'t update in wallet balance  --> ' . var_export($request, true));
+                            die;
+                        }
+
+                        return false;
+                    } elseif ($transaction_type == "transaction") {
+                        $data['message'] = "Payment received successfully";
+                        
+                        update_details(['active_status' => 'received'], ['order_id' => $order_id], 'order_items');
+                        $order_status = json_encode(array(array('received', date("d-m-Y h:i:sa"))));
+                        update_details(['status' => $order_status], ['order_id' => $order_id], 'order_items', false);
+                        
+                        update_details(['active_status' => 'received'], ['id' => $order_id], 'orders');
+                        $order_status = json_encode(array(array('received', date("d-m-Y h:i:sa"))));
+                        update_details(['status' => $order_status], ['id' => $order_id], 'orders', false);
+                    }
+                    $this->transaction_model->update_transaction($data, $txn_id);
+                } elseif ($status == "BAD_REQUEST"  || $status == "AUTHORIZATION_FAILED" || $status == "PAYMENT_ERROR" || $status == "TRANSACTION_NOT_FOUND" || $status == "PAYMENT_DECLINED" || $status == "TIMED_OUT") {
+                    $data['status'] = "failed";
+                    if ($transaction_type == "wallet") {
+                        $data['status'] = "failed";
+                        $data['message'] = "Wallet could not be recharged!";
+    
+                        $this->transaction_model->update_transaction($data, $txn_id);
+                    } elseif ($transaction_type == "transaction") {
+                        update_details(['active_status' => 'cancelled'], ['order_id' => $order_id], 'order_items');
+                        $order_status = json_encode(array(array('cancelled', date("d-m-Y h:i:sa"))));
+                        update_details(['status' => $order_status], ['order_id' => $order_id], 'order_items', false);
+
+                        update_details(['active_status' => 'cancelled'], ['id' => $order_id], 'orders');
+                        $order_status = json_encode(array(array('cancelled', date("d-m-Y h:i:sa"))));
+                        update_details(['status' => $order_status], ['id' => $order_id], 'orders', false);
+                        $data['message'] = "Payment couldn't be processed!";
+                    }
+                    $this->transaction_model->update_transaction($data, $txn_id);
+                }
+            } else {
+                log_message('error', 'Phonepe transaction id not found in phonepe--> ' . var_export($request, true));
+            }
+        } else {
+            log_message('error', 'No Request Found--> ' . var_export($request, true));
+        }
+    }
 }

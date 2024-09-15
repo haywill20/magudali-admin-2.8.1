@@ -46,10 +46,16 @@ $(document).ready(function () {
             csrfName = res['csrfName'];
             csrfHash = res['csrfHash'];
             // const app = firebase.initializeApp(res);
+
             const app = initializeApp(res);
-            const messaging = getMessaging();
+            const messaging = getMessaging(app);
+
+
+            // const app = initializeApp(res);
+            // const messaging = getMessaging();
+            console.log(messaging);
             requestPermission();
-            getToken(messaging, { vapidKey: 'BG6paHesz0uCHcd4_ebOIcVh0MW3uIYQsvQ4OWyMHFhW9r6WEC4Ke4Nx1-XtUYj1ydswNkd5wmGUpE5jknpCmE8' }).then((currentToken) => {
+            getToken(messaging, { vapidKey: res.vap_id_Key }).then((currentToken) => {
                 console.log("Inside get Token");
                 // console.log(currentToken);
                 if (currentToken) {
@@ -88,7 +94,7 @@ $(document).ready(function () {
             //     });
 
             // function requestNotiPermi() {
-            //     messaging.requestPermission()
+            //      messaging.requestPermission()
             //         .then(function () {
             //             // get the token in the form of promise
             //             return messaging.getToken()
@@ -105,14 +111,11 @@ $(document).ready(function () {
             //         });
             // }
             var typing_timer = [];
-            // messaging.onMessage(function (payload) {
-                // console.log("payload",payload);
-            // });
-           onMessage(messaging, (payload) => {
-            console.log("in messaging ");
+            onMessage(messaging, (payload) => {
+                console.log("in messaging ");
                 var notification = payload.data;
                 console.log(notification);
-            
+
                 if (notification.type == 'typing') {
                     console.log("in typing");
                     var from_id_fmc = notification.from_id;
@@ -287,9 +290,6 @@ $(document).ready(function () {
 });
 
 
-
-
-
 $(document).ready(function () {
     getOnlineMemebers();
 });
@@ -315,7 +315,7 @@ function getOnlineMemebers() {
         dataTpe: 'json',
         success: function (result) {
             var data = JSON.parse(result);
-            console.log(data);
+            // console.log(data);
             $.each(data?.data?.members, function (key, val) {
 
                 var i = $("li").find("[data-id='" + val.id + "'][data-type='person'] i");
@@ -884,7 +884,7 @@ function newLoadChat(from_id, type, offset = '', limit = '', sort = '', order = 
                                 var chat_content = string.replace(/<[\/]{0,1}(p)[^><]*>/ig, "");
 
                                 var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
-                              
+
                                 $.chatCtrl('#mychatbox2', {
                                     text: chat_content,
                                     picture: picture,
@@ -984,7 +984,7 @@ function printChat(chats, id_of_user) {
             }
 
             picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
-           
+
 
             if (chats[i].typing != undefined) type = 'typing';
             $.chatCtrl('#mychatbox2', {
@@ -1053,7 +1053,7 @@ function switchChat(from_id, type) {
                 var html = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
 
                 $("#chat-avtar-main").html(html);
-                
+
 
                 if (person[0]?.is_online == 1) {
                     $("#chat_online_status").addClass("text-success");
@@ -1265,7 +1265,7 @@ $(document).on('click', '.delete_grp', function () {
             Swal.fire('Cancelled!', 'Your data is  safe.', 'error');
         }
     });
- 
+
 });
 
 $(document).on("click", "#modal-info-group-call", function () {

@@ -77,7 +77,7 @@ $config['url_suffix'] = '';
 | than english.
 |
 */
-$config['language']    = 'spanish';
+$config['language']    = 'english';
 
 /*
 |--------------------------------------------------------------------------
@@ -456,7 +456,7 @@ $config['csrf_token_name'] = 'ekart_security_token';
 $config['csrf_cookie_name'] = 'ekart_security_cookie';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = TRUE;
-$config['csrf_exclude_uris'] = array('admin/product/process_bulk_upload', 'admin/product/get_subcategory','admin/themes/switch','admin/setting/set-default-theme','admin/updater/upload_update_file','admin/webhook/spr_webhook', 'cart/pre-payment-setup', 'cart/validate-promo-code', 'my-account/get-address', 'cart/place-order', 'payment/[a-z_-]+', 'admin/category/add_category', 'admin/orders/update_orders', 'admin/product/update_product_order', 'admin/orders/delete_orders', 'admin/product/delete_product', 'app/v1/api/[a-z_-]+', 'delivery_boy/app/v1/api/[a-z_-]+', 'admin/app/v1/api/[a-z_-]+', 'admin/home/fetch_sales', 'seller/app/v1/api/[a-z_-]+', 'admin/webhook/[a-z_-]+','admin/media/upload');
+$config['csrf_exclude_uris'] = array('admin/product/process_bulk_upload', 'admin/product/get_subcategory','admin/themes/switch','admin/setting/set-default-theme','admin/updater/upload_update_file','admin/webhook/spr_webhook', 'cart/pre-payment-setup', 'cart/validate-promo-code', 'my-account/get-address', 'cart/place-order', 'payment/[a-z_-]+', 'admin/category/add_category', 'admin/orders/update_orders', 'admin/product/update_product_order', 'admin/orders/delete_orders', 'admin/product/delete_product', 'app/v1/api/[a-z_-]+', 'delivery_boy/app/v1/api/[a-z_-]+', 'admin/app/v1/api/[a-z_-]+', 'admin/home/fetch_sales', 'seller/app/v1/api/[a-z_-]+', 'admin/webhook/[a-z_-]+','admin/media/upload', 'admin/webhook/phonepe_webhook');
 
 /*
 |--------------------------------------------------------------------------

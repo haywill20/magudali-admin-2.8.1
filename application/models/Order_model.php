@@ -548,8 +548,8 @@ class Order_model extends CI_Model
             $data2 = str_replace($hashtag_application_name, $system_settings['app_name'], $hashtag);
             $message = output_escaping(trim($data2, '"'));
 
-            $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'Tienes un nuevo pedido ID #' . $last_order_id;
-            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'Hola ' . $system_settings['app_name'] . ' porfavor procesa el nuevo pedido con ID #' . $last_order_id;
+            $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'New order placed ID #' . $last_order_id;
+            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
 
             if (trim(strtolower($data['payment_method'])) != 'paypal' || trim(strtolower($data['payment_method'])) != 'stripe') {
                 $overall_order_data = array(
@@ -591,8 +591,7 @@ class Order_model extends CI_Model
                         'title' => $fcm_admin_subject,
                         'body' => $fcm_admin_msg,
                         'type' => "place_order",
-                        'content_available' => true,
-                        'channel_id' => 'channel_id_test_8'
+                        'content_available' => true
                     );
                     if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
                         send_notification($fcmMsg, $registrationIDs_chunks);
@@ -622,7 +621,7 @@ class Order_model extends CI_Model
                 ));
             }
 
-            // $this->cart_model->remove_from_cart($data);
+            $this->cart_model->remove_from_cart($data);
             $user_balance = fetch_details('users', ['id' => $data['user_id']], 'balance');
 
             $response['error'] = false;
@@ -643,7 +642,7 @@ class Order_model extends CI_Model
 
     public function get_order_details($where = NULL, $status = false, $seller_id = NULL)
     {
-        $res = $this->db->select('oi.*,ot.courier_agency,ot.tracking_id,ot.url,oi.otp as item_otp,a.name as user_name,oi.id as order_item_id,p.*,v.product_id,o.*,o.email as user_email,o.id as order_id,o.total as order_total,o.wallet_balance,oi.active_status as oi_active_status,u.email,u.username as uname,oi.status as order_status,p.id as product_id,p.pickup_location as pickup_location,p.slug as product_slug,p.sku as product_sku,v.sku, v.price as product_price ,p.name as pname,p.type,p.image as product_image,p.is_prices_inclusive_tax,(SELECT username FROM users db where db.id=oi.delivery_boy_id ) as delivery_boy , (SELECT mobile FROM addresses a where a.id=o.address_id ) as mobile_number ')
+        $res = $this->db->select('oi.*,ot.courier_agency,ot.tracking_id,ot.url,oi.otp as item_otp,a.name as user_name,oi.id as order_item_id,p.*,v.product_id,o.*,o.email as user_email,o.id as order_id,o.total as order_total,o.wallet_balance,oi.active_status as oi_active_status,u.email,u.username as uname, u.country_code as country_code,oi.status as order_status,p.id as product_id,p.pickup_location as pickup_location,p.slug as product_slug,p.sku as product_sku,v.sku, v.price as product_price ,p.name as pname,p.type,p.image as product_image,p.is_prices_inclusive_tax,(SELECT username FROM users db where db.id=oi.delivery_boy_id ) as delivery_boy , (SELECT mobile FROM addresses a where a.id=o.address_id ) as mobile_number ')
             ->join('product_variants v ', ' oi.product_variant_id = v.id', 'left')
             ->join('products p ', ' p.id = v.product_id ', 'left')
             ->join('users u ', ' u.id = oi.user_id', 'left')
@@ -754,7 +753,7 @@ class Order_model extends CI_Model
             $total = $row['total'];
         }
 
-        $search_res = $this->db->select(' o.* , u.username, db.username as delivery_boy')
+        $search_res = $this->db->select(' o.* , u.username , u.country_code as country_code, db.username as delivery_boy')
             ->join(' `users` u', 'u.id= o.user_id', 'left')
             ->join(' `order_items` oi', 'oi.order_id= o.id', 'left')
             ->join('product_variants v ', ' oi.product_variant_id = v.id', 'left')
@@ -821,6 +820,9 @@ class Order_model extends CI_Model
         $currency_symbol = get_settings('currency');
         foreach ($user_details as $row) {
 
+            // echo "<pre>";
+            // print_r($row);
+
             if (!empty($row['items'])) {
                 $items = $row['items'];
                 $items1 = '';
@@ -877,6 +879,7 @@ class Order_model extends CI_Model
                     $operate = '<a href=' . base_url('admin/orders/edit_orders') . '?edit_id=' . $row['id'] . ' class="btn action-btn btn-primary btn-xs ml-1 mr-1 mb-1" title="View" ><i class="fa fa-eye"></i></a>';
                     $operate .= '<a href="javascript:void(0)" class="delete-orders btn btn-danger action-btn btn-xs ml-1 mr-1 mb-1" data-id=' . $row['id'] . ' title="Delete" ><i class="fa fa-trash"></i></a>';
                     $operate .= '<a href="' . base_url() . 'admin/invoice?edit_id=' . $row['id'] . '" class="btn action-btn btn-info btn-xs  ml-1 mb-1" title="Invoice" ><i class="fa fa-file"></i></a>';
+                    $operate .= '<a href="https://api.whatsapp.com/send?phone='.$row['country_code'] .$tempRow['mobile'].'&amp;text=Hello, '. $row['items'][0]['uname'].' Your order with ID : '.$row['items'][0]['order_id'] .' and is '.$row['items'][0]['active_status'].'. Please take a note of it. If you have further queries feel free to contact us. Thank you." target="_blank" title="Send Whatsapp Notification" class="btn btn-xs ml-1 mr-1 mb-1 btn-success"><i class="fa fa-phone-alt" style="font-size: 16px;color:white"></i></a>';
                     if ($row['items'][0]['type'] != 'digital_product') {
                         $operate .= ' <a href="javascript:void(0)" class="edit_order_tracking btn action-btn btn-success btn-xs ml-1 mr-1 mb-1" title="Order Tracking" data-order_id="' . $row['id'] . '"  data-target="#order-tracking-modal" data-toggle="modal"><i class="fa fa-map-marker-alt"></i></a>';
                     }

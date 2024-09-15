@@ -500,6 +500,10 @@ search_products.on("select2:select", function (e) {
                     $('#modal-product-tags').html('');
 
                     $.getJSON(base_url + 'products/get-details/' + modal.$element.data('dataProductId'), function (data) {
+                        
+                        var statistics = $('.item-view').data("statistics");
+                        console.log(data);
+                        console.log(statistics);
                         var total_images = 0;
                         $('#modal-add-to-cart-button').attr('data-product-id', data.id);
                         $('#modal-add-to-cart-button').attr('data-product-slug', data.slug);
@@ -755,9 +759,9 @@ search_products.on("select2:select", function (e) {
 
                                     is_image = 1;
 
-                                    variant_attributes += '<style> .product-page-details .btn-group>.active { color: #000000; border: 1px solid black;}</style>' + '<label class="btn text-center bg-transparent">' +
+                                    variant_attributes += '<style> .product-page-details .btn-group>.active { color: #000000; border: 1px solid black;}</style>' + '<label class="btn text-center bg-transparent h-10 w-10">' +
 
-                                        '<img class="swatche-image" src="' + swatche_values[j] + '">' +
+                                        '<img class="swatche-image h-10 w-10" src="' + swatche_values[j] + '">' +
 
                                         '<input type="radio" name="' + e.attr_name + '" value="' + id + '" class="modal-product-attributes" autocomplete="off"><br>' +
 
@@ -1018,12 +1022,15 @@ search_products.on("select2:select", function (e) {
                     icon: "error",
                     title: "Please select variant"
                 })
-            }), $(".auth-modal").on("click", "header a", function (e) {
-                e.preventDefault(), window.signingIn = !0;
-                var t = $(this).index();
-                $(this).addClass("active").siblings("a").removeClass("active"), $(this).parents("div").find("section").eq(t).removeClass("hide").siblings("section").addClass("hide"), 0 === $(this).index() ? $(".auth-modal .iziModal-content .icon-close").css("background", "#ddd") : $(".auth-modal .iziModal-content .icon-close").attr("style", "")
-            }),
+            })
+        $(".auth-modal").on("click", "header a", function (e) {
+            e.preventDefault(), window.signingIn = !0;
+            var t = $(this).index();
+            $(this).addClass("active").siblings("a").removeClass("active"), $(this).parents("div").find("section").eq(t).removeClass("hide").siblings("section").addClass("hide"), 0 === $(this).index() ? $(".auth-modal .iziModal-content .icon-close").css("background", "#ddd") : $(".auth-modal .iziModal-content .icon-close").attr("style", "")
+        })
 
+        const listnerElement = document.getElementById("modal-signup")
+        if (listnerElement != null) {
             document.getElementById("modal-signup").addEventListener("show.bs.modal", () => {
                 console.log("show instance method called!"),
                     //  closeNav(), 
@@ -1065,6 +1072,7 @@ search_products.on("select2:select", function (e) {
                     r(), $.trim(e.val()) && (e.intlTelInput("isValidNumber") ? a.removeClass("hide") : (e.addClass("error"), t.removeClass("hide")))
                 }), e.on("keyup change", r)
             })
+        }
 
         $("#quick-view").on("click", ".submit", function (e) {
             e.preventDefault();
@@ -1800,9 +1808,9 @@ function transaction_query_params(e) {
     }
 }
 
-function customer_wallet_query_params(e) {
+function customer_wallet_query_paramss(e) {
     return {
-        transaction_type: "wallet",
+        type: "wallet",
         limit: e.limit,
         sort: e.sort,
         order: e.order,
@@ -1976,8 +1984,8 @@ function customer_wallet_query_params(e) {
                         var r = void 0 !== a.product_variants.variant_values && null != a.product_variants.variant_values ? a.product_variants.variant_values : "",
                             s = a.special_price < a.price && 0 != a.special_price ? a.special_price : a.price;
                         t += '<div class="shopping-cart"><div class="shopping-cart-item d-flex justify-content-between mb-4" title = " ' + a.name + '"><div class="d-flex flex-row gap-3"><figure class="rounded cart-img"><a href="' + base_url + 'products/details/' + a.slug + '"><img src="' + base_url + a.image + '" alt="Not Found" style="object-fit: contain;"></a></figure><div class="w-100"><a href="' + base_url + 'products/details/' + a.slug + '"><h3 class="post-title fs-16 lh-xs mb-1"  title = " ' + a.name + '">' + a.name + "</h3></a><span>" + r + '</span><p class="price"><ins><span class="amount">' + currency + " " + s + '</span></ins></p><div class="product-pricing d-flex py-2 px-1 w-100"><div class="align-items-center d-flex p-2 w-15"><input type="number" name="header_qty" class="form-control d-flex align-items-center" value="' + n + '" data-id="' + a.product_variant_id + '" data-price="' + a.price + '" min="' + n + '" max="' + c + '" step="' + l + '" ></div><div class="product-line-price align-self-center px-1">' + currency + (a.qty * s) + '</div></div></div></div><div class="product-sm-removal"><button class="remove-product btn btn-sm btn-danger rounded-1 p-1 py-0" data-id="' + a.product_variant_id + '"><i class="uil uil-trash-alt"></i></button></div></div></div>'
-                    }), 
-                    $("#cart-item-sidebar").html(t)
+                    }),
+                        $("#cart-item-sidebar").html(t)
                 } else {
                     if (0 == is_loggedin) {
                         Toast.fire({
@@ -3504,5 +3512,45 @@ $(document).ready(function () {
                 // Handle error response
             }
         });
+    });
+});
+$(document).ready(function () {
+    // Submit chat message to backend on form submit
+    $(".reorder-btn").on("click", (event) => {
+        const variants = ($(event.target).data("variants")) + ""
+        const qty = ($(event.target).data("quantity")) + ""
+        console.log(variants)
+        console.log(qty)
+        let html = $(event.target).html()
+        $.ajax({
+            type: "POST",
+            url: base_url + "cart/manage",
+            data: {
+                product_variant_id: variants,
+                qty: qty,
+                is_saved_for_later: false,
+                [csrfName]: csrfHash
+            },
+            dataType: "json",
+            beforeSend: function () {
+                $(event.target).text("Please Wait").attr("disabled", true)
+            },
+            success: function (res) {
+                $(event.target).text(html).attr("disabled", false)
+                window.location.href = base_url + "cart/checkout"
+            }
+        })
+
+    })
+
+});
+
+$(document).ready(function () {
+    $('.select2-container').click(function (event) {
+        event.preventDefault();
+        if ($('#offcanvas-search').hasClass('show')) {
+            console.log('in offcanvas search ');
+            $('.select2-search--dropdown').addClass('mt-n10');
+        }
     });
 });

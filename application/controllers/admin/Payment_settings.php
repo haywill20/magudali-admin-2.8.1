@@ -115,6 +115,13 @@ class Payment_settings extends CI_Controller
                 $this->form_validation->set_rules('instamojo_client_secret', 'Instamojo client secret', 'trim|required|xss_clean');
                
             }
+            if (isset($_POST['phonepe_payment_method'])) {
+                $this->form_validation->set_rules('phonepe_payment_mode', 'phonepe Payment Mode', 'trim|required|xss_clean');
+                $this->form_validation->set_rules('phonepe_marchant_id', 'phonepe marchant id', 'trim|required|xss_clean');
+                $this->form_validation->set_rules('phonepe_salt_key', 'phonepe salt key', 'trim|required|xss_clean');
+                $this->form_validation->set_rules('phonepe_salt_index', 'phonepe salt index', 'trim|required|xss_clean');
+                $this->form_validation->set_rules('phonepe_app_id', 'phonepe app id', 'trim|required|xss_clean');
+            }
             if (isset($_POST['direct_bank_transfer'])) {
                 $this->form_validation->set_rules('account_name', 'Account Name', 'trim|required|xss_clean');
                 $this->form_validation->set_rules('account_number', 'Account Number', 'trim|required|xss_clean');

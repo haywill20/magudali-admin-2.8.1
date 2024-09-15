@@ -324,7 +324,7 @@ function getOnlineMemebers() {
         success: function (result) {
             var data = JSON.parse(result);
 
-            $.each(data.data.members, function (key, val) {
+            $.each(data?.data?.members, function (key, val) {
 
                 var i = $("li").find("[data-id='" + val.id + "'][data-type='person'] i");
                 if (val.is_online == 1) {
@@ -354,20 +354,20 @@ function getOnlineMemebers() {
 
             });
 
-            $.each(data.data.groups, function (key, val) {
+            // $.each(data.data.groups, function (key, val) {
 
-                if (val.is_read != 0) {
-                    if (window_is_focused == false) {
-                        newLoadChat(val.group_id, 'group');
-                    }
-                    var i = $("li").find("[data-id='" + val.group_id + "'][data-type='group']");
-                    i.addClass("new-msg-rcv");
-                    i.find(".badge-group-chat").remove();
-                    i.append('<div class="badge-chat badge-group-chat">New</div>');
-                }
+            //     if (val.is_read != 0) {
+            //         if (window_is_focused == false) {
+            //             newLoadChat(val.group_id, 'group');
+            //         }
+            //         var i = $("li").find("[data-id='" + val.group_id + "'][data-type='group']");
+            //         i.addClass("new-msg-rcv");
+            //         i.find(".badge-group-chat").remove();
+            //         i.append('<div class="badge-chat badge-group-chat">New</div>');
+            //     }
 
 
-            });
+            // });
 
             setTimeout(getOnlineMemebers, 10000);
 

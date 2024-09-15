@@ -7782,3 +7782,41 @@ $(document).ready(function () {
         });
     });
 });
+
+$(document).ready(function () {
+    // Submit chat message to backend on form submit
+    $(".reorder-btn").on("click", (event) => {
+        const variants = ($(event.target).data("variants")) + ""
+        const qty = ($(event.target).data("quantity")) + ""
+        console.log(variants)
+        console.log(qty)
+        let html = $(event.target).html()
+        $.ajax({
+            type: "POST",
+            url: base_url + "cart/manage",
+            data: {
+                product_variant_id: variants,
+                qty: qty,
+                is_saved_for_later: false,
+                [csrfName]: csrfHash
+            },
+            dataType: "json",
+            beforeSend: function () {
+                $(event.target).text("Please Wait").attr("disabled", true)
+            },
+            success: function (res) {
+                $(event.target).text(html).attr("disabled", false)
+                window.location.href = base_url + "cart/checkout"
+            }
+        })
+
+    })
+
+});
+
+$('.slider').slick({
+  vertical: true,
+  autoplay: true,
+  autoplaySpeed: 3000,
+  speed: 300
+});

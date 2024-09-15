@@ -41,6 +41,9 @@ class Transaction_model extends CI_Model
         $where = [];
         if (isset($_GET['transaction_type']))
             $where = ['transactions.transaction_type' => $_GET['transaction_type']];
+        
+        // if (isset($_GET['type']))
+        //     $where = ['transactions.type' => $_GET['type']];
 
         if (isset($_GET['offset']))
             $offset = $_GET['offset'];
@@ -58,7 +61,7 @@ class Transaction_model extends CI_Model
 
         if (isset($_GET['search']) and $_GET['search'] != '') {
             $search = $_GET['search'];
-            $multipleWhere = ['`transactions.id`' => $search, '`transactions.amount`' => $search, '`transactions.date_created`' => $search, 'users.username' => $search, 'users.mobile' => $search, 'users.email' => $search, 'type' => $search, 'transactions.status' => $search];
+            $multipleWhere = ['`transactions.id`' => $search, '`transactions.amount`' => $search, '`transactions.date_created`' => $search, 'users.username' => $search, 'users.mobile' => $search, 'users.email' => $search, 'transactions.type' => $search, 'transactions.status' => $search, 'transactions.txn_id' => $search];
         }
         if (isset($_GET['user_id']) && !empty($_GET['user_id'])) {
             $where = ['users.id' => $_GET['user_id']];
@@ -71,7 +74,30 @@ class Transaction_model extends CI_Model
             $group_id_res = fetch_details("groups", ['name' => $_GET['user_type']], "id");
             $group_id = $group_id_res[0]['id'];
         }
-        $count_res = $this->db->select(' COUNT(transactions.id) as `total` ')->join('users', ' transactions.user_id = users.id', 'left')->join('users_groups ug', 'ug.user_id = users.id')->where('ug.group_id = ' . $group_id);
+        // $count_res = $this->db->select(' COUNT(transactions.id) as `total` ')->join('users', ' transactions.user_id = users.id', 'left')->join('users_groups ug', 'ug.user_id = users.id')->where('ug.group_id = ' . $group_id);
+
+        // if (isset($multipleWhere) && !empty($multipleWhere)) {
+        //     $this->db->group_Start();
+        //     $count_res->or_like($multipleWhere);
+        //     $this->db->group_End();
+        // }
+        // if (isset($where) && !empty($where)) {
+        //     $count_res->where($where);
+        // }
+        // if (isset($user_where) && !empty($user_where)) {
+        //     $count_res->where($user_where);
+        // }
+        // if (isset($group_id) && !empty($group_id) && $group_id == 2) {
+        //     $count_res->or_where('ug.group_id = 1');
+        // }
+
+        // $txn_count = $count_res->get('transactions')->result_array();
+        // // print_R(count($txn_count));
+
+        //     $total = $txn_count[0]['total'];
+
+
+        $count_res = $this->db->select(' COUNT(transactions.id) as `total`  ');
 
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $this->db->group_Start();
@@ -87,14 +113,14 @@ class Transaction_model extends CI_Model
         if (isset($group_id) && !empty($group_id) && $group_id == 2) {
             $count_res->or_where('ug.group_id = 1');
         }
+        $txn_count = $count_res->join('users', ' transactions.user_id = users.id', 'left')->join('users_groups ug', 'ug.user_id = users.id')->where('ug.group_id = ' . $group_id)->get('transactions')->result_array();
 
-        $txn_count = $count_res->get('transactions')->result_array();
-
-        foreach ($txn_count as $row) {
-            $total = $row['total'];
-        }
+        $total = $txn_count[0]['total'];
+        // ---------------------------------------
+        
 
         $search_res = $this->db->select(' transactions.*,users.username as name  ');
+
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $this->db->group_Start();
             $search_res->or_like($multipleWhere);
@@ -111,7 +137,8 @@ class Transaction_model extends CI_Model
         }
         $search_res->join('users', ' transactions.user_id = users.id', 'left')->join('users_groups ug', 'ug.user_id = users.id')->where('ug.group_id = ' . $group_id);
         $txn_search_res = $search_res->order_by($sort, $order)->limit($limit, $offset)->get('transactions')->result_array();
-
+        // print_R(count($txn_search_res));
+       
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
@@ -119,6 +146,8 @@ class Transaction_model extends CI_Model
 
         foreach ($txn_search_res as $row) {
             $row = output_escaping($row);
+            // echo "<pre>";
+            // print_r($row);
             if ($row['type'] == 'bank_transfer') {
                 $operate = ' <a href="javascript:void(0)" class="edit_transaction action-btn btn btn-success btn-xs mr-1 mb-1" title="Edit" data-id="' . $row['id'] . '" data-txn_id="' . $row['txn_id'] . '" data-status="' . $row['status'] . '" data-message="' . $row['message'] . '"  data-target="#transaction_modal" data-toggle="modal"><i class="fa fa-pen"></i></a>';
             } else {

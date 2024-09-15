@@ -50,6 +50,8 @@ class Promo_code_model extends CI_Model
         }
 
         $search_res = $this->db->select(' p.`id` as id , p.`promo_code`, p.`image` , p.`message` , p.`start_date` , p.`end_date`, p.`discount` , p.`repeat_usage` ,p.`minimum_order_amount` ,p.`no_of_users` ,p.`discount_type` , p.`max_discount_amount`, p.`no_of_repeat_usage` , p.`status`,p.`is_cashback`,p.`list_promocode`');
+        // echo $this->db->last_query();
+
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $search_res->or_like($multipleWhere);
         }
@@ -58,8 +60,9 @@ class Promo_code_model extends CI_Model
         }
 
         $sc_search_res = $search_res->order_by($sort, "desc")->limit($limit, $offset)->get('promo_codes p')->result_array();
+        // print_r($sc_search_res);
         $bulkData = array();
-        $bulkData['total'] = $total;
+        $bulkData['total'] = count($sc_search_res);
         $rows = array();
         $tempRow = array();
 

@@ -25,17 +25,23 @@ class Home extends CI_Controller
     }
 
     public function index()
-    {   
-        
+    {
+
         $this->data['main_page'] = 'home';
         $this->data['title'] = 'Home | ' . $this->data['web_settings']['site_title'];
         $this->data['keywords'] = 'Home, ' . $this->data['web_settings']['meta_keywords'];
         $this->data['description'] = 'Home | ' . $this->data['web_settings']['meta_description'];
 
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $limit =  12;
         $offset =  0;
@@ -68,18 +74,18 @@ class Home extends CI_Controller
                     $filters['product_type'] = (isset($sections[$i]['product_type'])) ? $sections[$i]['product_type'] : null;
                 }
 
-                // $theme = fetch_details('themes', ['is_default' => 1], 'name');
+                $theme = fetch_details('themes', ['is_default' => 1], 'name');
                 // print_r($theme);
 
-                // if (isset($theme[0]['name']) && strtolower($theme[0]['name']) == 'modern') {
-                //     if ($sections[$i]['style'] == "default" || $sections[$i]['style'] == "style_3") {
-                //         $limit = 4;
-                //     } elseif ($sections[$i]['style'] == "style_1" || $sections[$i]['style'] == "style_2" || $sections[$i]['style'] == "style_4") {
-                //         $limit = 8;
-                //     } else {
-                //         $limit = null;
-                //     }
-                // } else {
+                if (isset($theme[0]['name']) && strtolower($theme[0]['name']) == 'modern') {
+                    if ($sections[$i]['style'] == "default" || $sections[$i]['style'] == "style_3") {
+                        $limit = 4;
+                    } elseif ($sections[$i]['style'] == "style_1" || $sections[$i]['style'] == "style_2" || $sections[$i]['style'] == "style_4") {
+                        $limit = 8;
+                    } else {
+                        $limit = null;
+                    }
+                } else {
                     if ($sections[$i]['style'] == "default") {
                         $limit = 10;
                     } elseif ($sections[$i]['style'] == "style_1" || $sections[$i]['style'] == "style_2") {
@@ -89,7 +95,7 @@ class Home extends CI_Controller
                     } else {
                         $limit = null;
                     }
-                // }
+                }
 
                 $products = fetch_product($user_id, (isset($filters)) ? $filters : null, (isset($product_ids)) ? $product_ids : null, $product_categories, $limit, null, null, null);
                 // print_R($products);
@@ -124,9 +130,15 @@ class Home extends CI_Controller
     public function categories()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $limit =  50;
         $offset =  0;
@@ -144,15 +156,21 @@ class Home extends CI_Controller
     public function brands()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
         }
-        
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
+        }
+
         $offset =  0;
         $sort = 'row_order';
         $order =  'ASC';
-        $brands = $this->brand_model->get_brands('', $limit=NULL, $offset, $sort, $order, 'false');
+        $brands = $this->brand_model->get_brands('', $limit = NULL, $offset, $sort, $order, 'false');
 
         $limit = ($this->input->get('per-page')) ? $this->input->get('per-page', true) : 16;
 
@@ -291,9 +309,15 @@ class Home extends CI_Controller
     public function checkout()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $this->data['main_page'] = 'checkout';
         $this->data['title'] = 'Checkout | ' . $this->data['web_settings']['site_title'];
@@ -305,9 +329,15 @@ class Home extends CI_Controller
     public function terms_and_conditions()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $this->data['main_page'] = 'terms-and-conditions';
         $this->data['title'] = 'Terms & Conditions | ' . $this->data['web_settings']['site_title'];
@@ -321,9 +351,15 @@ class Home extends CI_Controller
     public function privacy_policy()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $this->data['main_page'] = 'privacy-policy';
         $this->data['title'] = 'Privacy Policy | ' . $this->data['web_settings']['site_title'];
@@ -335,6 +371,17 @@ class Home extends CI_Controller
     }
     public function shipping_policy()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
+        }
         $this->data['main_page'] = 'shipping-policy';
         $this->data['title'] = 'Shipping Policy | ' . $this->data['web_settings']['site_title'];
         $this->data['keywords'] = 'Shipping Policy, ' . $this->data['web_settings']['meta_keywords'];
@@ -346,9 +393,15 @@ class Home extends CI_Controller
     public function return_policy()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $this->data['main_page'] = 'return-policy';
         $this->data['title'] = 'Return Policy | ' . $this->data['web_settings']['site_title'];
@@ -361,9 +414,15 @@ class Home extends CI_Controller
     public function about_us()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $this->data['main_page'] = 'about-us';
         $this->data['title'] = 'About US | ' . $this->data['web_settings']['site_title'];
@@ -377,9 +436,15 @@ class Home extends CI_Controller
     public function contact_us()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $this->data['main_page'] = 'contact-us';
         $this->data['title'] = 'Contact US | ' . $this->data['web_settings']['site_title'];
@@ -394,9 +459,15 @@ class Home extends CI_Controller
     public function faq()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $this->data['main_page'] = 'faq';
         $this->data['title'] = 'FAQ | ' . $this->data['web_settings']['site_title'];
@@ -410,9 +481,15 @@ class Home extends CI_Controller
     public function blogs()
     {
         $web_doctor_brown = get_settings('web_doctor_brown', true);
+        $system_settings = get_settings('system_settings', true);
+
         if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
             /* redirect him to the page where he can enter the purchase code */
             redirect(base_url("admin/purchase-code"));
+        }
+        if ((isset($system_settings['is_web_under_maintenance']) && $system_settings['is_web_under_maintenance'] == 1)) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("maintenance"));
         }
         $this->data['main_page'] = 'blogs';
         $this->data['title'] = 'Blogs | ' . $this->data['web_settings']['site_title'];

@@ -148,7 +148,7 @@ function fetch_details($table, $where = NULL, $fields = '*', $limit = '', $offse
     if (!empty($order) && !empty($sort)) {
         $t->db->order_by($sort, $order);
     }
-    
+
     $res = $t->db->get($table)->result_array();
     return $res;
 }
@@ -501,6 +501,8 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             $product[$i]['tax_percentage'] = (isset($product[$i]['tax_percentage']) && intval($product[$i]['tax_percentage']) > 0) ? $product[$i]['tax_percentage'] : '0';
             $product[$i]['tax_id'] = ((isset($product[$i]['tax_id']) && intval($product[$i]['tax_id']) > 0) && $product[$i]['tax_id'] != "") ? $product[$i]['tax_id'] : '0';
             $product[$i]['attributes'] = get_attribute_values_by_pid($product[$i]['id']);
+            // print_r($product[$i]['attributes']);
+            // die;
             $product[$i]['variants'] = get_variants_values_by_pid($product[$i]['id']);
             $variants =   get_variants_values_by_pid($product[$i]['id']);
             $total_stock = 0;
@@ -579,7 +581,7 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
             if ($is_deliverable != NULL) {
                 $zipcode = fetch_details('zipcodes', ['zipcode' => $is_deliverable], 'id');
                 if (!empty($zipcode)) {
-                    $product[$i]['is_deliverable'] = is_product_delivarable($type = 'zipcode', $zipcode[0]['id'], $product[$i]['id'],);
+                    $product[$i]['is_deliverable'] = is_product_delivarable($type = 'zipcode', $zipcode[0]['id'], $product[$i]['id']);
                 } else {
                     $product[$i]['is_deliverable'] = false;
                 }
@@ -785,7 +787,6 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
         $attribute_values_ids = implode(",", $attribute_values_ids);
         $attr_value_ids = array_filter(array_unique(explode(',', $attribute_values_ids)));
     }
-
     $response['min_price'] = $min_price;
     $response['max_price'] = $max_price;
     $response['product'] = $product;
@@ -796,6 +797,9 @@ function fetch_product($user_id = NULL, $filter = NULL, $id = NULL, $category_id
     } else {
         $response['filters'] = [];
     }
+    // print_r($response['filters']);
+    // print_r($response);
+    // die;
     return $response;
 }
 
@@ -1073,17 +1077,13 @@ function get_attribute_values_by_pid($id)
 {
     $t = &get_instance();
     $swatche_type = $swatche_values1 =  array();
-    $attribute_values = $t->db->select("
-    group_concat(`av`.`id` ORDER BY `av`.`id` ASC) as ids,
-    group_concat(' ',`av`.`value` ORDER BY `av`.`id` ASC) as value ,
-    `a`.`name` as attr_name, a.name,
-    GROUP_CONCAT(av.swatche_type ORDER BY av.id ASC ) as swatche_type ,
-    GROUP_CONCAT(av.swatche_value ORDER BY av.id ASC) as swatche_value
-")
+    $attribute_values = $t->db->select(" group_concat(`av`.`id` ORDER BY `av`.`id` ASC) as ids,group_concat(' ', `av`.`value`  ORDER BY `av`.`id` ASC ) as value ,`a`.`name` as attr_name, a.name, GROUP_CONCAT(av.swatche_type ORDER BY av.id ASC ) as swatche_type , GROUP_CONCAT(av.swatche_value  ORDER BY av.id ASC) as swatche_value")
         ->join('attribute_values av ', 'FIND_IN_SET(av.id, pa.attribute_value_ids ) > 0', 'inner')
         ->join('attributes a', 'a.id = av.attribute_id', 'inner')
         ->where('pa.product_id', $id)->group_by('`a`.`name`')->get('product_attributes pa')->result_array();
     if (!empty($attribute_values)) {
+            // print_r($attribute_values);
+            // die;
         for ($i = 0; $i < count($attribute_values); $i++) {
             $swatche_type = array();
             $swatche_values1 = array();
@@ -1105,8 +1105,6 @@ function get_attribute_values_by_pid($id)
     }
     return $attribute_values;
 }
-
-
 
 function get_attribute_values_by_id($id)
 {
@@ -1137,6 +1135,8 @@ function get_attribute_values_by_id($id)
             $attribute_values[$i] = output_escaping($attribute_values[$i]);
         }
     }
+    // print_r($attribute_values);
+    // die;
     return $attribute_values;
 }
 
@@ -2279,7 +2279,7 @@ function fetch_orders($order_id = NULL, $user_id = NULL, $status = NULL, $delive
         $total = $row['total'];
     }
 
-    $search_res = $t->db->select(' o.*, u.username,u.country_code, p.name,p.type,p.download_allowed,p.pickup_location,a.name as order_recipient_person,pv.special_price,pv.price,oc.delivery_charge as seller_delivery_charge,oc.promo_discount as seller_promo_dicount')
+    $search_res = $t->db->select(' o.*, u.username,u.country_code, u.email as email, p.name,p.type,p.download_allowed,p.pickup_location,a.name as order_recipient_person,pv.special_price,pv.price,oc.delivery_charge as seller_delivery_charge,oc.promo_discount as seller_promo_dicount')
         ->join(' `users` u', 'u.id= o.user_id', 'left')
         ->join(' `order_items` oi', 'o.id= oi.order_id', 'left')
         ->join('product_variants pv', 'pv.id=oi.product_variant_id', 'left')
@@ -3486,6 +3486,39 @@ function verify_payment_transaction($txn_id, $payment_method, $additional_data =
             return "stripe is supplied";
             break;
 
+        case 'phonepe':
+            $CI->load->library("phonepe");
+            $transaction = $CI->phonepe->check_status($txn_id);
+            $status = $transaction['code'];
+            if (!empty($transaction)) {
+                if ($status == 'PAYMENT_SUCCESS') {
+                    $response['error'] = false;
+                    $response['message'] = "Payment has been completed successfully";
+                    $response['amount'] = $transaction['data']['amount'];
+                    $response['data'] = $transaction;
+                    return $response;
+                } elseif ($status == "BAD_REQUEST"  || $status == "AUTHORIZATION_FAILED" || $status == "PAYMENT_ERROR" || $status == "TRANSACTION_NOT_FOUND" || $status == "PAYMENT_DECLINED" || $status == "TIMED_OUT") {
+                    $response['error'] = true;
+                    $response['message'] = $transaction['message'];
+                    $response['amount'] = (isset($transaction['data']['amount'])) ? $transaction['data']['amount'] : 0;
+                    $response['data'] = $transaction;
+                    return $response;
+                } else {
+                    $response['error'] = true;
+                    $response['message'] = "Internal error occurred please try again later!";
+                    $response['amount'] = (isset($transaction['data']['amount'])) ? $transaction['data']['amount'] : 0;;
+                    $response['data'] = $transaction;
+                    return $response;
+                }
+            } else {
+                $response['error'] = true;
+                $response['message'] = "Payment not found by the transaction ID!";
+                $response['amount'] = 0;
+                $response['data'] = [];
+                return $response;
+            }
+            break;
+
 
         case 'paytm':
             $CI->load->library('paytm');
@@ -4418,9 +4451,6 @@ function process_refund_old($id, $status, $type = 'order_items')
 function get_sliders($id = '', $type = '', $type_id = '')
 {
     $ci = &get_instance();
-
-    // Construir la consulta con filtros y ordenamiento por 'id' de mayor a menor
-    $ci->db->from('sliders');
     if (!empty($id)) {
         $ci->db->where('id', $id);
     }
@@ -4430,14 +4460,9 @@ function get_sliders($id = '', $type = '', $type_id = '')
     if (!empty($type_id)) {
         $ci->db->where('type_id', $type_id);
     }
-    $ci->db->order_by('id', 'DESC'); // Ordenar por 'id' de mayor a menor
-    $query = $ci->db->get();
-
-    // Obtener los resultados como un array de arrays
-    $res = $query->result_array();
-
-    // Procesar los resultados para agregar los enlaces según el tipo de slider (opcional)
-    foreach ($res as &$d) {
+    $res = $ci->db->get('sliders')->result_array();
+    $res = array_map(function ($d) {
+        $ci = &get_instance();
         $d['link'] = '';
         if (!empty($d['type'])) {
             if ($d['type'] == "categories") {
@@ -4452,11 +4477,10 @@ function get_sliders($id = '', $type = '', $type_id = '')
                 }
             }
         }
-    }
-
+        return $d;
+    }, $res);
     return $res;
 }
-
 
 function get_offers($id = '', $type = '', $type_id = '')
 {
@@ -4859,15 +4883,60 @@ function update_cash_received($amount, $delivery_boy_id, $action)
 
 function word_limit($string, $length = WORD_LIMIT, $dots = "...")
 {
-    return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+    $split = explode(" ", $string);
+    $newLength = 0;
+    $words = [];
+    foreach ($split as $word) {
+        $newLength += strlen($word);
+        array_push($words, $word);
+        if ($newLength >= $length) {
+            break;
+        }
+    }
+    $newstr = implode(" ", $words);
+    if (strlen($newstr) < $string) {
+        $newstr .= $dots;
+    }
+    return $newstr;
+    // return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
 }
 function short_description_word_limit($string, $length = SHORT_DESCRIPTION_WORD_LIMIT, $dots = "...")
 {
-    return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+    $split = explode(" ", $string);
+    $newLength = 0;
+    $words = [];
+    foreach ($split as $word) {
+        $newLength += strlen($word);
+        array_push($words, $word);
+        if ($newLength >= $length) {
+            break;
+        }
+    }
+    $newstr = implode(" ", $words);
+    if (strlen($newstr) < $string) {
+        $newstr .= $dots;
+    }
+    return $newstr;
+    // return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
 }
 function description_word_limit($string, $length = DESCRIPTION_WORD_LIMIT, $dots = "...")
 {
-    return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
+    $split = explode(" ", $string);
+    $newLength = 0;
+    $words = [];
+    foreach ($split as $word) {
+        $newLength += strlen($word);
+        array_push($words, $word);
+        if ($newLength >= $length) {
+            break;
+        }
+    }
+    $newstr = implode(" ", $words);
+    if (strlen($newstr) < $string) {
+        $newstr .= $dots;
+    }
+    return $newstr;
+    // return (strlen($string) > $length) ? substr($string, 0, $length - strlen($dots)) . $dots : $string;
 }
 function calculate_tax_inclusive($original_cost, $tax)
 {
@@ -5063,6 +5132,8 @@ function check_parcels_deliveriblity($parcels, $user_pincode)
                 $check_deliveribility_with_cod = $t->shiprocket->check_serviceability($availibility_data_with_cod);
                 $shiprocket_data_with_cod = shiprocket_recomended_data($check_deliveribility_with_cod);
 
+                $data = [];
+               
                 $data[$seller_id][$pickup_location]['parcel_weight'] = $parcel_weight['weight'];
                 $data[$seller_id][$pickup_location]['pickup_availability'] = $shiprocket_data['pickup_availability'];
                 $data[$seller_id][$pickup_location]['courier_name'] = $shiprocket_data['courier_name'];
@@ -5417,4 +5488,45 @@ function checkOTPExpiration($otpTime)
             "message" => "Error: Session has expired."
         ];
     }
+}
+
+function get_statistics($product_varient_id)
+{
+
+    $t = &get_instance();
+    $dateString = date('Y-m-d H:i:s');
+
+    $query = $t->db->query('
+    SELECT
+        (SELECT COUNT(id) FROM order_items 
+         WHERE product_variant_id = ? 
+         AND DATE(date_added) >= DATE(NOW()) - INTERVAL 31 DAY) AS total_ordered,
+        (SELECT COUNT(f.id) FROM favorites f 
+         LEFT JOIN product_variants pv ON f.product_id = pv.product_id 
+         WHERE pv.id = ?) AS total_favorites,
+        (SELECT COUNT(id) FROM cart 
+         WHERE product_variant_id = ?) AS total_in_cart
+', [$product_varient_id, $product_varient_id, $product_varient_id]);
+
+    $result = $query->row_array();
+
+    // Round to the nearest multiple of 100
+    $totalOrdered = round($result['total_ordered'], -1);
+    $totalFavorites = round($result['total_favorites'], -1);
+    $totalInCart = round($result['total_in_cart'], -1);
+
+    // Add a "+" sign if needed
+    $totalOrdered = ($totalOrdered > 10) ? number_format($totalOrdered) . '+' : $totalOrdered;
+    $totalFavorites = ($totalFavorites > 10) ? number_format($totalFavorites) . '+' : $totalFavorites;
+    $totalInCart = ($totalInCart > 10) ? number_format($totalInCart) . '+' : $totalInCart;
+    $total = [
+        "total_ordered" => $totalOrdered,
+        "total_favorites" => $totalFavorites,
+        "total_in_cart" => $totalInCart,
+        'product_variant_id' => $product_varient_id
+    ];
+
+    // print_r($reult);
+    // print_r($totsal);
+    return $total;
 }

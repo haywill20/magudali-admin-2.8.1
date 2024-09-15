@@ -54,9 +54,11 @@ class Setting_model extends CI_Model
             'inspect_element' => (isset($post['inspect_element'])) ? '1' : '0',
             'is_seller_app_under_maintenance' => (isset($post['is_seller_app_under_maintenance'])) ? '1' : '0',
             'is_delivery_boy_app_under_maintenance' => (isset($post['is_delivery_boy_app_under_maintenance'])) ? '1' : '0',
+            'is_web_under_maintenance' => (isset($post['is_web_under_maintenance'])) ? '1' : '0',
             'message_for_customer_app' => $post['message_for_customer_app'],
             'message_for_seller_app' => $post['message_for_seller_app'],
             'message_for_delivery_boy_app' => $post['message_for_delivery_boy_app'],
+            'message_for_web' => $post['message_for_web'],
             'cart_btn_on_list' => (isset($post['cart_btn_on_list'])) ? '1' : '0',
             'google_login' => (isset($post['google_login'])) ? '1' : '0',
             'facebook_login' => (isset($post['facebook_login'])) ? '1' : '0',
@@ -238,6 +240,14 @@ class Setting_model extends CI_Model
         $payment_data['instamojo_client_id'] = isset($post['instamojo_client_id']) && !empty($post['instamojo_client_id']) ? $post['instamojo_client_id'] : '';
         $payment_data['instamojo_client_secret'] = isset($post['instamojo_client_secret']) && !empty($post['instamojo_client_secret']) ? $post['instamojo_client_secret'] : '';
         $payment_data['instamojo_webhook_url'] = isset($post['instamojo_webhook_url']) && !empty($post['instamojo_webhook_url']) ? $post['instamojo_webhook_url'] : '';
+
+        $payment_data['phonepe_payment_method'] = isset($post['phonepe_payment_method']) && !empty($post['phonepe_payment_method']) ? '1' : '0';
+        $payment_data['phonepe_payment_mode'] = isset($post['phonepe_payment_mode']) && !empty($post['phonepe_payment_mode']) ? $post['phonepe_payment_mode'] : '';
+        $payment_data['phonepe_marchant_id'] = isset($post['phonepe_marchant_id']) && !empty($post['phonepe_marchant_id']) ? $post['phonepe_marchant_id'] : '';
+        $payment_data['phonepe_app_id'] = isset($post['phonepe_app_id']) && !empty($post['phonepe_app_id']) ? $post['phonepe_app_id'] : '';
+        $payment_data['phonepe_salt_key'] = isset($post['phonepe_salt_key']) && !empty($post['phonepe_salt_key']) ? $post['phonepe_salt_key'] : '';
+        $payment_data['phonepe_salt_index'] = isset($post['phonepe_salt_index']) && !empty($post['phonepe_salt_index']) ? $post['phonepe_salt_index'] : '';
+        $payment_data['phonepe_webhook_url'] = isset($post['phonepe_webhook_url']) && !empty($post['phonepe_webhook_url']) ? $post['phonepe_webhook_url'] : '';
 
         $payment_data['cod_method'] = isset($post['cod_method']) ? '1' : '0';
 

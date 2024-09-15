@@ -299,43 +299,6 @@ Defined Methods:-
             print_r(json_encode($result));
         }
     }
-    
-    public function get_zipcode_by_city_id_area()
-    {
-        /*  id:'57' 
-                limit:25            // { default - 25 } optional
-                offset:0            // { default - 0 } optional
-                sort:               // { a.name / a.id } optional
-                order:DESC/ASC      // { default - ASC } optional
-                search:value        // {optional} 
-            */
-
-        if (!$this->verify_token()) {
-            return false;
-        }
-
-        $this->form_validation->set_rules('id', 'City Id', 'trim|required|xss_clean');
-        $this->form_validation->set_rules('sort', 'sort', 'trim|xss_clean');
-        $this->form_validation->set_rules('limit', 'limit', 'trim|numeric|xss_clean');
-        $this->form_validation->set_rules('search', 'Search keyword', 'trim|xss_clean');
-        if (!$this->form_validation->run()) {
-            $this->response['error'] = true;
-            $this->response['message'] = strip_tags(validation_errors());
-            $this->response['data'] = array();
-            print_r(json_encode($this->response));
-            return;
-        } else {
-            $limit = (isset($_POST['limit']) && !empty(trim($_POST['limit']))) ? $this->input->post('limit', true) : 25;
-            $offset = (isset($_POST['offset']) && !empty(trim($_POST['offset']))) ? $this->input->post('offset', true) : 0;
-            $sort = (isset($_POST['sort']) && !empty(trim($_POST['sort']))) ? $this->input->post('sort', true) : 'a.name';
-            $order = (isset($_POST['order']) && !empty(trim($_POST['order']))) ? $this->input->post('order', true) : 'ASC';
-            $search = (isset($_POST['search']) && !empty(trim($_POST['search']))) ? $this->input->post('search', true) : "";
-            $id = $this->input->post('id', true);
-
-            $result = $this->Area_model->get_area_name_by_city($id, $sort, $order, $search, $limit, $offset);
-            print_r(json_encode($result));
-        }
-    }
 
     //3.get_cities
     public function get_cities()
@@ -638,24 +601,15 @@ Defined Methods:-
         if (!$this->verify_token()) {
             return false;
         }
-        
-        // Obtener los datos de sliders
         $res = fetch_details('sliders', '');
-    
-        // Función para comparar por el campo 'id' de manera descendente
-        usort($res, function($a, $b) {
-            return $b['id'] - $a['id'];
-        });
-    
-        // Procesamiento adicional si es necesario (como en tu código original)
-    
         $i = 0;
         foreach ($res as $row) {
+
             if ($res[$i]['link'] == null || empty($res[$i]['link'])) {
                 $res[$i]['link'] = "";
             }
             $res[$i]['image'] = base_url($res[$i]['image']);
-    
+
             if (strtolower($res[$i]['type']) == 'categories') {
                 $id = (!empty($res[$i]['type_id']) && isset($res[$i]['type_id'])) ? $res[$i]['type_id'] : '';
                 $cat_res = $this->category_model->get_categories($id);
@@ -667,18 +621,13 @@ Defined Methods:-
             } else {
                 $res[$i]['data'] = [];
             }
-    
+
             $i++;
         }
-
-    // Preparar la respuesta final
-    $this->response['error'] = false;
-    $this->response['data'] = $res;
-
-    // Imprimir la respuesta como JSON
-    print_r(json_encode($this->response));
-}
-
+        $this->response['error'] = false;
+        $this->response['data'] = $res;
+        print_r(json_encode($this->response));
+    }
 
     //7.validate_promo_code
     public function validate_promo_code()
