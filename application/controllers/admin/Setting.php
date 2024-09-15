@@ -57,9 +57,7 @@ class Setting extends CI_Controller
             $this->form_validation->set_rules('support_email', 'Support Email', 'trim|required|xss_clean|valid_email');
             $this->form_validation->set_rules('current_version', 'Current Version Of Android APP', 'trim|required|xss_clean');
             $this->form_validation->set_rules('current_version_ios', 'Current Version Of IOS APP', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('minimum_delivery_charge', 'Minimum Delivery charge', 'trim|required|numeric|xss_clean');
-            $this->form_validation->set_rules('max_kilometers', 'Maximum kilometers for minimum charge', 'trim|required|numeric|xss_clean');
-            $this->form_validation->set_rules('kilometer_price', 'Price per kilometer', 'trim|required|numeric|xss_clean');
+            $this->form_validation->set_rules('delivery_charge', 'Delivery charge', 'trim|required|numeric|xss_clean');
             $this->form_validation->set_rules('min_amount', 'Minimum amount', 'trim|required|numeric|xss_clean');
             $this->form_validation->set_rules('system_timezone_gmt', 'System GMT timezone', 'trim|required|xss_clean');
             $this->form_validation->set_rules('system_timezone', 'System timezone', 'trim|required|xss_clean');

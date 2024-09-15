@@ -23,10 +23,8 @@ class Notification_settings extends CI_Controller
             $settings = get_settings('system_settings', true);
             $this->data['title'] = 'Update Notification Settings | ' . $settings['app_name'];
             $this->data['meta_description'] = ' Update Notification Settings  | ' . $settings['app_name'];
-            // $this->data['fcm_server_key'] = get_settings('fcm_server_key');
+            $this->data['fcm_server_key'] = get_settings('fcm_server_key');
             $this->data['vap_id_Key'] = get_settings('vap_id_Key');
-            $this->data['sender_id'] = get_settings('sender_id');
-            $this->data['firebase_project_id'] = get_settings('firebase_project_id');
             $this->load->view('admin/template', $this->data);
         } else {
             redirect('admin/login', 'refresh');
@@ -128,9 +126,8 @@ class Notification_settings extends CI_Controller
                 return false;
             }
 
-            // $this->form_validation->set_rules('fcm_server_key', 'Fcm Server Key', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('fcm_server_key', 'Fcm Server Key', 'trim|required|xss_clean');
             $this->form_validation->set_rules('vap_id_Key', 'Vap Id Key', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('firebase_project_id', 'Firebase Project Id', 'trim|required|xss_clean');
 
             if (!$this->form_validation->run()) {
 
@@ -140,56 +137,8 @@ class Notification_settings extends CI_Controller
                 $this->response['message'] = validation_errors();
                 print_r(json_encode($this->response));
             } else {
-
-                if (isset($_FILES['service_account_file'])) {
-                    // if (!file_exists(FIREBASE_PATH)) {
-                    //     mkdir(FIREBASE_PATH, 0777, true);
-                    // }
-                    // print_r($_FILES);
-                    // die;
-                    // Check if file was uploaded without errors
-                    if ($_FILES['service_account_file']['error'] === UPLOAD_ERR_OK) {
-                        // Get file details
-                        $fileTmpPath = $_FILES['service_account_file']['tmp_name'];
-                        $fileName = $_FILES['service_account_file']['name'];
-                        $fileSize = $_FILES['service_account_file']['size'];
-                        $fileType = $_FILES['service_account_file']['type'];
-                        $fileNameCmps = explode(".", $fileName);
-                        $fileExtension = strtolower(end($fileNameCmps));
-
-                        // Check if the file has a JSON extension
-                        if ($fileExtension === 'json') {
-                            // Move the uploaded file to a directory on the server
-                            $uploadFileDir = './';
-                            $dest_path = $uploadFileDir . $fileName;
-
-                            if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                                $this->response['message'] =  "File is successfully uploaded.";
-
-                                // Read and process the JSON file
-                                $jsonData = file_get_contents($dest_path);
-                                $data = json_decode($jsonData, true);
-
-                                if (json_last_error() !== JSON_ERROR_NONE) {
-                                    $this->response['message'] = "Error decoding JSON file.";
-                                }
-                            } else {
-                                $this->response['message'] =  "Error moving the uploaded file.";
-                            }
-                        } else {
-                            $this->response['message'] =  "Uploaded file is not a valid JSON file.";
-                        }
-                    } else {
-                        $this->response['message'] =  "Error during file upload: " . $_FILES['service_account_file']['error'];
-                    }
-                } else {
-                    $this->response['message'] =  "No file uploaded.";
-                }
-                // die;
-                // $this->Setting_model->update_fcm_details($_POST);
+                $this->Setting_model->update_fcm_details($_POST);
                 $this->Setting_model->update_vapkey($_POST);
-                $this->Setting_model->update_firebase_project_id($_POST);
-                $this->Setting_model->update_service_account_file($_FILES['service_account_file']['name']);
                 $this->response['error'] = false;
                 $this->response['csrfName'] = $this->security->get_csrf_token_name();
                 $this->response['csrfHash'] = $this->security->get_csrf_hash();
@@ -240,17 +189,14 @@ class Notification_settings extends CI_Controller
                 print_r(json_encode($this->response));
                 return;
             }
-            // $fcm_key = get_settings('fcm_server_key');
-            
-            $firebase_project_id = get_settings('firebase_project_id');
-            $service_account_file = get_settings('service_account_file');
+            $fcm_key = get_settings('fcm_server_key');
 
-            // if (empty($fcm_key)) {
-            //     $this->response['error'] = true;
-            //     $this->response['message'] = "No FCM Key Found";
-            //     print_r(json_encode($this->response));
-            //     return;
-            // }
+            if (empty($fcm_key)) {
+                $this->response['error'] = true;
+                $this->response['message'] = "No FCM Key Found";
+                print_r(json_encode($this->response));
+                return;
+            }
 
             //creating a new push
             $data = $this->input->post(null, true);
@@ -318,43 +264,34 @@ class Notification_settings extends CI_Controller
             //first check if the push has an image with it
             if ($is_image_included) {
                 $fcmMsg = array(
-                    // 'content_available' => true,
+                    'content_available' => true,
                     'title' => "$title",
                     'body' => "$message",
                     'type' => "$type",
                     'type_id' => "$type_ids",
                     'image' => base_url()  . $notification_image_name,
                     'link' => (isset($data['link']) && !empty($data['link']) ? $data['link'] : ''),
-                    // 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                 );
             } else {
                 //if the push don't have an image give null in place of image
                 $fcmMsg = array(
-                    // 'content_available' => true,
+                    'content_available' => true,
                     'title' => "$title",
                     'body' => "$message",
                     'image' => '',
                     'type' => "$type",
                     'type_id' => "$type_ids",
                     'link' => (isset($data['link']) && !empty($data['link']) ? $data['link'] : ''),
-                    // 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                 );
             }
 
             $registrationIDs_chunks = array_chunk($registrationIDs, 1000);
-            // print_r($registrationIDs_chunks);
-           
-            // print_r($firebase_project_id); 
-            // print_r($service_account_file); 
-            // print_r('here');
-            // die;
-            if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                $fcmFields = send_notification('', $registrationIDs_chunks, $fcmMsg);
-            }
-            // print_r($fcmFields);
+            $fcmFields = send_notification($fcmMsg, $registrationIDs_chunks);
 
-            // $this->response['notification'] = $fcmFields['notification'];
-            // $this->response['data'] = $fcmFields['data'];
+            $this->response['notification'] = $fcmFields['notification'];
+            $this->response['data'] = $fcmFields['data'];
             $this->response['error'] = false;
             $this->response['message'] = 'Notification Sended Successfully';
             $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -385,6 +322,7 @@ class Notification_settings extends CI_Controller
             redirect('admin/login', 'refresh');
         }
     }
+
     public function mark_all_as_read()
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
