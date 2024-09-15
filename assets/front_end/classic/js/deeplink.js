@@ -6,8 +6,8 @@ var host = $('#host').val();
 var scheme = $('#scheme').val();
 // var web_doctor_brown = $('#web_doctor_brown').val();
 // console.log(web_doctor_brown);
-// console.log(host);    
-// console.log(scheme);    
+console.log(host);    
+console.log(scheme);    
 // const pathName = window.location.pathname;
 
 // alert('scheme+'://'+host+pathName);

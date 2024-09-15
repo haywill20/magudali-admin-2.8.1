@@ -61,8 +61,8 @@ $route['products/(:num)'] = "products/index/$1";
 $route['blogs/(:num)'] = "blogs/index/$1";
 $route['sellers/(:num)'] = "sellers/index/$1";
 // for web + application
-$route['default_controller'] = 'home';
+// $route['default_controller'] = 'home';
 // for app
-// $route['default_controller'] = 'landing';
+$route['default_controller'] = 'landing';
 $route['404_override'] = 'error_404';
 $route['translate_uri_dashes'] = TRUE;
