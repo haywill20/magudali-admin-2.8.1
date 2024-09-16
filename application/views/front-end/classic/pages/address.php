@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
+<section class="breadcrumb-title-bar colored-breadcrumb">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('address')) ? $this->lang->line('address') : 'Address' ?></h2>
         <nav aria-label="breadcrumb">
@@ -36,15 +36,15 @@
                         <div class="row">
                             <div class="col-md-12 col-sm-12 col-xs-12 form-group">
                                 <label for="name" class="control-label"><?= !empty($this->lang->line('name')) ? $this->lang->line('name') : 'Name' ?></label>
-                                <input type="text" class="form-control" id="address_name" name="name" placeholder="<?= !empty($this->lang->line('name')) ? $this->lang->line('name') : 'Name' ?>" />
+                                <input type="text" class="form-control" id="address_name" name="name" placeholder="Name" />
                             </div>
                             <div class="col-md-6 col-sm-12 col-xs-12 form-group">
                                 <label for="mobile_number" class="control-label"><?= !empty($this->lang->line('mobile_number')) ? $this->lang->line('mobile_number') : 'Mobile Number' ?></label>
-                                <input type="text" pattern="\d*" maxlength="16" class="form-control" id="mobile_number" name="mobile" placeholder="<?= !empty($this->lang->line('mobile_number')) ? $this->lang->line('mobile_number') : 'Mobile Number' ?>" />
+                                <input type="text" pattern="\d*" maxlength="16" class="form-control" id="mobile_number" name="mobile" placeholder="Mobile Number" />
                             </div>
                             <div class="col-md-6 col-sm-12 col-xs-12 form-group">
                                 <label for="alternate_mobile" class="control-label"><?= !empty($this->lang->line('alternate_mobile')) ? $this->lang->line('alternate_mobile') : 'Alternate Mobile Number' ?></label>
-                                <input type="text" class="form-control" pattern="\d*" maxlength="16" id="alternate_mobile" name="alternate_mobile" placeholder="<?= !empty($this->lang->line('alternate_mobile')) ? $this->lang->line('alternate_mobile') : 'Alternate Mobile Number' ?>" />
+                                <input type="text" class="form-control" pattern="\d*" maxlength="16" id="alternate_mobile" name="alternate_mobile" placeholder="Alternate Mobile Number" />
                             </div>
                             <div class="col-md-12 col-sm-12 col-xs-12 form-group">
                                 <label for="address" class="control-label"><?= !empty($this->lang->line('address')) ? $this->lang->line('address') : 'Address' ?></label>
@@ -67,7 +67,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6 col-sm-12 col-xs-12 form-group area">
-                                <label for="area" class="control-label"><?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?></label>
+                                <label for="area" class="control-label">Area</label>
                                 <input type="text" class="form-control" id="area" name="general_area_name" placeholder="Area Name" />
                             </div>
                             <!-- <div class="col-md-6 col-sm-12 col-xs-12 form-group area">
@@ -92,22 +92,22 @@
                                 <input type="text" class="form-control " id="city_name" name="city_name" placeholder="City" />
                             </div>
                             <div class="col-md-6 col-sm-12 col-xs-12 form-group area_name d-none">
-                                <label for="area" class="control-label"><?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?></label>
-                                <input type="text" class="form-control " id="area_name" name="area_name" placeholder="<?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?>" />
+                                <label for="area" class="control-label">Area</label>
+                                <input type="text" class="form-control " id="area_name" name="area_name" placeholder="Area Name" />
                             </div>
 
                             <div class="col-md-6 col-sm-12 col-xs-12 form-group pincode_name d-none">
-                                <label for="area" class="control-label"><?= !empty($this->lang->line('pincode')) ? $this->lang->line('pincode') : 'Zipcode' ?></label>
-                                <input type="text" class="form-control " id="pincode_name" name="pincode_name" placeholder="<?= !empty($this->lang->line('pincode')) ? $this->lang->line('pincode') : 'Zipcode' ?>" />
+                                <label for="area" class="control-label">Pincode</label>
+                                <input type="text" class="form-control " id="pincode_name" name="pincode_name" placeholder="Zipcode" />
                             </div>
 
                             <div class="col-md-6 col-sm-12 col-xs-12 form-group">
                                 <label for="state" class="control-label"><?= !empty($this->lang->line('state')) ? $this->lang->line('state') : 'State' ?></label>
-                                <input type="text" class="form-control" id="state" name="state" placeholder="<?= !empty($this->lang->line('state')) ? $this->lang->line('state') : 'State' ?>" />
+                                <input type="text" class="form-control" id="state" name="state" placeholder="State" />
                             </div>
                             <div class="col-md-6 col-sm-12 col-xs-12 form-group">
                                 <label for="country" class="control-label"><?= !empty($this->lang->line('country')) ? $this->lang->line('country') : 'Country' ?></label>
-                                <input type="text" class="form-control" name="country" id="country" placeholder="<?= !empty($this->lang->line('country')) ? $this->lang->line('country') : 'Country' ?>" />
+                                <input type="text" class="form-control" name="country" id="country" placeholder="Country" />
                             </div>
                             <div class="col-md-12 col-sm-12 col-xs-12 form-group">
                                 <label for="country" class="control-label"><?= !empty($this->lang->line('type')) ? $this->lang->line('type') : 'Type : ' ?></label>
@@ -116,11 +116,11 @@
                                     <label for="home" class="form-check-label text-dark"><?= !empty($this->lang->line('home')) ? $this->lang->line('home') : 'Home' ?></label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="type" id="office" value="office" />
+                                    <input type="radio" class="form-check-input" name="type" id="office" value="office" placeholder="Office" />
                                     <label for="office" class="form-check-label text-dark"><?= !empty($this->lang->line('office')) ? $this->lang->line('office') : 'Office' ?></label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" name="type" id="other" value="other" />
+                                    <input type="radio" class="form-check-input" name="type" id="other" value="other" placeholder="Other" />
                                     <label for="other" class="form-check-label text-dark"><?= !empty($this->lang->line('other')) ? $this->lang->line('other') : 'Other' ?></label>
                                 </div>
                             </div>
@@ -141,7 +141,7 @@
                                     <th data-field="id" data-sortable="true" data-visible="false"><?= !empty($this->lang->line('id')) ? $this->lang->line('id') : 'ID' ?></th>
                                     <th data-field="name" data-sortable="false"><?= !empty($this->lang->line('name')) ? $this->lang->line('name') : 'Name' ?></th>
                                     <th data-field="type" data-sortable="false" class="col-md-5"><?= !empty($this->lang->line('type')) ? $this->lang->line('type') : 'Type' ?></th>
-                                    <th data-field="mobile" data-sortable="false"><?= !empty($this->lang->line('mobile_number')) ? $this->lang->line('mobile_number') : 'Mobile Number' ?></th>
+                                    <th data-field="mobile" data-sortable="false"><?= !empty($this->lang->line('mobile_number')) ? $this->lang->line('mobile_number') : 'Mobile' ?></th>
                                     <th data-field="alternate_mobile" data-sortable="false" data-visible="false"><?= !empty($this->lang->line('alternate_mobile')) ? $this->lang->line('alternate_mobile') : 'Alternate Mobile' ?></th>
                                     <th data-field="address" data-sortable="false"><?= !empty($this->lang->line('address')) ? $this->lang->line('address') : 'Address' ?></th>
                                     <th data-field="landmark" data-sortable="false" data-visible="false"><?= !empty($this->lang->line('landmark')) ? $this->lang->line('landmark') : 'Landmark' ?></th>
@@ -207,20 +207,20 @@
                             </select>
                         </div> -->
                         <div class="col-md-6 col-sm-12 col-xs-12 form-group area">
-                            <label for="area" class="control-label"><?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?></label>
-                            <input type="text" class="form-control" id="edit_area" name="edit_general_area_name" placeholder="<?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?>" />
+                            <label for="area" class="control-label">Area</label>
+                            <input type="text" class="form-control" id="edit_area" name="edit_general_area_name" placeholder="Area Name" />
                         </div>
                         <div class="col-md-6 col-sm-12 col-xs-12 form-group other_city d-none">
                             <label for="city" class="control-label"><?= !empty($this->lang->line('city')) ? $this->lang->line('city') : 'City Name' ?></label>
                             <input type="text" class="form-control" id="other_city_value" name="other_city" placeholder="City" />
                         </div>
                         <div class="col-md-6 col-sm-12 col-xs-12 form-group other_areas d-none">
-                            <label for="area" class="control-label"><?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?></label>
-                            <input type="text" class="form-control" id="other_areas_value" name="other_areas" placeholder="<?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?>" />
+                            <label for="area" class="control-label">Area</label>
+                            <input type="text" class="form-control" id="other_areas_value" name="other_areas" placeholder="Area Name" />
                         </div>
                         <div class="col-md-6 col-sm-12 col-xs-12 form-group other_pincode d-none">
-                            <label for="area" class="control-label"><?= !empty($this->lang->line('pincode')) ? $this->lang->line('pincode') : 'Zipcode' ?></label>
-                            <input type="text" class="form-control " id="other_pincode_value" name="pincode_name" placeholder="<?= !empty($this->lang->line('pincode')) ? $this->lang->line('pincode') : 'Zipcode' ?>" />
+                            <label for="area" class="control-label">Pincode</label>
+                            <input type="text" class="form-control " id="other_pincode_value" name="pincode_name" placeholder="Zipcode" />
                         </div>
                         <!-- <input type="text" name="other_areas" id="other_areas" class="d-none"> -->
                         <!-- <div class="col-md-4 col-sm-12 col-xs-12 form-group edit_pincode">
@@ -235,11 +235,11 @@
                         </div>
                         <div class="col-md-6 col-sm-12 col-xs-12 form-group">
                             <label for="state" class="control-label"><?= !empty($this->lang->line('state')) ? $this->lang->line('state') : 'State' ?></label>
-                            <input type="text" class="form-control" id="edit_state" name="state" placeholder="<?= !empty($this->lang->line('state')) ? $this->lang->line('state') : 'State' ?>" />
+                            <input type="text" class="form-control" id="edit_state" name="state" placeholder="State" />
                         </div>
                         <div class="col-md-6 col-sm-12 col-xs-12 form-group">
                             <label for="country" class="control-label"><?= !empty($this->lang->line('country')) ? $this->lang->line('country') : 'Country' ?></label>
-                            <input type="text" class="form-control" name="country" id="edit_country" placeholder="<?= !empty($this->lang->line('country')) ? $this->lang->line('country') : 'Country' ?>" />
+                            <input type="text" class="form-control" name="country" id="edit_country" placeholder="Country" />
                         </div>
                         <div class="col-md-12 col-sm-12 col-xs-12 form-group">
                             <label for="country" class="control-label"><?= !empty($this->lang->line('type')) ? $this->lang->line('type') : 'Type : ' ?></label>

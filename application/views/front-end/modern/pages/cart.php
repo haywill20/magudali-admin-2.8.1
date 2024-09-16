@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<div class="content-wrapper deeplink_wrapper">
+<div class="content-wrapper">
     <section class="wrapper bg-soft-grape">
         <div class="container py-3 py-md-5">
             <nav class="d-inline-block" aria-label="breadcrumb">
@@ -85,7 +85,7 @@
                                         <div class="num-block skin-2 product-quantity">
                                             <?php $check_current_stock_status = validate_stock([$row['id']], [$row['qty']]); ?>
                                             <?php if (isset($check_current_stock_status['error'])  && $check_current_stock_status['error'] == TRUE) { ?>
-                                                <div><span class='text text-danger'> <?= !empty($this->lang->line('out_of_stock')) ? $this->lang->line('out_of_stock') : 'Out Of Stock' ?> </span></div>
+                                                <div><span class='text text-danger'> Out of Stock </span></div>
                                             <?php } else { ?>
                                                 <div class="num-in form-control d-flex align-items-center">
                                                     <?php $price = $row['special_price'] != '' && $row['special_price'] != null && $row['special_price'] > 0 ? $row['special_price'] : $row['price']; ?>
@@ -99,10 +99,10 @@
                                     <td class="text-center p-0 total-price"><span class="product-line-price"> <?= $settings['currency'] . '' . number_format(($row['qty'] * $price), 2) ?></span></td>
                                     <td class="d-flex gap-2 align-items-center border-0">
                                         <a class="product-removal link_cursor">
-                                            <i class="remove-product uil uil-trash-alt fs-23 text-danger" name="remove_inventory" id="remove_inventory" data-id="<?= $row['id']; ?>" title="<?= !empty($this->lang->line('remove_from_cart')) ? $this->lang->line('remove_from_cart') : 'Remove From Cart' ?>"></i>
+                                            <i class="remove-product uil uil-trash-alt fs-23 text-danger" name="remove_inventory" id="remove_inventory" data-id="<?= $row['id']; ?>" title="Remove from Cart"></i>
                                         </a>
                                         <a class="save-for-later remove-product link_cursor" data-id="<?= $row['id']; ?>">
-                                            <i class="uil uil-bag-alt fs-23 text-blue" title="<?= !empty($this->lang->line('save_for_later')) ? $this->lang->line('save_for_later') : 'Save For Later' ?>"></i>
+                                            <i class="uil uil-bag-alt fs-23 text-blue" title="Save for Later"></i>
                                         </a>
 
                                     </td>
@@ -155,8 +155,6 @@
                                 //die; ?>
                                 <?php foreach ($save_for_later as $key => $row) {
                                     if (isset($row['qty']) && $row['qty'] >= 0) {
-                                        // echo "<pre>";
-                                        // print_R($row['qty']);
                                         $price = $row['special_price'] != '' && $row['special_price'] != null && $row['special_price'] > 0 && $row['special_price'] < $row['price'] ? $row['special_price'] : $row['price'];
                                 ?>
                                         <tr class="cart-product-desc-list">
@@ -177,7 +175,7 @@
                                                             <br><?= str_replace(',', ' | ', $row['product_variants'][0]['variant_values']) ?>
                                                         <?php } ?>
                                                     </h3>
-                                                    <button class="btn remove-product btn-outline-warning move-to-cart btn-sm" data-id="<?= $row['id']; ?>" data-qty="<?= $row['qty'] ?>"><?= !empty($this->lang->line('move_to_cart')) ? $this->lang->line('move_to_cart') : 'Move to cart' ?></button>
+                                                    <button class="btn remove-product btn-outline-warning move-to-cart btn-sm" data-id="<?= $row['id']; ?>"><?= !empty($this->lang->line('move_to_cart')) ? $this->lang->line('move_to_cart') : 'Move to cart' ?></button>
                                                 </div>
                                             </td>
                                             <td>
@@ -192,7 +190,7 @@
                                                     <?php if (isset($check_current_stock_status['error'])  && $check_current_stock_status['error'] == TRUE) { ?>
                                                         <div><span class='text text-danger'> Out of Stock </span></div>
                                                     <?php } else { ?>
-                                                        <div class="num-in form-control d-flex align-items-center move-to-cart-qty">
+                                                        <div class="num-in form-control d-flex align-items-center">
                                                             <?php $price = $row['special_price'] != '' && $row['special_price'] != null && $row['special_price'] > 0 ? $row['special_price'] : $row['price']; ?>
                                                             <span class="minus dis" data-min="<?= (isset($row['minimum_order_quantity']) && !empty($row['minimum_order_quantity'])) ? $row['minimum_order_quantity'] : 1 ?>" data-step="<?= (isset($row['minimum_order_quantity']) && !empty($row['quantity_step_size'])) ? $row['quantity_step_size'] : 1 ?>"></span>
                                                             <input type="text" class="in-num itemQty" data-page="cart" data-id="<?= $row['id']; ?>" value="<?= $row['qty'] ?>" data-price="<?= $price ?>" data-step="<?= (isset($row['minimum_order_quantity']) && !empty($row['quantity_step_size'])) ? $row['quantity_step_size'] : 1 ?>" data-min="<?= (isset($row['minimum_order_quantity']) && !empty($row['minimum_order_quantity'])) ? $row['minimum_order_quantity'] : 1 ?>" data-max="<?= (isset($row['total_allowed_quantity']) && !empty($row['total_allowed_quantity'])) ? $row['total_allowed_quantity'] : '' ?>">

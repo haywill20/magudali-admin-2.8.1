@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
+<section class="breadcrumb-title-bar colored-breadcrumb">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('my_account')) ? $this->lang->line('my_account') : 'My Account' ?></h2>
         <nav aria-label="breadcrumb">
@@ -47,16 +47,16 @@
                         </div>
                     </a>
                 </div>
-                <!-- <div class='col-md-3 card text-center border-0 mr-3 mb-3'>
+                <div class='col-md-3 card text-center border-0 mr-3 mb-3'>
                     <a href='<?= base_url('my-account/notifications') ?>' class="link-color">
                         <div class='card-header bg-transparent'>
-                            <?//= !empty($this->lang->line('notification')) ? $this->lang->line('notification') : 'NOTIFICATION' ?>
+                            <?= !empty($this->lang->line('notification')) ? $this->lang->line('notification') : 'NOTIFICATION' ?>
                         </div>
                         <div class='card-body'>
                             <i class="far fa-bell dashboard-icon link-color fa-lg"></i>
                         </div>
                     </a>
-                </div> -->
+                </div>
                 <div class='col-md-3 card text-center border-0 mr-3 mb-3'>
                     <a href='<?= base_url('my-account/Favorite') ?>' class="link-color">
                         <div class='card-header bg-transparent'>
@@ -94,16 +94,6 @@
                         </div>
                         <div class='card-body'>
                             <i class="fas fa-exchange-alt dashboard-icon link-color fa-lg"></i>
-                        </div>
-                    </a>
-                </div>
-                <div class='col-md-3 card text-center border-0 mr-3 mb-3'>
-                    <a href='<?= base_url('my-account/chat') ?>' class="link-color text-decoration-none">
-                        <div class='card-header bg-transparent'>
-                            <?= !empty($this->lang->line('chat')) ? $this->lang->line('chat') : 'Chat' ?>
-                        </div>
-                        <div class='card-body'>
-                            <i class="dashboard-icon fa-comments far fa-lg"></i>
                         </div>
                     </a>
                 </div>

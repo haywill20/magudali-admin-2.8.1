@@ -22,22 +22,11 @@
 
     use function PHPSTORM_META\type;
 
-    // $sms_gateway_settings = get_settings('sms_gateway_settings');
-    // // print_r($authentication_settings);
-
-    // if ($sms_gateway_settings !== null && is_string($sms_gateway_settings)) {
-    //     $sms_gateway_data = get_settings('sms_gateway_settings');
-    // } else {
-    //     $sms_gateway_data = [];
-    // }
-
     $sms = json_encode($sms_gateway_settings);
 
     ?>
     <section class="content">
         <input type="hidden" id="sms_gateway_settings" name="sms_gateway_settings" value='<?= $sms ?>'>
-        <input type="hidden" id="sms_gateway_data" value='<?= isset($sms) ? ($sms) : [] ?>' />
-
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
@@ -91,33 +80,6 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="py-3">
-                                                <h4 class="mb-3">Create Authorization Token </h4>
-                                                <div class="d-flex mb-2">
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="converterInputAccountSID" class="form-label">Account SID</label>
-                                                            <input type="text" id="converterInputAccountSID" class="form-control">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label for="converterInputAuthToken" class="form-label">Auth Token</label>
-                                                            <input type="text" id="converterInputAuthToken" class="form-control">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex flex-column">
-                                                    <div class="col-md-4 mb-3">
-                                                        <button type="button" onClick="createHeader()" class="btn btn-success">Create</button>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <h4 id="basicToken"></h4>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-
                                             <div class="">
                                                 <ul class="nav nav-tabs mb-4">
                                                     <li class="nav-item">
@@ -189,7 +151,7 @@
                                                             <div class="col-12 description">
                                                                 <div class="form-group col-md-12">
                                                                     <div class="mb-3">
-                                                                        <textarea name="text_format_data" class="text_format_data" rows="3" placeholder="Place some text here" style="resize: both;"></textarea>
+                                                                        <textarea name="text_format_data" class="text_format_data" placeholder="Place some text here"></textarea>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -207,9 +169,18 @@
 
                                                             <div class="card-body p-0">
                                                                 <div id="formdata_section" class="col-md-8">
-
+                                                                    <div class="d-flex justify-content-center">
+                                                                        <div class="form-group" id="error_box">
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
+                                                                <div class="card-body d-flex">
 
+                                                                    <pre class="">{only_mobile_number}</pre>
+                                                                    <pre>{mobile_number_with_country_code}</pre>
+                                                                    <pre>{country_code}</pre>
+                                                                    <pre>{message}</pre>
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -230,23 +201,16 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="card-body d-flex">
-
-                                                    <pre class="">{only_mobile_number}</pre>
-                                                    <pre>{mobile_number_with_country_code}</pre>
-                                                    <pre>{country_code}</pre>
-                                                    <pre>{message}</pre>
-                                                </div>
                                                 <div class="mb-3">
                                                     <div class="form-group">
                                                         <button type="reset" class="btn btn-warning">Reset</button>
                                                         <button class="btn btn-success" id="sms_gateway_submit">Update SMS Gayeway Settings</button>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="d-flex justify-content-center ">
+                                                <div class="d-flex justify-content-center ">
                                                     <div id="error_box">
                                                     </div>
-                                                </div> -->
+                                                </div>
                                             </div>
                                         </div>
                                     </form>
@@ -311,10 +275,10 @@
                                                 </tbody>
                                             </table>
 
-                                            <!-- <div class="d-flex justify-content-center">
+                                            <div class="d-flex justify-content-center">
                                                 <div class="form-group" id="error_box">
                                                 </div>
-                                            </div> -->
+                                            </div>
                                             <div class="form-group">
                                                 <button type="submit" class="btn btn-success" id="submit_btn">Update User</button>
                                             </div>
@@ -333,7 +297,6 @@
                                         <!-- form start -->
                                         <form class="form-horizontal form-submit-event add_sms" action="<?= base_url('admin/custom_sms/add_sms'); ?>" method="POST" id="add_product_form" enctype="multipart/form-data">
                                             <?php
-                                            // print_R($fetched_data);
                                             if (isset($fetched_data[0]['id'])) {
                                             ?>
                                                 <input type="hidden" id="edit_custom_sms" name="edit_custom_sms" value="<?= @$fetched_data[0]['id'] ?>">
@@ -345,12 +308,11 @@
 
                                             <div class=" card-body">
                                                 <div class="form-group row">
-                                                    <label for="type" class="col-sm-2 control-label">Typesgvxdcfgbcx <span class='text-danger text-sm'> * </span></label>
+                                                    <label for="type" class="col-sm-2 control-label">Types <span class='text-danger text-sm'> * </span></label>
                                                     <div class="col-sm-10">
                                                         <select name="type" class="form-control type">
                                                             <option value=" ">Select Types</option>
-                                                            <?php foreach ($notification_modules as $key => $value) {
-                                                            ?>
+                                                            <?php foreach ($notification_modules as $key => $value) { ?>
                                                                 <option value="<?= $key ?>" <?= (isset($fetched_data[0]['id']) &&  $fetched_data[0]['type'] == $key) ? "Selected" : "" ?>><?= ucwords(str_replace('_', ' ', $key)) ?></option>
                                                             <?php
                                                             } ?>
@@ -363,26 +325,6 @@
                                                     <div class="col-sm-10">
                                                         <input type="text" name="title" id="update_title" class="form-control update_title" placeholder="Title Name" value="<?= (isset($fetched_data[0]['title'])) ? $fetched_data[0]['title'] : ""; ?>" />
                                                     </div>
-                                                </div>
-                                                <div class="form-group row otp <?= (isset($fetched_data[0]['id'])  && $fetched_data[0]['type'] == 'otp') ? '' : 'd-none' ?>">
-                                                    <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                    <?php
-                                                    $hashtag = get_notification_variables();
-                                                    foreach ($hashtag as $row) { ?>
-                                                        <div class="col">
-                                                            <div class="hashtag"><?= $row ?></div>
-                                                        </div>
-                                                    <?php } ?>
-                                                </div>
-                                                <div class="form-group row otp <?= (isset($fetched_data[0]['id'])  && $fetched_data[0]['type'] == 'otp') ? '' : 'd-none' ?>">
-                                                    <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                    <?php
-                                                    $hashtag = get_notification_variables();
-                                                    foreach ($hashtag as $row) { ?>
-                                                        <div class="col">
-                                                            <div class="hashtag"><?= $row ?></div>
-                                                        </div>
-                                                    <?php } ?>
                                                 </div>
                                                 <div class="form-group row place_order <?= (isset($fetched_data[0]['id'])  && $fetched_data[0]['type'] == 'place_order') ? '' : 'd-none' ?>">
                                                     <label for="message" class="col-sm-2 col-form-label"></label></label>
@@ -565,10 +507,10 @@
                                                     <button type="reset" class="btn btn-warning">Reset</button>
                                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Custom message ' : 'Add Custom message ' ?></button>
                                                 </div>
-                                                <!-- <div class="d-flex justify-content-center">
+                                                <div class="d-flex justify-content-center">
                                                     <div class="form-group" id="error_box">
                                                     </div>
-                                                </div> -->
+                                                </div>
                                             </div>
                                         </form>
                                     </div>
@@ -581,14 +523,14 @@
                                         </div>
                                         <div class="card-innr">
                                             <div class="gaps-1-5x"></div>
-                                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/custom_sms/view_sms') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-export-options='{ "fileName": "custom-sms-list","ignoreColumn": ["operate"] }' data-query-params="queryParams">
+                                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/custom_sms/view_sms') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-export-options='{ "fileName": "custom-sms-list","ignoreColumn": ["operate"] }' data-query-params="queryParams">
                                                 <thead>
                                                     <tr>
                                                         <th data-field="id" data-sortable="true">ID</th>
                                                         <th data-field="title" data-sortable="false">Title</th>
                                                         <th data-field="type" data-sortable="true">Type</th>
                                                         <th data-field="message" data-sortable="true">Message</th>
-                                                        <th data-field="operate" data-sortable="false">Action</th>
+                                                        <th data-field="operate" data-sortable="true">Action</th>
                                                     </tr>
                                                 </thead>
                                             </table>
@@ -611,233 +553,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <div class=" card-body">
-                                            <div class="form-group row">
-                                                <label for="type" class="col-sm-2 control-label">Type <span class='text-danger text-sm'> * </span></label>
-                                                <div class="col-sm-10">
-                                                    <select name="type" class="form-control type" id="selected_type">
-                                                        <option value=" ">Select Types</option>
-                                                        <?php foreach ($notification_modules as $key => $value) {
-                                                        ?>
-                                                            <option value="<?= $key ?>" <?= (isset($fetched_data[0]['id']) &&  $fetched_data[0]['type'] == $key) ? "Selected" : "" ?>><?= ucwords(str_replace('_', ' ', $key)) ?></option>
-                                                        <?php
-                                                        } ?>
-                                                    </select>
-                                                    <?php ?>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <label for="title" class="col-sm-2 col-form-label">Title <span class='text-danger text-sm'>*</span></label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" name="title" id="edit_title" class="form-control update_title" placeholder="Title Name" value="<?= (isset($fetched_data[0]['title'])) ? $fetched_data[0]['title'] : ""; ?>" />
-                                                </div>
-                                            </div>
-                                            <div class="form-group row otp <?= (isset($fetched_data[0]['id'])  && $fetched_data[0]['type'] == 'otp') ? '' : 'd-none' ?>">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row otp <?= (isset($fetched_data[0]['id'])  && $fetched_data[0]['type'] == 'otp') ? '' : 'd-none' ?>">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row place_order <?= (isset($fetched_data[0]['id'])  && $fetched_data[0]['type'] == 'place_order') ? '' : 'd-none' ?>">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag_input"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row">
-                                                <label for="message" class="col-sm-2 col-form-label">Message<span class='text-danger text-sm'>*</span></label>
-                                                <div class="col-sm-10">
-                                                    <textarea name="message" id="edit-text-box" class="form-control" placeholder="Place some text here"><?= (isset($fetched_data[0]['id'])) ? $fetched_data[0]['message'] : ''; ?></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row place_order d-none" >
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row settle_cashback_discount d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row settle_seller_commission d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row customer_order_received d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row customer_order_processed d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row customer_order_shipped d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row customer_order_delivered d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row customer_order_cancelled d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row customer_order_returned d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row customer_order_returned_request_approved d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row customer_order_returned_request_decline d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row wallet_transaction d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row ticket_status d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = ['< application_name >'];
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row ticket_message d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = ['< application_name >'];
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row bank_transfer_receipt_status d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group row bank_transfer_proof d-none">
-                                                <label for="message" class="col-sm-2 col-form-label"></label></label>
-                                                <?php
-                                                $hashtag = get_notification_variables();
-                                                foreach ($hashtag as $row) { ?>
-                                                    <div class="col">
-                                                        <div class="hashtag"><?= $row ?></div>
-                                                    </div>
-                                                <?php } ?>
-                                            </div>
-                                            <div class="form-group">
-                                                <button type="reset" class="btn btn-warning">Reset</button>
-                                                <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Custom message ' : 'Add Custom message ' ?></button>
-                                            </div>
-                                            <!-- <div class="d-flex justify-content-center">
-                                                    <div class="form-group" id="error_box">
-                                                    </div>
-                                                </div> -->
-                                        </div>
+                                        <!-- form start -->
 
                                     </div>
                                 </div>

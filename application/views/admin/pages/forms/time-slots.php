@@ -69,7 +69,9 @@
                                             <button type="submit" class="btn btn-success" id="submit_btn">Save</button>
                                         </div>
                                     </div><!-- /.box-body -->
-
+                                    <div class="d-flex justify-content-center form-group">
+                                        <div id="error_box"></div>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -112,7 +114,7 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="form-group col-md-4">
+                                <div class="form-group col-md-4">
                                         <label for="">Last Order Time</label>
                                     </div>
                                     <div class="form-group col-md-8">
@@ -120,7 +122,7 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="form-group col-md-4">
+                                <div class="form-group col-md-4">
                                         <label for="">Status</label>
                                     </div>
                                     <div class="form-group col-md-8">
@@ -136,7 +138,10 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Time Slots' : 'Add Time Slots' ?></button>
                                 </div>
 
-
+                                <div class="d-flex justify-content-center ">
+                                    <div id="error_box">
+                                    </div>
+                                </div>
                             </div><!-- /.box-body -->
 
                         </form>
@@ -165,7 +170,7 @@
                     <div class="card content-area p-4">
                         <div class="card-innr">
                             <div class="gaps-1-5x"></div>
-                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/Time_slots/view_time_slots') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="queryParams">
+                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/Time_slots/view_time_slots') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="queryParams">
                                 <thead>
                                     <tr>
                                         <th data-field="id" data-sortable="true">ID</th>
@@ -174,7 +179,7 @@
                                         <th data-field="to_time" data-sortable="true">To Time</th>
                                         <th data-field="last_order_time" data-sortable="true">Last Order Time</th>
                                         <th data-field="status" data-sortable="true">Status</th>
-                                        <th data-field="operate" data-sortable="false">Action</th>
+                                        <th data-field="operate" data-sortable="true">Action</th>
                                     </tr>
                                 </thead>
                             </table>

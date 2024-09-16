@@ -552,51 +552,23 @@ function show_message(prefix = "Great!", message, type = 'success') {
 }
 
 function paginate(total, current_page, limit) {
-    var number_of_pages = Math.ceil(total / limit);
+    var number_of_pages = total / limit;
+    var i = 0;
     var pagination = `<div class="row p-2">
     <div class="col-12">
         <div class="d-flex justify-content-center">
             <ul class="pagination mb-0">`;
-
-    // Previous button
-    pagination += `<li class="page-item ${current_page === 0 ? 'disabled' : ''}">
-                    <a class="page-link" href="javascript:void(0)" onclick="prev_page()">Previous</a>
-                  </li>`;
-
-    // Page numbers
-    var startPage = Math.max(current_page - 1, 0);
-    var endPage = Math.min(current_page + 1, number_of_pages - 1);
-
-    if (startPage > 0) {
-        pagination += `<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="go_to_page(${limit}, 0)">1</a></li>`;
-        if (startPage > 1) {
-            pagination += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
+    pagination += `<li class="page-item"><a class="page-link" href="javascript:prev_page()" >Previous</a></li>`;
+    var active = "";
+    while (i < number_of_pages) {
+        active = (current_page == i) ? "active" : "";
+        pagination += `<li class="page-item ${active}"><a class="page-link" href="javascript:go_to_page(${limit},${i})" >${++i}</a></li>`;
     }
-
-    for (var i = startPage; i <= endPage; i++) {
-        var active = (current_page === i) ? "active" : "";
-        pagination += `<li class="page-item ${active}">
-                        <a class="page-link" href="javascript:void(0)" onclick="go_to_page(${limit}, ${i})">${i + 1}</a>
-                      </li>`;
-    }
-
-    if (endPage < number_of_pages - 1) {
-        if (endPage < number_of_pages - 2) {
-            pagination += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
-        pagination += `<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="go_to_page(${limit}, ${number_of_pages - 1})">${number_of_pages}</a></li>`;
-    }
-
-    // Next button
-    pagination += `<li class="page-item ${current_page === number_of_pages - 1 ? 'disabled' : ''}">
-                    <a class="page-link" href="javascript:void(0)" onclick="next_page()">Next</a>
-                  </li>`;
-
-    pagination += `</ul>
-                </div>
+    pagination += `<li class="page-item"><a class="page-link" href="javascript:next_page()">Next</a></li>
+                </ul>
             </div>
-        </div>`;
+        </div>
+    </div>`;
     $(".pagination-container").html(pagination);
 }
 

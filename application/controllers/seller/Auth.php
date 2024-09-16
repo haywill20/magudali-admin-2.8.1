@@ -67,8 +67,8 @@ class Auth extends CI_Controller
             $this->form_validation->set_rules('user_mobile', 'Mobile', 'trim|required|xss_clean|min_length[5]');
         }
         $this->form_validation->set_rules('store_name', 'Store Name', 'trim|required|xss_clean');
-        $this->form_validation->set_rules('tax_name', 'Tax Name', 'trim|xss_clean');
-        $this->form_validation->set_rules('tax_number', 'Tax Number', 'trim|xss_clean');
+        $this->form_validation->set_rules('tax_name', 'Tax Name', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('tax_number', 'Tax Number', 'trim|required|xss_clean');
         $this->form_validation->set_rules('store_logo', 'Store Logo', 'trim|xss_clean');
         $this->form_validation->set_rules('national_identity_card', 'National Identity Card', 'trim|xss_clean');
         $this->form_validation->set_rules('authorized_signature', 'Authorized Signature', 'trim|xss_clean');
@@ -344,17 +344,17 @@ class Auth extends CI_Controller
                 }
                 $seller_data = array(
                     'user_id' => $this->input->post('user_id', true),
-                    // 'address_proof' => (!empty($proof_doc)) ? $proof_doc : null,
-                    // 'national_identity_card' => (!empty($id_card_doc)) ? $id_card_doc : null,
+                    'address_proof' => (!empty($proof_doc)) ? $proof_doc : null,
+                    'national_identity_card' => (!empty($id_card_doc)) ? $id_card_doc : null,
                     'store_logo' => (!empty($store_logo_doc)) ? $store_logo_doc : null,
                     'authorized_signature' => (!empty($authorized_signature_doc)) ? $authorized_signature_doc : $this->input->post('authorized_signature', true),
-                    // 'pan_number' => (isset($_POST['pan_number']) && !empty($_POST['pan_number'])) ? $this->input->post('pan_number', true) : "",
-                    // 'tax_number' => $this->input->post('tax_number', true),
-                    // 'tax_name' => $this->input->post('tax_name', true),
-                    // 'bank_name' => (isset($_POST['bank_name']) && !empty($_POST['bank_name'])) ? $this->input->post('bank_name', true) : "",
-                    // 'bank_code' => (isset($_POST['bank_code']) && !empty($_POST['bank_code'])) ? $this->input->post('bank_code', true) : "",
-                    // 'account_name' => (isset($_POST['account_name']) && !empty($_POST['account_name'])) ? $this->input->post('account_name', true) : "",
-                    // 'account_number' => (isset($_POST['account_number']) && !empty($_POST['account_number'])) ? $this->input->post('account_number', true) : "",
+                    'pan_number' => (isset($_POST['pan_number']) && !empty($_POST['pan_number'])) ? $this->input->post('pan_number', true) : "",
+                    'tax_number' => $this->input->post('tax_number', true),
+                    'tax_name' => $this->input->post('tax_name', true),
+                    'bank_name' => (isset($_POST['bank_name']) && !empty($_POST['bank_name'])) ? $this->input->post('bank_name', true) : "",
+                    'bank_code' => (isset($_POST['bank_code']) && !empty($_POST['bank_code'])) ? $this->input->post('bank_code', true) : "",
+                    'account_name' => (isset($_POST['account_name']) && !empty($_POST['account_name'])) ? $this->input->post('account_name', true) : "",
+                    'account_number' => (isset($_POST['account_number']) && !empty($_POST['account_number'])) ? $this->input->post('account_number', true) : "",
                     'store_description' => (isset($_POST['store_description']) && !empty($_POST['store_description'])) ? $this->input->post('store_description', true) : "",
                     'store_url' => (isset($_POST['store_url']) && !empty($_POST['store_url'])) ? $this->input->post('store_url', true) : "",
                     'store_name' => (isset($_POST['store_name']) && !empty($_POST['store_name'])) ? $this->input->post('store_name', true) : "",
@@ -390,6 +390,7 @@ class Auth extends CI_Controller
                     echo json_encode($response);
                     return false;
                 }
+
                 $identity_column = $this->config->item('identity', 'ion_auth');
                 $email = strtolower($this->input->post('email'));
                 $mobile = $this->input->post('mobile');
@@ -399,7 +400,6 @@ class Auth extends CI_Controller
                 $additional_data = [
                     'username' => $this->input->post('name', true),
                     'address' => $this->input->post('address', true),
-                    'country_code' => isset($_POST['country_code']) ? str_replace('+', '', $this->input->post('country_code')) : 0,
                     'type' => 'phone',
                 ];
                 $this->ion_auth->register($identity, $password, $email, $additional_data, ['4']);
@@ -408,17 +408,17 @@ class Auth extends CI_Controller
 
                     $data = array(
                         'user_id' => $user_id[0]['id'],
-                        // 'address_proof' => (!empty($proof_doc)) ? $proof_doc : null,
-                        // 'national_identity_card' => (!empty($id_card_doc)) ? $id_card_doc : null,
+                        'address_proof' => (!empty($proof_doc)) ? $proof_doc : null,
+                        'national_identity_card' => (!empty($id_card_doc)) ? $id_card_doc : null,
                         'store_logo' => (!empty($store_logo_doc)) ? $store_logo_doc : null,
                         'authorized_signature' => (!empty($authorized_signature_doc)) ? $authorized_signature_doc : null,
-                        // 'pan_number' => (isset($_POST['pan_number']) && !empty($_POST['pan_number'])) ? $this->input->post('pan_number', true) : "",
-                        // 'tax_number' => $this->input->post('tax_number', true),
-                        // 'tax_name' => $this->input->post('tax_name', true),
-                        // 'bank_name' => (isset($_POST['bank_name']) && !empty($_POST['bank_name'])) ? $this->input->post('bank_name', true) : "",
-                        // 'bank_code' => (isset($_POST['bank_code']) && !empty($_POST['bank_code'])) ? $this->input->post('bank_code', true) : "",
-                        // 'account_name' => (isset($_POST['account_name']) && !empty($_POST['account_name'])) ? $this->input->post('account_name', true) : "",
-                        // 'account_number' => (isset($_POST['account_number']) && !empty($_POST['account_number'])) ? $this->input->post('account_number', true) : "",
+                        'pan_number' => (isset($_POST['pan_number']) && !empty($_POST['pan_number'])) ? $this->input->post('pan_number', true) : "",
+                        'tax_number' => $this->input->post('tax_number', true),
+                        'tax_name' => $this->input->post('tax_name', true),
+                        'bank_name' => (isset($_POST['bank_name']) && !empty($_POST['bank_name'])) ? $this->input->post('bank_name', true) : "",
+                        'bank_code' => (isset($_POST['bank_code']) && !empty($_POST['bank_code'])) ? $this->input->post('bank_code', true) : "",
+                        'account_name' => (isset($_POST['account_name']) && !empty($_POST['account_name'])) ? $this->input->post('account_name', true) : "",
+                        'account_number' => (isset($_POST['account_number']) && !empty($_POST['account_number'])) ? $this->input->post('account_number', true) : "",
                         'store_description' => (isset($_POST['store_description']) && !empty($_POST['store_description'])) ? $this->input->post('store_description', true) : "",
                         'store_url' => (isset($_POST['store_url']) && !empty($_POST['store_url'])) ? $this->input->post('store_url', true) : "",
                         'store_name' => (isset($_POST['store_name']) && !empty($_POST['store_name'])) ? $this->input->post('store_name', true) : "",
@@ -426,38 +426,6 @@ class Auth extends CI_Controller
                     );
                     $insert_id = $this->Seller_model->add_seller($data);
                     if (!empty($insert_id)) {
-                        $seller_user_id = fetch_details('seller_data', ['id' => $insert_id]);
-                        $seller_id = fetch_details('users', ['id' => $seller_user_id[0]['user_id']]);
-
-                        //find admin email 
-                        $user_group = fetch_details('users_groups', ['group_id' => 1], '*');
-                        $admin_id = fetch_details('users', ['id' => $user_group[0]['user_id']], 'email,username');
-                        // print_r($admin_id);
-                        //     print_r($user_group);
-                        //     die;
-                        if (!empty($admin_id[0]['email'])) {
-                            $title = "Seller registared Successfully in your plateform Please check";
-                            $mail_admin_msg = 'Congratulations , We hope this message finds you well. We are writing to inform you about the registrer of seller account on your platform.Please be aware that this action is not reversible, Please conect with us.';
-                            $email_message = array(
-                                'username' => 'Hello, Dear <b>' . ucfirst($admin_id[0]['username']) . '</b>, ',
-                                'subject' => $title,
-                                'email' => $admin_id[0]['email'],
-                                'message' => $mail_admin_msg
-                            );
-                            send_mail($admin_id[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
-                        }
-
-
-                        $title = "Seller registared Successfully. Wait for aprooval of admin.";
-                        $mail_admin_msg = 'Congratulations , We hope this message finds you well. We are writing to inform you about the registrer of your seller account on our platform.Please be aware that this action is not reversible, Please conect with us and wait for admin approval for your account.';
-                        $email_message = array(
-                            'username' => 'Hello, Dear <b>' . ucfirst($seller_id[0]['username']) . '</b>, ',
-                            'subject' => $title,
-                            'email' => $seller_id[0]['email'],
-                            'message' => $mail_admin_msg
-                        );
-                        // print_R($email_message);
-                        send_mail($seller_id[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
                         $this->response['error'] = false;
                         $this->response['csrfName'] = $this->security->get_csrf_token_name();
                         $this->response['csrfHash'] = $this->security->get_csrf_hash();
@@ -550,9 +518,9 @@ class Auth extends CI_Controller
         $this->form_validation->set_rules('username', 'Username', 'required|xss_clean|trim');
 
         if (!empty($_POST['old']) || !empty($_POST['new']) || !empty($_POST['new_confirm'])) {
-            $this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required|xss_clean');
-            $this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|xss_clean|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
-            $this->form_validation->set_rules('new_confirm', $this->lang->line('change_password_validation_new_password_confirm_label'), 'required|xss_clean');
+            $this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required');
+            $this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
+            $this->form_validation->set_rules('new_confirm', $this->lang->line('change_password_validation_new_password_confirm_label'), 'required');
         }
 
 

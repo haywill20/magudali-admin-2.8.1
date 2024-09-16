@@ -59,10 +59,10 @@
                                     </div>
                                 </form>
                             </div>
-                            <!-- <div class="d-flex justify-content-center">
+                            <div class="d-flex justify-content-center">
                                 <div class="form-group" id="error_box">
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -101,10 +101,10 @@
                                                         <button type="submit" class="btn btn-success" id="submit_btn">Save</button>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="d-flex justify-content-center">
+                                                <div class="d-flex justify-content-center">
                                                     <div class="form-group" id="error_box">
                                                     </div>
-                                                </div> -->
+                                                </div>
                                                 <!-- /.card-body -->
                                             </form>
                                         </div>
@@ -187,7 +187,7 @@
                                         <th data-field="status" data-sortable='true' data-visible='false'>Status</th>
                                         <th data-field="active_status" data-sortable='true' data-visible='true'>Active Status</th>
                                         <th data-field="date_added" data-sortable='true'>Order Date</th>
-                                        <th data-field="operate" data-sortable="false">Action</th>
+                                        <th data-field="operate">Action</th>
                                         <th data-field="send_mail">Send Mail</th>
                                     </tr>
                                 </thead>

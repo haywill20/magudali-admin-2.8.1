@@ -18,25 +18,7 @@ class Home_model extends CI_Model
             $this->db->where('oi.delivery_boy_id', $user_id);
         }
         $res = $this->db->get('`orders` o')->result_array();
-        // echo $this->db->last_query();
-        return $res[0]['counter'];
-    }
-    public function count_dashboard_orders($type = '')
-    {
-        $res = $this->db->select('count(distinct oi.order_id) as counter');
-        if (!empty($type) && $type != 'api') {
-            if ($this->ion_auth->is_delivery_boy()) {
-                $user_id = $this->session->userdata('user_id');
-                $this->db->where('oi.delivery_boy_id', $user_id);
-            }
-        }
-        if ($this->ion_auth->is_delivery_boy()) {
-            $this->db->join('order_items oi', 'oi.order_id=o.id', 'left');
-            $user_id = $this->session->userdata('user_id');
-            $this->db->where('oi.delivery_boy_id', $user_id);
-        }
-        $res = $this->db->get('`order_items` oi')->result_array();
-        // echo $this->db->last_query();
+        
         return $res[0]['counter'];
     }
 

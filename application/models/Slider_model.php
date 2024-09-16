@@ -14,7 +14,7 @@ class Slider_model extends CI_Model
     function add_slider($data)
     {
         $data = escape_array($data);
-        // print_r($data);
+
         $slider_data = [
             'type' => $data['slider_type'],
             'image' => $data['image'],
@@ -30,25 +30,17 @@ class Slider_model extends CI_Model
         }
 
         if (isset($data['slider_type']) && $data['slider_type'] == 'products' && isset($data['product_id']) && !empty($data['product_id'])) {
-            // $product_ids = implode(',', $data['product_id']);
-            // print_r($product_ids);
-            // $slider_data['type_id'] = $product_ids;
             $slider_data['type_id'] = $data['product_id'];
             $slider_data['link'] = '';
         }
-        // else{
-        //     $product_ids = null;
-        // }
 
-
-        if (isset($data['edit_slider']) && !empty($data['edit_slider'])) {
+        if (isset($data['edit_slider'])) {
             if (empty($data['image'])) {
                 unset($slider_data['image']);
             }
 
             $this->db->set($slider_data)->where('id', $data['edit_slider'])->update('sliders');
         } else {
-            // print_r($slider_data);
             $this->db->insert('sliders', $slider_data);
         }
     }
@@ -58,7 +50,7 @@ class Slider_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'DESC';
+        $order = 'ASC';
         $multipleWhere = '';
 
         if (isset($_GET['offset']))
@@ -113,18 +105,7 @@ class Slider_model extends CI_Model
         foreach ($slider_search_res as $row) {
             $row = output_escaping($row);
 
-            if (isset($row['type_id']) && !empty($row['type_id']) && $row['type'] == 'products') {
-                $product = fetch_details('products', ['id' => $row['type_id']], 'name');
-                $tempRow['name'] = $product[0]['name'];
-            } elseif (isset($row['type_id']) && !empty($row['type_id']) && $row['type'] == 'categories') {
-                $categories = fetch_details('categories', ['id' => $row['type_id']], 'name');
-                $tempRow['name'] = $categories[0]['name'];
-            }else{
-               $tempRow['name'] = ''; 
-            }
-
-            // $operate = ' <a href="' . base_url('admin/slider/manage-slider?edit_id=' . $row['id']) . '" class="btn btn-success edit_slider action-btn btn-xs ml-1 mr-1 mb-1"  title="Edit" data-id="' . $row['id'] . '" data-url="admin/slider/"><i class="fa fa-pen"></i></a>';
-            $operate = ' <a href="' . base_url('admin/slider/manage-slider?edit_id=' . $row['id']) . '" class="btn btn-success edit_slider action-btn btn-xs ml-1 mr-1 mb-1"  title="Edit" data-id="' . $row['id'] . '" data-target="#add_slider" data-toggle="modal"><i class="fa fa-pen"></i></a>';
+            $operate = ' <a href="' . base_url('admin/slider?edit_id=' . $row['id']) . '" class="btn btn-success action-btn btn-xs ml-1 mr-1 mb-1"  title="Edit" data-id="' . $row['id'] . '" data-url="admin/slider/"><i class="fa fa-pen"></i></a>';
             $operate .= ' <a  href="javascript:void(0)" class="btn btn-danger btn-xs action-btn mr-1 mb-1 ml-1"  title="Delete" id="delete-slider" data-id="' . $row['id'] . '"  ><i class="fa fa-trash"></i></a>';
 
             $tempRow['id'] = $row['id'];

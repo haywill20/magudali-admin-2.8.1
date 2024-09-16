@@ -113,7 +113,7 @@
                                                 <br>
                                             </td>
                                             <td>
-                                                <?= number_format($tax_amount, 2) ?>
+                                                <?= number_format($tax_amount,2) ?>
                                                 <br>
                                             </td>
                                             <td>
@@ -201,30 +201,13 @@
                                                 </td>
                                             </tr>
                                         <?php } ?>
-                                        <!-- <?php
-                                        //if (isset($order_detls[0]['discount']) && $order_detls[0]['discount'] > 0 && $order_detls[0]['discount'] != NULL) { ?>
-                                            <tr>
-                                                <th>Special Discount
-                                                    <?//= $settings['currency'] ?>(<?//= $order_detls[0]['discount'] ?> %)</th>
-                                                <td>-
-                                                    <?//php echo $special_discount = round($cal_final_total * $order_detls[0]['discount'] / 100, 2);
-                                                    //$cal_final_total = floatval($cal_final_total - $special_discount);
-                                                    ?>
-                                                </td>
-                                            </tr>
-                                        <?php
-                                        //}
-                                        ?> -->
                                         <?php
                                         if (isset($order_detls[0]['discount']) && $order_detls[0]['discount'] > 0 && $order_detls[0]['discount'] != NULL) { ?>
                                             <tr>
                                                 <th>Special Discount
-                                                    <?= $settings['currency'] ?>(<?= $order_detls[0]['discount'] ?>)</th>
+                                                    <?= $settings['currency'] ?>(<?= $order_detls[0]['discount'] ?> %)</th>
                                                 <td>-
-                                                    <? //php echo $special_discount = round($cal_final_total * $order_detls[0]['discount'] / 100, 2);
-                                                    //$cal_final_total = floatval($cal_final_total - $special_discount);
-                                                    ?>
-                                                    <?php echo $special_discount = round($order_detls[0]['discount']);
+                                                    <?php echo $special_discount = round($cal_final_total * $order_detls[0]['discount'] / 100, 2);
                                                     $cal_final_total = floatval($cal_final_total - $special_discount);
                                                     ?>
                                                 </td>

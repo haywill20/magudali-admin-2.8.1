@@ -33,10 +33,10 @@
                                 <div class="form-group pt-3">
                                     <button class="btn btn-success" id="system_update_btn">Update The System</button>
                                 </div>
-                                <!-- <div class="d-flex justify-content-center">
+                                <div class="d-flex justify-content-center">
                                     <div class="form-group" id="error_box">
                                     </div>
-                                </div> -->
+                                </div>
                             </div>
                         </form>
                     </div>

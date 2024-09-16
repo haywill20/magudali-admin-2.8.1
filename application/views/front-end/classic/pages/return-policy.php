@@ -1,4 +1,4 @@
-<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
+<section class="breadcrumb-title-bar colored-breadcrumb">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('return_policy')) ? $this->lang->line('return_policy') : 'Return Policy' ?></h2>
         <nav aria-label="breadcrumb">

@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<div class="content-wrapper deeplink_wrapper">
+<div class="content-wrapper">
     <section class="wrapper bg-soft-grape">
         <div class="container py-3 py-md-5">
             <nav class="d-inline-block" aria-label="breadcrumb">
@@ -25,11 +25,8 @@
     <div class="entry-content">
         <div id="compare-items" class="d-flex flex-column">
             <div class="container">
-                <div class="align-items-center d-flex flex-column">
-                    <div class="empty-compare">
-                        <img src="<?= base_url('assets/front_end/modern/img/empty-compare.webp') ?>" alt="<?= !empty($this->lang->line('no_items_to_compare')) ? $this->lang->line('no_items_to_compare') : 'No items to compare' ?>">
-                    </div>
-                    <div class="h5"><?= !empty($this->lang->line('no_items_to_compare')) ? $this->lang->line('no_items_to_compare') : 'No items to compare' ?></div>
+                <div class="row">
+                    <div class="col-md-12 d-flex justify-content-center h5">No items to compare</div>
                 </div>
             </div>
         </div>

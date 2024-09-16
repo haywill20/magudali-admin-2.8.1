@@ -77,7 +77,7 @@ $config['url_suffix'] = '';
 | than english.
 |
 */
-$config['language']    = 'english';
+$config['language']    = 'spanish';
 
 /*
 |--------------------------------------------------------------------------
@@ -451,19 +451,12 @@ $config['global_xss_filtering'] = FALSE;
 | 'csrf_exclude_uris' = Array of URIs which ignore CSRF checks
 */
 
-$config['csrf_protection'] = TRUE;
+$config['csrf_protection'] = FALSE;
 $config['csrf_token_name'] = 'ekart_security_token';
 $config['csrf_cookie_name'] = 'ekart_security_cookie';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = TRUE;
-$config['csrf_exclude_uris'] = array(
-    'admin/product/process_bulk_upload', 'login/logout', 'my-account/update-order-item-status', 'admin/product/get_subcategory', 'admin/themes/switch',
-    'admin/setting/set-default-theme', 'admin/updater/upload_update_file', 'admin/webhook/spr_webhook', 'cart/pre-payment-setup',
-    'cart/validate-promo-code', 'my-account/get-address', 'cart/place-order', 'cart/manage', 'payment/[a-z_-]+', 'admin/category/add_category',
-    'admin/orders/update_orders', 'admin/product/update_product_order', 'admin/orders/delete_orders', 'admin/product/delete_product', 'admin/language/set_default_for_web',
-    'app/v1/api/[a-z_-]+', 'delivery_boy/app/v1/api/[a-z_-]+', 'admin/app/v1/api/[a-z_-]+', 'admin/home/fetch_sales', 'seller/app/v1/api/[a-z_-]+',
-    'app/v1/Chat_Api/[a-z_-]+', 'seller/app/v1/Chat_Api/[a-z_-]+', 'admin/webhook/[a-z_-]+', 'admin/media/upload', 'admin/webhook/phonepe_webhook', 'admin/chat/[a-z_-]+', 'seller/chat/[a-z_-]+', 'admin/orders/[a-z_-]+', 'seller/orders/[a-z_-]+'
-);
+$config['csrf_exclude_uris'] = array('admin/product/process_bulk_upload', 'admin/product/get_subcategory','admin/themes/switch','admin/setting/set-default-theme','admin/updater/upload_update_file','admin/webhook/spr_webhook', 'cart/pre-payment-setup', 'cart/validate-promo-code', 'my-account/get-address', 'cart/place-order', 'payment/[a-z_-]+', 'admin/category/add_category', 'admin/orders/update_orders', 'admin/product/update_product_order', 'admin/orders/delete_orders', 'admin/product/delete_product', 'app/v1/api/[a-z_-]+', 'delivery_boy/app/v1/api/[a-z_-]+', 'admin/app/v1/api/[a-z_-]+', 'admin/home/fetch_sales', 'seller/app/v1/api/[a-z_-]+', 'admin/webhook/[a-z_-]+','admin/media/upload');
 
 /*
 |--------------------------------------------------------------------------
@@ -596,5 +589,3 @@ $config['type'] = array(
     'spreadsheet' => ['xls', 'xsls'],
     'archive' => ['zip', '7z', 'bz2', 'gz', 'gzip', 'rar', 'tar'],
 );
-
-$config["excluded_resize_extentions"] = ["gif"];

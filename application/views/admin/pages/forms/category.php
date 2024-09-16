@@ -30,7 +30,7 @@
                                 <div class="form-group row">
                                     <label for="category_input_name" class="col-sm-2 col-form-label">Name <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="category_input_name" placeholder="Category Name" name="category_input_name" value="<?= isset($fetched_data[0]['name']) ? output_escaping($fetched_data[0]['name']) : "" ?>">
+                                        <input type="text" class="form-control" id="category_input_name" placeholder="Category Name" name="category_input_name" value="<?= isset($fetched_data[0]['name'])?output_escaping($fetched_data[0]['name']):"" ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -48,7 +48,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" >
                                     <label for="image">Main Image <span class='text-danger text-sm'>*</span><small>(Recommended Size : 131 x 131 pixels)</small></label>
                                     <div class="col-sm-10">
                                         <div class='col-md-3'><a class="uploadFile img btn btn-primary text-white btn-sm" data-input='category_input_image' data-isremovable='0' data-is-multiple-uploads-allowed='0' data-toggle="modal" data-target="#media-upload-modal" value="Upload Photo"><i class='fa fa-upload'></i> Upload</a></div>
@@ -100,7 +100,10 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Category' : 'Add Category' ?></button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                </div>
+                            </div>
                     </div>
                     <!-- /.card-footer -->
                     </form>

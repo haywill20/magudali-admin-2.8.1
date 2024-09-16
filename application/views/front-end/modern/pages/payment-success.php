@@ -1,4 +1,4 @@
-<section class="main-content mb-15 deeplink_wrapper">
+<section class="main-content mb-15">
     <div class="row">
         <div class="col-md-12 col-12 mt-4 pt-2">
             <div class="tab-content" id="pills-tabContent">

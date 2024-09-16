@@ -1,6 +1,6 @@
-<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
+<section class="breadcrumb-title-bar colored-breadcrumb">
     <div class="main-content responsive-breadcrumb">
-        <h2><?= !empty($this->lang->line('faq')) ? $this->lang->line('faq') : 'FAQ' ?></h2>
+        <h2>FAQ'S</h2>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="<?= base_url() ?>"><?= !empty($this->lang->line('home')) ? $this->lang->line('home') : 'Home' ?></a></li>
@@ -31,18 +31,6 @@
                         </div>
                     <?php } ?>
                 </div>
-                <?php if ((!isset($faq['data']) && empty($faq['data'])) || $faq['data'] == []) { ?>
-                    <div class="d-flex flex-column align-items-center mt-7">
-                        <div>
-                            <img src="<?= base_url('assets/front_end/modern/img/new/No-Faq.png') ?>" alt="No Faq" width="160px" />
-                        </div>
-                        <div>
-                            <div class=" add-faqs-form float-right">
-                                <h1 class="h2"><?= !empty($this->lang->line('no_faqs_found')) ? $this->lang->line('no_faqs_found') : 'No FAQs Found.' ?></h1>
-                            </div>
-                        </div>
-                    </div>
-                <?php } ?>
             </div>
             <div class="col-md-5">
                 <div class="faq_image">

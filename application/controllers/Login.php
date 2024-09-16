@@ -18,6 +18,11 @@ class Login extends CI_Controller
 
     public function login_check()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if (!$this->ion_auth->logged_in()) {
             $this->data['main_page'] = 'home';
             $this->data['title'] = 'Login Panel | ' . $this->data['settings']['app_name'];
@@ -58,11 +63,7 @@ class Login extends CI_Controller
     public function logout()
     {
         $this->ion_auth->logout();
-        $this->response['error'] = true;
-        $this->response['message'] = 'Logout successful.';
-        echo json_encode($this->response);
-        // redirect('home', 'refresh');
-        return false;
+        redirect('home', 'refresh');
     }
 
     public function update_user()
@@ -79,7 +80,7 @@ class Login extends CI_Controller
         //     $this->session->set_flashdata('authorize_flag', PERMISSION_ERROR_MSG);
         //     redirect('admin/home', 'refresh');
         // }
-
+        
         $identity_column = $this->config->item('identity', 'ion_auth');
         // $identity = $this->session->userdata('identity');
         $user_id = $_SESSION['user_id'];
@@ -96,9 +97,9 @@ class Login extends CI_Controller
         $this->form_validation->set_rules('username', 'Username', 'required|xss_clean|trim');
 
         if (!empty($_POST['old']) || !empty($_POST['new']) || !empty($_POST['new_confirm'])) {
-            $this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required|xss_clean');
-            $this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|xss_clean|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
-            $this->form_validation->set_rules('new_confirm', $this->lang->line('change_password_validation_new_password_confirm_label'), 'required|xss_clean');
+            $this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required');
+            $this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
+            $this->form_validation->set_rules('new_confirm', $this->lang->line('change_password_validation_new_password_confirm_label'), 'required');
         }
 
 
@@ -129,83 +130,7 @@ class Login extends CI_Controller
                     return false;
                 }
             }
-
-            if (!file_exists(FCPATH . USER_IMG_PATH)) {
-                mkdir(FCPATH . USER_IMG_PATH, 0777);
-            }
-
-            $temp_array = array();
-            $files = $_FILES;
-            $images_new_name_arr = array();
-            $images_info_error = "";
-            $allowed_media_types = implode('|', allowed_media_types());
-            $config = [
-                'upload_path' =>  FCPATH . USER_IMG_PATH,
-                'allowed_types' => $allowed_media_types,
-                'max_size' => 8000,
-            ];
-
-            // print_r($_POST);
-            // print_r($_FILES);
-            // print_r($_FILES['profile_image']['name'][0]);
-            // die;
-            
-            if (!empty($_FILES['profile_image']['name'][0]) && isset($_FILES['profile_image']['name'])) {
-                $other_image_cnt = count($_FILES['profile_image']['name']);
-                $other_img = $this->upload;
-                $other_img->initialize($config);
-                
-                for ($i = 0; $i < $other_image_cnt; $i++) {
-
-                    if (!empty($_FILES['profile_image']['name'][$i])) {
-
-                        $_FILES['temp_image']['name'] = $files['profile_image']['name'][$i];
-                        $_FILES['temp_image']['type'] = $files['profile_image']['type'][$i];
-                        $_FILES['temp_image']['tmp_name'] = $files['profile_image']['tmp_name'][$i];
-                        $_FILES['temp_image']['error'] = $files['profile_image']['error'][$i];
-                        $_FILES['temp_image']['size'] = $files['profile_image']['size'][$i];
-                        if (!$other_img->do_upload('temp_image')) {
-                            $images_info_error = 'profile_image :' . $images_info_error . ' ' . $other_img->display_errors();
-                        } else {
-                            $temp_array = $other_img->data();
-                            resize_review_images($temp_array, FCPATH . USER_IMG_PATH);
-                            $images_new_name_arr[$i] = USER_IMG_PATH . $temp_array['file_name'];
-                        }
-                    } else {
-                        $_FILES['temp_image']['name'] = $files['profile_image']['name'][$i];
-                        $_FILES['temp_image']['type'] = $files['profile_image']['type'][$i];
-                        $_FILES['temp_image']['tmp_name'] = $files['profile_image']['tmp_name'][$i];
-                        $_FILES['temp_image']['error'] = $files['profile_image']['error'][$i];
-                        $_FILES['temp_image']['size'] = $files['profile_image']['size'][$i];
-                        if (!$other_img->do_upload('temp_image')) {
-                            $images_info_error = $other_img->display_errors();
-                        }
-                    }
-                }
-                // print_r($images_new_name_arr[0]);
-                //Deleting Uploaded attachments if any overall error occured
-                if ($images_info_error != NULL || !$this->form_validation->run()) {
-                    if (isset($images_new_name_arr) && !empty($images_new_name_arr || !$this->form_validation->run())) {
-                        foreach ($images_new_name_arr as $key => $val) {
-                            unlink(FCPATH . USER_IMG_PATH . $images_new_name_arr[$key]);
-                        }
-                    }
-                }
-            }
-            if ($images_info_error != NULL) {
-                $this->response['error'] = true;
-                $this->response['message'] =  $images_info_error;
-                print_r(json_encode($this->response));
-                return false;
-            }
-
-            $user_details = [
-                'username' => $this->input->post('username'), 
-                'email' => $this->input->post('email'), 
-                'mobile' => $this->input->post('mobile'),
-                'image' => (isset($images_new_name_arr[0]) && !empty($images_new_name_arr[0])) ? $images_new_name_arr[0] : $_POST['user_profile_image'],
-                // 'image' => (isset($_POST['user_profile_image']) && !empty($_POST['user_profile_image'])) ? $images_new_name_arr[0] : "",
-            ];
+            $user_details = ['username' => $this->input->post('username'), 'email' => $this->input->post('email'), 'mobile' => $this->input->post('mobile')];
             $user_details = escape_array($user_details);
             $this->db->set($user_details)->where($identity_column, $identity)->update($tables['login_users']);
             $this->response['error'] = false;

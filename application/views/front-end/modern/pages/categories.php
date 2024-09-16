@@ -1,4 +1,4 @@
-<section class="container mb-15 mt-md-5 deeplink_wrapper">
+<section class="container mb-15 mt-md-5">
     <div class="category-section container-fluid text-center">
         <div class='my-4 featured-section-title'>
             <div class='col-md-12'>
@@ -6,17 +6,17 @@
             </div>
             <hr class="mt-6 mb-6">
         </div>
-        <div class="d-flex flex-wrap">
+        <div class="row">
             <?php foreach ($categories as $key => $row) { ?>
-                <div class="col-md-2 col-6 mb-6">
-                    <div class="align-items-center category-image d-flex flex-column justify-content-center">
+                <div class="col-md-2 col-sm-6 mb-6">
+                    <div class="category-image justify-content-center d-flex">
                         <div class="category-image-container">
                             <a href="<?= base_url('products/category/' . html_escape($row['slug'])) ?>">
-                                <img src="<?= base_url('media/image?path='. $row['relative_path'] .'&width=125&quality=80') ?>">
+                                <img src="<?= $row['image'] ?>">
                             </a>
-                        </div>
-                        <div class="">
-                            <span><?= html_escape($row['name']) ?></span>
+                            <div class="">
+                                <span><?= html_escape($row['name']) ?></span>
+                            </div>
                         </div>
                     </div>
                 </div>

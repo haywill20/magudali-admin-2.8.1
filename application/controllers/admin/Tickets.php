@@ -13,8 +13,6 @@ class Tickets extends CI_Controller
         $this->load->library(['ion_auth', 'form_validation', 'upload']);
         $this->load->helper(['url', 'language', 'file']);
         $this->load->model('ticket_model');
-        $this->data['firebase_project_id'] = get_settings('firebase_project_id');
-        $this->data['service_account_file'] = get_settings('service_account_file');
         if (!has_permissions('read', 'support_tickets')) {
             $this->session->set_flashdata('authorize_flag', PERMISSION_ERROR_MSG);
             redirect('admin/home', 'refresh');
@@ -315,8 +313,6 @@ class Tickets extends CI_Controller
                     'edit_ticket_status' => $ticket_id
                 );
                 $settings = get_settings('system_settings', true);
-                $firebase_project_id = $this->data['firebase_project_id'];
-                $service_account_file = $this->data['service_account_file'];
                 if (!$this->ticket_model->add_ticket($data)) {
                     $result = $this->ticket_model->get_tickets($ticket_id);
                     if (!empty($result)) {
@@ -327,23 +323,20 @@ class Tickets extends CI_Controller
                         $hashtag = html_entity_decode($string);
                         $data = str_replace($hashtag_application_name, $settings['app_name'], $hashtag);
                         $message = output_escaping(trim($data, '"'));
-                        // print_r($ticket_id);
-                        $ticket_res = fetch_details('tickets', ['id' => $ticket_id], 'user_id');
+                        $ticket_res = fetch_details('ticket_messages', ['user_type' => 'user', 'ticket_id' => $ticket_id], 'user_id');
 
-                        // print_r($ticket_res);
                         $user_res = fetch_details("users", ['id' => $ticket_res[0]['user_id']], 'fcm_id', '',  '', '', '');
                         $fcm_ids[0][] = $user_res[0]['fcm_id'];
                         $fcm_admin_subject =  (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Your Ticket status has been changed";
                         $fcm_admin_msg = (!empty($custom_notification)) ? $message : "Ticket Message";
-                        if (!empty($fcm_ids) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                        if (!empty($fcm_ids)) {
                             $fcmMsg = array(
                                 'title' => $fcm_admin_subject,
                                 'body' => $fcm_admin_msg,
                                 'type' => "ticket_status",
                                 'type_id' => $ticket_id
                             );
-
-                            send_notification($fcmMsg, $fcm_ids,$fcmMsg);
+                            send_notification($fcmMsg, $fcm_ids);
                         }
                     }
                     $this->response['error'] = false;

@@ -20,13 +20,6 @@ Defined Methods:-
 ---------------------------------------------------------------------------
 
 */
-    private  $user_details = [];
-
-    protected $excluded_routes = [
-        "seller/app/v1/Chat_Api/search_user",
-        "seller/app/v1/Chat_Api/get_supporters",
-
-    ];
 
     public function __construct()
     {
@@ -47,18 +40,6 @@ Defined Methods:-
         $this->identity_column = $this->config->item('identity', 'ion_auth');
         // initialize db tables data
         $this->tables = $this->config->item('tables', 'ion_auth');
-
-        $current_uri =  uri_string();
-        if (!in_array($current_uri, $this->excluded_routes)) {
-            $token = verify_app_request();
-            if ($token['error']) {
-                header('Content-Type: application/json');
-                http_response_code($token['status']);
-                print_r(json_encode($token));
-                die();
-            }
-            $this->user_details = $token['data'];
-        }
     }
 
     function test()
@@ -88,7 +69,7 @@ Defined Methods:-
         $payload = [
             'iat' => time(), /* issued at time */
             'iss' => 'eshop',
-            'exp' => time() + (60 * 60 * 24 * 365), /* expires after 1 minute */
+            'exp' => time() + (30 * 60), /* expires after 1 minute */
         ];
         $token = $this->jwt->encode($payload, JWT_SECRET_KEY);
         print_r(json_encode($token));
@@ -117,19 +98,23 @@ Defined Methods:-
             JWT::$leeway = 6000000000;
             $flag = true; //For payload indication that it return some data or throws an expection.
             $error = true; //It will indicate that the payload had verified the signature and hash is valid or not.
-            try {
-                // $payload = $this->jwt->decode($token, $row['secret'], ['HS256']);
-                $payload = $this->jwt->decode($token, new Key(JWT_SECRET_KEY, 'HS256'));
-                if (isset($payload->iss) && $payload->iss == 'eshop') {
-                    $error = false;
-                    $flag = false;
-                } else {
-                    $error = true;
-                    $flag = false;
-                    $message = 'Invalid Hash';
+            foreach ($api_keys as $row) {
+                $message = '';
+                try {
+                    // $payload = $this->jwt->decode($token, $row['secret'], ['HS256']);
+                    $payload = $this->jwt->decode($token, new Key($row['secret'], 'HS256'));
+                    if (isset($payload->iss) && $payload->iss == 'eshop') {
+                        $error = false;
+                        $flag = false;
+                    } else {
+                        $error = true;
+                        $flag = false;
+                        $message = 'Invalid Hash';
+                        break;
+                    }
+                } catch (Exception $e) {
+                    $message = $e->getMessage();
                 }
-            } catch (Exception $e) {
-                $message = $e->getMessage();
             }
 
             if ($flag) {
@@ -214,62 +199,70 @@ Defined Methods:-
             return false;
         }
 
-        $user_id = isset($this->user_details['id']) && $this->user_details['id'] !== null ? $this->user_details['id'] : '';
+        $this->form_validation->set_rules('user_id', 'User Id', 'trim|numeric|required|xss_clean');
 
 
-        $limit = (isset($_POST['limit'])) ? $this->input->post('limit', true) : 10;
-        $offset = (isset($_POST['offset'])) ? $this->input->post('offset', true) : 0;
-        $user = array();
-        $i = 0;
-        $type = 'person';
+        if (!$this->form_validation->run()) {
+            $this->response['error'] = true;
+            $this->response['message'] = strip_tags(validation_errors());
+            $this->response['data'] = array();
+            print_r(json_encode($this->response));
+            return;
+        } else {
+
+            $limit = (isset($_POST['limit'])) ? $this->input->post('limit', true) : 10;
+            $offset = (isset($_POST['offset'])) ? $this->input->post('offset', true) : 0;
+            $user = array();
+            $i = 0;
+            $type = 'person';
 
 
-        $members = $this->chat_model->get_chat_history($user_id, $limit, $offset);
+            $members = $this->chat_model->get_chat_history($_POST['user_id'], $limit, $offset);
 
 
 
-        foreach ($members as $row) {
-            //  print_R($row);
+            foreach ($members as $row) {
+                //  print_R($row);
 
-            $to_id = (isset($user_id)) ? $user_id : '';
-            $from_id = $row['from_id'];
-            // $to_id = $row['to_id'];
-            // $from_id = $row['id'];
+                $to_id = (isset($_POST['user_id'])) ? $this->input->post('user_id', true) : '';
+                $from_id = $row['from_id'];
+                // $to_id = $row['to_id'];
+                // $from_id = $row['id'];
 
-            if (isset($from_id) && !empty($from_id)) {
-                $unread_meg = $this->chat_model->get_unread_msg_count($type, $from_id, $to_id);
-            }
+                if (isset($from_id) && !empty($from_id)) {
+                    $unread_meg = $this->chat_model->get_unread_msg_count($type, $from_id, $to_id);
+                }
 
 
-            $user[$i] = $row;
-            $user[$i]['unread_msg'] = $unread_meg;
+                $user[$i] = $row;
+                $user[$i]['unread_msg'] = $unread_meg;
 
-            $date = strtotime('now');
-            if ($to_id == $row['opponent_user_id']) {
-                $user[$i]['is_online'] = 1;
-            } else {
-                if ($row['last_online'] > $date) {
+                $date = strtotime('now');
+                if ($to_id == $row['opponent_user_id']) {
                     $user[$i]['is_online'] = 1;
                 } else {
-                    $user[$i]['is_online'] = 0;
+                    if ($row['last_online'] > $date) {
+                        $user[$i]['is_online'] = 1;
+                    } else {
+                        $user[$i]['is_online'] = 0;
+                    }
                 }
+                $i++;
             }
-            $i++;
+
+
+
+
+            if (isset($members)) {
+                $this->response['error'] = false;
+                $this->response['message'] = "chat retrieved successfully !";
+                $this->response['data'] = $user;
+            } else {
+                $this->response['error'] = true;
+                $this->response['message'] = "chat Not Found !";
+                $this->response['data'] = array();
+            }
         }
-
-
-
-
-        if (isset($members)) {
-            $this->response['error'] = false;
-            $this->response['message'] = "chat retrieved successfully !";
-            $this->response['data'] = $user;
-        } else {
-            $this->response['error'] = true;
-            $this->response['message'] = "chat Not Found !";
-            $this->response['data'] = array();
-        }
-
         print_r(json_encode($this->response));
     }
 
@@ -323,17 +316,10 @@ Defined Methods:-
             foreach ($messages['msg'] as $row) {
                 $message['msg'][$i] = $row;
                 $media_files = $this->chat_model->get_media($row['id']);
-                // if (isset($media_files) && !empty($media_files)) {
-                //     $file_extention = explode('.', $media_files[0]['original_file_name']);
-                //     $media_files[0]['file_extension'] = end($file_extention);
-                //     $media_files[0]['file_url'] = base_url('uploads/chat_media/' . $media_files[0]['original_file_name']);
-                // }
                 if (isset($media_files) && !empty($media_files)) {
-                    for ($j = 0; $j < count($media_files); $j++) {
-                        $file_extention = explode('.', $media_files[$j]['original_file_name']);
-                        $media_files[$j]['file_extension'] = end($file_extention);
-                        $media_files[$j]['file_url'] = base_url('uploads/chat_media/' . $media_files[$j]['original_file_name']);
-                    }
+                    $file_extention = explode('.', $media_files[0]['original_file_name']);
+                    $media_files[0]['file_extension'] = end($file_extention);
+                    $media_files[0]['file_url'] = base_url('uploads/chat_media/' . $media_files[0]['original_file_name']);
                 }
                 $message['msg'][$i]['media_files'] = !empty($media_files) ? $media_files : [];
                 $message['msg'][$i]['text'] = $row['message'];
@@ -410,10 +396,9 @@ Defined Methods:-
 
         $this->form_validation->set_rules('type', 'Type', 'trim|required|xss_clean');
         $this->form_validation->set_rules('from_id', 'From Id', 'trim|numeric|required|xss_clean');
-        // if (isset($_POST['type']) && strtolower($_POST['type']) == 'group') {
-        //     $this->form_validation->set_rules('user_id', 'User Id', 'trim|numeric|required|xss_clean');
-        // }
-        $user_id = isset($this->user_details['id']) && $this->user_details['id'] !== null ? $this->user_details['id'] : '';
+        if (isset($_POST['type']) && strtolower($_POST['type']) == 'group') {
+            $this->form_validation->set_rules('user_id', 'User Id', 'trim|numeric|required|xss_clean');
+        }
 
 
         if (!$this->form_validation->run()) {
@@ -445,7 +430,7 @@ Defined Methods:-
                 } else {
                     $user[$i]['picture'] = '#';
 
-                    if ($this->chat_model->check_group_admin($row['id'], $user_id)) {
+                    if ($this->chat_model->check_group_admin($row['id'], $_POST['user_id'])) {
                         $user[$i]['is_admin'] = true;
                     } else {
                         $user[$i]['is_admin'] = false;
@@ -479,13 +464,12 @@ Defined Methods:-
         if (!$this->verify_token()) {
             return false;
         }
-        $user_id = isset($this->user_details['id']) && $this->user_details['id'] !== null ? $this->user_details['id'] : '';
 
         $this->form_validation->set_rules('type', 'Type', 'trim|required|xss_clean');
         $this->form_validation->set_rules('from_id', 'From Id', 'trim|numeric|required|xss_clean');
-        // if (isset($_POST['type']) && strtolower($_POST['type']) == 'group') {
-        //     $this->form_validation->set_rules('user_id', 'User Id', 'trim|numeric|required|xss_clean');
-        // }
+        if (isset($_POST['type']) && strtolower($_POST['type']) == 'group') {
+            $this->form_validation->set_rules('user_id', 'User Id', 'trim|numeric|required|xss_clean');
+        }
 
         if (!$this->form_validation->run()) {
             $this->response['error'] = true;
@@ -496,7 +480,7 @@ Defined Methods:-
         } else {
 
             $from_id = (isset($_POST['from_id'])) ? $this->input->post('from_id') : '';
-            $to_id = (isset($user_id)) ? $user_id : '';
+            $to_id = (isset($_POST['user_id'])) ? $this->input->post('user_id') : '';
             $type = (isset($_POST['type'])) ? $this->input->post('type') : '';
 
             if ($this->chat_model->mark_msg_read($type, $from_id, $to_id)) {
@@ -527,8 +511,9 @@ Defined Methods:-
         }
 
         $this->form_validation->set_rules('type', 'Type', 'trim|required|xss_clean');
-        // $this->form_validation->set_rules('from_id', 'From Id', 'trim|numeric|required|xss_clean');
+        $this->form_validation->set_rules('from_id', 'From Id', 'trim|numeric|required|xss_clean');
         $this->form_validation->set_rules('to_id', 'To Id', 'trim|numeric|required|xss_clean');
+        $this->form_validation->set_rules('message', 'Message', 'trim|xss_clean');
         $this->form_validation->set_rules('message', 'Message', 'trim|xss_clean');
         $this->form_validation->set_rules('documents', 'documents', 'trim|xss_clean');
 
@@ -542,8 +527,7 @@ Defined Methods:-
         } else {
 
             $type = (isset($_POST['type'])) ? $this->input->post('type') : '';
-            // $from_id = (isset($_POST['from_id'])) ? $this->input->post('from_id') : '';
-            $from_id = isset($this->user_details['id']) && $this->user_details['id'] !== null ? $this->user_details['id'] : '';;
+            $from_id = (isset($_POST['from_id'])) ? $this->input->post('from_id') : '';
             $to_id = (isset($_POST['to_id'])) ? $this->input->post('to_id') : '';
             $message = (isset($_POST['message'])) ? $this->input->post('message') : '';
 
@@ -646,13 +630,10 @@ Defined Methods:-
                 foreach ($messages as $row) {
                     $message[$i] = $row;
                     $media_files = $this->chat_model->get_media($row['id']);
-
                     if (isset($media_files) && !empty($media_files)) {
-                        for ($j = 0; $j < count($media_files); $j++) {
-                            $file_extention = explode('.', $media_files[$j]['original_file_name']);
-                            $media_files[$j]['file_extension'] = end($file_extention);
-                            $media_files[$j]['file_url'] = base_url('uploads/chat_media/' . $media_files[$j]['original_file_name']);
-                        }
+                        $file_extention = explode('.', $media_files[0]['original_file_name']);
+                        $media_files[0]['file_extension'] = end($file_extention);
+                        $media_files[0]['file_url'] = base_url('uploads/chat_media/' . $media_files[0]['original_file_name']);
                     }
                     $message[$i]['media_files'] = !empty($media_files) ? $media_files : [];
                     $message[$i]['text'] = $row['message'];
@@ -664,8 +645,10 @@ Defined Methods:-
 
                     $to_id = $to_id;
                     $from_id = $from_id;
-                    $firebase_project_id = get_settings('firebase_project_id');
-                    $service_account_file = get_settings('service_account_file');
+
+                    // if ($to_id == $from_id && $this->input->post('chat_type') == 'person') {
+                    //     return false;
+                    // }
 
                     // single user msg
                     if ($type == 'person') {
@@ -677,7 +660,7 @@ Defined Methods:-
                         // this is the user who going to send FCM msg 
                         // $senders_info = $this->users_model->get_user_by_id($this->session->userdata('user_id'));
                         $senders_info = fetch_details('users', ['active' => 1, 'id' => $from_id]);
-                        // print_r($senders_info);
+
                         $data = $notification = array();
                         $notification['title'] = $senders_info[0]['username'];
                         // $notification['picture'] = mb_substr($senders_info[0]['first_name'], 0, 1) . '' . mb_substr($senders_info[0]['last_name'], 0, 1);
@@ -712,20 +695,17 @@ Defined Methods:-
                                 $fcm_ids[] = $fcm_id['fcm_id'];
                             }
                         }
-                        $registrationIDs[] = $fcm_ids;
+                        $registrationIDs = $fcm_ids;
                         $fcm_admin_subject = 'New Message from ' . $senders_info[0]['username'];
                         $fcmMsg = array(
                             'title' => $fcm_admin_subject,
                             'body' => $this->input->post('message'),
                             'type' => "chat",
                             'message' => json_encode($new_msg),
-                            // 'content_available' => 'true'
+                            'content_available' => true
                         );
 
-                        // print_r($fcmMsg);
-                        if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                            $fcmFields = send_notification($fcmMsg, $registrationIDs, $fcmMsg);
-                        }
+                        $fcmFields = send_notification($fcmMsg, $registrationIDs);
 
                         $ch = curl_init();
                         $fcm_key = get_settings('fcm_server_key');
@@ -747,6 +727,87 @@ Defined Methods:-
                         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
                         $result['error'] = false;
+                        $result['response'] = curl_exec($ch);
+                        if (curl_errno($ch))
+                            echo 'Error:' . curl_error($ch);
+
+                        curl_close($ch);
+                    } else {
+
+                        // group user msg
+                        $group_id = $to_id;
+
+                        $users = $this->chat_model->get_group_members($group_id);
+                        foreach ($users as $user) {
+                            // $userdata = $this->users_model->get_user_by_id($user['user_id']);
+                            $userdata = fetch_details('users', ['active' => 1, 'id' => $user['user_id']]);
+
+                            if ($user['user_id'] != $from_id) {
+                                $fcm_ids[] = $userdata[0]['fcm_id'];
+                            }
+                        }
+
+                        $registrationIDs = $fcm_ids;
+
+
+                        // this is the user who going to send FCM msg
+                        // $senders_info = $this->users_model->get_user_by_id($this->session->userdata('user_id'));
+                        $senders_info = fetch_details('users', ['active' => 1, 'id' => $from_id]);
+
+                        $data = $notification = array();
+                        $notification['title'] = '#' . $users[0]['title'] . ' - ' . $senders_info[0]['username'];
+                        // $notification['picture'] = mb_substr($senders_info[0]['first_name'], 0, 1) . '' . mb_substr($senders_info[0]['last_name'], 0, 1);
+
+                        // $notification['profile'] = !empty($senders_info[0]['profile']) ? $senders_info[0]['profile'] : '';
+
+                        $notification['senders_name'] = $senders_info[0]['username'];
+                        $notification['type'] = 'message';
+                        $notification['message_type'] = 'group';
+                        $notification['from_id'] = $from_id;
+                        $notification['to_id'] = $group_id;
+                        $notification['msg_id'] = $msg_id;
+                        $notification['registrationIDs'] = $registrationIDs;
+                        $notification['new_msg'] = json_encode($new_msg);
+                        $notification['body'] = $this->input->post('chat-input-textarea');
+                        // $notification['icon'] = 'assets/icons/' . (!empty(get_half_logo()) ? get_half_logo() : 'logo-half.png');
+                        $notification['base_url'] = base_url('chat');
+                        $data['data']['data'] = $notification;
+                        $data['data']['webpush']['fcm_options']['link'] = base_url('chat');
+                        $data['registration_ids'] = $registrationIDs;
+                        $fcm_admin_subject = 'New Message from' . $senders_info[0]['username'];
+                        $fcmMsg = array(
+                            'title' => $fcm_admin_subject,
+                            'body' => $this->input->post('message'),
+                            'type' => "chat",
+                            'message' => json_encode($new_msg),
+                            'content_available' => true
+                        );
+
+                        $fcmFields = send_notification($fcmMsg, $registrationIDs);
+
+                        $ch = curl_init();
+                        $fcm_key = get_settings('firebase_settings');
+
+                        $fcm_key = !empty($fcm_key) ? json_decode($fcm_key) : '';
+
+                        $fcm_key = !empty($fcm_key->fcm_server_key) ? $fcm_key->fcm_server_key : '';
+
+                        curl_setopt($ch, CURLOPT_POST, 1);
+                        $headers = array();
+                        $headers[] = "Authorization: key = " . $fcm_key;
+
+                        $headers[] = "Content-Type: application/json";
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+                        curl_setopt($ch, CURLOPT_URL, "https://fcm.googleapis.com/fcm/send");
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+                        $result['error'] = false;
+
+                        $this->chat_model->set_group_msg_as_unread($group_id, $from_id);
+
                         $result['response'] = curl_exec($ch);
                         if (curl_errno($ch))
                             echo 'Error:' . curl_error($ch);
@@ -776,9 +837,9 @@ Defined Methods:-
           order : DESC/ASC
           sort : id
         */
-        // if (!$this->verify_token()) {
-        //     return false;
-        // }
+        if (!$this->verify_token()) {
+            return false;
+        }
 
         $this->form_validation->set_rules('search', 'Search keyword', 'trim|xss_clean');
         $this->form_validation->set_rules('sort', 'sort', 'trim|xss_clean');
@@ -833,12 +894,228 @@ Defined Methods:-
         print_r(json_encode($this->response));
     }
 
+    // public function create_group()
+    // {
+    //     /*
+    //       title : test grp
+    //       description : this is test grp
+    //       user_ids : 2,3,3 // group member user id
+    //       user_id : 1 // current user id
+
+    //     */
+
+    //     if (!$this->verify_token()) {
+    //         return false;
+    //     }
+
+    //     $this->form_validation->set_rules('title', 'Title', 'trim|required|xss_clean');
+    //     $this->form_validation->set_rules('description', 'Description', 'trim|required|xss_clean');
+    //     $this->form_validation->set_rules('user_ids', 'Users', 'trim|required|xss_clean');
+    //     $this->form_validation->set_rules('user_id', 'User Id', 'trim|numeric|required|xss_clean');
+
+    //     if (!$this->form_validation->run()) {
+    //         $this->response['error'] = true;
+    //         $this->response['message'] = strip_tags(validation_errors());
+    //         $this->response['data'] = array();
+    //         print_r(json_encode($this->response));
+    //         return;
+    //     } else {
+    //         $title = (isset($_POST['title']) && !empty(trim($_POST['title']))) ? $this->input->post('title') : "";
+    //         $description = (isset($_POST['description']) && !empty(trim($_POST['description']))) ? $this->input->post('description') : "";
+    //         $user_ids = (isset($_POST['user_ids']) && !empty(trim($_POST['user_ids']))) ? $this->input->post('user_ids') : "";
+
+    //         // $user_id = $_POST['user_id'];
+
+    //         $admin_id = $_POST['user_id'];
+
+    //         if (!empty($user_ids)) {
+    //             $group_mem_ids = $user_ids . ',' . $admin_id;
+    //             $group_mem_ids = explode(",", $group_mem_ids);
+    //         } else {
+    //             $group_mem_ids = array($_POST['user_id']);
+    //         }
+
+
+    //         $no_of_mem = count($group_mem_ids);
+
+    //         $data = array(
+    //             'title' => strip_tags($title),
+    //             'description' => strip_tags($description),
+    //             'created_by' => $admin_id,
+    //             'no_of_members' => $no_of_mem
+    //         );
+
+    //         $group_id = $this->chat_model->create_group($data);
+
+    //         if ($group_id != false) {
+
+    //             foreach ($group_mem_ids as $user_id) {
+    //                 $data1 = array(
+    //                     'group_id' => $group_id,
+    //                     'user_id' => $user_id,
+    //                 );
+    //                 $this->chat_model->add_group_members($data1);
+    //             }
+    //             $admins_ids = array($admin_id);
+    //             $this->chat_model->make_group_admin($group_id, $admins_ids);
+
+    //             $response['error'] = false;
+    //             $response['message'] = 'Group Created successfully.';
+    //         } else {
+    //             $response['error'] = true;
+    //             $response['message'] = 'Group could not Created! Try again!';
+    //         }
+
+    //         echo json_encode($response);
+    //     }
+    // }
+
+    // public function edit_group()
+    // {
+    //     /*
+    //       title : test grp
+    //       description : this is test grp
+    //       user_ids : 2,3,3 // group member user id
+    //       user_id : 1 // current user id
+    //       group_id : 2 //edit group id
+
+    //     */
+
+    //     if (!$this->verify_token()) {
+    //         return false;
+    //     }
+
+    //     $this->form_validation->set_rules('title', 'Title', 'trim|required|xss_clean');
+    //     $this->form_validation->set_rules('description', 'Description', 'trim|required|xss_clean');
+    //     $this->form_validation->set_rules('user_ids', 'Users', 'trim|required|xss_clean');
+    //     $this->form_validation->set_rules('user_id', 'User Id', 'trim|numeric|required|xss_clean');
+    //     $this->form_validation->set_rules('group_id', 'Group Id', 'trim|numeric|required|xss_clean');
+
+    //     if (!$this->form_validation->run()) {
+    //         $this->response['error'] = true;
+    //         $this->response['message'] = strip_tags(validation_errors());
+    //         $this->response['data'] = array();
+    //         print_r(json_encode($this->response));
+    //         return;
+    //     } else {
+    //         $title = (isset($_POST['title']) && !empty(trim($_POST['title']))) ? $this->input->post('title') : "";
+    //         $description = (isset($_POST['description']) && !empty(trim($_POST['description']))) ? $this->input->post('description') : "";
+    //         $user_ids = (isset($_POST['user_ids']) && !empty(trim($_POST['user_ids']))) ? $this->input->post('user_ids') : "";
+    //         $group_id = (isset($_POST['group_id']) && !empty(trim($_POST['group_id']))) ? $this->input->post('group_id') : "";
+    //         $user_id = (isset($_POST['user_id']) && !empty(trim($_POST['user_id']))) ? $this->input->post('user_id') : "";
+
+
+    //         // $user_id = $_POST['user_id'];
+
+    //         $admin_id = $user_id;
+
+    //         if (!empty($user_ids)) {
+    //             $group_mem_ids = $user_ids . ',' . $admin_id;
+    //             $group_mem_ids = explode(",", $group_mem_ids);
+    //         } else {
+    //             $group_mem_ids = array($user_id);
+    //         }
+
+
+    //         $no_of_mem = count($group_mem_ids);
+    //         $admins_ids = array($user_id);
+
+    //         $data = array(
+    //             'title' => strip_tags($title),
+    //             'description' => strip_tags($description),
+    //             'no_of_members' => $no_of_mem
+    //         );
+
+    //         if ($this->chat_model->edit_group($data, $group_id)) {
+
+    //             foreach ($group_mem_ids as $user_id) {
+    //                 $data1 = array(
+    //                     'group_id' => $group_id,
+    //                     'user_id' => $user_id,
+    //                 );
+
+    //                 $this->chat_model->add_group_members($data1);
+    //             }
+
+    //             $this->chat_model->remove_all_group_members($group_id, $group_mem_ids);
+
+    //             $this->chat_model->make_group_admin($group_id, $admins_ids);
+
+    //             // $groups = $this->chat_model->get_groups($user_id);
+    //             $groups = fetch_details('chat_groups',['id'=>$group_id]);
+
+    //             $i = 0;
+    //             foreach($groups as $grp)
+    //             {
+
+    //                     $groups[$i] = $grp;
+    //                     $grp['group_members'] = [];
+    //                     $users = $this->chat_model->get_group_members($grp['id']);
+    //                     $j=0;
+    //                      foreach($users as $row)
+    //                      {
+    //                          $users[$j]['image'] = isset($row['image'])  && !empty($row['image']) && $row['image'] != null ? $row['image']: '';
+    //                          $j++;
+    //                      }
+    //                     $groups[$i]['group_members'] = $users;
+    //                     $i++;
+
+    //             }
+
+    //             $response['error'] = false;
+    //             $response['message'] = 'Group Edited successfully';
+    //             $response['data'] = $groups;
+    //         }else {
+    //             $response['error'] = true;
+    //             $response['message'] = 'Group could not Edited! Try again!';
+    //         }
+    //         echo json_encode($response);
+    //     }
+    // }
+
+
+    // public function delete_group()
+    // {
+    //     /*
+    //       user_id : 1 // current user id
+    //       group_id : 2 //edit group id
+
+    //     */
+
+    //     if (!$this->verify_token()) {
+    //         return false;
+    //     }
+    //     $this->form_validation->set_rules('user_id', 'User Id', 'trim|numeric|required|xss_clean');
+    //     $this->form_validation->set_rules('group_id', 'Group Id', 'trim|numeric|required|xss_clean');
+
+    //     if (!$this->form_validation->run()) {
+    //         $this->response['error'] = true;
+    //         $this->response['message'] = strip_tags(validation_errors());
+    //         $this->response['data'] = array();
+    //         print_r(json_encode($this->response));
+    //         return;
+    //     } else {
+
+    //         $user_id = (isset($_POST['user_id']) && !empty(trim($_POST['user_id']))) ? $this->input->post('user_id') : "";
+    //         $group_id = (isset($_POST['group_id']) && !empty(trim($_POST['group_id']))) ? $this->input->post('group_id') : "";;
+
+    //         if ($this->chat_model->delete_group($group_id, $user_id)) {
+    //             $response['error'] = false;
+    //             $response['message'] = 'Group Deleted successfully';
+    //         } else {
+    //             $response['error'] = true;
+    //             $response['message'] = 'Group Not  Deleted successfully';
+    //         }
+
+    //         echo json_encode($response);
+    //     }
+    // }
 
     public function get_supporters()
     {
-        // if (!$this->verify_token()) {
-        //     return false;
-        // }
+        if (!$this->verify_token()) {
+            return false;
+        }
 
         $data = $this->chat_model->get_supporters();
         $items = [];

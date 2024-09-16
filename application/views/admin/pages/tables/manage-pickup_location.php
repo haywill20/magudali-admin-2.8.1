@@ -107,7 +107,10 @@
                                 </div>
                             </div>
                     </div>
-
+                    <div class="d-flex justify-content-center">
+                        <div class="form-group" id="error_box">
+                        </div>
+                    </div>
                     </form>
                 </div>
 
@@ -149,7 +152,7 @@
                             </div>
                         </div>
 
-                        <table class='table-striped' id='pickup_location_table' data-toggle="table" data-url="<?= base_url('admin/pickup_location/view_pickup_location') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-export-types='["txt","excel"]' data-export-options='{
+                        <table class='table-striped' id='pickup_location_table' data-toggle="table" data-url="<?= base_url('admin/pickup_location/view_pickup_location') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-export-types='["txt","excel"]' data-export-options='{
                         "fileName": "area-list",
                         "ignoreColumn": ["operate"]
                         }' data-maintain-selected="true" data-query-params="product_query_params">
@@ -166,7 +169,7 @@
                                     <th data-field="city" data-sortable="true">City</th>
                                     <th data-field="pin_code" data-sortable="true">Pincode</th>
                                     <th data-field="verified">Verified</th>
-                                    <th data-field="operate" data-sortable="false">Actions</th>
+                                    <th data-field="operate">Actions</th>
                                 </tr>
                             </thead>
                         </table>

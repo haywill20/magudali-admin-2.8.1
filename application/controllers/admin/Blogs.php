@@ -148,7 +148,7 @@ class Blogs extends CI_Controller
             }
 
             $this->data['categories'] = $this->blog_model->get_categories();
-            $this->data['fetched_data'] = fetch_details('blog_categories',['status' => 1]);
+            $this->data['fetched_data'] = fetch_details('blog_categories');
 
             $this->load->view('admin/template', $this->data);
         } else {
@@ -178,15 +178,6 @@ class Blogs extends CI_Controller
     public function add_blog()
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
-
-
-            if (defined('SEMI_DEMO_MODE') && SEMI_DEMO_MODE == 0) {
-                $this->response['error'] = true;
-                $this->response['message'] = SEMI_DEMO_MODE_MSG;
-                echo json_encode($this->response);
-                return false;
-                exit();
-            }
 
             $this->form_validation->set_rules('blog_title', 'Title', 'trim|required|xss_clean');
             $this->form_validation->set_rules('blog_category', 'Blog category', 'trim|required|xss_clean');

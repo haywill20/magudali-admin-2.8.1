@@ -57,7 +57,6 @@ class Brand extends CI_Controller
     }
     public function add_brand()
     {
-        // print_r($_POST);
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
 
             if (isset($_POST['edit_brand'])) {
@@ -88,15 +87,6 @@ class Brand extends CI_Controller
                 print_r(json_encode($this->response));
             } else {
 
-                if (is_exist(['name' => $_POST['brand_input_name']], 'brands')) {
-                    $response["error"]   = true;
-                    $response['csrfName'] = $this->security->get_csrf_token_name();
-                    $response['csrfHash'] = $this->security->get_csrf_hash();
-                    $response["message"] = "Brand Already exist you should use a different name";
-                    $response["data"] = array();
-                    echo json_encode($response);
-                    return false;
-                }
                 $this->Brand_model->add_brand($_POST);
                 $this->response['error'] = false;
                 $this->response['csrfName'] = $this->security->get_csrf_token_name();

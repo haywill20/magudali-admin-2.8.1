@@ -20,16 +20,16 @@
             </p>
         </a>
     </li>
-    <!-- <li class="nav-item p-1">
-        <a class="rounded text-decoration-none d-flex gap-1 align-items-center <?//= ($current_url == base_url('my-account/notifications')) ? 'active h6 text-primary' : '' ?>" id="notification" href="<?= base_url('my-account/notifications') ?>">
+    <li class="nav-item p-1">
+        <a class="rounded text-decoration-none d-flex gap-1 align-items-center <?= ($current_url == base_url('my-account/notifications')) ? 'active h6 text-primary' : '' ?>" id="notification" href="<?= base_url('my-account/notifications') ?>">
             <div>
                 <i class="uil uil-bell fs-22"></i>
             </div>
             <p class="mb-0">
-                <?//= !empty($this->lang->line('notification')) ? $this->lang->line('notification') : 'NOTIFICATION' ?>
+                <?= !empty($this->lang->line('notification')) ? $this->lang->line('notification') : 'NOTIFICATION' ?>
             </p>
         </a>
-    </li> -->
+    </li>
     <li class="nav-item p-1">
         <a class="rounded text-decoration-none d-flex gap-1 align-items-center <?= ($current_url == base_url('my-account/favorites')) ? 'active h6 text-primary' : '' ?>" id="wishlist" href="<?= base_url('my-account/favorites') ?>">
             <div>
@@ -81,17 +81,7 @@
         </a>
     </li>
     <li class="nav-item p-1">
-        <a class="rounded text-decoration-none d-flex gap-1 align-items-center <?= ($current_url == base_url('my-account/tickets')) ? 'active h6 text-primary' : '' ?>" id="user-chat" href="<?= base_url('my-account/tickets') ?>">
-            <div>
-                <i class="uil uil-ticket fs-22"></i>
-            </div>
-            <p class="mb-0">
-                <?= !empty($this->lang->line('support_tickets')) ? $this->lang->line('support_tickets') : 'Support Tickets' ?>
-            </p>
-        </a>
-    </li>
-    <li class="nav-item p-1">
-        <a class="rounded text-decoration-none d-flex gap-1 align-items-center <?= ($current_url == base_url('login/logout')) ? 'active h6 text-primary' : '' ?>" id="user_logout" href="<?= base_url('login/logout') ?>">
+        <a class="rounded text-decoration-none d-flex gap-1 align-items-center <?= ($current_url == base_url('login/logout')) ? 'active h6 text-primary' : '' ?>" id="logout_btn" href="<?= base_url('login/logout') ?>">
             <div>
                 <i class="uil uil-signout fs-22"></i>
             </div>

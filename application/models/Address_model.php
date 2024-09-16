@@ -71,12 +71,8 @@ class Address_model extends CI_Model
             $address_data['area'] = (isset($data['other_areas']) && !empty($data['other_areas'])) ? $data['other_areas'] : $area[0]['name'];
         }
         if (isset($data['pincode_name']) || isset($data['pincode'])) {
-            $address_data['system_pincode'] = (isset($data['pincode_name']) && !empty($data['pincode_name'])) ? 0 : 1;
-            if (isset($data['pincode_full'])) {
-                $address_data['pincode'] = (isset($data['pincode_name']) && !empty($data['pincode_name'])) ? $data['pincode_name'] : $data['pincode_full'];
-            } else {
-                $address_data['pincode'] = $data['pincode'];
-            }
+            $address_data['system_pincode'] = (isset($data['pincode_name']) && !empty($data['pincode_name'])) ? 0 : 1 ;
+            $address_data['pincode'] = (isset($data['pincode_name']) && !empty($data['pincode_name'])) ? $data['pincode_name'] : $data['pincode'];
         }
         
 
@@ -141,13 +137,11 @@ class Address_model extends CI_Model
                 $this->db->where('is_default', 1);
             }
             $res = $this->db->get('addresses addr')->result_array();
-            // print_r($res);
 
             if (!empty($res)) {
                 for ($i = 0; $i < count($res); $i++) {
-                    $pincode = (isset($res[$i]['pincode']) && ($res[$i]['pincode']) != 0) ? $res[$i]['pincode'] : "";
-                    // print_r($pincode);
-                    $minimum_free_delivery_order_amount =  fetch_details('zipcodes', ['zipcode' => $pincode], 'minimum_free_delivery_order_amount,delivery_charges');
+                    $area_id = (isset($res[$i]['area_id']) && ($res[$i]['area_id']) != 0) ? $res[$i]['area_id'] : "";
+                    $minimum_free_delivery_order_amount =  fetch_details('areas', ['id' => $area_id], 'minimum_free_delivery_order_amount,delivery_charges');
                     $amount = $minimum_free_delivery_order_amount[0]['minimum_free_delivery_order_amount'];
                     $delivery_charges = $minimum_free_delivery_order_amount[0]['delivery_charges'];
                     $res[$i] = output_escaping($res[$i]);
@@ -164,7 +158,7 @@ class Address_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'DESC';
+        $order = 'ASC';
         $multipleWhere = '';
 
         if (isset($_GET['user_id']) && !empty($_GET['user_id'])) {

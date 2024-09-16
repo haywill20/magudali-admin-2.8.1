@@ -43,7 +43,10 @@
                                                         <button type="submit" class="btn btn-success" id="submit_btn">Update Transaction</button>
                                                     </div>
                                                 </div>
-
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="form-group" id="error_box">
+                                                    </div>
+                                                </div>
                                                 <!-- /.card-body -->
                                             </form>
                                         </div>
@@ -93,7 +96,7 @@
                                         <th data-field="status" data-sortable="false">Status</th>
                                         <th data-field="message" data-sortable="false" data-visible="false">Message</th>
                                         <th data-field="txn_date" data-sortable="false">Date</th>
-                                        <!-- <th data-field="operate" data-sortable="false">Actions</th> -->
+                                        <th data-field="operate" data-sortable="false">Actions</th>
                                     </tr>
                                 </thead>
                             </table>

@@ -40,21 +40,16 @@ $(document).ready(function () {
         data: csrfName + "=" + csrfHash,
         dataType: 'json',
         success: function (result) {
+            var res = JSON.parse(result);
+            console.log(res);
 
-            var res = JSON.parse(result.response);
-
-            csrfName = result.csrfName,
-                csrfHash = result.csrfHash
-
+            csrfName = res['csrfName'];
+            csrfHash = res['csrfHash'];
+            // const app = firebase.initializeApp(res);
             const app = initializeApp(res);
-            const messaging = getMessaging(app);
-
-
-            // const app = initializeApp(res);
-            // const messaging = getMessaging();
-            console.log(messaging);
+            const messaging = getMessaging();
             requestPermission();
-            getToken(messaging, { vapidKey: res.vap_id_Key }).then((currentToken) => {
+            getToken(messaging, { vapidKey: 'BG6paHesz0uCHcd4_ebOIcVh0MW3uIYQsvQ4OWyMHFhW9r6WEC4Ke4Nx1-XtUYj1ydswNkd5wmGUpE5jknpCmE8' }).then((currentToken) => {
                 console.log("Inside get Token");
                 // console.log(currentToken);
                 if (currentToken) {
@@ -93,7 +88,7 @@ $(document).ready(function () {
             //     });
 
             // function requestNotiPermi() {
-            //      messaging.requestPermission()
+            //     messaging.requestPermission()
             //         .then(function () {
             //             // get the token in the form of promise
             //             return messaging.getToken()
@@ -110,11 +105,14 @@ $(document).ready(function () {
             //         });
             // }
             var typing_timer = [];
-            onMessage(messaging, (payload) => {
-                console.log("in messaging ");
+            // messaging.onMessage(function (payload) {
+                // console.log("payload",payload);
+            // });
+           onMessage(messaging, (payload) => {
+            console.log("in messaging ");
                 var notification = payload.data;
                 console.log(notification);
-
+            
                 if (notification.type == 'typing') {
                     console.log("in typing");
                     var from_id_fmc = notification.from_id;
@@ -289,6 +287,9 @@ $(document).ready(function () {
 });
 
 
+
+
+
 $(document).ready(function () {
     getOnlineMemebers();
 });
@@ -314,7 +315,7 @@ function getOnlineMemebers() {
         dataTpe: 'json',
         success: function (result) {
             var data = JSON.parse(result);
-            // console.log(data);
+            console.log(data);
             $.each(data?.data?.members, function (key, val) {
 
                 var i = $("li").find("[data-id='" + val.id + "'][data-type='person'] i");
@@ -424,8 +425,7 @@ $(document).on('keyup', '#in-chat-search', function () {
             data: {
                 from_id: from_id,
                 type: type,
-                search: search,
-                [csrfName]: csrfHash
+                search: search
             },
             dataTpe: 'json',
             success: function (result) {
@@ -825,8 +825,7 @@ function markMsgRead(from_id, type) {
         type: "POST",
         data: {
             from_id: from_id,
-            type: type,
-            [csrfName]: csrfHash
+            type: type
         },
         dataTpe: 'json',
         success: function (result) {
@@ -857,8 +856,7 @@ function newLoadChat(from_id, type, offset = '', limit = '', sort = '', order = 
             offset: offset,
             limit: limit,
             sort: sort,
-            order: order,
-            [csrfName]: csrfHash
+            order: order
         },
         dataTpe: 'json',
         success: function (result) {
@@ -886,7 +884,7 @@ function newLoadChat(from_id, type, offset = '', limit = '', sort = '', order = 
                                 var chat_content = string.replace(/<[\/]{0,1}(p)[^><]*>/ig, "");
 
                                 var picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
-
+                              
                                 $.chatCtrl('#mychatbox2', {
                                     text: chat_content,
                                     picture: picture,
@@ -921,8 +919,7 @@ function loadChat(from_id, type, offset = '', limit = '', sort = '', order = '')
             offset: offset,
             limit: limit,
             sort: sort,
-            order: order,
-            [csrfName]: csrfHash
+            order: order
         },
         dataTpe: 'json',
         success: function (result) {
@@ -956,8 +953,7 @@ function sendFCM(receiver_id, title, msg, type, message_type = '') {
             title: title,
             msg: msg,
             type: type,
-            message_type: message_type,
-            [csrfName]: csrfHash
+            message_type: message_type
         },
         dataTpe: 'json',
         success: function (result) { }
@@ -988,7 +984,7 @@ function printChat(chats, id_of_user) {
             }
 
             picture = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
-
+           
 
             if (chats[i].typing != undefined) type = 'typing';
             $.chatCtrl('#mychatbox2', {
@@ -1044,8 +1040,7 @@ function switchChat(from_id, type) {
         type: "POST",
         data: {
             from_id: from_id,
-            type: type,
-            [csrfName]: csrfHash
+            type: type
         },
         dataTpe: 'json',
         success: function (result) {
@@ -1058,7 +1053,7 @@ function switchChat(from_id, type) {
                 var html = '<figure class="avatar avatar-md"><img src="' + base_url + 'assets/front_end/classic/images/user.png" class="rounded-circle"></figure>';
 
                 $("#chat-avtar-main").html(html);
-
+                
 
                 if (person[0]?.is_online == 1) {
                     $("#chat_online_status").addClass("text-success");
@@ -1184,6 +1179,138 @@ $(document).on('click', '.go-to-bottom-btn', function () {
     scrollToBottom();
     $(".go-to-bottom-btn").hide();
 });
+$(document).on('click', '.edit_btn', function () {
+    var grp_id = $(this).data('id')
+
+    $.ajax({
+        type: "POST",
+        url: base_url + "admin/chat/get_group_members",
+        data: {
+            group_id: grp_id
+        },
+        dataType: "json",
+        success: function (result) {
+            var title = result['data'][0].title;
+            var description = result['data'][0].description;
+            var update_id = result['data'][0].group_id;
+
+            var user_ids = [];
+            var admin_ids = [];
+            $.each(result['data'], function (key, val) {
+                user_ids[key] = val.user_id;
+                if (val.is_admin == 1) {
+                    admin_ids[key] = val.user_id;
+                }
+            });
+
+            $('#update_id').val(update_id);
+            $('#delete_group').attr("data-id", update_id);
+            $('#update_title').val(title);
+            $('#update_description').val(description);
+            $('#update_users').val(user_ids);
+            $('#update_users').trigger('change');
+
+            $('#update_admins').val(admin_ids);
+            $('#update_admins').trigger('change');
+
+            // $("#modal-edit-group").trigger("click");
+        }
+    });
+});
+
+
+
+$(document).on('click', '.delete_grp', function () {
+    var grp_id = $(this).data('id')
+
+    Swal.fire({
+        title: 'Are You Sure!',
+        text: "You won't be able to revert this!",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        showLoaderOnConfirm: true,
+        preConfirm: function () {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'POST',
+                    url: base_url + 'admin/chat/delete_group',
+                    data: {
+                        grp_id: grp_id,
+                        [csrfName]: csrfHash
+                    },
+                    dataType: 'json',
+                    success: function (result) {
+                        csrfName = result['csrfName'];
+                        csrfHash = result['csrfHash'];
+                        if (result.error == false) {
+
+                            Swal.fire('Success', 'Group Deleted !', 'success');
+                            setTimeout(function () {
+                                location.reload();
+                            }, 600);
+                        } else {
+                            Swal.fire('Oops...', 'Something went wrong with ajax !', 'error');
+                        }
+
+                    }
+                });
+            });
+        },
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.cancel) {
+            Swal.fire('Cancelled!', 'Your data is  safe.', 'error');
+        }
+    });
+ 
+});
+
+$(document).on("click", "#modal-info-group-call", function () {
+
+    var id = $(this).data("id");
+    $.ajax({
+        type: "POST",
+        url: base_url + "admin/chat/get_group_members",
+        data: {
+            group_id: id
+        },
+        dataType: "json",
+        success: function (result) {
+
+            var title = result['data'][0].title;
+            var description = result['data'][0].description;
+            var update_id = result['data'][0].group_id;
+
+            var user_ids = [];
+            var admin_ids = [];
+
+            $.each(result['data'], function (key, val) {
+                user_ids[key] = val.user_id;
+                if (val.is_admin == 1) {
+                    admin_ids[key] = val.user_id;
+                }
+            });
+
+            $('#update_id_info').val(update_id);
+            $('#update_title_info').val(title);
+            $('#update_description_info').val(description);
+            $('#update_users_info').val(user_ids);
+            $('#update_users_info').trigger('change');
+
+            $('#update_admins_info').val(admin_ids);
+            $('#update_admins_info').trigger('change');
+
+            $("#modal-info-group").trigger("click");
+
+            $('#modal-info-group').modal('show')
+        }
+    });
+
+});
+
 
 $(document).on('change', '#chat_user', function () {
 

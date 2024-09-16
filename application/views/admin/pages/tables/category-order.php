@@ -29,10 +29,10 @@
                                     <div class="col-md-6 col-12 offset-md-3">
                                         <label for="subcategory_id" class="col-form-label">Category List</label>
                                         <div class="row font-weight-bold">
-                                            <div class="col-2">No.</div>
-                                            <div class="col-4">Row Order</div>
-                                            <div class="col-3">Name</div>
-                                            <div class="col-3">Image</div>
+                                            <!-- <div class="col-1">No.</div> -->
+                                            <div class="col-2">Order</div>
+                                            <div class="col-5">Category</div>
+                                            <div class="col-4">Image</div>                                            
                                         </div>
                                         <ul class="list-group bg-grey move order-container" id="sortable">
                                             <?php
@@ -41,12 +41,12 @@
                                                 foreach ($categories as $row) {
                                             ?>
                                                     <li class="list-group-item d-flex bg-gray-light align-items-center h-25" id="category_id-<?= $row['id'] ?>">
-                                                        <div class="col-2"><span> <?= $i ?> </span></div>
-                                                        <div class="col-4"><span> <?= $row['row_order'] ?> </span></div>
-                                                        <div class="col-3"><span><?= $row['name'] ?></span></div>
-                                                        <div class="col-3">
+                                                        <!-- <div class="col-2"><span> <?= $i ?> </span></div> -->
+                                                        <div class="col-2"><span> <?= $row['row_order'] ?> </span></div>
+                                                        <div class="col-5"><span><?= $row['name'] ?></span></div>
+                                                        <div class="col-4">
                                                             <img src="<?= $row['image'] ?>" class="image-box-100">
-                                                        </div>
+                                                        </div>                                                        
                                                     </li>
                                                 <?php
                                                     $i++;

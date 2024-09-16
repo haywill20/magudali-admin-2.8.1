@@ -22,7 +22,6 @@ class Setting_model extends CI_Model
             'system_configurations' => $post['system_configurations'],
             'system_timezone_gmt' => $post['system_timezone_gmt'],
             'system_configurations_id' => $post['system_configurations_id'],
-            'copyright_details'=> $post['copyright_details'],
             'app_name' => $post['app_name'],
             'support_number' => $post['support_number'],
             'support_email' => $post['support_email'],
@@ -42,9 +41,8 @@ class Setting_model extends CI_Model
             'refer_earn_bonus_times' => $post['refer_earn_bonus_times'],
             'welcome_wallet_balance_on' => (isset($post['welcome_wallet_balance_on'])) ? '1' : '0',
             'wallet_balance_amount' => $post['wallet_balance_amount'],
-            // 'allow_order_attachments' => (isset($post['allow_order_attachments'])) ? '1' : '0',
-            'local_pickup' => (isset($post['local_pickup'])) ? '1' : '0',
-            // 'upload_limit' => $post['upload_limit'],
+            'allow_order_attachments' => (isset($post['allow_order_attachments'])) ? '1' : '0',
+            'upload_limit' => $post['upload_limit'],
             'minimum_cart_amt' => $post['minimum_cart_amt'],
             'low_stock_limit' => (isset($post['low_stock_limit'])) ? $post['low_stock_limit'] : '5',
             'max_items_cart' => $post['max_items_cart'],
@@ -56,11 +54,9 @@ class Setting_model extends CI_Model
             'inspect_element' => (isset($post['inspect_element'])) ? '1' : '0',
             'is_seller_app_under_maintenance' => (isset($post['is_seller_app_under_maintenance'])) ? '1' : '0',
             'is_delivery_boy_app_under_maintenance' => (isset($post['is_delivery_boy_app_under_maintenance'])) ? '1' : '0',
-            'is_web_under_maintenance' => (isset($post['is_web_under_maintenance'])) ? '1' : '0',
             'message_for_customer_app' => $post['message_for_customer_app'],
             'message_for_seller_app' => $post['message_for_seller_app'],
             'message_for_delivery_boy_app' => $post['message_for_delivery_boy_app'],
-            'message_for_web' => $post['message_for_web'],
             'cart_btn_on_list' => (isset($post['cart_btn_on_list'])) ? '1' : '0',
             'google_login' => (isset($post['google_login'])) ? '1' : '0',
             'facebook_login' => (isset($post['facebook_login'])) ? '1' : '0',
@@ -71,16 +67,10 @@ class Setting_model extends CI_Model
             'expand_product_images' => (isset($post['expand_product_images'])) ? '1' : '0',
             'tax_name' => $post['tax_name'],
             'tax_number' => $post['tax_number'],
-            'company_name' => (isset($post['app_name'])) ?  $post['app_name'] : '',
+            'company_name' => (isset($post['company_name'])) ?  $post['company_name'] : '',
             'company_url' => (isset($post['company_url'])) ?  $post['company_url'] : '',
             'supported_locals' => (isset($post['supported_locals'])) ?  $post['supported_locals'] : '',
             'decimal_point' => (isset($post['decimal_point'])) ?  $post['decimal_point'] : '',
-            'pincode_wise_deliverability' => (isset($post['pincode_wise_deliverability'])) ? '1' : '0',
-            'city_wise_deliverability' => (isset($post['city_wise_deliverability'])) ? '1' : '0',
-            'android_app_store_link' => (isset($post['android_app_store_link'])) ? $post['android_app_store_link'] : '',
-            'ios_app_store_link' => (isset($post['ios_app_store_link'])) ? $post['ios_app_store_link'] : '',
-            'scheme' => (isset($post['scheme'])) ? $post['scheme'] : '',
-            'host' => (isset($post['host'])) ? $post['host'] : '',
         ];
 
 
@@ -140,7 +130,6 @@ class Setting_model extends CI_Model
         $post['support_mode'] = (isset($post['support_mode']) && !empty($post['support_mode'])) ?: 0;
         $post['safety_security_mode'] = (isset($post['safety_security_mode']) && !empty($post['safety_security_mode'])) ?: 0;
         $main_image_name = (isset($post['logo']) && !empty($post['logo'])) ? $post['logo'] : "";
-        $footer_image_name = (isset($post['footer_logo']) && !empty($post['footer_logo'])) ? $post['footer_logo'] : "";
         $favicon_image_name = (isset($post['favicon']) && !empty($post['favicon'])) ? $post['favicon'] : "";
         $system_data = json_encode($post);
         $query = $this->db->get_where('settings', array(
@@ -156,17 +145,6 @@ class Setting_model extends CI_Model
                 $this->db->insert('settings', ['value' => $main_image_name, 'variable' => 'web_logo']);
             } else {
                 $this->db->set('value', $main_image_name)->where('variable', 'web_logo')->update('settings');
-            }
-        }
-        if ($footer_image_name != NULL && !empty($footer_image_name)) {
-            $logo_res = $this->db->get_where('settings', array(
-                'variable' => 'web_footer_logo'
-            ));
-            $logo_count = $logo_res->num_rows();
-            if ($logo_count == 0) {
-                $this->db->insert('settings', ['value' => $footer_image_name, 'variable' => 'web_footer_logo']);
-            } else {
-                $this->db->set('value', $footer_image_name)->where('variable', 'web_footer_logo')->update('settings');
             }
         }
         if ($favicon_image_name != NULL && !empty($favicon_image_name)) {
@@ -261,14 +239,6 @@ class Setting_model extends CI_Model
         $payment_data['instamojo_client_secret'] = isset($post['instamojo_client_secret']) && !empty($post['instamojo_client_secret']) ? $post['instamojo_client_secret'] : '';
         $payment_data['instamojo_webhook_url'] = isset($post['instamojo_webhook_url']) && !empty($post['instamojo_webhook_url']) ? $post['instamojo_webhook_url'] : '';
 
-        $payment_data['phonepe_payment_method'] = isset($post['phonepe_payment_method']) && !empty($post['phonepe_payment_method']) ? '1' : '0';
-        $payment_data['phonepe_payment_mode'] = isset($post['phonepe_payment_mode']) && !empty($post['phonepe_payment_mode']) ? $post['phonepe_payment_mode'] : '';
-        $payment_data['phonepe_marchant_id'] = isset($post['phonepe_marchant_id']) && !empty($post['phonepe_marchant_id']) ? $post['phonepe_marchant_id'] : '';
-        // $payment_data['phonepe_app_id'] = isset($post['phonepe_app_id']) && !empty($post['phonepe_app_id']) ? $post['phonepe_app_id'] : '';
-        $payment_data['phonepe_salt_key'] = isset($post['phonepe_salt_key']) && !empty($post['phonepe_salt_key']) ? $post['phonepe_salt_key'] : '';
-        $payment_data['phonepe_salt_index'] = isset($post['phonepe_salt_index']) && !empty($post['phonepe_salt_index']) ? $post['phonepe_salt_index'] : '';
-        $payment_data['phonepe_webhook_url'] = isset($post['phonepe_webhook_url']) && !empty($post['phonepe_webhook_url']) ? $post['phonepe_webhook_url'] : '';
-
         $payment_data['cod_method'] = isset($post['cod_method']) ? '1' : '0';
 
         $payment_data = json_encode($payment_data);
@@ -340,8 +310,8 @@ class Setting_model extends CI_Model
         $post = escape_array($post);
         $authentication_data = array();
 
-        $authentication_data['authentication_method'] = isset($post['authentication_method']) && !empty($post['authentication_method']) ? $post['authentication_method'] : '';
-        // $authentication_data['authentication_method'] = 'firebase';
+        // $authentication_data['authentication_method'] = isset($post['authentication_method']) && !empty($post['authentication_method']) ? $post['authentication_method'] : '';
+        $authentication_data['authentication_method'] = 'firebase';
 
         $authentication_data = json_encode($authentication_data);
 
@@ -394,43 +364,6 @@ class Setting_model extends CI_Model
             $this->db->insert('settings', $data);
         } else {
             $this->db->set('value', $post['vap_id_Key'])->where('variable', 'vap_id_Key')->update('settings');
-        }
-    }
-    
-    public function update_firebase_project_id($post)
-    {
-        $post = escape_array($post);
-
-        $query = $this->db->get_where('settings', array(
-            'variable' => 'firebase_project_id'
-        ));
-        $count = $query->num_rows();
-        if ($count === 0) {
-            $data = array(
-                'variable' => 'firebase_project_id',
-                'value' => $post['firebase_project_id']
-            );
-            $this->db->insert('settings', $data);
-        } else {
-            $this->db->set('value', $post['firebase_project_id'])->where('variable', 'firebase_project_id')->update('settings');
-        }
-    }
-    public function update_service_account_file($post)
-    {
-        $post = escape_array($post);
-
-        $query = $this->db->get_where('settings', array(
-            'variable' => 'service_account_file'
-        ));
-        $count = $query->num_rows();
-        if ($count === 0) {
-            $data = array(
-                'variable' => 'service_account_file',
-                'value' => $post
-            );
-            $this->db->insert('settings', $data);
-        } else {
-            $this->db->set('value', $post)->where('variable', 'service_account_file')->update('settings');
         }
     }
     public function update_smsgateway($post)
@@ -738,7 +671,7 @@ class Setting_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'DESC';
+        $order = 'ASC';
         $multipleWhere = '';
         if (isset($_GET['offset']))
             $offset = $_GET['offset'];

@@ -110,12 +110,12 @@ class Customer_model extends CI_Model
             }else{
                 $tempRow['mobile'] = "";
             }
-            $tempRow['balance'] = $row['balance'];
+            $tempRow['balance'] = $row['balance'] == null || $row['balance'] == 0 || empty($row['balance']) ? "0" : number_format($row['balance'], 2);
             $tempRow['city'] = $row['city_name'];
             $tempRow['area'] = $row['area_name'];
             $tempRow['street'] = $row['street'];
             $tempRow['status'] = ($row['active'] == '1') ? '<a class="badge badge-success text-white" >Active</a>' : '<a class="badge badge-danger text-white" >Inactive</a>';
-            $tempRow['date'] = date('d-m-Y', strtotime($row['created_at']));
+            $tempRow['date'] = $row['created_at'];
             if (!$this->ion_auth->is_seller()) {
                 $tempRow['actions'] = $operate;
             }
@@ -209,8 +209,7 @@ class Customer_model extends CI_Model
                 $tempRow['area'] = $row['area_name'];
                 $tempRow['street'] = $row['street'];
                 $tempRow['status'] = $row['active'];
-                // $tempRow['date'] = $row['created_at'];
-                $tempRow['date'] = date('d-m-Y', strtotime($row['created_at']));
+                $tempRow['date'] = $row['created_at'];
 
                 $rows[] = $tempRow;
             }

@@ -102,7 +102,7 @@ function flutterwave_payment() {
 }
 var stripe1
 function stripe_setup(key) {
-
+   
     // A reference to Stripe.js initialized with a fake API key.
     // Sign in to see examples pre-filled with your key.
     var stripe = Stripe(key)
@@ -144,7 +144,7 @@ function stripe_setup(key) {
 }
 
 function stripe_payment(stripe, card, clientSecret) {
-
+   
     // Calls stripe.confirmCardPayment
     // If the card requires authentication Stripe shows a pop-up modal to
     // prompt the user to enter authentication details without leaving your page.
@@ -440,51 +440,6 @@ function midtrans_setup(midtrans_transaction_token, order_id) {
     })
 }
 
-
-function wallet_refill() {
-    let myForm = document.getElementById('wallet_form')
-    var formdata = new FormData(myForm)
-    formdata.append(csrfName, csrfHash)
-    var latitude =
-        sessionStorage.getItem('latitude') === null ?
-            '' :
-            sessionStorage.getItem('latitude')
-    var longitude =
-        sessionStorage.getItem('longitude') === null ?
-            '' :
-            sessionStorage.getItem('longitude')
-    formdata.append('latitude', latitude)
-    formdata.append('longitude', longitude)
-    return $.ajax({
-        type: 'POST',
-        data: formdata,
-        url: base_url + 'cart/wallet_refill',
-        dataType: 'json',
-        cache: false,
-        processData: false,
-        contentType: false,
-        beforeSend: function () {
-            $('#place_order_btn').attr('disabled', true).html('Please Wait...')
-        },
-        success: function (data) {
-            csrfName = data.csrfName
-            csrfHash = data.csrfHash
-            $('#place_order_btn').attr('disabled', false).html('Place Order')
-            if (data.error == false) {
-                Toast.fire({
-                    icon: 'success',
-                    title: data.message
-                })
-            } else {
-                Toast.fire({
-                    icon: 'error',
-                    title: data.message
-                })
-            }
-        }
-    })
-}
-
 var fatoorah_url = '';
 function my_fatoorah_setup() {
     window.location.replace(fatoorah_url)
@@ -588,38 +543,6 @@ $(document).on('click', '#wallet_refill', function () {
                 },
                 'json'
             )
-        }
-        else if (payment_methods == 'phonepe') {
-            var amount = $('#amount').val()
-            var user_id = $('#user_id').val()
-            var order_id = $('#order_id').val()
-            $.post(
-                base_url + 'payment/phonepe', {
-                [csrfName]: csrfHash,
-                amount: amount,
-                user_id: user_id,
-                type: 'wallet',
-                order_id: order_id,
-            },
-                function (data) {
-                    console.log(data);
-                    let url = (data["data"]["data"]['instrumentResponse']['redirectInfo']['url']) ? data["data"]["data"]['instrumentResponse']['redirectInfo']['url'] : ""
-                    let message = (data['message']) ? data['message'] : ""
-                    wallet_refill().done(function (result) {
-                        console.log(result);
-                        if (url != "") {
-                            window.location.replace(url);
-                        } else {
-                            Toast.fire({
-                                icon: 'error',
-                                title: message
-                            })
-                        }
-                    })
-                },
-                'json'
-            )
-
         }
         else if (payment_methods == 'Paystack') {
             var key = $('#paystack_key_id').val()

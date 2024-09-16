@@ -35,9 +35,9 @@ class Admin_privacy_policy extends CI_Controller
                 return false;
             }
 
-            $this->form_validation->set_rules('terms_n_conditions_input_description', 'Terms and Condition Description', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('terms_n_conditions_input_description', 'Terms and Condition Description', 'trim|required');
 
-            $this->form_validation->set_rules('privacy_policy_input_description', 'Privay Policy Description', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('privacy_policy_input_description', 'Privay Policy Description', 'trim|required');
 
             if (!$this->form_validation->run()) {
 

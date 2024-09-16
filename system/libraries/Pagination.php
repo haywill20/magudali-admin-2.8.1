@@ -489,21 +489,18 @@ class CI_Pagination
 
             // Remove any specified prefix/suffix from the segment.
             if ($this->prefix !== '' or $this->suffix !== '') {
-                $this->cur_page = isset($this->cur_page)?str_replace(array($this->prefix, $this->suffix), '', $this->cur_page):'';
+                $this->cur_page = str_replace(array($this->prefix, $this->suffix), '', $this->cur_page);
             }
         } else {
             $this->cur_page = (string) $this->cur_page;
         }
 
         // If something isn't quite right, back to the default base page.
-        if (!empty($this->cur_page)) {
-            // print_r("here");
-            if (!ctype_digit((string)$this->cur_page) or ($this->use_page_numbers && (int) $this->cur_page === 0)) {
-                $this->cur_page = $base_page;
-            } else {
-                // Make sure we're using integers for comparisons later.
-                $this->cur_page = (int) $this->cur_page;
-            }
+        if (!ctype_digit($this->cur_page) or ($this->use_page_numbers && (int) $this->cur_page === 0)) {
+            $this->cur_page = $base_page;
+        } else {
+            // Make sure we're using integers for comparisons later.
+            $this->cur_page = (int) $this->cur_page;
         }
 
         // Is the page number beyond the result range?

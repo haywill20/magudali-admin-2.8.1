@@ -40,20 +40,20 @@
                                         <label class="control-label col-md-3 col-sm-3 col-xs-12">Status <span class='text-danger text-sm'>*</span></label>
                                         <div class="col-md-7 col-sm-6 col-xs-12">
                                             <div id="status" class="btn-group">
-                                                <!-- <label class="btn btn-warning" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
+                                                <label class="btn btn-warning" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
                                                     <input type="radio" name="status" value="0" class='pending'> Pending
-                                                </label> -->
+                                                </label>
                                                 <label class="btn btn-primary" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
-                                                    <input type="radio" name="status" value="1" class='approved' id="approved"> Approved
+                                                    <input type="radio" name="status" value="1" class='approved'> Approved
                                                 </label>
                                                 <label class="btn btn-danger" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
-                                                    <input type="radio" name="status" value="2" class='rejected' id="rejected"> Rejected
+                                                    <input type="radio" name="status" value="2" class='rejected'> Rejected
                                                 </label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-5 d-none" id="return_request_delivery_by">
-
+                                        
                                         <select id='deliver_by' name='deliver_by' class='form-control'>
                                             <option value=''>Select Delivery Boy</option>
                                             <?php foreach ($delivery_res as $row) { ?>
@@ -71,7 +71,10 @@
                                         <button type="reset" class="btn btn-warning">Reset</button>
                                         <button type="submit" class="btn btn-success" id="submit_btn">Update</button>
                                     </div>
-
+                                    <div class="d-flex justify-content-center">
+                                        <div class="form-group" id="error_box">
+                                        </div>
+                                    </div>
                             </div>
                             </form>
                         </div>

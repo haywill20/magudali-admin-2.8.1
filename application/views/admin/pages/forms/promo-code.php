@@ -41,14 +41,14 @@
                                         <label for="">Message <span class='text-danger text-sm'>*</span></label>
                                         <input type="text" class="form-control" name="message" value="<?= @$fetched_details[0]['message'] ?>">
                                     </div>
-
+                                   
                                     <div class="form-group col-md-6">
                                         <label for="">Start Date <span class='text-danger text-sm'>*</span></label>
-                                        <input type="date" class="form-control" name="start_date" id="start_date" min="<?= date('Y-m-d') ?>" value="<?= @$fetched_details[0]['start_date'] ?>">
+                                        <input type="date" class="form-control" name="start_date" id="start_date" min="<?= date('Y-m-d') ?>" value="<?= @$fetched_details[0]['start_date'] ?>">  
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="">End Date <span class='text-danger text-sm'>*</span></label>
-                                        <input type="date" class="form-control" name="end_date" id="end_date" min="<?= date('Y-m-d') ?>" value="<?= @$fetched_details[0]['end_date'] ?>">
+                                        <input type="date" class="form-control" name="end_date" id="end_date"  min="<?= date('Y-m-d') ?>" value="<?= @$fetched_details[0]['end_date'] ?>">
                                     </div>
 
                                     <div class="form-group col-md-6">
@@ -138,7 +138,10 @@
                                     <button type="submit" class="btn btn-success " id="submit_btn"><?= (isset($fetched_details[0]['id'])) ? 'Update Promo Code' : 'Add Promo Code' ?></button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                </div>
+                            </div>
                             <!-- /.card-footer -->
                         </form>
                     </div>

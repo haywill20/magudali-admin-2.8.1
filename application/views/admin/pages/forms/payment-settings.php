@@ -494,7 +494,7 @@
                                     </div>
                                 </div>
                                 <?php
-                                if (isset($settings['paytm_payment_mode']) && $settings['paytm_payment_mode'] == 'production') {
+                                if ($settings['paytm_payment_mode'] == 'production') {
                                 ?>
                                     <div class="row">
                                         <div class="form-group col-md-4">
@@ -732,7 +732,7 @@
                                         <input type="text" class="form-control" name="instamojo_client_secret" value="<?= @$settings['instamojo_client_secret']  ?>" />
                                     </div>
                                 </div>
-
+                                
                                 <div class="row">
                                     <div class="form-group col-md-4">
                                         <label for="instamojo_webhook_url">Payment Endpoint URL <small>(Set this as Endpoint URL in your Instamojo account)</small></label>
@@ -741,79 +741,9 @@
                                         <input type="text" class="form-control" name="instamojo_webhook_url" value="<?= base_url("admin/webhook/instamojo_webhook");  ?>" readonly />
                                     </div>
                                 </div>
-
-                                <!------------------------------------------------------------------------------------>
-                                <!-----------------------------------------------phone pe ---------------------------->
-                                <h5>Phone Pe </h5>
-                                <hr>
-                                <div>
-                                    <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label for="phonepe_payment_method">Phone pe Payments <small>[ Enable / Disable ] </small></label>
-                                        </div>
-                                        <div class="form-group col-md-8">
-                                            <input type="checkbox" name="phonepe_payment_method" <?= (@$settings['phonepe_payment_method']) == '1' ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label for="">PhonePe Mode <small>[ SANDBOX / UAT / PRODUCTION ]</small>
-                                            </label>
-                                        </div>
-                                        <div class="form-group col-md-8">
-                                            <select name="phonepe_payment_mode" class="form-control">
-                                                <option value="">Select Mode</option>
-                                                <option value="SANDBOX" <?= (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == 'SANDBOX') ? 'selected' : '' ?>>SANDBOX</option>
-                                                <option value="UAT" <?= (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == 'UAT') ? 'selected' : '' ?>>UAT</option>
-                                                <option value="PRODUCTION" <?= (isset($settings['phonepe_payment_mode']) && $settings['phonepe_payment_mode'] == 'PRODUCTION') ? 'selected' : '' ?>>PRODUCTION</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label for="phonepe_marchant_id">Marchant ID</label>
-                                        </div>
-                                        <div class="form-group col-md-8">
-                                            <input type="text" class="form-control" name="phonepe_marchant_id" value="<?= @$settings['phonepe_marchant_id']  ?>" />
-                                        </div>
-                                    </div>
-                                    <!-- <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label for="phonepe_app_id">App id</label>
-                                        </div>
-                                        <div class="form-group col-md-8">
-                                            <input type="text" class="form-control" name="phonepe_app_id" value="<?= @$settings['phonepe_app_id']  ?>" />
-                                        </div>
-                                    </div> -->
-                                    <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label for="phonepe_salt_index">Salt index</label>
-                                        </div>
-                                        <div class="form-group col-md-8">
-                                            <input type="text" class="form-control" name="phonepe_salt_index" value="<?= @$settings['phonepe_salt_index']  ?>" />
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label for="phonepe_salt_key">Salt key</label>
-                                        </div>
-                                        <div class="form-group col-md-8">
-                                            <input type="text" class="form-control" name="phonepe_salt_key" value="<?= @$settings['phonepe_salt_key']  ?>" />
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label for="phonepe_webhook_url">Payment Endpoint URL <small>(Set this as Endpoint URL in your phonepe account)</small></label>
-                                        </div>
-                                        <div class="form-group col-md-8">
-                                            <input type="text" class="form-control" name="phonepe_webhook_url" value="<?= base_url("admin/webhook/phonepe_webhook");  ?>" readonly />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!------------------------------------------------------------------------------------>
-                                <!------------------------------------------Bank Transfer ---------------------------->
+                                
+                             
+                                <!--------------------------------------------------------------------------------------------------  -->
                                 <h5>Direct Bank Transfer </h5>
                                 <hr>
                                 <div class="row">
@@ -859,13 +789,9 @@
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label for="notes">Extra Notes</label>
-                                        <!-- <textarea name="notes" class="textarea addr_editor" placeholder="Extra Notes">  <?//= @$settings['notes'] ?></textarea> -->
-                                        <textarea name="notes" class="textarea addr_editor" placeholder="Extra Notes">  <?= @str_replace('\"', '', str_replace('\r\n', '&#13;&#10;', $settings['notes'])) ?></textarea>
+                                        <textarea name="notes" class="textarea addr_editor" placeholder="Extra Notes">  <?= @$settings['notes'] ?></textarea>
                                     </div>
                                 </div>
-
-                                <!------------------------------------------------------------------------------------>
-                                <!-------------------------------------- Cash on Delivery ---------------------------->
                                 <h5>Cash On Delivery </h5>
                                 <hr>
                                 <div class="row">
@@ -881,7 +807,10 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn">Update Payment Settings</button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                </div>
+                            </div>
                         </form>
                     </div>
                     <!--/.card-->

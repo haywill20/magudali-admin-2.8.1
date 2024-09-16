@@ -20,7 +20,7 @@ class Area_model extends CI_Model
     {
         $data = escape_array($data);
         $zipcode_data = [
-            'zipcode' => isset($data['zipcode']) ? $data['zipcode'] : '',
+            'zipcode' => $data['zipcode'],
             'city_id' => $data['city'],
             'minimum_free_delivery_order_amount' => $data['minimum_free_delivery_order_amount'],
             'delivery_charges' => $data['delivery_charges'],
@@ -153,7 +153,7 @@ class Area_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'DESC';
+        $order = 'ASC';
         $multipleWhere = '';
 
         if (isset($_GET['offset']))
@@ -222,7 +222,7 @@ class Area_model extends CI_Model
                 $tempRow['city_name'] = '';
                 $tempRow['minimum_free_delivery_order_amount'] = 0;
                 $tempRow['delivery_charges'] = 0;
-            } else {
+            }else{
                 $tempRow['city_name'] = $row['city_name'];
                 $tempRow['minimum_free_delivery_order_amount'] = $row['minimum_free_delivery_order_amount'];
                 $tempRow['delivery_charges'] = $row['delivery_charges'];
@@ -291,7 +291,7 @@ class Area_model extends CI_Model
         return $bulkData;
     }
 
-    function get_area_by_city($city_id, $sort = "areas.name", $order = "ASC", $search = "", $limit = '', $offset = '')
+    function get_area_by_city($city_id, $sort = "a.name", $order = "ASC", $search = "", $limit = '', $offset = '')
     {
         $multipleWhere = '';
         $where = array();
@@ -304,17 +304,9 @@ class Area_model extends CI_Model
             $where['a.city_id'] = $city_id;
         }
         if ($this->db->field_exists('minimum_free_delivery_order_amount', 'zipcodes')) {
-            // $areas = fetch_details('zipcodes', ['city_id' => $city_id], 'zipcode,id');
-
-            $search_res = $this->db->select('z.zipcode,z.id as id');
-            if (isset($multipleWhere) && !empty($multipleWhere)) {
-                $search_res->group_start();
-                $search_res->or_like($multipleWhere);
-                $search_res->group_end();
-            }
-            $areas = $search_res->where('city_id', $city_id)->order_by($sort, $order)->limit($limit, $offset)->get('zipcodes z')->result_array();
-        } else {
-            $search_res = $this->db->select('z.zipcode,z.id as id')->join('zipcodes z', 'z.id=a.zipcode_id');
+            $areas = fetch_details('zipcodes', ['city_id' => $city_id], 'zipcode,id');
+        }else{
+            $search_res = $this->db->select('z.zipcode, z.id as id')->join('zipcodes z', 'z.id=a.zipcode_id');
             if (isset($multipleWhere) && !empty($multipleWhere)) {
                 $search_res->group_start();
                 $search_res->or_like($multipleWhere);
@@ -322,7 +314,7 @@ class Area_model extends CI_Model
             }
             $areas = $search_res->where('city_id', $city_id)->order_by($sort, $order)->limit($limit, $offset)->get('areas a')->result_array();
         }
-
+       
         $bulkData = array();
         $bulkData['error'] = (empty($areas)) ? true : false;
         if (!empty($areas)) {
@@ -331,6 +323,37 @@ class Area_model extends CI_Model
             }
         }
         $bulkData['data'] = (empty($areas)) ? [] : $areas;
+        return $bulkData;
+    }
+    
+    function get_area_name_by_city($city_id, $sort = "a.name", $order = "ASC", $search = "", $limit = '', $offset = '') {
+        $this->db->select('a.name, z.zipcode, z.id as id');
+        $this->db->join('zipcodes z', 'z.id = a.zipcode_id');
+        $this->db->where('a.city_id', $city_id);
+    
+        // Aplicar búsqueda si se proporciona
+        if (!empty($search)) {
+            $this->db->like('z.zipcode', $search);
+        }
+    
+        // Ordenar y limitar resultados
+        $this->db->order_by($sort, $order);
+        if (!empty($limit)) {
+            $this->db->limit($limit, $offset);
+        }
+    
+        $query = $this->db->get('areas a');
+    
+        $bulkData = array();
+        if ($query) {
+            $areas = $query->result_array();
+            $bulkData['error'] = false;
+            $bulkData['data'] = $areas;
+        } else {
+            $bulkData['error'] = true;
+            $bulkData['data'] = array();
+        }
+    
         return $bulkData;
     }
 
@@ -371,20 +394,8 @@ class Area_model extends CI_Model
             $search_res->where($where);
         }
         $cities = $search_res->group_by('c.id')->order_by($sort, $order, $search)->limit($limit, $offset)->get('cities c')->result_array();
-        $total_cities = $this->db->select('COUNT(c.id) as total');
-
-        if (isset($multipleWhere) && !empty($multipleWhere)) {
-            $total_cities->group_start();
-            $total_cities->or_like($multipleWhere);
-            $total_cities->group_end();
-        }
-        if (isset($where) && !empty($where)) {
-            $total_cities->where($where);
-        }
-        $total_cities = $total_cities->get('cities c')->row_array();
         $bulkData = array();
         $bulkData['error'] = (empty($cities)) ? true : false;
-        $bulkData['total'] = isset($total_cities['total']) ? intval($total_cities['total']) : 0;
         if (!empty($cities)) {
             for ($i = 0; $i < count($cities); $i++) {
                 $cities[$i] = output_escaping($cities[$i]);
@@ -484,18 +495,5 @@ class Area_model extends CI_Model
         }
         $bulkData['rows'] = $rows;
         print_r(json_encode($bulkData));
-    }
-
-    public function delete_zipcodes($ids)
-    {
-        // Example: Delete media items from database where id in $ids array
-        $this->db->where_in('id', $ids);
-        return $this->db->delete('zipcodes'); // Replace with your actual table name
-    }
-
-    public function get_download_zipcodes()
-    {
-        $zipcodes = $this->db->get('zipcodes')->result_array();
-        return $zipcodes;
     }
 }

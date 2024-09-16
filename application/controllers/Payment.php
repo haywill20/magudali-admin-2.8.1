@@ -7,7 +7,7 @@
         {
             parent::__construct();
             $this->load->database();
-            $this->load->library(['Paypal_lib', 'paytm', 'my_fatoorah', 'phonepe']);
+            $this->load->library(['Paypal_lib', 'paytm', 'my_fatoorah']);
             $this->load->model(['cart_model', 'address_model', 'order_model', 'transaction_model']);
             $this->data['is_logged_in'] = ($this->ion_auth->logged_in()) ? 1 : 0;
             $this->data['user'] = ($this->ion_auth->logged_in()) ? $this->ion_auth->user()->row() : array();
@@ -15,8 +15,6 @@
             $this->response['csrfHash'] = $this->security->get_csrf_hash();
             $this->data['settings'] = get_settings('system_settings', true);
             $this->data['web_settings'] = get_settings('web_settings', true);
-            $this->data['auth_settings'] = get_settings('authentication_settings', true);
-            $this->data['web_logo'] = get_settings('web_logo');
         }
 
         public function paypal()
@@ -42,7 +40,7 @@
             }
             // Set variables for paypal form
             $returnURL = base_url() . 'payment/success';
-            $cancelURL = base_url() . 'payment/delete_order/' . $order_id;
+            $cancelURL = base_url() . 'payment/delete_order/'.$order_id;
             $notifyURL = base_url() . 'app/v1/api/ipn';
             // $returnURL = base_url() . 'payment/success';
             // $cancelURL = base_url() . 'payment/cancel';
@@ -64,11 +62,13 @@
             if (!$this->ion_auth->logged_in()) {
                 redirect(base_url());
             }
-
-            if ($_SERVER['HTTP_REFERER'] == 'https://www.sandbox.paypal.com/' || $_SERVER['HTTP_REFERER'] == 'https://www.paypal.com/') {
+        
+            if($_SERVER['HTTP_REFERER'] == 'https://www.sandbox.paypal.com/' || $_SERVER['HTTP_REFERER'] == 'https://www.paypal.com/')
+            {
                 $order_id = $this->uri->segment(3);
-                $order_item = fetch_details('order_items', ['order_id' => $order_id], 'user_id,product_variant_id,quantity');
-                foreach ($order_item as $row) {
+                $order_item = fetch_details('order_items',['order_id'=>$order_id],'user_id,product_variant_id,quantity');
+                foreach($order_item as $row)
+                {
                     $cart_data = [
                         'user_id' => $row['user_id'],
                         'product_variant_id' => $row['product_variant_id'],
@@ -78,10 +78,10 @@
                     $this->db->insert('cart', $cart_data);
                 }
                 $order = fetch_orders($order_id, false, false, false, false, false, false, false);
-
+                
                 $user_id = $order['order_data'][0]['user_id'];
                 $returnable_amount = $order['order_data'][0]['final_total'];
-
+            
                 update_wallet_balance('credit', $user_id, $returnable_amount, 'Wallet Amount Credited for Order ID  : ' . $order_id);
                 if ($order['order_data'][0]['order_items'][0]['status'][0][0] == 'awaiting') {
                     update_stock($order['order_data'][0]['order_items'][0]['product_variant_id'], $order['order_data'][0]['order_items'][0]['quantity'], 'plus');
@@ -89,7 +89,9 @@
                 delete_details(['id' => $order_id], 'orders');
                 delete_details(['order_id' => $order_id], 'order_items');
                 redirect('payment/cancel');
+            
             }
+            
         }
         public function paytm()
         {
@@ -204,180 +206,6 @@
                 redirect(base_url(), 'refresh');
             }
         }
-
-        public function phonepe()
-        {
-            if ($this->ion_auth->logged_in()) {
-                if ($_POST['type'] == 'wallet') {
-                    // echo "<pre>";
-                    // print_r($_POST);
-                    $overall_amount = $_POST['amount'];
-                    $amount = $overall_amount;
-                    $user_id = $this->data['user']->id;
-                    $settings = get_settings('system_settings', true);
-                    $order_id = $_POST['order_id'];
-                    $transation_id = $_POST['order_id'];
-                    $mobile = $this->data['user']->mobile;
-                    $data = array(
-                        'merchantTransactionId' => $transation_id,
-                        'merchantUserId' => $user_id,
-                        'amount' => $amount * 100,
-                        'redirectUrl' => base_url("payment/phonepe_response"),
-                        'redirectMode' => 'POST',
-                        'callbackUrl' => base_url("admin/webhook/phonepe_webhook"),
-                        'mobileNumber' => $mobile,
-                    );
-                    $res = $this->phonepe->pay($data);
-                    $this->response['error'] = false;
-                    $this->response['message'] = 'trasaction initiated successfully';
-                    $this->response['data'] = $res;
-                    $this->response['data']['order_id'] = $order_id;
-                    print_r(json_encode($this->response));
-                    return;
-                } else {
-                    $_POST['user_id'] = $this->data['user']->id;
-                    $cart = get_cart_total($this->data['user']->id, false, '0', $_POST['address_id']);
-                    $wallet_balance = fetch_details('users', 'id=' . $this->data['user']->id, 'balance');
-                    $wallet_balance = $wallet_balance[0]['balance'];
-                    $overall_amount = $cart['overall_amount'];
-                    $mobile = $cart['mobile'];
-                    if ($_POST['wallet_used'] == 1 && $wallet_balance > 0) {
-                        $overall_amount = $overall_amount - $wallet_balance;
-                    }
-                    if (!empty($_POST['promo_code'])) {
-                        $validate = validate_promo_code($_POST['promo_code'], $this->data['user']->id, $cart['total_arr']);
-                        if ($validate['error']) {
-                            $this->response['error'] = true;
-                            $this->response['message'] = $validate['message'];
-                            print_r(json_encode($this->response));
-                            return false;
-                        } else {
-                            $overall_amount = $overall_amount - $validate['data'][0]['final_discount'];
-                        }
-                    }
-                    $amount = intval($overall_amount);
-                    $user_id = $this->data['user']->id;
-                    $transation_id = time() . "" . rand("100", "999");
-                    $data = array(
-                        'merchantTransactionId' => $transation_id,
-                        'merchantUserId' => $user_id,
-                        'amount' => $amount * 100,
-                        'redirectUrl' => base_url("payment/phonepe_response"),
-                        'redirectMode' => 'POST',
-                        'callbackUrl' => base_url("admin/webhook/phonepe_webhook"),
-                        'mobileNumber' => $mobile,
-                    );
-
-                    $res = $this->phonepe->pay($data);
-                    // echo "<pre>";
-                    // var_dump($data["param1"]);
-                    $this->response['error'] = false;
-                    $this->response['data'] = $res;
-                    $this->response['transaction_id'] = $transation_id;
-                    $this->response['message'] = $res['message'];
-                    $this->response['url'] = ($res['data']['instrumentResponse']['redirectInfo']['url']) ? $res['data']['instrumentResponse']['redirectInfo']['url'] : " ";
-                    // $this->response['data']['order_id'] = $order_id;
-                    // echo "<pre>";
-                    // print_r($this->response);
-                    print_r(json_encode($this->response));
-                    return;
-                }
-            } else {
-                $this->response['error'] = true;
-                $this->response['message'] = "Unauthorised access is not allowed.";
-                print_r(json_encode($this->response));
-                return false;
-            }
-        }
-
-        public function phonepe_response()
-        {
-            $paramList = array();
-            $paramList = $_POST;
-            if (isset($_POST['transactionId']) && !empty($_POST['transactionId'])) {
-                $transation_id = $_POST['transactionId'];
-                $transaction = fetch_details("transactions", ["txn_id" => $transation_id]);
-            }
-            $user_id = (isset($transaction[0]['user_id'])) ? $transaction[0]['user_id'] : "";
-            $user_details = fetch_details('users', ['id' => $user_id]);
-            session_start();
-
-            $_SESSION["mobile"] = (isset($user_details[0]['mobile'])) ? $user_details[0]['mobile'] : "";
-            $_SESSION["identity"] = (isset($user_details[0]['mobile'])) ? $user_details[0]['mobile'] : "";
-            $_SESSION["user_id"] = (isset($user_details[0]['id'])) ? $user_details[0]['id'] : "";
-            $_SESSION["email"] = (isset($user_details[0]['email'])) ? $user_details[0]['email'] : "";
-            $_SESSION["ion_auth_session_hash"] = "6583d6c4f205998ecacc9f51b68a2a2e44ea0006";
-            $transaction_type = (isset($transaction[0]['transaction_type'])) ? $transaction[0]['transaction_type'] : "";
-
-            $order_id = (isset($transaction[0]['order_id'])) ? $transaction[0]['order_id'] : "";
-
-            $response = $this->phonepe->check_status($_POST['transactionId']);
-            $status = $paramList["code"];
-            if (!empty($transation_id)) {
-                $transaction = fetch_details('transactions', ['txn_id' => $transation_id], '*');
-                $amount = $_POST['amount'] / 100;
-            } else {
-                $amount = 0;
-            }
-            // print_r($response);
-            if ($this->ion_auth->logged_in()) {
-                if ($response) {
-                    if ($transaction_type == "wallet") {
-                        if ($status == 'PAYMENT_SUCCESS') {
-                            // $data['status'] = "success";
-                            // $data['message'] = "Wallet refill successful";
-
-                            // $this->transaction_model->update_transaction($data, $transation_id);
-                            redirect(base_url("payment/wallet_success"));
-                            return false;
-                        } elseif ($status == "BAD_REQUEST"  || $status == "AUTHORIZATION_FAILED" || $status == "PAYMENT_ERROR" || $status == "TRANSACTION_NOT_FOUND" || $status == "PAYMENT_DECLINED" || $status == "TIMED_OUT") {
-                            // $data['status'] = "failed";
-                            // $data['message'] = "Wallet could not be recharged!";
-
-                            // $this->transaction_model->update_transaction($data, $transation_id);
-                            redirect(base_url("payment/cancel"));
-                        } else {
-                            $this->phonepe->check_status($transation_id);
-                            redirect(base_url("payment/wallet_success"));
-                        }
-                    }
-                    if (isset($order_id) && !empty($order_id)) {
-                        if ($status == "PAYMENT_SUCCESS") {
-                            // update_details(['active_status' => 'received'], ['order_id' => $order_id], 'order_items');
-                            // $order_status = json_encode(array(array('received', date("d-m-Y h:i:sa"))));
-                            // update_details(['status' => $order_status], ['order_id' => $order_id], 'order_items', false);
-
-                            // update_details(['active_status' => 'received'], ['id' => $order_id], 'orders');
-                            // $order_status = json_encode(array(array('received', date("d-m-Y h:i:sa"))));
-                            // update_details(['status' => $order_status], ['id' => $order_id], 'orders', false);
-                            redirect(base_url('payment/success'), 'refresh');
-                        } elseif ($status == "BAD_REQUEST"  || $status == "AUTHORIZATION_FAILED" || $status == "PAYMENT_ERROR" || $status == "TRANSACTION_NOT_FOUND" || $status == "PAYMENT_DECLINED" || $status == "TIMED_OUT") {
-                            // $this->delete_order_general($order_id);
-                            redirect(base_url('payment/cancel'), 'refresh');
-                        } else {
-                            // $this->phonepe->check_status($_POST['transactionId']);
-                            // update_details(['active_status' => 'awaiting'], ['order_id' => $order_id], 'order_items');
-                            // $order_status = json_encode(array(array('awaiting', date("d-m-Y h:i:sa"))));
-                            // update_details(['status' => $order_status], ['order_id' => $order_id], 'order_items', false);
-
-                            // update_details(['active_status' => 'awaiting'], ['id' => $order_id], 'orders');
-                            // $order_status = json_encode(array(array('awaiting', date("d-m-Y h:i:sa"))));
-                            // update_details(['status' => $order_status], ['id' => $order_id], 'orders', false);
-                            redirect(base_url('payment/success'), 'refresh');
-                        }
-                    } else {
-                        redirect(base_url(), 'refresh');
-                    }
-                } else {
-                    $this->session->set_flashdata('message', 'Order already exists with this transaction ID');
-                    $this->session->set_flashdata('message_type', 'error');
-                    redirect(base_url(), 'refresh');
-                }
-            } else {
-                redirect(base_url(), 'refresh');
-            }
-        }
-
         public function initiate_paytm_transaction()
         {
             if ($this->data['is_logged_in']) {
@@ -563,7 +391,7 @@
                 update_details(['status' => $order_status], ['order_id' => $status->Data->UserDefinedField], 'order_items', false);
 
                 update_details(['payu_txn_id' => $payment_id], ['order_id' => $status->Data->UserDefinedField], 'transactions');
-                redirect(base_url("payment/wallet_success"));
+                redirect(base_url("payment/success"));
                 return;
             } else {
                 redirect(base_url("payment/cancel"));

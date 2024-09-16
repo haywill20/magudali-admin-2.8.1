@@ -15,14 +15,17 @@ class Compare extends CI_Controller
         $this->data['user'] = ($this->ion_auth->logged_in()) ? $this->ion_auth->user()->row() : array();
         $this->data['settings'] = get_settings('system_settings', true);
         $this->data['web_settings'] = get_settings('web_settings', true);
-        $this->data['auth_settings'] = get_settings('authentication_settings', true);
-        $this->data['web_logo'] = get_settings('web_logo');
         $this->response['csrfName'] = $this->security->get_csrf_token_name();
         $this->response['csrfHash'] = $this->security->get_csrf_hash();
     }
 
     public function index()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         $this->data['main_page'] = 'Compare';
         $this->data['title'] = 'Compare | ' . $this->data['web_settings']['site_title'];
         $this->data['keywords'] = 'Compare, ' . $this->data['web_settings']['meta_keywords'];

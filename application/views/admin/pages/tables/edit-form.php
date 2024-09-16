@@ -32,12 +32,12 @@
                 </select>
               </div>
             </div>
-            <!-- <div class="d-flex justify-content-center form-group" id="error_box">
+            <div class="d-flex justify-content-center form-group" id="error_box">
               <div class="card text-white d-none mb-3">
                 <div class="card-header"></div>
                 <div class="card-body"></div>
               </div>
-            </div> -->
+            </div>
             <div class="card-footer d-flex justify-content-center">
               <button type="submit" class="btn btn-info col-md-4" id="submit_btn">Add Category</button>
             </div>

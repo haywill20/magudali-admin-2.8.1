@@ -58,7 +58,7 @@ class Notification_model extends CI_Model
         $notification_data['data'] = $search_res;
         return  $notification_data;
     }
-    public function get_notifications_data($offset = 0, $limit = 10, $sort = 'read_by', $order = 'DESC')
+    public function get_notifications_data($offset = 0, $limit = 10, $sort = 'read_by', $order = 'ASC')
     {
 
         $multipleWhere = '';
@@ -121,7 +121,7 @@ class Notification_model extends CI_Model
             $tempRow['id'] = $row['id'];
             $tempRow['title'] = $row['title'];
             $tempRow['message'] = $row['message'];
-            $tempRow['type'] =  str_replace('_', ' ', $row['type']);
+            $tempRow['type'] = $row['type'];
             $tempRow['type_id'] = $row['type_id'];
             $tempRow['read_by'] = ($row['read_by'] == 1) ? '<label class="badge badge-primary">Read</label>' : '<label class="badge badge-danger">Un-Read</label>';
             $tempRow['operate'] = $operate;
@@ -130,7 +130,7 @@ class Notification_model extends CI_Model
         $bulkData['rows'] = $rows;
         print_r(json_encode($bulkData));
     }
-    public function get_notification_list($offset = 0, $limit = 10, $sort = 'id', $order = 'DESC')
+    public function get_notification_list($offset = 0, $limit = 10, $sort = 'id', $order = 'ASC')
     {
 
         $multipleWhere = '';
@@ -152,12 +152,6 @@ class Notification_model extends CI_Model
             $search = $_GET['search'];
             $multipleWhere = ['id' => $search, 'title' => $search, 'message' => $search];
         }
-        // print_r($_GET);
-        // die;
-        // if (isset($_GET['message_type']) && $_GET['message_type'] != '') {
-        //     $where = ['payment_type' =>  $_GET['message_type']];
-        // }
-
 
         $count_res = $this->db->select(' COUNT(id) as `total` ');
 
@@ -189,7 +183,6 @@ class Notification_model extends CI_Model
         foreach ($city_search_res as $row) {
             $row = output_escaping($row);
             $operate = ' <a class="delete_notifications btn btn-danger action-btn btn-xs mr-1 ml-1 mb-1" title="Delete" href="javascript:void(0)"  data-id="' . $row['id'] . '" ><i class="fa fa-trash"></i></a>';
-
             $tempRow['id'] = $row['id'];
             $tempRow['title'] = $row['title'];
             $tempRow['type'] = $row['type'];
@@ -209,16 +202,15 @@ class Notification_model extends CI_Model
             $tempRow['image_src'] = $row['image'];
             $tempRow['image'] = "<div class='mx-auto product-image image-box-100'><a href='" . $row['image'] . "' data-toggle='lightbox' data-gallery='gallery' >
       <img class='rounded'  src='"  . $row['image'] . "'></a></div>";
-            $full_notification =  '<div class="d-flex"><div class="'. (!empty($row['image']) ? "" :"d-none") .'">'.$tempRow['image'].'</div><div class="ms-2"><b class="m-0">' . $row['title'] . '</b><p class="m-0">'. $row['message'] .'</p></div></div>';
-            $tempRow['full_notification'] = $full_notification;
-
             $tempRow['link'] = $row['link'];
+            $tempRow['full_notification'] = '<h4>' . $row['title'] . '</h4><p>' . $row['message'] . '</p><img src=' . $row['image'] . ' alt="Notification Image" height="100px" />';
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }
         $bulkData['rows'] = $rows;
         print_r(json_encode($bulkData));
     }
+
     public function mark_all_as_read()
     {
         if (update_details(['read_by' => '1'], ['read_by' => 0], 'system_notification')) {

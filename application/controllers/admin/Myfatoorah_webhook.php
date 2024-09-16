@@ -9,11 +9,11 @@ class myfatoorah_webhook extends CI_Controller
     public function myfatoorah()
     {
         //Debug in server first
-
+      
 
         $txn_id = (isset($request['payload']['payment']['entity']['id'])) ? $request['payload']['payment']['entity']['id'] : "";
 
-
+        
 
 
         if (!empty($request['payload']['payment']['entity']['id'])) {
@@ -31,7 +31,9 @@ class myfatoorah_webhook extends CI_Controller
         if (!empty($transaction)) {
             $order_id = $transaction[0]['order_id'];
             $user_id = $transaction[0]['user_id'];
-        } else {
+        } 
+        else 
+        {
             $order_id = 0;
             $order_id = (isset($request['payload']['order']['entity']['notes']['order_id'])) ? $request['payload']['order']['entity']['notes']['order_id'] : $request['payload']['payment']['entity']['notes']['order_id'];
         }
@@ -172,12 +174,7 @@ class myfatoorah_webhook extends CI_Controller
                                     'type' => "place_order",
                                     'content_available' => true
                                 );
-                                $firebase_project_id = get_settings('firebase_project_id');
-                                $service_account_file = get_settings('service_account_file');
-                                // print_r($registrationIDs_chunks_user); 
-                                if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                                    send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
-                                }
+                                send_notification($fcmMsg, $user_fcm_id);
                             }
                             update_stock($order['order_data'][0]['product_variant_ids'], $order['order_data'][0]['quantity'], 'plus');
                         }
@@ -274,4 +271,10 @@ class myfatoorah_webhook extends CI_Controller
         log_message('error', $report);
         die($error_msg);
     }
+   
+    
+
+
+
+
 }

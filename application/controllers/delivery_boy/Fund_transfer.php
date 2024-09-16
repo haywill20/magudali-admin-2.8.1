@@ -52,7 +52,7 @@ class Fund_transfer extends CI_Controller
             $user_id = $this->ion_auth->user()->row()->id;
             $this->data['curreny'] = $settings['currency'];
             $this->data['cash_in_hand'] = fetch_details("users", ['id' => $user_id], 'cash_received');
-            $this->data['cash_collected'] =  $this->db->select(' SUM(amount) as total_amt ')->where(['type' => 'delivery_boy_cash', 'user_id' => $user_id])->get('transactions')->result_array();
+            $this->data['cash_collected'] =  $this->db->select(' SUM(amount) as total_amt ')->where(['type' => 'delivery_boy_cash_collection', 'user_id' => $user_id])->get('transactions')->result_array();
             $this->data['title'] = 'View Cash Collection | ' . $settings['app_name'];
             $this->data['meta_description'] = ' View Cash Collection  | ' . $settings['app_name'];
             $this->load->view('delivery_boy/template', $this->data);

@@ -32,9 +32,7 @@ class Product extends CI_Controller
                 ->join('users_groups ug', ' ug.user_id = u.id ')
                 ->join('seller_data sd', ' sd.user_id = u.id ')
                 ->where(['ug.group_id' => '4'])
-                ->where(['sd.status' => 1])
                 ->get('users u')->result_array();
-
             $this->load->view('admin/template', $this->data);
         } else {
             redirect('admin/login', 'refresh');
@@ -51,31 +49,20 @@ class Product extends CI_Controller
             $this->data['meta_description'] = 'Add Product | ' . $settings['app_name'];
             $this->data['taxes'] = fetch_details('taxes', null, '*');
             $this->data['countries'] = fetch_details('countries', null, 'name,id');
-            $this->data['shipping_method'] = get_settings('shipping_method', true);
-            $this->data['payment_method'] = get_settings('payment_method', true);
-            $this->data['system_settings'] = get_settings('system_settings', true);
-            $this->data['cities'] = fetch_details('cities', "", 'name,id', '5');
-
             if (isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
                 $seller_id = fetch_details('products', ['id' => $_GET['edit_id']], 'seller_id')[0]['seller_id'];
                 $this->data['shipping_data'] = fetch_details('pickup_locations', ['status' => 1, 'seller_id' => $seller_id], 'id,pickup_location');
-            } else {
+            }else{
                 $this->data['shipping_data'] = fetch_details('pickup_locations', ['status' => 1], 'id,pickup_location');
             }
             $this->data['brands'] = fetch_details('brands', null, 'name,id');
 
-            // echo "<pre>";
-            // print_r($this->data['sellers']);
-            // print_r($seller_id);
-            // die;
+            $this->data['sellers'] = $this->db->select(' u.username as seller_name,u.id as seller_id,sd.category_ids,sd.store_name,sd.id as seller_data_id  ')
+                ->join('users_groups ug', ' ug.user_id = u.id ')
+                ->join('seller_data sd', ' sd.user_id = u.id ')
+                ->where(['ug.group_id' => '4'])
+                ->get('users u')->result_array();
             if (isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
-                $this->data['seller'] = $this->db->select(' u.username as seller_name,u.id as seller_id,sd.category_ids,sd.store_name,sd.id as seller_data_id  ')
-                    ->join('users_groups ug', ' ug.user_id = u.id ')
-                    ->join('seller_data sd', ' sd.user_id = u.id ')
-                    ->where(['ug.group_id' => '4'])
-                    ->where(['u.id' => $seller_id ])
-                    ->where(['sd.status' => '1'])
-                    ->get('users u')->result_array();
                 $this->data['title'] = 'Update Product | ' . $settings['app_name'];
                 $this->data['meta_description'] = 'Update Product | ' . $settings['app_name'];
                 $product_details = fetch_details('products', ['id' => $_GET['edit_id']], '*');
@@ -96,16 +83,13 @@ class Product extends CI_Controller
             $attributes = $this->db->select('attr_val.id,attr.name as attr_name ,attr_set.name as attr_set_name,attr_val.value')
                 ->join('attributes attr', 'attr.id=attr_val.attribute_id')
                 ->join('attribute_set attr_set', 'attr_set.id=attr.attribute_set_id')
-                ->where(['attr.status' => 1, 'attr_set.status' => 1,'attr_val.status' => 1])
+                ->where(['attr.status' => 1, 'attr_set.status' => 1])
                 ->get('attribute_values attr_val')->result_array();
 
             $attributes_refind = array();
 
             for ($i = 0; $i < count($attributes); $i++) {
-                // echo "<pre>";
                 if (!array_key_exists($attributes[$i]['attr_set_name'], $attributes_refind)) {
-                    // print_R($attributes);
-                    // print_R($attributes[$i]['attr_set_name']);
                     $attributes_refind[$attributes[$i]['attr_set_name']] = array();
                     for ($j = 0; $j < count($attributes); $j++) {
                         if ($attributes[$i]['attr_set_name'] == $attributes[$j]['attr_set_name']) {
@@ -119,7 +103,6 @@ class Product extends CI_Controller
                         }
                     }
                 }
-                // die;
             }
             $this->data['categories'] = $this->category_model->get_categories();
             $this->data['attributes_refind'] = $attributes_refind;
@@ -247,7 +230,7 @@ class Product extends CI_Controller
                 $this->db->or_where('c.parent_id', $_GET['cat_id']);
             }
             $product_data = json_encode($this->db->order_by('row_order')->join('categories c', 'p.category_id = c.id')->get('products p')->result_array());
-            //this print_r is used for return data so don't remove it 
+           //this print_r is used for return data so don't remove it 
             print_r($product_data);
         } else {
             redirect('admin/login', 'refresh');
@@ -264,7 +247,6 @@ class Product extends CI_Controller
 
                 delete_details(['id' => $_GET['id']], 'products');
                 delete_details(['product_id' => $_GET['id']], 'product_attributes');
-                delete_details(['product_id' => $_GET['id']], 'product_faqs');
                 $response['error'] = false;
                 $response['message'] = 'Deleted Succesfully';
             } else {
@@ -307,8 +289,7 @@ class Product extends CI_Controller
             $this->form_validation->set_rules('hsn_code', 'HSN_Code', 'trim|xss_clean');
             $this->form_validation->set_rules('video', 'Video', 'trim|xss_clean');
             $this->form_validation->set_rules('video_type', 'Video Type', 'trim|xss_clean');
-            $this->form_validation->set_rules('deliverable_type', 'Deliverable Type', 'trim|xss_clean');
-            $this->form_validation->set_rules('product_identity', 'product_identity', 'trim|xss_clean');
+            $this->form_validation->set_rules('deliverable_type', 'Deliverable Type', 'required|trim|xss_clean');
 
             if (isset($_POST['video_type']) && $_POST['video_type'] != '') {
                 if ($_POST['video_type'] == 'youtube' || $_POST['video_type'] == 'vimeo') {
@@ -342,11 +323,8 @@ class Product extends CI_Controller
             if (isset($_POST['is_prices_inclusive_tax'])) {
                 $this->form_validation->set_rules('is_prices_inclusive_tax', 'Tax included in prices', 'trim|xss_clean');
             }
-            if (isset($_POST['deliverable_type']) && !empty($_POST['deliverable_type']) && ($_POST['deliverable_type'] == INCLUDED || $_POST['deliverable_type'] == EXCLUDED)) {
+            if ($_POST['deliverable_type'] == INCLUDED || $_POST['deliverable_type'] == EXCLUDED) {
                 $this->form_validation->set_rules('deliverable_zipcodes[]', 'Deliverable Zipcodes', 'trim|required|xss_clean');
-            }
-            if (isset($_POST['deliverable_city_type']) && !empty($_POST['deliverable_city_type']) && ($_POST['deliverable_city_type'] == INCLUDED || $_POST['deliverable_city_type'] == EXCLUDED)) {
-                $this->form_validation->set_rules('deliverable_cities[]', 'Deliverable Cities', 'trim|required|xss_clean');
             }
 
             // If product type is simple			
@@ -421,14 +399,7 @@ class Product extends CI_Controller
                     $_POST['zipcodes'] = NULL;
                 }
 
-                if (isset($_POST['deliverable_cities']) && !empty($_POST['deliverable_cities'])) {
-                    $_POST['cities'] = implode(",", $_POST['deliverable_cities']);
-                } else {
-                    $_POST['cities'] = NULL;
-                }
-                // print_r($_POST);
-                // die;
-
+               
                 $this->product_model->add_product($_POST);
                 $this->response['error'] = false;
                 $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -446,20 +417,7 @@ class Product extends CI_Controller
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
             $seller_id =  (isset($_GET['seller_id']) && !empty($_GET['seller_id'])) ? $this->input->get('seller_id', true) : NULL;
-            $status =  (isset($_GET['status']) && $_GET['status'] != "") ? $this->input->get('status', true) : '';
-            if (isset($_GET['flag']) && !empty($_GET['flag'])) {
-                return $this->product_model->get_product_details($_GET['flag'], $seller_id, $status);
-            }
-            return $this->product_model->get_product_details(null, $seller_id, $status);
-        } else {
-            redirect('admin/login', 'refresh');
-        }
-    }
-    public function get_product_faq_data()
-    {
-        if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
-            $seller_id =  (isset($_GET['seller_id']) && !empty($_GET['seller_id'])) ? $this->input->get('seller_id', true) : NULL;
-            $status =  (isset($_GET['status']) && $_GET['status'] != "") ? $this->input->get('status', true) : '1';
+            $status =  (isset($_GET['status']) && $_GET['status'] != "") ? $this->input->get('status', true) : NULL;
             if (isset($_GET['flag']) && !empty($_GET['flag'])) {
                 return $this->product_model->get_product_details($_GET['flag'], $seller_id, $status);
             }
@@ -688,15 +646,12 @@ class Product extends CI_Controller
 
     public function process_bulk_upload()
     {
-        // print_R($_FILES['upload_file']);
-        // return false;
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
             if (print_msg(!has_permissions('create', 'product'), PERMISSION_ERROR_MSG, 'product')) {
                 return false;
             }
             $this->form_validation->set_rules('bulk_upload', '', 'xss_clean');
             $this->form_validation->set_rules('type', 'Type', 'trim|required|xss_clean');
-
             if (empty($_FILES['upload_file']['name'])) {
                 $this->form_validation->set_rules('upload_file', 'File', 'trim|required|xss_clean', array('required' => 'Please choose file'));
             }
@@ -729,9 +684,7 @@ class Product extends CI_Controller
                 if ($type == 'upload') {
                     while (($row = fgetcsv($handle, 10000, ",")) != FALSE) //get row values
                     {
-                        // print_R($row);
-                        // return false;
-
+                      
                         if ($temp != 0) {
                             if (empty($row[0])) {
                                 $this->response['error'] = true;
@@ -853,27 +806,7 @@ class Product extends CI_Controller
                                 }
                             }
 
-                            if ($row[29] != 0 && $row[29] != 1 && $row[29] != 2 && $row[29] != 3 && $row[29] == "") {
-                                $this->response['error'] = true;
-                                $this->response['message'] = 'Not valid value for deliverable_city_type at row ' . $temp;
-                                $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                                $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                                print_r(json_encode($this->response));
-                                return false;
-                            }
-
-                            if ($row[29] == INCLUDED || $row[29] == EXCLUDED) {
-                                if (empty($row[30])) {
-                                    $this->response['error'] = true;
-                                    $this->response['message'] = 'Deliverable_cities is empty at row ' . $temp;
-                                    $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                                    $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                                    print_r(json_encode($this->response));
-                                    return false;
-                                }
-                            }
-
-                            if (empty($row[31])) {
+                            if (empty($row[29])) {
                                 $this->response['error'] = true;
                                 $this->response['message'] = 'Seller ID is empty at row ' . $temp;
                                 $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -881,10 +814,10 @@ class Product extends CI_Controller
                                 print_r(json_encode($this->response));
                                 return false;
                             }
-                            $seller_id = $row[31];
+                            $seller_id = $row[29];
                             $seller_data = fetch_details('seller_data', ['user_id' => $seller_id], 'category_ids');
 
-                            if (!isset($seller_data[0]['category_ids']) || !in_array($row[0], explode(',', $seller_data[0]['category_ids']))) {
+                            if (!in_array($row[0], explode(',', $seller_data[0]['category_ids']))) {
                                 $this->response['error'] = true;
                                 $this->response['message'] = 'This Category ID : ' . $row[0] . ' is not assign to seller id:' . $seller_id . ' at row ' . $temp;
                                 $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -893,16 +826,16 @@ class Product extends CI_Controller
                                 return false;
                             }
 
-                            $index1 = 36;
+                            $index1 = 30;
                             $total_variants = 0;
-                            for ($j = 0; $j < 70; $j++) {
+                            for ($j = 0; $j < 50; $j++) {
 
                                 if (!empty($row[$index1])) {
                                     $total_variants++;
                                 }
-                                $index1 = $index1 + 11;
+                                $index1 = $index1 + 7;
                             }
-                            $variant_index = 36;
+                            $variant_index = 30;
                             for ($k = 0; $k < $total_variants; $k++) {
                                 if ($row[2] == 'variable_product') {
                                     if (empty($row[$variant_index])) {
@@ -913,18 +846,17 @@ class Product extends CI_Controller
                                         print_r(json_encode($this->response));
                                         return false;
                                     }
-                                    $variant_index = $variant_index + 11;
+                                    $variant_index = $variant_index + 7;
                                 }
                             }
-                            // if ($total_variants == 0) {
-                            //     $this->response['error'] = true;
-                            //     $this->response['message'] = 'Variants not found at row ' . $temp;
-                            //     $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                            //     $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                            //     print_r(json_encode($this->response));
-                            //     return false;
-                            // } else
-                            if ($row[2] == 'simple_product' && $total_variants > 1) {
+                            if ($total_variants == 0) {
+                                $this->response['error'] = true;
+                                $this->response['message'] = 'Variants not found at row ' . $temp;
+                                $this->response['csrfName'] = $this->security->get_csrf_token_name();
+                                $this->response['csrfHash'] = $this->security->get_csrf_hash();
+                                print_r(json_encode($this->response));
+                                return false;
+                            } elseif ($row[2] == 'simple_product' && $total_variants > 1) {
                                 $this->response['error'] = true;
                                 $this->response['message'] = 'You can not add variants more than one for simple prodcuct at row  ' . $temp;
                                 $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -941,7 +873,6 @@ class Product extends CI_Controller
                     while (($row = fgetcsv($handle, 10000, ",")) != FALSE) //get row vales
                     {
                         if ($temp1 != 0) {
-
                             $data['category_id'] = $row[0];
                             if (!empty($row[1])) {
                                 $data['tax'] = $row[1];
@@ -1007,30 +938,26 @@ class Product extends CI_Controller
                             $data['description'] = $row[26];
                             $data['deliverable_type'] = $row[27]; //in csv its 28th
                             $data['deliverable_zipcodes'] = $row[28]; // in csv its 29th
-                            $data['deliverable_city_type'] = $row[29]; //in csv its 28th
-                            $data['deliverable_cities'] = $row[30]; // in csv its 29th
-                            $data['seller_id'] = $row[31]; // in csv its 29th
-                            $data['brand'] = isset($row[32]) ? $row[32] : '';
-                            $data['hsn_code'] = isset($row[33]) ? $row[33] : '';
-                            $data['pickup_location'] = isset($row[34]) ? $row[34] : '';
-                            $data['extra_description'] = isset($row[35]) ? $row[35] : '';
-
-                            // print_R($data);
-                            // return false;
+                            $data['seller_id'] = $row[29]; // in csv its 29th
+                            $data['brand'] = isset($row[37]) ? $row[37] : '';
+                            $data['hsn_code'] = isset($row[38]) ? $row[38] : '';
+                            $data['pickup_location'] = isset($row[39]) ? $row[39] : '';
+                            $data['extra_description'] = isset($row[40]) ? $row[40] : '';
+                           
 
                             $this->db->insert('products', $data);
                             $product_id = $this->db->insert_id();
 
-                            $index1 = 37;
+                            $index1 = 31;
                             $total_variants = 0;
-                            for ($j = 0; $j < 70; $j++) {
+                            for ($j = 0; $j < 50; $j++) {
                                 if (!empty($row[$index1])) {
                                     $total_variants++;
                                 }
-                                $index1 = $index1 + 11;
+                                $index1 = $index1 + 7;
                             }
 
-                            $index1 = 36;
+                            $index1 = 30;
                             $attribute_value_ids = '';
                             for ($j = 0; $j < $total_variants; $j++) {
                                 if (!empty($row[$index1])) {
@@ -1040,7 +967,7 @@ class Product extends CI_Controller
                                         $attribute_value_ids = strval($row[$index1]);
                                     }
                                 }
-                                $index1 = $index1 + 11;
+                                $index1 = $index1 + 7;
                             }
                             $attribute_value_ids = !empty($attribute_value_ids) ? $attribute_value_ids : '';
                             $pro_attr_data = [
@@ -1050,7 +977,7 @@ class Product extends CI_Controller
 
                             ];
                             $this->db->insert('product_attributes', $pro_attr_data);
-                            $index = 36;
+                            $index = 30;
                             for ($i = 0; $i < $total_variants; $i++) {
                                 $variant_data[$i]['images'] = '[]';
                                 $variant_data[$i]['product_id'] = $product_id;
@@ -1090,26 +1017,6 @@ class Product extends CI_Controller
                                 }
 
                                 $index++;
-                                if (isset($row[$index]) && $row[$index] != '') {
-                                    $variant_data[$i]['weight'] = $row[$index];
-                                }
-
-                                $index++;
-                                if (isset($row[$index]) && $row[$index] != '') {
-                                    $variant_data[$i]['height'] = $row[$index];
-                                }
-
-                                $index++;
-                                if (isset($row[$index]) && $row[$index] != '') {
-                                    $variant_data[$i]['breadth'] = $row[$index];
-                                }
-
-                                $index++;
-                                if (isset($row[$index]) && $row[$index] != '') {
-                                    $variant_data[$i]['length'] = $row[$index];
-                                }
-
-                                $index++;
                                 $this->db->insert('product_variants', $variant_data[$i]);
                             }
                         }
@@ -1125,7 +1032,7 @@ class Product extends CI_Controller
                 } else { // bulk_update
                     while (($row = fgetcsv($handle, 10000, ",")) != FALSE) //get row vales
                     {
-
+                        
                         if ($temp != 0) {
                             if (empty($row[0])) {
                                 $this->response['error'] = true;
@@ -1230,30 +1137,8 @@ class Product extends CI_Controller
                                 }
                             }
 
-                            if ($row[29] != "") {
-                                if ($row[29] != 0 && $row[29] != 1 && $row[29] != 2 && $row[29] != 3) {
-                                    $this->response['error'] = true;
-                                    $this->response['message'] = 'Not valid value for deliverable_city_type at row ' . $temp;
-                                    $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                                    $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                                    print_r(json_encode($this->response));
-                                    return false;
-                                }
-                            }
-
-                            if ($row[29] != "" && ($row[29] == INCLUDED || $row[29] == EXCLUDED)) {
-                                if (empty($row[30])) {
-                                    $this->response['error'] = true;
-                                    $this->response['message'] = 'Deliverable_cities is empty at row ' . $temp;
-                                    $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                                    $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                                    print_r(json_encode($this->response));
-                                    return false;
-                                }
-                            }
-
                             if (!empty($row[1])) {
-                                if (empty($row[31])) {
+                                if (empty($row[29])) {
                                     $this->response['error'] = true;
                                     $this->response['message'] = 'Seller ID is empty at row ' . $temp;
                                     $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -1261,10 +1146,10 @@ class Product extends CI_Controller
                                     print_r(json_encode($this->response));
                                     return false;
                                 }
-                                $seller_id = $row[31];
+                                $seller_id = $row[29];
                                 $seller_data = fetch_details('seller_data', ['user_id' => $seller_id], 'category_ids');
 
-                                if (!isset($seller_data[0]['category_ids']) || !in_array($row[1], explode(',', $seller_data[0]['category_ids']))) {
+                                if (!in_array($row[1], explode(',', $seller_data[0]['category_ids']))) {
                                     $this->response['error'] = true;
                                     $this->response['message'] = 'This Category ID : ' . $row[1] . ' is not assign to seller id:' . $seller_id . ' at row ' . $temp;
                                     $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -1272,7 +1157,7 @@ class Product extends CI_Controller
                                     print_r(json_encode($this->response));
                                     return false;
                                 }
-                                if (empty($row[36])) {
+                                if (empty($row[30])) {
                                     $this->response['error'] = true;
                                     $this->response['message'] = 'Variant ID is empty at row ' . $temp;
                                     $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -1435,55 +1320,48 @@ class Product extends CI_Controller
                                 } else {
                                     $data['deliverable_zipcodes'] = $product[0]['deliverable_zipcodes'];
                                 }
+
+
                                 if ($row[29] != '') {
-                                    $data['deliverable_city_type'] = $row[29];
-                                } else {
-                                    $data['deliverable_city_type'] = $product[0]['deliverable_city_type'];
-                                }
-                                if ($row[29] != '' && ($row[29] == INCLUDED || $row[29] == EXCLUDED)) {
-                                    $data['deliverable_cities'] = $row[30];
-                                } else {
-                                    $data['deliverable_cities'] = $product[0]['deliverable_cities'];
-                                }
-
-
-                                if ($row[31] != '') {
-                                    $data['seller_id'] = $row[31];
+                                    $data['seller_id'] = $row[29];
                                 } else {
                                     $data['seller_id'] = $product[0]['seller_id'];
                                 }
-                                if ($row[32] != '') {
-                                    $data['brand'] = $row[32];
+                                if ($row[36] != '') {
+                                    $data['brand'] = $row[36];
                                 } else {
                                     $data['brand'] = $product[0]['brand'];
                                 }
-                                if ($row[33] != '') {
-                                    $data['hsn_code'] = $row[33];
+                                if ($row[37] != '') {
+                                    $data['hsn_code'] = $row[37];
                                 } else {
                                     $data['hsn_code'] = $product[0]['hsn_code'];
                                 }
-                                if ($row[34] != '') {
-                                    $data['pickup_location'] = $row[34];
+                                if ($row[38] != '') {
+                                    $data['pickup_location'] = $row[38];
                                 } else {
                                     $data['pickup_location'] = $product[0]['pickup_location'];
                                 }
-                                if ($row[35] != '') {
-                                    $data['extra_description'] = $row[35];
+                                if ($row[39] != '') {
+                                    $data['extra_description'] = $row[39];
                                 } else {
                                     $data['extra_description'] = $product[0]['extra_description'];
                                 }
+                               
+                               
 
+                               
                                 $this->db->where('id', $row[0])->update('products', $data);
                             }
-                            $index1 = 38;
+                            $index1 = 31;
                             $total_variants = 0;
-                            for ($j = 0; $j < 70; $j++) {
+                            for ($j = 0; $j < 50; $j++) {
                                 if (!empty($row[$index1])) {
                                     $total_variants++;
                                 }
-                                $index1 = $index1 + 10;
+                                $index1 = $index1 + 6;
                             }
-                            $index = 37;
+                            $index = 30;
                             for ($i = 0; $i < $total_variants; $i++) {
                                 $variant_id = $row[$index];
                                 $variant = fetch_details('product_variants', ['id' => $row[$index]], '*');
@@ -1519,26 +1397,6 @@ class Product extends CI_Controller
                                         $variant_data[$i]['availability'] = $row[$index];
                                     } else {
                                         $variant_data[$i]['availability'] = $variant[0]['availability'];
-                                    }
-
-                                    $index++;
-                                    if (isset($row[$index]) && $row[$index] != '') {
-                                        $variant_data[$i]['weight'] = $row[$index];
-                                    }
-
-                                    $index++;
-                                    if (isset($row[$index]) && $row[$index] != '') {
-                                        $variant_data[$i]['height'] = $row[$index];
-                                    }
-
-                                    $index++;
-                                    if (isset($row[$index]) && $row[$index] != '') {
-                                        $variant_data[$i]['breadth'] = $row[$index];
-                                    }
-
-                                    $index++;
-                                    if (isset($row[$index]) && $row[$index] != '') {
-                                        $variant_data[$i]['length'] = $row[$index];
                                     }
                                     $index++;
                                     $this->db->where('id', $variant_id)->update('product_variants', $variant_data[$i]);
@@ -1611,65 +1469,5 @@ class Product extends CI_Controller
         } else {
             redirect('admin/login', 'refresh');
         }
-    }
-
-    public function bulk_download()
-    {
-        if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
-            if (!has_permissions('create', 'product')) {
-                print_msg(PERMISSION_ERROR_MSG, 'product');
-                return;
-            }
-
-            $filename = 'products_' . date('Ymd') . '.csv';
-
-            $productsData = $this->product_model->getProductsAndVariants();
-
-            $csvHeaders = [
-                'product id', 'category_id', 'tax', 'type', 'stock type', 'name', 'short_description',
-                'indicator', 'cod_allowed', 'minimum order quantity', 'quantity step size', 'total allowed quantity',
-                'is prices inclusive tax', 'is returnable', 'is cancelable', 'cancelable till', 'image', 'video_type',
-                'video', 'tags', 'warranty period', 'guarantee period', 'made in', 'sku', 'stock', 'availability',
-                'deliverable_type', 'deliverable_zipcodes', 'deliverable_city_type', 'deliverable_cities', 'variant id', 'price', 'special price',
-                ' sku', ' stock', ' availability'
-            ];
-
-            header('Content-Type: text/csv; charset=utf-8');
-            header('Content-Disposition: attachment; filename=' . $filename);
-
-            $output = fopen('php://output', 'w');
-            fputcsv($output, $csvHeaders);
-
-            foreach ($productsData as $product) {
-                foreach ($product['variants'] as $variant) {
-                    $data = [
-                        $product['id'], $product['category_id'], $product['tax'], $product['type'],
-                        $product['stock_type'], $product['name'], $product['short_description'],
-                        $product['indicator'], $product['cod_allowed'], $product['minimum_order_quantity'],
-                        $product['quantity_step_size'], $product['total_allowed_quantity'],
-                        $product['is_prices_inclusive_tax'], $product['is_returnable'], $product['is_cancelable'],
-                        $product['cancelable_till'], $product['image'], $product['video_type'], $product['video'],
-                        $product['tags'], $product['warranty_period'], $product['guarantee_period'],
-                        $product['made_in'], $product['sku'], $product['stock'], $product['availability'],
-                        $product['deliverable_type'], $product['deliverable_zipcodes'],
-                        $product['deliverable_city_type'], $product['deliverable_cities'],
-                        $variant['id'], $variant['price'], $variant['special_price'], $variant['sku'],
-                        $variant['stock'], $variant['availability']
-                    ];
-                    fputcsv($output, $data);
-                }
-            }
-
-            fclose($output);
-        }
-    }
-
-    public function get_sellers_data()
-    {
-        $search = $this->input->get('search');
-        $response = $this->product_model->get_sellers($search);
-        // print_r($response);
-        // die;
-        echo json_encode($response);
     }
 }

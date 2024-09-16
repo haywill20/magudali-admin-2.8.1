@@ -27,8 +27,6 @@ class Invoice extends CI_Controller
                 $seller_data = fetch_details('seller_data', ['user_id' => $seller_id], 'store_name,pan_number,tax_name,tax_number,authorized_signature');
                 $res = $this->Order_model->get_order_details(['o.id' => $_GET['edit_id'], 'oi.seller_id' => $seller_id], true);
                 if (!empty($res)) {
-                    // echo "<pre>";
-                    // print_r($res);
                     $items = [];
                     $promo_code = [];
                     if (!empty($res[0]['promo_code'])) {
@@ -42,7 +40,6 @@ class Invoice extends CI_Controller
                         $temp['discounted_price'] = $row['discounted_price'];
                         $temp['tax_percent'] = $row['tax_percent'];
                         $temp['tax_amount'] = $row['tax_amount'];
-                        $temp['product_price'] = $row['product_price'];
                         $temp['price'] = $row['price'];
                         $temp['delivery_boy'] = $row['delivery_boy'];
                         $temp['active_status'] = $row['oi_active_status'];

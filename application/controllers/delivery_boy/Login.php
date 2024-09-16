@@ -54,10 +54,6 @@ class Login extends CI_Controller
             ->where(['ug.group_id' => '3'])
             ->get('users u')
             ->result_array();
-
-        $this->data['shipping_method'] = get_settings('shipping_method', true);
-        $this->data['system_settings'] = get_settings('system_settings', true);
-        $this->data['cities'] = fetch_details('cities', "", 'name,id', '5');
         // }
         // echo "<pre>";
         // print_r($this->data);
@@ -67,23 +63,13 @@ class Login extends CI_Controller
 
     public function create_delivery_boy()
     {
-        // print_r($_POST);
-        // die;
         $this->form_validation->set_rules('name', 'Name', 'trim|required|xss_clean');
         $this->form_validation->set_rules('email', 'Mail', 'trim|required|xss_clean');
-        $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|xss_clean|min_length[5]|max_length[16]');
-        // $this->form_validation->set_rules('country_code', 'Country Code', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|xss_clean|min_length[5]');
         $this->form_validation->set_rules('password', 'Password', 'trim|required|xss_clean');
         $this->form_validation->set_rules('confirm_password', 'Confirm password', 'trim|required|matches[password]|xss_clean');
         $this->form_validation->set_rules('address', 'Address', 'trim|required|xss_clean');
-
-
-        if (isset($_POST['pincode_wise_deliverability']) && !empty($_POST['pincode_wise_deliverability']) && ($_POST['pincode_wise_deliverability'] == 1)) {
-            $this->form_validation->set_rules('serviceable_zipcodes[]', 'Serviceable Zipcodes', 'trim|required|xss_clean');
-        }
-        if (isset($_POST['city_wise_deliverability']) && !empty($_POST['city_wise_deliverability']) && ($_POST['city_wise_deliverability'] == 1)) {
-            $this->form_validation->set_rules('serviceable_cities[]', 'Serviceable Cities', 'trim|required|xss_clean');
-        }
+        $this->form_validation->set_rules('serviceable_zipcodes[]', 'Serviceable Zipcodes', 'trim|required|xss_clean');
 
         if (!isset($_POST['edit_delivery_boy'])) {
             if (isset($_FILES) && !empty($_FILES) && count($_FILES['driving_license']['name']) < 2) {
@@ -216,59 +202,15 @@ class Login extends CI_Controller
                 $identity = ($identity_column == 'mobile') ? $mobile : $email;
                 $password = $this->input->post('password');
 
-                if (isset($_POST['serviceable_zipcodes']) && !empty($_POST['serviceable_zipcodes'])) {
-                    $serviceable_zipcodes = implode(",", $this->input->post('serviceable_zipcodes', true));
-                } else {
-                    $serviceable_zipcodes = NULL;
-                }
-
-                if (isset($_POST['serviceable_cities']) && !empty($_POST['serviceable_cities'])) {
-                    $serviceable_cities = implode(",", $this->input->post('serviceable_cities', true));
-                } else {
-                    $serviceable_cities = NULL;
-                }
-
                 $additional_data = [
                     'username' => $this->input->post('name'),
                     'address' => $this->input->post('address'),
-                    'serviceable_zipcodes' => $serviceable_zipcodes,
-                    'serviceable_cities' => $serviceable_cities,
+                    'serviceable_zipcodes' => implode(",", $this->input->post('serviceable_zipcodes', true)),
                     'type' => 'phone',
                     'driving_license' => implode(',', $images_new_name_arr),
-                    'country_code' => isset($_POST['country_code']) ? str_replace('+', '', $this->input->post('country_code')) : 0,
-
                 ];
 
-                $insert_id = $this->ion_auth->register($identity, $password, $email, $additional_data, ['3']);
-                if (!empty($insert_id)) {
-                    $delivery_boy_id = fetch_details('users', ['id' => $insert_id]);
-                    $title = "Delivery Boy registared Successfully. Wait for aprooval of admin.";
-                    $mail_admin_msg = 'Congratulations , We hope this message finds you well. We are writing to inform you about the registrer of your delivery boy account on our platform.Please be aware that this action is not reversible, Please conect with us and wait for admin approval for your account.';
-                    $email_message = array(
-                        'username' => 'Hello, Dear <b>' . ucfirst($delivery_boy_id[0]['username']) . '</b>, ',
-                        'subject' => $title,
-                        'email' => $delivery_boy_id[0]['email'],
-                        'message' => $mail_admin_msg
-                    );
-                    send_mail($delivery_boy_id[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
-
-
-                    //send mail to admin 
-                    $user_group = fetch_details('users_groups', ['group_id' => 1], '*');
-                    $admin_id = fetch_details('users', ['id' => $user_group[0]['user_id']], 'email,username');
-
-                    if (!empty($admin_id[0]['email'])) {
-                        $title = "Delivery Boy registared Successfully in your plateform Please check";
-                        $mail_admin_msg = 'Congratulations , We hope this message finds you well. We are writing to inform you about the registrer of delivery boy account on your platform.Please be aware that this action is not reversible, Please conect with us.';
-                        $email_message = array(
-                            'username' => 'Hello, Dear <b>' . ucfirst($admin_id[0]['username']) . '</b>, ',
-                            'subject' => $title,
-                            'email' => $admin_id[0]['email'],
-                            'message' => $mail_admin_msg
-                        );
-                        send_mail($admin_id[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
-                    }
-                }
+                $this->ion_auth->register($identity, $password, $email, $additional_data, ['3']);
                 update_details(['active' => 1], [$identity_column => $identity], 'users');
             }
 
@@ -303,9 +245,9 @@ class Login extends CI_Controller
         $this->form_validation->set_rules('username', 'Username', 'required|xss_clean|trim');
 
         if (!empty($_POST['old']) || !empty($_POST['new']) || !empty($_POST['new_confirm'])) {
-            $this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required|xss_clean');
-            $this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|xss_clean|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
-            $this->form_validation->set_rules('new_confirm', $this->lang->line('change_password_validation_new_password_confirm_label'), 'required|xss_clean');
+            $this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required');
+            $this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
+            $this->form_validation->set_rules('new_confirm', $this->lang->line('change_password_validation_new_password_confirm_label'), 'required');
         }
 
 
@@ -433,12 +375,5 @@ class Login extends CI_Controller
         $this->response['csrfName'] = $this->security->get_csrf_token_name();
         $this->response['csrfHash'] = $this->security->get_csrf_hash();
         print_r(json_encode($this->response));
-    }
-
-    public function get_cities()
-    {
-        $search = $this->input->get('search');
-        $response = $this->Area_model->get_cities_list($search);
-        echo json_encode($response);
     }
 }

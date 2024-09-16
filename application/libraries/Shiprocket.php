@@ -1,11 +1,13 @@
 <?php
 /* 
+
     1. get_credentials()
     2. create_order($amount,$receipt='')
     3. fetch_payments($id ='')
     4. capture_payment($amount, $id, $currency = "INR")
     5. verify_payment($order_id, $razorpay_payment_id, $razorpay_signature)
-    6. curl($url, $method = 'GET', $data = [])
+
+    0. curl($url, $method = 'GET', $data = [])
 */
 class Shiprocket
 {
@@ -62,15 +64,16 @@ class Shiprocket
 
         $url = $this->url . 'settings/company/addpickup';
         $result = $this->curl($url, "POST", json_encode($data));
-
+       
         //and return the result 
-
+       
         return $result;
     }
 
     public function curl($url, $method = 'GET', $data = [])
     {
         $token = $this->generate_token();
+
         $ch = curl_init();
         $headers = array(
             'Authorization: Bearer ' . $token,
@@ -109,14 +112,12 @@ class Shiprocket
             "weight" => $weight,
             "cod" => $cod
         );
-        // print_r($query);
 
         $qry_str = http_build_query($query);
 
         $url = $this->url . 'courier/serviceability/?' . $qry_str;
 
         $result = $this->curl($url);
-        // print_r($result);
         return $result;
     }
 
@@ -124,8 +125,9 @@ class Shiprocket
     {
         // firebase server url to send the curl request
         $url = $this->url . 'orders/create/adhoc';
+
         //building headers for the request
-        
+
         $data = json_encode($data);
         $result = $this->curl($url, $method = 'POST', $data);
         return $result;

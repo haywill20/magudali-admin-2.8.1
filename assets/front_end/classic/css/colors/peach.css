@@ -42,10 +42,6 @@
 .add-to-cart {
     background-color: var(--primary-color) !important;
 }
-.btn-primary {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-}
 
 .product-grid .social li a:hover {
     background-color: var(--primary-color) !important;

@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
+<section class="breadcrumb-title-bar colored-breadcrumb">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('transactions')) ? $this->lang->line('transactions') : 'Transactions' ?></h2>
         <nav aria-label="breadcrumb">

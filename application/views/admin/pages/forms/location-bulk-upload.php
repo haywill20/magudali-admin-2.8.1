@@ -70,16 +70,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <?php  
-                                $date = date('Ymd'); 
-                                $filename = "zipcodes_".$date.".csv";
-                                ?>
                                 <div class="form-group row">
                                     <div class="card-body pad">
                                         <div class="form-group zipcode_samples">
                                             <a href="<?= base_url('uploads/zipcodes-bulk-upload-sample.csv') ?>" class="btn btn-info mt-1 mb-1 col-md-3" download="zipcodes-bulk-upload-sample.csv">Zipcode Bulk upload sample file <i class="fas fa-download"></i></a>
                                             <a href="<?= base_url('uploads/zipcodes-bulk-update-sample.csv') ?>" class="btn btn-info mt-1 mb-1 col-md-3" download="zipcodes-bulk-update-sample.csv">Zipcode Bulk update sample file <i class="fas fa-download"></i></a>
-                                            <a href="<?= base_url('admin/area/zipcode_bulk_dowload') ?>" class="btn btn-info mt-1 mb-1 col-md-3" download="<?= $filename ?>">Zipcode Bulk Download file <i class="fas fa-download"></i></a>
                                         </div>
                                         <div class="form-group city_samples">
                                             <a href="<?= base_url('uploads/cities-bulk-upload-sample.csv') ?>" class="btn btn-info  mt-1 mb-1 col-md-3" download="cities-bulk-upload-sample.csv">Cities Bulk upload sample file <i class="fas fa-download"></i></a>

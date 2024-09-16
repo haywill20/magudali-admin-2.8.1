@@ -21,23 +21,12 @@ class Manage_stock extends CI_Controller
             $this->data['meta_description'] = 'Stock Management |' . $settings['app_name'];
             if (isset($_GET['edit_id'])) {
 
-                $product_id = fetch_details('product_variants', ['id' => $_GET['edit_id']]);
-                $product_type = fetch_details('products', ['id' => $product_id[0]['product_id']]);
-
-                if ($product_type[0]['stock_type'] == 0) {
-                    $stock = $product_type[0];
-                    $id = $stock['id'];
-                    $attributes = fetch_details("product_attributes", ['product_id' => $product_id[0]['product_id']]);
-                    $attribute_value = fetch_details("attribute_values", ['id' => $attributes[0]['attribute_value_ids']], ['value']);
-                    $this->data['fetched'] = $stock['stock'];
-                } else {
-                    $stock = fetch_details("product_variants", ['id' => $_GET['edit_id']], ['stock', 'product_id', 'attribute_value_ids']);
-                    $attribute_value = fetch_details("attribute_values", ['id' => $stock[0]['attribute_value_ids']], ['value']);
-                    $id = $stock[0]['product_id'];
-                    $this->data['fetched'] = $stock[0]['stock'];
-                }
+                $stock = fetch_details("product_variants", ['id' => $_GET['edit_id']], ['stock', 'product_id', 'attribute_value_ids']);
+                $attribute_value = fetch_details("attribute_values", ['id' => $stock[0]['attribute_value_ids']], ['value']);
+                $id = $stock[0]['product_id'];
               
                 $this->data['fetched_data'] = fetch_product("", "", $id);
+                $this->data['fetched'] = $stock[0]['stock'];
                 $this->data['attribute'] = $attribute_value;
                 // $this->data['attribute'] = $attribute_value[0]['value'];
 
@@ -48,7 +37,6 @@ class Manage_stock extends CI_Controller
                 ->join('users_groups ug', ' ug.user_id = u.id ')
                 ->join('seller_data sd', ' sd.user_id = u.id ')
                 ->where(['ug.group_id' => '4'])
-                ->where(['sd.status' => 1])
                 ->get('users u')->result_array();
 
             $this->load->view('admin/template', $this->data);

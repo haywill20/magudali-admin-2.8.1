@@ -77,34 +77,34 @@
                                         <textarea type="text" class="form-control" id="address" placeholder="Enter Address" name="address"><?= isset($fetched_data[0]['address']) ? @$fetched_data[0]['address'] : ""; ?></textarea>
                                     </div>
                                 </div>
-                                <!-- <div class="form-group row">
+                                <div class="form-group row">
                                     <label for="address_proof" class="col-sm-2 col-form-label">Address Proof <span class='text-danger text-sm'>*</span> </label>
                                     <div class="col-sm-10">
-                                        <?//php if (isset($fetched_data[0]['address_proof']) && !empty($fetched_data[0]['address_proof'])) { ?>
+                                        <?php if (isset($fetched_data[0]['address_proof']) && !empty($fetched_data[0]['address_proof'])) { ?>
                                             <span class="text-danger">*Leave blank if there is no change</span>
-                                        <?//php } ?>
+                                        <?php } ?>
                                         <input type="file" class="form-control" name="address_proof" id="address_proof" accept="image/*" />
                                     </div>
                                 </div>
-                                <?//php if (isset($fetched_data[0]['address_proof']) && !empty($fetched_data[0]['address_proof'])) { ?>
+                                <?php if (isset($fetched_data[0]['address_proof']) && !empty($fetched_data[0]['address_proof'])) { ?>
                                     <div class="form-group row">
-                                        <div class="mx-auto product-image"><a href="<?//= base_url($fetched_data[0]['address_proof']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?//= base_url($fetched_data[0]['address_proof']); ?>" class="img-fluid rounded"></a></div>
+                                        <div class="mx-auto product-image"><a href="<?= base_url($fetched_data[0]['address_proof']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?= base_url($fetched_data[0]['address_proof']); ?>" class="img-fluid rounded"></a></div>
                                     </div>
-                                <?//php } ?>
+                                <?php } ?>
                                 <div class="form-group row">
                                     <label for="authorized_signature" class="col-sm-2 col-form-label">Authorized Signature <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <?//php if (isset($fetched_data[0]['authorized_signature']) && !empty($fetched_data[0]['authorized_signature'])) { ?>
+                                        <?php if (isset($fetched_data[0]['authorized_signature']) && !empty($fetched_data[0]['authorized_signature'])) { ?>
                                             <span class="text-danger">*Leave blank if there is no change</span>
-                                        <?//php } ?>
+                                        <?php } ?>
                                         <input type="file" class="form-control" name="authorized_signature" id="authorized_signature" accept="image/*" />
                                     </div>
                                 </div>
-                                <?//php if (isset($fetched_data[0]['authorized_signature']) && !empty($fetched_data[0]['authorized_signature'])) { ?>
+                                <?php if (isset($fetched_data[0]['authorized_signature']) && !empty($fetched_data[0]['authorized_signature'])) { ?>
                                     <div class="form-group row">
-                                        <div class="mx-auto product-image"><a href="<?//= base_url($fetched_data[0]['authorized_signature']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?//= base_url($fetched_data[0]['authorized_signature']); ?>" class="img-fluid rounded"></a></div>
+                                        <div class="mx-auto product-image"><a href="<?= base_url($fetched_data[0]['authorized_signature']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?= base_url($fetched_data[0]['authorized_signature']); ?>" class="img-fluid rounded"></a></div>
                                     </div>
-                                <?//php } ?> -->
+                                <?php } ?>
 
                                 <h4>Store Details</h4>
                                 <hr>
@@ -140,64 +140,64 @@
                                         <div class="mx-auto product-image"><a href="<?= base_url($fetched_data[0]['logo']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?= base_url($fetched_data[0]['logo']); ?>" class="img-fluid rounded"></a></div>
                                     </div>
                                 <?php } ?>
-                                <!-- <h4>Bank Details</h4>
+                                <h4>Bank Details</h4>
                                 <hr>
                                 <div class="form-group row">
                                     <label for="account_number" class="col-sm-2 col-form-label">Account Number <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="account_number" placeholder="Account Number" name="account_number" value="<?//= @$fetched_data[0]['account_number'] ?>">
+                                        <input type="text" class="form-control" id="account_number" placeholder="Account Number" name="account_number" value="<?= @$fetched_data[0]['account_number'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="account_name" class="col-sm-2 col-form-label">Account Name <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="account_name" placeholder="Account Name" name="account_name" value="<?//= @$fetched_data[0]['account_name'] ?>">
+                                        <input type="text" class="form-control" id="account_name" placeholder="Account Name" name="account_name" value="<?= @$fetched_data[0]['account_name'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="bank_code" class="col-sm-2 col-form-label">Bank Code <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="bank_code" placeholder="Bank Code" name="bank_code" value="<?//= @$fetched_data[0]['bank_code'] ?>">
+                                        <input type="text" class="form-control" id="bank_code" placeholder="Bank Code" name="bank_code" value="<?= @$fetched_data[0]['bank_code'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="bank_name" class="col-sm-2 col-form-label">Bank Name <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="bank_name" placeholder="Bank Name" name="bank_name" value="<?//= @$fetched_data[0]['bank_name'] ?>">
+                                        <input type="text" class="form-control" id="bank_name" placeholder="Bank Name" name="bank_name" value="<?= @$fetched_data[0]['bank_name'] ?>">
                                     </div>
-                                </div> -->
+                                </div>
                                 <h4>Other Details</h4>
                                 <hr>
-                                <!-- <div class="form-group row">
+                                <div class="form-group row">
                                     <label for="latitude" class="col-sm-2 col-form-label">Latitude <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="latitude" placeholder="Latitude" name="latitude" value="<?//= @$fetched_data[0]['latitude'] ?>">
+                                        <input type="text" class="form-control" id="latitude" placeholder="Latitude" name="latitude" value="<?= @$fetched_data[0]['latitude'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="longitude" class="col-sm-2 col-form-label">Longitude <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="longitude" placeholder="Longitude" name="longitude" value="<?//= @$fetched_data[0]['longitude'] ?>">
+                                        <input type="text" class="form-control" id="longitude" placeholder="Longitude" name="longitude" value="<?= @$fetched_data[0]['longitude'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="tax_name" class="col-sm-2 col-form-label">Tax Name <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="tax_name" placeholder="Tax Name" name="tax_name" value="<?//= @$fetched_data[0]['tax_name'] ?>">
+                                        <input type="text" class="form-control" id="tax_name" placeholder="Tax Name" name="tax_name" value="<?= @$fetched_data[0]['tax_name'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="tax_number" class="col-sm-2 col-form-label">Tax Number <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="tax_number" placeholder="Tax Number" name="tax_number" value="<?//= @$fetched_data[0]['tax_number'] ?>">
+                                        <input type="text" class="form-control" id="tax_number" placeholder="Tax Number" name="tax_number" value="<?= @$fetched_data[0]['tax_number'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="pan_number" class="col-sm-2 col-form-label">Pan Number <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="pan_number" placeholder="Pan Number" name="pan_number" value="<?//= @$fetched_data[0]['pan_number'] ?>">
+                                        <input type="text" class="form-control" id="pan_number" placeholder="Pan Number" name="pan_number" value="<?= @$fetched_data[0]['pan_number'] ?>">
                                     </div>
-                                </div> -->
+                                </div>
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Status <span class='text-danger text-sm'>*</span></label>
                                     <div id="status" class="btn-group col-sm-4">
@@ -209,20 +209,20 @@
                                         </label>
                                     </div>
                                 </div>
-                                <!-- <div class="form-group row">
+                                <div class="form-group row">
                                     <label for="national_identity_card" class="col-sm-2 col-form-label">National Identity Card <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <?//php if (isset($fetched_data[0]['national_identity_card']) && !empty($fetched_data[0]['national_identity_card'])) { ?>
+                                        <?php if (isset($fetched_data[0]['national_identity_card']) && !empty($fetched_data[0]['national_identity_card'])) { ?>
                                             <span class="text-danger">*Leave blank if there is no change</span>
-                                        <?//php } ?>
+                                        <?php } ?>
                                         <input type="file" class="form-control" name="national_identity_card" id="national_identity_card" accept="image/*" />
                                     </div>
                                 </div>
-                                <?//php if (isset($fetched_data[0]['national_identity_card']) && !empty($fetched_data[0]['national_identity_card'])) { ?>
+                                <?php if (isset($fetched_data[0]['national_identity_card']) && !empty($fetched_data[0]['national_identity_card'])) { ?>
                                     <div class="form-group row">
-                                        <div class="mx-auto product-image"><a href="<?//= base_url($fetched_data[0]['national_identity_card']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?//= base_url($fetched_data[0]['national_identity_card']); ?>" class="img-fluid rounded"></a></div>
+                                        <div class="mx-auto product-image"><a href="<?= base_url($fetched_data[0]['national_identity_card']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?= base_url($fetched_data[0]['national_identity_card']); ?>" class="img-fluid rounded"></a></div>
                                     </div>
-                                <?//php } ?> -->
+                                <?php } ?>
 
 
                                 <div class="form-group">
@@ -230,7 +230,12 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn">Update Profile</button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                    <div class="card text-white d-none mb-3">
+                                    </div>
+                                </div>
+                            </div>
                             <!-- /.card-footer -->
                         </form>
 

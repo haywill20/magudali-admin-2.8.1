@@ -70,7 +70,7 @@
                                 <address>
                                     <?= ($order_detls[0]['user_name'] != "") ? $order_detls[0]['user_name'] : $order_detls[0]['uname'] ?>
                                     <?= $order_detls[0]['address'] ?><br>
-                                    <?= ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) || ($this->ion_auth->is_seller() && get_seller_permission($seller_id, 'customer_privacy') == false)) ? (!empty($order_detls[0]['mobile']) ? (str_repeat("X", strlen($order_detls[0]['mobile']) - 3) . substr($order_detls[0]['mobile'], -3)) : $order_detls[0]['mobile_number']) : $order_detls[0]['mobile']; ?><br>
+                                    <?= ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) || ($this->ion_auth->is_seller() && get_seller_permission($seller_id, 'customer_privacy') == false)) ? str_repeat("X", strlen($order_detls[0]['mobile']) - 3) . substr($order_detls[0]['mobile'], -3) : $order_detls[0]['mobile']; ?><br>
                                     <?= ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) || ($this->ion_auth->is_seller() && get_seller_permission($seller_id, 'customer_privacy') == false)) ? str_repeat("X", strlen($order_detls[0]['email']) - 3) . substr($order_detls[0]['email'], -3) : $order_detls[0]['email']; ?><br>
                                 </address>
                                 <p><strong>Order No : </strong>#<?= $order_detls[0]['id'] ?><br>
@@ -81,60 +81,6 @@
 
                         </div>
                         <!-- /.row -->
-                        <div>
-                            <?php
-                            $consignment = fetch_details('consignments', ['order_id' => $order_detls[0]['order_id']]);
-                            ?>
-                            <div class="row m-3">
-                                <b>Consignment Details:</b>
-                            </div>
-                            <table class="table borderless text-center text-sm">
-                                <thead class="">
-                                    <tr>
-                                        <th>Sr No.</th>
-                                        <th>Consignment Id</th>
-                                        <th>Consignment Title</th>
-                                        <th>Status</th>
-                                        <th>OTP</th>
-                                        <th>Delivery Charge</th>
-                                        <th>Created Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $M = 1;
-                                    foreach ($consignment as $consignment_details) {
-                                        $consignment_items = fetch_details('consignment_items', ['consignment_id' => $consignment_details['id']]);
-                                    ?>
-                                        <tr>
-                                            <td>
-                                                <?= $M ?>
-                                            </td>
-                                            <td>
-                                                <?= $consignment_details['id'] ?>
-                                            </td>
-                                            <td>
-                                                <?= $consignment_details['name'] ?>
-                                            </td>
-                                            <td>
-                                                <?= $consignment_details['status'] ?>
-                                            </td>
-                                            <td>
-                                                <?= $consignment_details['otp'] ?>
-                                            </td>
-                                            <td>
-                                                <?= $consignment_details['delivery_charge'] ?>
-                                            </td>
-                                            <td>
-                                                <?= $consignment_details['created_at'] ?>
-                                            </td>
-                                        </tr>
-                                    <?php $M++;
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
                         <!-- Table row -->
                         <div class="row m-4">
                             <p>Product Details:</p>
@@ -151,9 +97,11 @@
                                             <th>HSN Code</th>
                                             <th>Price</th>
                                             <th>Tax (%)</th>
-                                            <th>Tax Amount (<?= $settings['currency'] ?>)</th>
+                                            <th class="d-none">Tax Amount (
+                                                <?= $settings['currency'] ?>)</th>
                                             <th>Qty</th>
-                                            <th>SubTotal (<?= $settings['currency'] ?>)</th>
+                                            <th>SubTotal (
+                                                <?= $settings['currency'] ?>)</th>
                                             <th class="d-none">Order Status</th>
                                         </tr>
                                     </thead>
@@ -166,9 +114,9 @@
                                             $product_variants = isset($product_variants[0]['variant_values']) && !empty($product_variants[0]['variant_values']) ? str_replace(',', ' | ', $product_variants[0]['variant_values']) : '-';
                                             // $tax_amount = ($row['tax_amount']) ? $row['tax_amount'] : '0';
                                             if (isset($row['is_prices_inclusive_tax']) && $row['is_prices_inclusive_tax'] == 1) {
-                                                $tax_amount  = $row['product_price'] - ($row['product_price'] * (100 / (100 + $row['tax_percent'])));
+                                                $tax_amount  = $row['price'] - ($row['price'] * (100 / (100 + $row['tax_percent'])));
                                             } else {
-                                                $tax_amount = $row['product_price'] * ($row['tax_percent'] / 100);
+                                                $tax_amount = $row['price'] * ($row['tax_percent'] / 100);
                                             }
                                             $hsn_code = ($row['hsn_code']) ? $row['hsn_code'] : '-';
                                             $total += floatval($row['price'] + $tax_amount) * floatval($row['quantity']);
@@ -206,7 +154,7 @@
                                                     <br>
                                                 </td>
                                                 <td>
-                                                    <?= number_format($tax_amount, 2) * $row['quantity']  ?>
+                                                    <?= number_format($tax_amount,2) ?>
                                                     <br>
                                                 </td>
                                                 <td>
@@ -310,12 +258,9 @@
                                             if (isset($order_detls[0]['discount']) && $order_detls[0]['discount'] > 0 && $order_detls[0]['discount'] != NULL) { ?>
                                                 <tr>
                                                     <th>Special Discount
-                                                        <?= $settings['currency'] ?>(<?= $order_detls[0]['discount'] ?>)</th>
+                                                        <?= $settings['currency'] ?>(<?= $order_detls[0]['discount'] ?> %)</th>
                                                     <td>-
-                                                        <? //php echo $special_discount = round($cal_final_total * $order_detls[0]['discount'] / 100, 2);
-                                                        //$cal_final_total = floatval($cal_final_total - $special_discount);
-                                                        ?>
-                                                        <?php echo $special_discount = round($order_detls[0]['discount']);
+                                                        <?php echo $special_discount = round($cal_final_total * $order_detls[0]['discount'] / 100, 2);
                                                         $cal_final_total = floatval($cal_final_total - $special_discount);
                                                         ?>
                                                     </td>

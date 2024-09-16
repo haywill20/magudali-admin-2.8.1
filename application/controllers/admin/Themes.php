@@ -98,15 +98,6 @@ class Themes extends CI_Controller
     public function switch()
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
-            if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
-                $this->response['error'] = true;
-                $this->response['message'] = DEMO_VERSION_MSG;
-                echo json_encode($this->response);
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
-                return false;
-                exit();
-            }
             $this->form_validation->set_rules('id', 'Theme', 'trim|required|xss_clean|numeric');
             $this->form_validation->set_rules('status', 'Status', 'trim|required|xss_clean|numeric|in_list[0,1]');
             if (!$this->form_validation->run()) {

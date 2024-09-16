@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class SMS_gateway_settings extends CI_Controller
+class Sms_gateway_settings extends CI_Controller
 {
 
     public function __construct()
@@ -43,6 +43,9 @@ class SMS_gateway_settings extends CI_Controller
             $this->data['sms_gateway_settings'] = get_settings('sms_gateway_settings', true);
             $this->data['send_notification_settings'] = get_settings('send_notification_settings', true);
             $this->data['notification_modules'] = $this->config->item('notification_modules');
+            if (isset($_GET['edit_id']) && !empty($_GET['edit_id'])) {
+                $this->data['fetched_data'] = fetch_details('custom_sms', ['id' => $_GET['edit_id']]);
+            }
             $this->load->view('admin/template', $this->data);
         } else {
             redirect('admin/login', 'refresh');
@@ -132,31 +135,16 @@ class SMS_gateway_settings extends CI_Controller
 
     function test_sms()
     {
-        $this->data['main_page'] = 'test';
-        return $this->load->view('front-end/' . THEME . '/template');
-
-        // $otp_msg = fetch_details('custom_sms', ['type' => 'otp']);
-        // $message_body = $otp_msg[0]['message'];
-        // // Remove the escaped characters
-
-        // $json_message_body = stripslashes($message_body);
-        // $json_message_body = str_replace(['rn', '\r', '\n', '\\'], '', $json_message_body);
-
-        // // Decode the JSON string to an associative array
-        // $message_body = json_decode($json_message_body, true);
-        // $mobile = $message_body['recipients'][0]['mobiles'];
-
-        // send_sms($mobile, json_encode($message_body));
-        // die;
-        // $emails = ["customer" => ['infinitie123@gmail.com'], "admin" => ['infinitie987@gmail.com']];
-        // $phone = ["customer" => ['9876543210'], "delivery_boy" => ['1212121212']];
-        // //   notify_event(
-        // //                 "place_order",
-        // //                 ["customer" => ['infinitie123@gmail.com']],
-        // //                 ["customer" => ['9876543210']],
-        // //                 ["orders.id" => "1"]
-        // //             );
-        // $res = set_user_otp(random_int(100000, 999999), date('Y-m-d H:i:s'));
-        // print_r($res);
+        echo "<pre>";
+        $emails = ["customer" => ['infinitie.roshni@gmail.com'], "admin" => ['infinitie.jay@gmail.com']];
+        $phone = ["customer" => ['7284938224'], "delivery_boy" => ['9898528257']];
+        //   notify_event(
+        //                 "place_order",
+        //                 ["customer" => ['infinitie.roshni@gmail.com']],
+        //                 ["customer" => ['7284938224']],
+        //                 ["orders.id" => "2"]
+        //             );
+        $res = set_user_otp(random_int(100000, 999999), date('Y-m-d H:i:s'));
+        print_r($res);
     }
 }

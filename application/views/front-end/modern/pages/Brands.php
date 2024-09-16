@@ -1,19 +1,25 @@
-<section class="container mb-15 deeplink_wrapper">
-    <div class="category-section text-center">
+<section class="container mb-15 mt-md-5">
+    <div class="category-section container-fluid text-center">
         <div class='my-4 featured-section-title'>
-            <div class=''>
+            <div class='col-md-12'>
                 <h3 class='section-title'><?= !empty($this->lang->line('brands')) ? $this->lang->line('brands') : 'Brands' ?></h3>
             </div>
-            <hr class="my-5">
+            <hr class="mt-6 mb-6">
         </div>
-        <div class="d-flex flex-wrap gap-3">
-
+        <div class="row">
+            
             <?php foreach ($brands as $key => $row) { ?>
-                <div class="swiper-slide-category text-center brand_image_div mx-2">
-                    <a href="<?= base_url('products?brand=' . html_escape($row['brand_slug'])) ?>" class="text-decoration-none">
-                        <img class="lazy" src="<?= base_url('assets/front_end/modern/img/product-placeholder.jpg') ?>" data-src="<?= base_url('media/image?path='. $row['brand_img'] .'&width=110&quality=80') ?>" alt="<?= html_escape($row['brand_name']) ?>" />
-                        <h6 class="fs-14 mb-0"><?= html_escape($row['brand_name']) ?></h6>
-                    </a>
+                <div class="col-md-2 col-sm-6 mb-6">
+                    <div class="category-image justify-content-center d-flex">
+                        <div class="category-image-container">
+                            <a href="<?= base_url('products?brand=' . html_escape($row['brand_slug'])) ?>">
+                                <img src="<?= base_url($row['brand_img']) ?>">
+                            </a>
+                            <div class="">
+                                <span><?= html_escape($row['brand_name']) ?></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             <?php } ?>
 

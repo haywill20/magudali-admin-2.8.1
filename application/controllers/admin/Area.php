@@ -312,7 +312,6 @@ class Area extends CI_Controller
                 $this->data['fetched_data'] = fetch_details('zipcodes', ['id' => $_GET['edit_id']]);
             }
             $this->data['city'] = fetch_details('cities', '');
-            $this->data['settings'] = $settings;
             $this->data['default_zipcode_detail'] = $default_zipcode_detail;
             $this->load->view('admin/template', $this->data);
         } else {
@@ -359,14 +358,10 @@ class Area extends CI_Controller
             }
 
             $this->form_validation->set_rules('city', ' City ', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('zipcode', ' Zipcode ', 'trim|required|xss_clean');
             $this->form_validation->set_rules('minimum_free_delivery_order_amount', ' Minimum Free Delivery Amount ', 'trim|required|numeric|xss_clean');
             $this->form_validation->set_rules('delivery_charges', ' Delivery Charges ', 'trim|required|numeric|xss_clean');
 
-            $settings = get_settings('system_settings', true);
-
-            if (isset($settings['pincode_wise_deliverability']) && $settings['pincode_wise_deliverability'] == 1) {
-                $this->form_validation->set_rules('zipcode', ' Zipcode ', 'trim|required|xss_clean');
-            }
             if (!$this->form_validation->run()) {
 
                 $this->response['error'] = true;
@@ -375,49 +370,26 @@ class Area extends CI_Controller
                 $this->response['message'] = validation_errors();
                 print_r(json_encode($this->response));
             } else {
-                if (isset($settings['pincode_wise_deliverability']) && $settings['pincode_wise_deliverability'] == 1) {
-                    if (isset($_POST['edit_zipcode'])) {
-                        if (is_exist(['city_id' => $_POST['city'], 'zipcode' => $_POST['zipcode']], 'zipcodes', $_POST['edit_zipcode'])) {
-                            $response["error"]   = true;
-                            $response["message"] = "Combination Already Exist ! Provide a unique Combination";
-                            $response['csrfName'] = $this->security->get_csrf_token_name();
-                            $response['csrfHash'] = $this->security->get_csrf_hash();
-                            $response["data"] = array();
-                            echo json_encode($response);
-                            return false;
-                        }
-                    } else {
-                        if (is_exist(['city_id' => $_POST['city'], 'zipcode' => $_POST['zipcode']], 'zipcodes')) {
-                            $response["error"]   = true;
-                            $response["message"] = "Combination Already Exist ! Provide a unique Combination";
-                            $response['csrfName'] = $this->security->get_csrf_token_name();
-                            $response['csrfHash'] = $this->security->get_csrf_hash();
-                            $response["data"] = array();
-                            echo json_encode($response);
-                            return false;
-                        }
+
+                if (isset($_POST['edit_zipcode'])) {
+                    if (is_exist(['city_id' => $_POST['city'], 'zipcode' => $_POST['zipcode']], 'zipcodes', $_POST['edit_zipcode'])) {
+                        $response["error"]   = true;
+                        $response["message"] = "Combination Already Exist ! Provide a unique Combination";
+                        $response['csrfName'] = $this->security->get_csrf_token_name();
+                        $response['csrfHash'] = $this->security->get_csrf_hash();
+                        $response["data"] = array();
+                        echo json_encode($response);
+                        return false;
                     }
-                } else if (isset($settings['city_wise_deliverability']) && $settings['city_wise_deliverability'] == 1) {
-                    if (isset($_POST['edit_zipcode'])) {
-                        if (is_exist(['city_id' => $_POST['city'], 'zipcode' => ''], 'zipcodes', $_POST['edit_zipcode'])) {
-                            $response["error"]   = true;
-                            $response["message"] = "Combination Already Exist ! Provide a unique Combination";
-                            $response['csrfName'] = $this->security->get_csrf_token_name();
-                            $response['csrfHash'] = $this->security->get_csrf_hash();
-                            $response["data"] = array();
-                            echo json_encode($response);
-                            return false;
-                        }
-                    } else {
-                        if (is_exist(['city_id' => $_POST['city'], 'zipcode' => ''], 'zipcodes')) {
-                            $response["error"]   = true;
-                            $response["message"] = "Combination Already Exist ! Provide a unique Combination";
-                            $response['csrfName'] = $this->security->get_csrf_token_name();
-                            $response['csrfHash'] = $this->security->get_csrf_hash();
-                            $response["data"] = array();
-                            echo json_encode($response);
-                            return false;
-                        }
+                } else {
+                    if (is_exist(['city_id' => $_POST['city'], 'zipcode' => $_POST['zipcode']], 'zipcodes')) {
+                        $response["error"]   = true;
+                        $response["message"] = "Combination Already Exist ! Provide a unique Combination";
+                        $response['csrfName'] = $this->security->get_csrf_token_name();
+                        $response['csrfHash'] = $this->security->get_csrf_hash();
+                        $response["data"] = array();
+                        echo json_encode($response);
+                        return false;
                     }
                 }
                 $this->Area_model->add_zipcode($_POST);
@@ -426,7 +398,6 @@ class Area extends CI_Controller
                 $this->response['csrfHash'] = $this->security->get_csrf_hash();
                 $message = (isset($_POST['edit_zipcode'])) ? 'Zipcode Updated Successfully' : 'Zipcode Added Successfully';
                 $this->response['message'] = $message;
-                // print_r($this->response);
                 print_r(json_encode($this->response));
             }
         } else {
@@ -448,32 +419,6 @@ class Area extends CI_Controller
                 $response['error'] = true;
                 $response['message'] = 'Something went wrong';
             }
-            echo json_encode($response);
-        } else {
-            redirect('admin/login', 'refresh');
-        }
-    }
-
-    public function delete_zipcode_multi()
-    {
-        // Check if it's an AJAX request and if IDs are sent via POST
-        if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin() && $this->input->post('ids')) {
-            $ids = $this->input->post('ids');
-
-            $deleted = $this->Area_model->delete_zipcodes($ids);
-
-            if ($deleted) {
-                $response['success'] = true;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $_POSTresponse['csrfHash'] = $this->security->get_csrf_hash();
-                $response['message'] = 'Media items deleted successfully.';
-            } else {
-                $response['success'] = false;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
-                $response['message'] = 'Failed to delete media items.';
-            }
-
             echo json_encode($response);
         } else {
             redirect('admin/login', 'refresh');
@@ -1101,37 +1046,6 @@ class Area extends CI_Controller
                 ];
                 update_details($set, ['zipcode' => $row['zipcode']], 'zipcodes');
             }
-        }
-    }
-
-    public function zipcode_bulk_dowload()
-    {
-        if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
-            if (!has_permissions('create', 'product')) {
-                print_msg(PERMISSION_ERROR_MSG, 'product');
-                return;
-            }
-
-            $filename = 'zipcodes_' . date('Ymd') . '.csv';
-
-            $zipcodes = $this->Area_model->get_download_zipcodes();
-
-            $csvHeaders = [
-                'zipcode id', 'zipcode', 'city_id', 'minimum_free_delivery_order_amount', 'delivery_charges'
-            ];
-
-            header('Content-Type: text/csv; charset=utf-8');
-            header('Content-Disposition: attachment; filename=' . $filename);
-
-            $output = fopen('php://output', 'w');
-            fputcsv($output, $csvHeaders);
-
-            foreach ($zipcodes as $zipcode) {
-                $data = [$zipcode['id'], $zipcode['zipcode'], $zipcode['city_id'], $zipcode['minimum_free_delivery_order_amount'], $zipcode['delivery_charges']];
-                fputcsv($output, $data);
-            }
-
-            fclose($output);
         }
     }
 }

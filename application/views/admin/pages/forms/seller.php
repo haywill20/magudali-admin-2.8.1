@@ -47,7 +47,10 @@
                                             <button type="submit" class="btn btn-success" id="save_btn">Save</button>
                                         </div>
                                     </div>
-
+                                    <div class="d-flex justify-content-center">
+                                        <div class="form-group" id="error_box">
+                                        </div>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -77,7 +80,7 @@
                                 <div class="form-group row">
                                     <label for="mobile" class="col-sm-2 col-form-label">Mobile <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" maxlength="16" oninput="validateNumberInput(this)" class="form-control" id="mobile" placeholder="Enter Mobile" name="mobile" value="<?= @$fetched_data[0]['mobile'] ?>">
+                                        <input type="number" class="form-control" id="mobile" placeholder="Enter Mobile" name="mobile" value="<?= @$fetched_data[0]['mobile'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -110,21 +113,20 @@
                                         <textarea type="text" class="form-control" id="address" placeholder="Enter Address" name="address"><?= isset($fetched_data[0]['address']) ? @$fetched_data[0]['address'] : ""; ?></textarea>
                                     </div>
                                 </div>
-                                <!-- <div class="form-group row">
+                                <div class="form-group row">
                                     <label for="address_proof" class="col-sm-2 col-form-label">Address Proof <span class='text-danger text-sm'>*</span> </label>
                                     <div class="col-sm-10">
-                                        <?//php if (isset($fetched_data[0]['address_proof']) && !empty($fetched_data[0]['address_proof'])) { ?>
+                                        <?php if (isset($fetched_data[0]['address_proof']) && !empty($fetched_data[0]['address_proof'])) { ?>
                                             <span class="text-danger">*Leave blank if there is no change</span>
-                                        <?//php } ?>
+                                        <?php } ?>
                                         <input type="file" class="form-control" name="address_proof" id="address_proof" accept="image/*" />
                                     </div>
                                 </div>
-                                <?//php if (isset($fetched_data[0]['address_proof']) && !empty($fetched_data[0]['address_proof'])) { ?>
+                                <?php if (isset($fetched_data[0]['address_proof']) && !empty($fetched_data[0]['address_proof'])) { ?>
                                     <div class="form-group row">
-                                        <div class="mx-auto product-image"><a href="<?//= base_url($fetched_data[0]['address_proof']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?= base_url($fetched_data[0]['address_proof']); ?>" class="img-fluid rounded"></a></div>
+                                        <div class="mx-auto product-image"><a href="<?= base_url($fetched_data[0]['address_proof']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?= base_url($fetched_data[0]['address_proof']); ?>" class="img-fluid rounded"></a></div>
                                     </div>
-                                <?//php } ?>
-                                -->
+                                <?php } ?>
                                 <div class="form-group row">
                                     <label for="authorized_signature" class="col-sm-2 col-form-label">Authorized Signature <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
@@ -143,7 +145,7 @@
                                 <div class="form-group row">
                                     <label for="commission" class="col-sm-2 col-form-label">Commission(%) <small>(Commission(%) to be given to the Super Admin on order item globally.)</small> </label>
                                     <div class="col-sm-10">
-                                        <input type="number" max="100" class="form-control" id="global_commission" placeholder="Enter Commission(%) to be given to the Super Admin on order item." name="global_commission" value="<?= @$fetched_data[0]['commission'] ?>">
+                                        <input type="number" class="form-control" id="global_commission" placeholder="Enter Commission(%) to be given to the Super Admin on order item." name="global_commission" value="<?= @$fetched_data[0]['commission'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -171,8 +173,7 @@
                                 <div class="form-group row">
                                     <label for="store_url" class="col-sm-2 col-form-label">URL </label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="store_url" pattern="\b((http|https)://)?(www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(/[a-zA-Z0-9#?&%=._-]*)*\b
-" placeholder="Store URL" name="store_url" value="<?= @$fetched_data[0]['store_url'] ?>">
+                                        <input type="text" class="form-control" id="store_url" placeholder="Store URL" name="store_url" value="<?= @$fetched_data[0]['store_url'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -195,32 +196,32 @@
                                         <div class="mx-auto product-image"><a href="<?= base_url($fetched_data[0]['logo']); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?= base_url($fetched_data[0]['logo']); ?>" class="img-fluid rounded"></a></div>
                                     </div>
                                 <?php } ?>
-                                <!-- <h4>Bank Details</h4>
+                                <h4>Bank Details</h4>
                                 <hr>
                                 <div class="form-group row">
                                     <label for="account_number" class="col-sm-2 col-form-label">Account Number </label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="account_number" placeholder="Account Number" name="account_number" value="<?//= @$fetched_data[0]['account_number'] ?>">
+                                        <input type="text" class="form-control" id="account_number" placeholder="Account Number" name="account_number" value="<?= @$fetched_data[0]['account_number'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="account_name" class="col-sm-2 col-form-label">Account Name </label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="account_name" placeholder="Account Name" name="account_name" value="<?//= @$fetched_data[0]['account_name'] ?>">
+                                        <input type="text" class="form-control" id="account_name" placeholder="Account Name" name="account_name" value="<?= @$fetched_data[0]['account_name'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="bank_code" class="col-sm-2 col-form-label">Bank Code</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="bank_code" placeholder="Bank Code" name="bank_code" value="<?//= @$fetched_data[0]['bank_code'] ?>">
+                                        <input type="text" class="form-control" id="bank_code" placeholder="Bank Code" name="bank_code" value="<?= @$fetched_data[0]['bank_code'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="bank_name" class="col-sm-2 col-form-label">Bank Name </label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="bank_name" placeholder="Bank Name" name="bank_name" value="<?//= @$fetched_data[0]['bank_name'] ?>">
+                                        <input type="text" class="form-control" id="bank_name" placeholder="Bank Name" name="bank_name" value="<?= @$fetched_data[0]['bank_name'] ?>">
                                     </div>
-                                </div> -->
+                                </div>
                                 <h4>Other Details</h4>
                                 <hr>
                                 <div class="form-group row">
@@ -237,8 +238,8 @@
                                         </label>
                                     </div>
                                 </div>
-                                <!-- <div class="form-group row">
-                                    <label for="national_identity_card" class="col-sm-2 col-form-label">National Identity Card </label>
+                                <div class="form-group row">
+                                    <label for="national_identity_card" class="col-sm-2 col-form-label">National Identity Card <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
                                         <?php if (isset($fetched_data[0]['national_identity_card']) && !empty($fetched_data[0]['national_identity_card'])) { ?>
                                             <span class="text-danger">*Leave blank if there is no change</span>
@@ -268,7 +269,7 @@
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" id="pan_number" placeholder="Pan Number" name="pan_number" value="<?= @$fetched_data[0]['pan_number'] ?>">
                                     </div>
-                                </div> -->
+                                </div>
                                 <div class="form-group row">
                                     <label for="latitude" class="col-sm-2 col-form-label">Latitude </label>
                                     <div class="col-sm-10">
@@ -287,19 +288,19 @@
                                     $permit = json_decode($fetched_data[0]['permissions'], true);
                                 } ?>
                                 <div class="form-group row">
-                                    <label for="require_products_approval" class="col-sm-2 form-label">Require Product's Approval?</label>
+                                    <label for="require_products_approval" class="col-sm-2 form-label">Require Product's Approval? <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-1">
                                         <input type="checkbox" name="require_products_approval" <?= (isset($permit['require_products_approval']) && $permit['require_products_approval'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
                                     </div>
-                                    <label for="customer_privacy" class="form-label">View Customer's Details?</label>
+                                    <label for="customer_privacy" class="form-label">View Customer's Details? <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-1">
                                         <input type="checkbox" name="customer_privacy" <?= (isset($permit['customer_privacy']) && $permit['customer_privacy'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
                                     </div>
-                                    <label for="view_order_otp" class="form-label">View Order's OTP? & Can change deliver status?</label>
+                                    <label for="view_order_otp" class="form-label">View Order's OTP? & Can change deliver status? <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-1">
                                         <input type="checkbox" name="view_order_otp" <?= (isset($permit['view_order_otp']) && $permit['view_order_otp'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
                                     </div>
-                                    <label for="assign_delivery_boy" class="form-label">Can assign delivery boy?</label>
+                                    <label for="assign_delivery_boy" class="form-label">Can assign delivery boy? <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-1">
                                         <input type="checkbox" name="assign_delivery_boy" <?= (isset($permit['assign_delivery_boy']) && $permit['assign_delivery_boy'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
                                     </div>
@@ -310,7 +311,12 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Seller' : 'Add Seller' ?></button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                    <div class="card text-white d-none mb-3">
+                                    </div>
+                                </div>
+                            </div>
                             <!-- /.card-footer -->
                         </form>
                     </div>

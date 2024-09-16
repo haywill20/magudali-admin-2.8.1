@@ -61,8 +61,8 @@ class Auth extends CI_Controller
         $this->data['title'] = $this->lang->line('login_heading');
         $identity_column = $this->config->item('identity', 'ion_auth');
         // validate form input
-        $this->form_validation->set_rules('identity', ucfirst($identity_column), 'required|xss_clean');
-        $this->form_validation->set_rules('password', str_replace(':', '', $this->lang->line('login_password_label')), 'required|xss_clean');
+        $this->form_validation->set_rules('identity', ucfirst($identity_column), 'required');
+        $this->form_validation->set_rules('password', str_replace(':', '', $this->lang->line('login_password_label')), 'required');
 
         if ($this->form_validation->run() === TRUE) {
             $tables = $this->config->item('tables', 'ion_auth');
@@ -197,9 +197,9 @@ class Auth extends CI_Controller
      */
     public function change_password()
     {
-        $this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required|xss_clean');
-        $this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|xss_clean|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
-        $this->form_validation->set_rules('new_confirm', $this->lang->line('change_password_validation_new_password_confirm_label'), 'required|xss_clean');
+        $this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required');
+        $this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
+        $this->form_validation->set_rules('new_confirm', $this->lang->line('change_password_validation_new_password_confirm_label'), 'required');
 
 
         $identity = $this->session->userdata('identity');
@@ -257,9 +257,9 @@ class Auth extends CI_Controller
 
         // setting validation rules by checking whether identity is username or email
         if ($this->config->item('identity', 'ion_auth') != 'email') {
-            $this->form_validation->set_rules('identity', $this->lang->line('forgot_password_identity_label'), 'required|xss_clean');
+            $this->form_validation->set_rules('identity', $this->lang->line('forgot_password_identity_label'), 'required');
         } else {
-            $this->form_validation->set_rules('identity', $this->lang->line('forgot_password_validation_email_label'), 'required|valid_email|xss_clean');
+            $this->form_validation->set_rules('identity', $this->lang->line('forgot_password_validation_email_label'), 'required|valid_email');
         }
 
 
@@ -340,8 +340,8 @@ class Auth extends CI_Controller
         if ($user) {
             // if the code is valid then display the password reset form
 
-            $this->form_validation->set_rules('new', $this->lang->line('reset_password_validation_new_password_label'), 'required|xss_clean|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
-            $this->form_validation->set_rules('new_confirm', $this->lang->line('reset_password_validation_new_password_confirm_label'), 'required|xss_clean');
+            $this->form_validation->set_rules('new', $this->lang->line('reset_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[new_confirm]');
+            $this->form_validation->set_rules('new_confirm', $this->lang->line('reset_password_validation_new_password_confirm_label'), 'required');
 
             if ($this->form_validation->run() === FALSE) {
                 // display the form
@@ -446,8 +446,8 @@ class Auth extends CI_Controller
         $id = (int)$id;
 
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('confirm', $this->lang->line('deactivate_validation_confirm_label'), 'required|xss_clean');
-        $this->form_validation->set_rules('id', $this->lang->line('deactivate_validation_user_id_label'), 'required|alpha_numeric|xss_clean');
+        $this->form_validation->set_rules('confirm', $this->lang->line('deactivate_validation_confirm_label'), 'required');
+        $this->form_validation->set_rules('id', $this->lang->line('deactivate_validation_user_id_label'), 'required|alpha_numeric');
 
         if ($this->form_validation->run() === FALSE) {
             // insert csrf check
@@ -490,18 +490,18 @@ class Auth extends CI_Controller
         $this->data['identity_column'] = $identity_column;
 
         // validate form input
-        $this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'trim|required|xss_clean');
-        $this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'trim|required|xss_clean');
+        $this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'trim|required');
+        $this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'trim|required');
         if ($identity_column !== 'email') {
-            $this->form_validation->set_rules('identity', $this->lang->line('create_user_validation_identity_label'), 'trim|xss_clean|required|is_unique[' . $tables['login_users'] . '.' . $identity_column . ']');
-            $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'trim|required|valid_email|xss_clean');
+            $this->form_validation->set_rules('identity', $this->lang->line('create_user_validation_identity_label'), 'trim|required|is_unique[' . $tables['login_users'] . '.' . $identity_column . ']');
+            $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'trim|required|valid_email');
         } else {
-            $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'trim|required|xss_clean|valid_email|is_unique[' . $tables['login_users'] . '.email]');
+            $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'trim|required|valid_email|is_unique[' . $tables['login_users'] . '.email]');
         }
-        $this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'trim|xss_clean');
-        $this->form_validation->set_rules('company', $this->lang->line('create_user_validation_company_label'), 'trim|xss_clean');
-        $this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|xss_clean|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
-        $this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required|xss_clean');
+        $this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'trim');
+        $this->form_validation->set_rules('company', $this->lang->line('create_user_validation_company_label'), 'trim');
+        $this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
+        $this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
 
         if ($this->form_validation->run() === TRUE) {
             $email = strtolower($this->input->post('email'));
@@ -608,10 +608,10 @@ class Auth extends CI_Controller
         //USAGE NOTE - you can do more complicated queries like this
 
         // validate form input
-        $this->form_validation->set_rules('first_name', $this->lang->line('edit_user_validation_fname_label'), 'trim|required|xss_clean');
-        $this->form_validation->set_rules('last_name', $this->lang->line('edit_user_validation_lname_label'), 'trim|required|xss_clean');
-        $this->form_validation->set_rules('phone', $this->lang->line('edit_user_validation_phone_label'), 'trim|xss_clean');
-        $this->form_validation->set_rules('company', $this->lang->line('edit_user_validation_company_label'), 'trim|xss_clean');
+        $this->form_validation->set_rules('first_name', $this->lang->line('edit_user_validation_fname_label'), 'trim|required');
+        $this->form_validation->set_rules('last_name', $this->lang->line('edit_user_validation_lname_label'), 'trim|required');
+        $this->form_validation->set_rules('phone', $this->lang->line('edit_user_validation_phone_label'), 'trim');
+        $this->form_validation->set_rules('company', $this->lang->line('edit_user_validation_company_label'), 'trim');
 
         if (isset($_POST) && !empty($_POST)) {
             // do we have a valid request?
@@ -621,8 +621,8 @@ class Auth extends CI_Controller
 
             // update the password if it was posted
             if ($this->input->post('password')) {
-                $this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|xss_clean|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
-                $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required|xss_clean');
+                $this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
+                $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
             }
 
             if ($this->form_validation->run() === TRUE) {
@@ -725,7 +725,7 @@ class Auth extends CI_Controller
         }
 
         // validate form input
-        $this->form_validation->set_rules('group_name', $this->lang->line('create_group_validation_name_label'), 'trim|required|alpha_dash|xss_clean');
+        $this->form_validation->set_rules('group_name', $this->lang->line('create_group_validation_name_label'), 'trim|required|alpha_dash');
 
         if ($this->form_validation->run() === TRUE) {
             $new_group_id = $this->ion_auth->create_group($this->input->post('group_name'), $this->input->post('description'));
@@ -780,7 +780,7 @@ class Auth extends CI_Controller
         $group = $this->ion_auth->group($id)->row();
 
         // validate form input
-        $this->form_validation->set_rules('group_name', $this->lang->line('edit_group_validation_name_label'), 'trim|required|alpha_dash|xss_clean');
+        $this->form_validation->set_rules('group_name', $this->lang->line('edit_group_validation_name_label'), 'trim|required|alpha_dash');
 
         if (isset($_POST) && !empty($_POST)) {
             if ($this->form_validation->run() === TRUE) {
@@ -876,12 +876,12 @@ class Auth extends CI_Controller
             email: test@gmail.com 
         */
         $auth_settings = get_settings('authentication_settings', true);
-        // print_r($_POST);
+        // print_r($auth_settings);
         if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
             $this->response['error'] = true;
             $this->response['message'] = DEMO_VERSION_MSG;
             echo json_encode($this->response);
-            return;
+            return false;
         }
         $this->form_validation->set_rules('mobile', 'Mobile', 'trim|numeric|required|xss_clean');
         $this->form_validation->set_rules('email', 'Email', 'trim|xss_clean|valid_email');
@@ -897,27 +897,10 @@ class Auth extends CI_Controller
             print_r(json_encode($this->response));
             return;
         } else {
-            // if (isset($_POST['forget_password_val']) && ($_POST['forget_password_val'] == 1) && is_exist(['mobile' => $_POST['mobile']], 'users')) {
-            //     $this->response['error'] = false;
-            //     $this->response['message'] = 'Ready to sent OTP request from firebase!';
-            //     $this->response['data'] = array();
-            //     print_r(json_encode($this->response));
-            //     return;
-            // }
-            // print_r($_POST);
-            // die;
-            if (!isset($_POST['forget_password_val']) && is_exist(['mobile' => $_POST['mobile']], 'users')) {
-                if (isset($_POST['mobile']) && is_exist(['mobile' => $_POST['mobile']], 'users')) {
-                    $this->response['error'] = true;
-                    $this->response['message'] = 'Mobile is already registered.Please try to login !';
-                    $this->response['data'] = array();
-                    print_r(json_encode($this->response));
-                    return;
-                }
-            }
-            if (isset($_POST['forget_password_val']) && ($_POST['forget_password_val'] == 1) && !is_exist(['mobile' => $_POST['mobile']], 'users')) {
+
+            if (isset($_POST['mobile']) && is_exist(['mobile' => $_POST['mobile']], 'users')) {
                 $this->response['error'] = true;
-                $this->response['message'] = 'Mobile is not register yet !';
+                $this->response['message'] = 'Mobile is already registered.Please try to login !';
                 $this->response['data'] = array();
                 print_r(json_encode($this->response));
                 return;
@@ -1046,14 +1029,10 @@ class Auth extends CI_Controller
             ];
 
             $auth_settings = get_settings('authentication_settings', true);
-            if ($auth_settings['authentication_method'] == "sms" && isset($_POST['type']) && !empty($_POST['type']) && $_POST['type'] == 'phone') {
+            if ($auth_settings['authentication_method'] == "sms") {
                 $otps = fetch_details('otps', ['mobile' => $mobile]);
                 $time = $otps[0]['created_at'];
                 $time_expire = checkOTPExpiration($time);
-                // print_r($otps);
-                // print_r($time);
-                // print_r($time_expire);
-
                 if ($time_expire['error'] == 1) {
                     $response['error'] = true;
                     $response['message'] = $time_expire['message'];

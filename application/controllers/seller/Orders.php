@@ -11,8 +11,6 @@ class Orders extends CI_Controller
         $this->load->database();
         $this->load->helper(['url', 'language', 'timezone_helper']);
         $this->load->model('Order_model');
-        $this->data['firebase_project_id'] = get_settings('firebase_project_id');
-        $this->data['service_account_file'] = get_settings('service_account_file');
     }
 
     public function index()
@@ -52,8 +50,7 @@ class Orders extends CI_Controller
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_seller() && ($this->ion_auth->seller_status() == 1 || $this->ion_auth->seller_status() == 0)) {
             $seller_id = $this->ion_auth->get_user_id();
-            // print_r($seller_id);
-            return $this->Order_model->get_seller_order_items_list(NULL, 0, 10, 'oi.id', 'DESC', $seller_id);
+            return $this->Order_model->get_order_items_list(NULL, 0, 10, 'oi.id', 'DESC', $seller_id);
         } else {
             redirect('seller/login', 'refresh');
         }
@@ -77,15 +74,15 @@ class Orders extends CI_Controller
                 if (!empty($area_id) && $area_id[0]['area_id'] != 0) {
                     $zipcode_id = fetch_details('areas', ['id' => $area_id[0]['area_id']], 'zipcode_id');
                     if (!empty($zipcode_id)) {
-                        $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1, 'u.status' => 1])->where('find_in_set(' . $zipcode_id[0]['zipcode_id'] . ', u.serviceable_zipcodes)!=', 0)->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
+                        $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1])->where('find_in_set(' . $zipcode_id[0]['zipcode_id'] . ', u.serviceable_zipcodes)!=', 0)->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
                     } else {
-                        $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1, 'u.status' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
+                        $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
                     }
                 } else {
-                    $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1, 'u.status' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
+                    $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
                 }
             } else {
-                $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1, 'u.status' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
+                $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
             }
             if ($res[0]['payment_method'] == "bank_transfer") {
                 $bank_transfer = fetch_details('order_bank_transfer', ['order_id' => $res[0]['order_id']]);
@@ -291,24 +288,8 @@ class Orders extends CI_Controller
             $delivery_boy_updated = 0;
             $delivery_boy_id = (isset($_POST['deliver_by']) && !empty(trim($_POST['deliver_by']))) ? $this->input->post('deliver_by', true) : 0;
 
-            // assign delivery boy when status is processed
-
-            // print_r($_POST['status']);
-            // print_r($delivery_boy_id);
-            // die;
-            if (isset($_POST['status']) && !empty($_POST['status']) && $_POST['status'] == 'processed') {
-                if (!isset($delivery_boy_id) || empty($delivery_boy_id) || $delivery_boy_id == 0) {
-                    $this->response['error'] = true;
-                    $this->response['message'] = "Please select delivery boy to mark this order as processed.";
-                    $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                    $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                    $this->response['data'] = array();
-                    print_r(json_encode($this->response));
-                    return false;
-                }
-            }
-
             // validate delivery boy when status is shipped
+
             if (isset($_POST['status']) && !empty($_POST['status']) && $_POST['status'] == 'shipped') {
                 if ((!isset($current_status[0]['delivery_boy_id']) || empty($current_status[0]['delivery_boy_id']) || $current_status[0]['delivery_boy_id'] == 0) && (empty($_POST['deliver_by']) || $_POST['deliver_by'] == '')) {
                     $this->response['error'] = true;
@@ -344,8 +325,6 @@ class Orders extends CI_Controller
                         $current_delivery_boys = fetch_details('order_items', "",  '*', "", "", "", "", "id", $order_itam_ids);
                         $settings = get_settings('system_settings', true);
                         $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
-                        $firebase_project_id = $this->data['firebase_project_id'];
-                        $service_account_file = $this->data['service_account_file'];
                         if (isset($current_delivery_boys[0]['delivery_boy_id']) && !empty($current_delivery_boys[0]['delivery_boy_id'])) {
                             $user_res = fetch_details('users', "",  'fcm_id,username,email,mobile', "", "", "", "", "id", array_column($current_delivery_boys, "delivery_boy_id"));
                         } else {
@@ -422,7 +401,7 @@ class Orders extends CI_Controller
                                         'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : "You have new order to deliver",
                                         'body' =>  $customer_msg,
                                         'type' => "order",
-                                        'order_id' => (string)$order_items[0]['order_id'],
+                                        'order_id' => $order_items[0]['order_id'],
                                     );
                                     notify_event(
                                         $type['type'],
@@ -438,8 +417,8 @@ class Orders extends CI_Controller
                                 }
                             }
                         }
-                        if (!empty($fcm_ids) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                        if (!empty($fcm_ids)) {
+                            send_notification($fcmMsg, $fcm_ids);
                         }
 
                         if ($this->Order_model->update_order(['delivery_boy_id' => $delivery_boy_id], $order_itam_ids, false, 'order_items')) {
@@ -548,9 +527,7 @@ class Orders extends CI_Controller
                     );
 
                     $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
-                    }
+                    send_notification($fcmMsg, $fcm_ids);
                 }
 
                 $this->response['error'] = false;

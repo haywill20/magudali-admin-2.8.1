@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
+<section class="breadcrumb-title-bar colored-breadcrumb">
     <div class="main-content responsive-breadcrumb">
         <h2><?= !empty($this->lang->line('wallet')) ? $this->lang->line('wallet') : 'Wallet' ?></h2>
         <nav aria-label="breadcrumb">
@@ -46,7 +46,7 @@
                                             <img src="<?= THEME_ASSETS_URL . 'images/wallet.png' ?>" class="payment-gateway-images" alt="wallet" title="Customer wallet balance">
                                         </div>
                                         <div class="h4 d-flex  mt-3  justify-content-center">
-                                        <?= !empty($this->lang->line('email')) ? $this->lang->line('email') : 'Email' ?>
+                                            Current Balance
                                         </div>
                                         <div class="h4 d-flex justify-content-center  price">
                                             <p class="h4"> <?= $settings['currency'] . ' ' . number_format($user->balance, 2)  ?> </p>
@@ -63,7 +63,7 @@
                                         <!-- <div class="h4 d-flex justify-content-center"> Add money </div> -->
 
                                         <div class="h4 d-flex justify-content-center mt-2">
-                                            <button type="button" class="button button-rounded button-primary" data-toggle="modal" data-target="#myModal"><?= !empty($this->lang->line('add_money')) ? $this->lang->line('add_money') : 'Add Money' ?></button>
+                                            <button type="button" class="button button-rounded button-primary" data-toggle="modal" data-target="#myModal">Add money</button>
                                         </div>
                                     </div>
                                 </div>
@@ -73,7 +73,7 @@
                                 <div class='card col-md-12 ml-3 wallet-card'>
                                     <div class='card-body bg-transparent'>
                                         <div class="h4 d-flex justify-content-center mt-2">
-                                            <button type="button" class="button button-rounded button-danger" data-toggle="modal" data-target="#withdraw"><?= !empty($this->lang->line('withdraw_money')) ? $this->lang->line('withdraw_money') : 'Withdraw Money' ?></button>
+                                            <button type="button" class="button button-rounded button-danger" data-toggle="modal" data-target="#withdraw">Withdraw money</button>
                                         </div>
                                     </div>
                                 </div>
@@ -84,293 +84,271 @@
 
                                         <!-- Modal Header -->
                                         <div class="modal-header">
-                                            <h4 class="modal-title price"><?= !empty($this->lang->line('add_money_to_wallet')) ? $this->lang->line('add_money_to_wallet') : 'Add money to wallet' ?></h4>
+                                            <h4 class="modal-title price">Add money to wallet</h4>
                                             <!-- <button type="button" class="btn-close" data-dismiss="modal">&times;</button> -->
                                         </div>
                                         <!-- Modal body -->
                                         <div class="ship-details-wrapper mt-3 payment-methods">
-                                            <form class="form-horizontal form-submit-event" method="POST" id="wallet_form" enctype="multipart/form-data">
-                                                <?php
-                                                $CUR_USERID = $_SESSION['user_id'];
-                                                $order_id = 'wallet-refill-user' . "-" . $CUR_USERID . "-" . time() . "-" . rand("900", "999");
+                                            <!-- <form class="form-horizontal form-submit-event" method="POST" id="wallet_form" enctype="multipart/form-data"> -->
+                                            <?php
+                                            $CUR_USERID = $_SESSION['user_id'];
+                                            $order_id = 'wallet-refill-user' . "-" . $CUR_USERID . "-" . time() . "-" . rand("900", "999");
 
 
-                                                $payment_methods = get_settings('payment_method', true);
-                                                $name = fetch_details('users', ['id' => $_SESSION['user_id']]);
+                                            $payment_methods = get_settings('payment_method', true);
+                                            $name = fetch_details('users', ['id' => $_SESSION['user_id']]);
 
 
-                                                ?>
+                                            ?>
 
-                                                <input type="hidden" name="app_name" id="app_name" value="<?= $settings['app_name'] ?>" />
-                                                <input type="hidden" id="flutterwave_currency" value="<?= $payment_methods['flutterwave_currency_code'] ?>" />
-                                                <input type="hidden" id="user_email" value="<?= $_SESSION['email']  ?>" />
+                                            <input type="hidden" name="app_name" id="app_name" value="<?= $settings['app_name'] ?>" />
+                                            <input type="hidden" id="flutterwave_currency" value="<?= $payment_methods['flutterwave_currency_code'] ?>" />
+                                            <input type="hidden" id="user_email" value="<?= $_SESSION['email']  ?>" />
 
-                                                <input type="hidden" id="username" value="<?= $username['username'] ?>" />
-                                                <input type="hidden" id="user_contact" value="<?= $username['mobile'] ?>" />
-                                                <input type="hidden" name="logo" id="logo" value="<?= base_url(get_settings('web_logo')) ?>" />
-
-
-                                                <input type="hidden" name="order_id" id="order_id" value="<?= $order_id ?>">
-                                                <input type="number" name="amount" id="amount" min="1" required class="col-md-11 ml-4 form-control" placeholder="<?= !empty($this->lang->line('enter_amount')) ? $this->lang->line('enter_amount') : 'Enter Amount' ?>">
+                                            <input type="hidden" id="username" value="<?= $username['username'] ?>" />
+                                            <input type="hidden" id="user_contact" value="<?= $username['mobile'] ?>" />
+                                            <input type="hidden" name="logo" id="logo" value="<?= base_url(get_settings('web_logo')) ?>" />
 
 
-                                                <input type="text" name="message" class="col-md-11 ml-4 mt-3 ticket_msg form-control " id="message_input" placeholder="<?= !empty($this->lang->line('type_message')) ? $this->lang->line('type_message') : 'Type Message' ?>">
-                                                <br>
-
-                                                <div class="align-item-center ship-title-details justify-content-between d-flex ml-3">
-                                                    <h5><?= !empty($this->lang->line('payment_method')) ? $this->lang->line('payment_method') : 'Payment Method' ?></h5>
-                                                </div>
-                                                <div class="shipped-details mt-3 col-md-6">
-                                                    <table class="table table-step-shipping">
-                                                        <tbody>
-
-                                                            <?php if (isset($payment_methods['paypal_payment_method']) && $payment_methods['paypal_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="paypal">
-                                                                            <input id="paypal" name="payment_method" type="radio" value="Paypal" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="paypal">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/paypal.png' ?>" class="payment-gateway-images" alt="Paypal">
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="paypal">
-                                                                            Paypal
-                                                                        </label>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
-                                                            <?php if (isset($payment_methods['razorpay_payment_method']) && $payment_methods['razorpay_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="razorpay">
-                                                                            <input id="razorpay" name="payment_method" type="radio" value="Razorpay" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="razorpay">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/razorpay.png' ?>" class="payment-gateway-images" alt="Razorpay">
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="razorpay">
-                                                                            RazorPay
-                                                                        </label>
-                                                                        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" value="" />
-                                                                        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id" value="" />
-                                                                        <input type="hidden" name="razorpay_signature" id="razorpay_signature" value="" />
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
-                                                            <?php if (isset($payment_methods['paystack_payment_method']) && $payment_methods['paystack_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="paystack">
-                                                                            <input id="paystack" name="payment_method" type="radio" value="Paystack" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="paystack">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/paystack.png' ?>" class="payment-gateway-images" alt="Paystack">
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="paystack">
-                                                                            Paystack
-                                                                        </label>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
-                                                            <?php if (isset($payment_methods['payumoney_payment_method']) && $payment_methods['payumoney_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="payumoney">
-                                                                            <input id="payumoney" name="payment_method" type="radio" value="Payumoney" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="payumoney">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/payumoney.png' ?>" class="payment-gateway-images" alt="Payumoney">
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="payumoney">
-                                                                            Payumoney
-                                                                        </label>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
-                                                            <?php if (isset($payment_methods['flutterwave_payment_method']) && $payment_methods['flutterwave_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="flutterwave">
-                                                                            <input id="flutterwave" name="payment_method" type="radio" value="Flutterwave" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="flutterwave">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/flutterwave.png' ?>" class="payment-gateway-images" alt="Flutterwave">
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="flutterwave">
-                                                                            Flutterwave
-                                                                        </label>
-                                                                        <?php foreach ($name as $username) { ?>
-                                                                            <input type="hidden" name="flutterwave_public_key" id="flutterwave_public_key" value="<?= $payment_methods['flutterwave_public_key'] ?>" />
-                                                                            <input type="hidden" name="flutterwave_transaction_id" id="flutterwave_transaction_id" value="" />
-                                                                            <input type="hidden" name="flutterwave_transaction_ref" id="flutterwave_transaction_ref" value="" />
-                                                                            <input type="hidden" name="promo_set" id="promo_set" value="" />
-                                                                        <?php  } ?>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
-                                                            <?php if (isset($payment_methods['paytm_payment_method']) && $payment_methods['paytm_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="paytm">
-                                                                            <input id="paytm" name="payment_method" type="radio" value="Paytm" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="paytm">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/paytm.png' ?>" class="payment-gateway-images" alt="Paytm">
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="paytm">
-                                                                            Paytm
-                                                                        </label>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
-                                                            <?php if (isset($payment_methods['stripe_payment_method']) && $payment_methods['stripe_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="stripe">
-                                                                            <input id="stripe" name="payment_method" type="radio" value="Stripe" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="stripe">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/stripe.png' ?>" class="payment-gateway-images" alt="Stripe">
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="stripe">
-                                                                            Stripe
-                                                                        </label>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
-
-                                                            <?php if (isset($payment_methods['midtrans_payment_method']) && $payment_methods['midtrans_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="midtrans">
-                                                                            <input id="midtrans" name="payment_method" type="radio" value="Midtrans" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="midtrans">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/midtrans.jpg' ?>" class="payment-gateway-images" alt="Midtrans">
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="midtrans">
-                                                                            Midtrans
-                                                                        </label>
-
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
+                                            <input type="hidden" name="order_id" id="order_id" value="<?= $order_id ?>">
+                                            <input type="number" name="amount" id="amount" min="1" required class="col-md-11 ml-4 form-control" placeholder="Enter amount">
 
 
-                                                            <?php if (isset($payment_methods['myfaoorah_payment_method']) && $payment_methods['myfaoorah_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="my_fatoorah">
-                                                                            <input id="my_fatoorah" name="payment_method" type="radio" value="my_fatoorah" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="my_fatoorah">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/myfatoorah.jpg' ?>" class="payment-gateway-images" alt="myfatoorah">
-                                                                        </label>
-                                                                    </td>
+                                            <input type="text" name="message" class="col-md-11 ml-4 mt-3 ticket_msg form-control " id="message_input" placeholder="Type Message ...">
+                                            <br>
 
-                                                                    <td style="border: none;">
-                                                                        <label for="my_fatoorah">
-                                                                            My Fatoorah
-                                                                        </label>
-                                                                    </td>
-                                                                </tr>
+                                            <div class="align-item-center ship-title-details justify-content-between d-flex ml-3">
+                                                <h5><?= !empty($this->lang->line('payment_method')) ? $this->lang->line('payment_method') : 'Payment Method' ?></h5>
+                                            </div>
+                                            <div class="shipped-details mt-3 col-md-6">
+                                                <table class="table table-step-shipping">
+                                                    <tbody>
 
-                                                            <?php } ?>
+                                                        <?php if (isset($payment_methods['paypal_payment_method']) && $payment_methods['paypal_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="paypal">
+                                                                        <input id="paypal" name="payment_method" type="radio" value="Paypal" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="paypal">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/paypal.png' ?>" class="payment-gateway-images" alt="Paypal">
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="paypal">
+                                                                        Paypal
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                        <?php if (isset($payment_methods['razorpay_payment_method']) && $payment_methods['razorpay_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="razorpay">
+                                                                        <input id="razorpay" name="payment_method" type="radio" value="Razorpay" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="razorpay">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/razorpay.png' ?>" class="payment-gateway-images" alt="Razorpay">
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="razorpay">
+                                                                        RazorPay
+                                                                    </label>
+                                                                    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" value="" />
+                                                                    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id" value="" />
+                                                                    <input type="hidden" name="razorpay_signature" id="razorpay_signature" value="" />
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                        <?php if (isset($payment_methods['paystack_payment_method']) && $payment_methods['paystack_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="paystack">
+                                                                        <input id="paystack" name="payment_method" type="radio" value="Paystack" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="paystack">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/paystack.png' ?>" class="payment-gateway-images" alt="Paystack">
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="paystack">
+                                                                        Paystack
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                        <?php if (isset($payment_methods['payumoney_payment_method']) && $payment_methods['payumoney_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="payumoney">
+                                                                        <input id="payumoney" name="payment_method" type="radio" value="Payumoney" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="payumoney">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/payumoney.png' ?>" class="payment-gateway-images" alt="Payumoney">
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="payumoney">
+                                                                        Payumoney
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                        <?php if (isset($payment_methods['flutterwave_payment_method']) && $payment_methods['flutterwave_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="flutterwave">
+                                                                        <input id="flutterwave" name="payment_method" type="radio" value="Flutterwave" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="flutterwave">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/flutterwave.png' ?>" class="payment-gateway-images" alt="Flutterwave">
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="flutterwave">
+                                                                        Flutterwave
+                                                                    </label>
+                                                                    <?php foreach ($name as $username) { ?>
+                                                                        <input type="hidden" name="flutterwave_public_key" id="flutterwave_public_key" value="<?= $payment_methods['flutterwave_public_key'] ?>" />
+                                                                        <input type="hidden" name="flutterwave_transaction_id" id="flutterwave_transaction_id" value="" />
+                                                                        <input type="hidden" name="flutterwave_transaction_ref" id="flutterwave_transaction_ref" value="" />
+                                                                        <input type="hidden" name="promo_set" id="promo_set" value="" />
+                                                                    <?php  } ?>
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                        <?php if (isset($payment_methods['paytm_payment_method']) && $payment_methods['paytm_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="paytm">
+                                                                        <input id="paytm" name="payment_method" type="radio" value="Paytm" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="paytm">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/paytm.png' ?>" class="payment-gateway-images" alt="Paytm">
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="paytm">
+                                                                        Paytm
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                        <?php if (isset($payment_methods['stripe_payment_method']) && $payment_methods['stripe_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="stripe">
+                                                                        <input id="stripe" name="payment_method" type="radio" value="Stripe" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="stripe">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/stripe.png' ?>" class="payment-gateway-images" alt="Stripe">
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="stripe">
+                                                                        Stripe
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
 
-                                                            <?php if (isset($payment_methods['instamojo_payment_method']) && $payment_methods['instamojo_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="instamojo">
-                                                                            <input id="instamojo" name="payment_method" type="radio" value="instamojo" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="instamojo">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/instamojo.png' ?>" class="payment-gateway-images" alt="instamojo">
-                                                                        </label>
-                                                                    </td>
+                                                        <?php if (isset($payment_methods['midtrans_payment_method']) && $payment_methods['midtrans_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="midtrans">
+                                                                        <input id="midtrans" name="payment_method" type="radio" value="Midtrans" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="midtrans">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/midtrans.jpg' ?>" class="payment-gateway-images" alt="Midtrans">
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="midtrans">
+                                                                        Midtrans
+                                                                    </label>
 
-                                                                    <td style="border: none;">
-                                                                        <label for="instamojo">
-                                                                            Instamojo
-                                                                        </label>
-                                                                        <!-- <input type="hidden" name="instamojo_payment_id" id="instamojo_payment_id" value="" />
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+
+
+                                                        <?php if (isset($payment_methods['myfaoorah_payment_method']) && $payment_methods['myfaoorah_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="my_fatoorah">
+                                                                        <input id="my_fatoorah" name="payment_method" type="radio" value="my_fatoorah" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="my_fatoorah">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/myfatoorah.jpg' ?>" class="payment-gateway-images" alt="myfatoorah">
+                                                                    </label>
+                                                                </td>
+
+                                                                <td style="border: none;">
+                                                                    <label for="my_fatoorah">
+                                                                        My Fatoorah
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+
+                                                        <?php } ?>
+
+                                                        <?php if (isset($payment_methods['instamojo_payment_method']) && $payment_methods['instamojo_payment_method'] == 1) { ?>
+                                                            <tr>
+                                                                <td style="border: none;">
+                                                                    <label for="instamojo">
+                                                                        <input id="instamojo" name="payment_method" type="radio" value="instamojo" required>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="border: none;">
+                                                                    <label for="instamojo">
+                                                                        <img src="<?= THEME_ASSETS_URL . 'images/instamojo.png' ?>" class="payment-gateway-images" alt="instamojo">
+                                                                    </label>
+                                                                </td>
+
+                                                                <td style="border: none;">
+                                                                    <label for="instamojo">
+                                                                        Instamojo
+                                                                    </label>
+                                                                    <!-- <input type="hidden" name="instamojo_payment_id" id="instamojo_payment_id" value="" />
                                                                     <input type="hidden" name="instamojo_order_id" id="instamojo_order_id" value="" /> -->
-                                                                    </td>
-                                                                </tr>
+                                                                </td>
+                                                            </tr>
 
-                                                            <?php } ?>
+                                                        <?php } ?>
 
-                                                            <?php if (isset($payment_methods['phonepe_payment_method']) && $payment_methods['phonepe_payment_method'] == 1) { ?>
-                                                                <tr>
-                                                                    <td style="border: none;">
-                                                                        <label for="phonepe">
-                                                                            <input id="phonepe" class="form-check-input m-0" name="payment_method" type="radio" value="phonepe" required>
-                                                                        </label>
-                                                                    </td>
-                                                                    <td style="border: none;">
-                                                                        <label for="phonepe">
-                                                                            <img src="<?= THEME_ASSETS_URL . 'images/phonepay-logo.png' ?>" class="payment-gateway-images" alt="phonepe">
-                                                                        </label>
-                                                                    </td>
-
-                                                                    <td style="border: none;">
-                                                                        <label for="phonepe">
-                                                                            PhonePe
-                                                                        </label>
-                                                                    </td>
-                                                                </tr>
-                                                            <?php } ?>
-
-                                                        </tbody>
-                                                    </table>
-                                                    <div id="stripe_div">
-                                                        <div id="stripe-card-element">
-                                                            <!--Stripe.js injects the Card Element-->
-                                                        </div>
-                                                        <p id="card-error" role="alert"></p>
-                                                        <p class="result-message hidden"></p>
+                                                    </tbody>
+                                                </table>
+                                                <div id="stripe_div">
+                                                    <div id="stripe-card-element">
+                                                        <!--Stripe.js injects the Card Element-->
                                                     </div>
+                                                    <p id="card-error" role="alert"></p>
+                                                    <p class="result-message hidden"></p>
                                                 </div>
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-success" id="wallet_refill" value="Save"><?= !empty($this->lang->line('refill')) ? $this->lang->line('refill') : 'Refill' ?></button>
-                                                    <button type="button" class="btn btn-danger" data-dismiss="modal"><?= !empty($this->lang->line('close')) ? $this->lang->line('close') : 'Close' ?></button>
-                                                </div>
-                                            </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-success" id="wallet_refill" value="Save"><?= labels('Refill', 'Refill') ?></button>
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                            </div>
                                             <!-- </form> -->
                                         </div>
 
@@ -387,7 +365,7 @@
 
                                         <!-- Modal Header -->
                                         <div class="modal-header">
-                                            <h4 class="modal-title price"><?= !empty($this->lang->line('withdraw_money')) ? $this->lang->line('withdraw_money') : 'Withdraw Money' ?></h4>
+                                            <h4 class="modal-title price">Withdraw money</h4>
 
 
                                         </div>
@@ -395,19 +373,19 @@
                                         <div class="ship-details-wrapper mt-3 payment-methods">
                                             <!-- <form action="<?= base_url('my_account/withdraw_money') ?>" class='form-submit-event' method="post"> -->
 
-                                            <input type="number" name="amount" id="withdrawal_amount" min="1" required class="col-md-11 ml-4 form-control" placeholder="<?= !empty($this->lang->line('withdraw_money')) ? $this->lang->line('withdraw_money') : 'Withdrawal Money' ?>">
+                                            <input type="number" name="amount" id="withdrawal_amount" min="1" required class="col-md-11 ml-4 form-control" placeholder="withdrawal amount">
 
                                             <input type="hidden" id="user_id" name='user_id' value="<?= $_SESSION['user_id']  ?>" />
 
 
-                                            <input type="text" name="payment_address" id="payment_address" class="col-md-11 ml-4 mt-3 ticket_msg form-control " id="message_input" placeholder="<?= !empty($this->lang->line('enter_bank_details')) ? $this->lang->line('enter_bank_details') : 'Enter bank details' ?>">
+                                            <input type="text" name="payment_address" id="payment_address" class="col-md-11 ml-4 mt-3 ticket_msg form-control " id="message_input" placeholder="Enter bank details...">
                                             <br>
 
 
 
                                             <div class="modal-footer">
                                                 <button type="submit" class="btn btn-success" id="withdraw_amount" value="Save"><?= labels('Withdraw', 'Withdraw') ?></button>
-                                                <button type="button" class="btn btn-danger" data-dismiss="modal"><?= !empty($this->lang->line('close')) ? $this->lang->line('close') : 'Close' ?>+</button>
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                                             </div>
                                             <!-- </form> -->
                                         </div>
@@ -424,10 +402,10 @@
                     <hr>
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#wallet_transaction"><?= !empty($this->lang->line('wallet_transaction')) ? $this->lang->line('wallet_transaction') : 'Wallet transaction' ?></a>
+                            <a class="nav-link active" data-toggle="tab" href="#wallet_transaction">Wallet transaction</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#withdrawal_requests"><?= !empty($this->lang->line('withdrawal_request')) ? $this->lang->line('withdrawal_request') : 'Withdrawal requests' ?></a>
+                            <a class="nav-link" data-toggle="tab" href="#withdrawal_requests">Withdrawal requests</a>
                         </li>
                     </ul>
 
@@ -435,15 +413,15 @@
                         <div id="wallet_transaction" class="tab-pane active"><br>
                             <table class='table-striped price' data-toggle="table" data-url="<?= base_url('my-account/get-wallet-transactions') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-query-params="customer_wallet_query_params">
                                 <thead>
-                                <tr>
-                                    <th data-field="id" data-sortable="true"><?= !empty($this->lang->line('id')) ? $this->lang->line('id') : 'ID' ?></th>
-                                    <th data-field="name" data-sortable="false"><?= !empty($this->lang->line('username')) ? $this->lang->line('username') : 'Username' ?></th>
-                                    <th data-field="type" data-sortable="false"><?= !empty($this->lang->line('type')) ? $this->lang->line('type') : 'Type' ?></th>
-                                    <th data-field="amount" data-sortable="false"><?= !empty($this->lang->line('amount')) ? $this->lang->line('amount') : 'Amount' ?></th>
-                                    <th data-field="status" data-sortable="false"><?= !empty($this->lang->line('status')) ? $this->lang->line('status') : 'Status' ?></th>
-                                    <th data-field="message" data-sortable="false"><?= !empty($this->lang->line('message')) ? $this->lang->line('message') : 'Message' ?></th>
-                                    <th data-field="date" data-sortable="false"><?= !empty($this->lang->line('date')) ? $this->lang->line('date') : 'Date' ?></th>
-                                </tr>
+                                    <tr>
+                                        <th data-field="id" data-sortable="true">ID</th>
+                                        <th data-field="name" data-sortable="false">User Name</th>
+                                        <th data-field="type" data-sortable="false">Type</th>
+                                        <th data-field="amount" data-sortable="false">Amount</th>
+                                        <th data-field="status" data-sortable="false">Status</th>
+                                        <th data-field="message" data-sortable="false">Message</th>
+                                        <th data-field="date" data-sortable="false">Date</th>
+                                    </tr>
                                 </thead>
                             </table>
                         </div>

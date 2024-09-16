@@ -21,6 +21,7 @@ class Order_model extends CI_Model
             $current_status = $set[$field[0]]; //processed
 
             $res = fetch_details($table, $where, '*');
+
             if ($set['status'] != 'return_request_decline') {
                 $priority_status = [
                     'received' => 0,
@@ -68,37 +69,19 @@ class Order_model extends CI_Model
                         }
                     }
                     $set = [$field[0] => json_encode(array_values($temp))];
-                    // print_r($set);
-                    // print_r($row);
-                    // print_r($current_status);
-                    // die;
 
                     $this->db->trans_start();
                     $this->db->set($set)->where(['id' => $row['id']])->update($table);
+
                     $this->db->trans_complete();
-                    // echo $this ->db->last_query();
                     $response = FALSE;
                     if ($this->db->trans_status() === TRUE) {
                         $response = TRUE;
                     }
-                    // die;
                     /* give commission to the delivery boy if the order is delivered */
                     if ($current_status == 'delivered') {
-                        $order = fetch_details('order_items', $where, 'delivery_boy_id,order_id,sub_total,id,seller_id');
-                        // echo "<pre>";
-                        // print_r($order);
-                        $item_seller_id = $order[0]['seller_id'];
-                        // print_r($item_seller_id);
-                        $order_item_id = intval($order[0]['id']);
-                        // print_r($order_item_id);
-                        $result = $this->db->select('*')->from('order_charges')->where('seller_id', $item_seller_id)->where_in('order_item_ids', array($order_item_id))->get();
-                        // echo $this->db->last_query();
-                        // print_r($result);
-                        $delivery_charges = $result->result_array();
-                        // print_r($delivery_charges);
-                        $order_item_delivery_charges = $delivery_charges[0]['delivery_charge'];
+                        $order = fetch_details('order_items', $where, 'delivery_boy_id,order_id,sub_total');
 
-                        // die;
                         $order_final_total = fetch_details('orders', 'id=' . $order[0]['order_id'], 'final_total,payment_method');
                         if (!empty($order)) {
                             $delivery_boy_id = $order[0]['delivery_boy_id'];
@@ -107,9 +90,6 @@ class Order_model extends CI_Model
                                 $delivery_boy = fetch_details('users', ['id' => $delivery_boy_id], 'bonus,bonus_type');
                                 if (isset($delivery_boy) && !empty($delivery_boy)) {
                                     $final_total = $order[0]['sub_total'];
-                                    $total_amount = $final_total + $order_item_delivery_charges;
-                                    // print_r($final_total + $order_item_delivery_charges);
-
                                     $settings = get_settings('system_settings', true);
                                     // get bonus_type
                                     if ($delivery_boy[0]['bonus_type'] == "fixed_amount_per_order_item") {
@@ -129,8 +109,7 @@ class Order_model extends CI_Model
                                     $transaction_data = [
                                         'transaction_type' => "wallet",
                                         'user_id' => $delivery_boy_id,
-                                        'order_id' => $row['order_id'],
-                                        'order_item_id' => $row['id'],
+                                        'order_id' => $row['id'],
                                         'type' => "credit",
                                         'txn_id' => "",
                                         'amount' => $commission,
@@ -145,17 +124,16 @@ class Order_model extends CI_Model
                                     $transaction_data = [
                                         'transaction_type' => "transaction",
                                         'user_id' => $delivery_boy_id,
-                                        'order_id' => $row['order_id'],
-                                        'order_item_id' => $row['id'],
+                                        'order_id' => $row['id'],
                                         'type' => "delivery_boy_cash",
                                         'txn_id' => "",
-                                        'amount' => $total_amount,
+                                        'amount' => $final_total,
                                         'status' => "1",
                                         'message' => "Delivery boy collected COD",
                                     ];
                                     $this->transaction_model->add_transaction($transaction_data);
                                     $this->load->model('customer_model');
-                                    update_cash_received($total_amount, $delivery_boy_id, "add");
+                                    update_cash_received($final_total, $delivery_boy_id, "add");
                                 }
                             }
                         }
@@ -183,44 +161,8 @@ class Order_model extends CI_Model
         }
     }
 
-    public function delete_draft_orders()
-    {
-        $status = "draft";
-        $products = fetch_details('orders', ['status' => $status], 'id');
-        foreach ($products as $order_id) {
-            $order = fetch_orders($order_id['id'], false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, 0);
-            $added_date = $order['order_data'][0]['order_items'][0]['date_added'];
-
-            $added_date_time = new DateTime($added_date);
-            $current_time = new DateTime();
-            $time_diff = $current_time->diff($added_date_time);
-
-            if ($time_diff->h >= 1 || $time_diff->days > 0) {
-                $user_id = $order['order_data'][0]['user_id'];
-                $returnable_amount = $order['order_data'][0]['wallet_balance'];
-                update_wallet_balance('credit', $user_id, $returnable_amount, 'Wallet Amount Credited for Order ID  : ' . $order['order_data'][0]['id']);
-                update_stock($order['order_data'][0]['order_items'][0]['product_variant_id'], $order['order_data'][0]['order_items'][0]['quantity'], 'plus');
-                delete_details(['id' => $order['order_data'][0]['id']], 'orders');
-                delete_details(['order_id' => $order['order_data'][0]['id']], 'order_items');
-                delete_details(['order_id' => $order['order_data'][0]['id']], 'transactions');
-
-                $response['error'] = false;
-                $response['message'] = 'Order deleted successfully';
-                $response['data'] = array();
-            }
-        }
-        print_r(json_encode($response));
-    }
-
     public function update_order_item($id, $status, $return_request = 0, $fromapp = false)
     {
-        // print_r("id : " .$id);
-        // print_r("status : " .$status);
-        // print_r("return request  : " .$return_request);
-        // print_r("frm app : " . $fromapp);
-        // die;
-        $firebase_project_id = $this->data['firebase_project_id'];
-        $service_account_file = $this->data['service_account_file'];
         if ($return_request == 0) {
             $res = validate_order_status($id, $status, 'order_items', '', true);
 
@@ -249,7 +191,7 @@ class Order_model extends CI_Model
             $order_counter = $order_items_details[$key]['order_counter'];
             $order_cancel_counter = $order_items_details[$key]['order_cancel_counter'];
             $order_return_counter = $order_items_details[$key]['order_return_counter'];
-            $user_res = fetch_details('users', ['id' => $order_item_details[0]['seller_id']], 'fcm_id,username,mobile,email');
+            $user_res = fetch_details('users', ['id' => $order_item_details[0]['seller_id']], 'fcm_id,username');
 
             $fcm_ids = array();
             if (!empty($user_res[0]['fcm_id'])) {
@@ -260,27 +202,19 @@ class Order_model extends CI_Model
 
             if ($this->update_order(['status' => $status], ['id' => $id], true, 'order_items')) {
                 $this->order_model->update_order(['active_status' => $status], ['id' => $id], false, 'order_items');
-                $firebase_project_id = get_settings('firebase_project_id');
-                $service_account_file = get_settings('service_account_file');
 
                 //send notification while order cancelled
                 if ($status == 'cancelled') {
                     $fcm_admin_subject = 'Order cancelled';
                     $fcm_admin_msg = 'Hello ' . $user_res[0]['username'] . 'order of order item id ' . $id . ' is cancelled.';
-                    if (!empty($fcm_ids) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                    if (!empty($fcm_ids)) {
                         $fcmMsg = array(
                             'title' => $fcm_admin_subject,
                             'body' => $fcm_admin_msg,
                             'type' => "place_order",
                             'content_available' => true
                         );
-                        send_notification($fcmMsg, $registrationIDs_chunks, $fcmMsg);
-                        (notify_event(
-                            "place_order",
-                            ["seller" => [$user_res[0]['email']]],
-                            ["seller" => [$user_res[0]['mobile']]],
-                            ["orders.id" => $id]
-                        ));
+                        send_notification($fcmMsg, $registrationIDs_chunks);
                     }
                     if (isset($order_tracking_data) && !empty($order_tracking_data) && $order_tracking_data != null) {
                         cancel_shiprocket_order($order_tracking_data[0]['shiprocket_order_id']);
@@ -336,8 +270,6 @@ class Order_model extends CI_Model
                 }
             }
             $delivery_charge = isset($data['delivery_charge']) && !empty($data['delivery_charge']) ? $data['delivery_charge'] : 0;
-            // print_r($delivery_charge);
-            // die;
             $discount = isset($data['discount']) && !empty($data['discount']) ? $data['discount'] : 0;
             $gross_total = 0;
             $cart_data = [];
@@ -378,7 +310,7 @@ class Order_model extends CI_Model
             /* Calculating Promo Discount */
             if (isset($data['promo_code']) && !empty($data['promo_code'])) {
 
-                $promo_code = validate_promo_code($data['promo_code'], $data['user_id'], $data['temp_total']);
+                $promo_code = validate_promo_code($data['promo_code'], $data['user_id'], $data['total']);
 
                 if ($promo_code['error'] == false) {
 
@@ -406,8 +338,6 @@ class Order_model extends CI_Model
                 $product_variant[$i]['qty'] =  $quantity[$i];
             }
             foreach ($product_variant as $product) {
-                // print_r($product);
-                // die;
                 $prctg = (isset($product['tax_percentage']) && intval($product['tax_percentage']) > 0 && $product['tax_percentage'] != null) ? $product['tax_percentage'] : '0';
                 if ((isset($product['is_prices_inclusive_tax']) && $product['is_prices_inclusive_tax'] == 0) || (!isset($product['is_prices_inclusive_tax'])) && $prctg > 0) {
                     $price_tax_amount = $product['price'] * ($prctg / 100);
@@ -486,9 +416,6 @@ class Order_model extends CI_Model
                 'email' => isset($data['email']) ? $data['email'] : ' ',
                 'is_pos_order' => isset($data['is_pos_order']) ? $data['is_pos_order'] : 0
             ];
-            if ($data['payment_method'] == "phonepe") {
-                $order_data['status'] = $status;
-            }
             if (isset($data['address_id']) && !empty($data['address_id'])) {
                 $order_data['address_id'] = (isset($data['address_id']) ? $data['address_id'] : '');
             }
@@ -523,34 +450,7 @@ class Order_model extends CI_Model
 
             $this->db->insert('orders', $order_data);
             $last_order_id = $this->db->insert_id();
-            if (isset($data['is_pos_order']) && $data['is_pos_order'] == 1) {
-                // $status = json_encode(array(array($status, date("d-m-Y h:i:sa"))));
-                // Define the input array
-                $statuses = [
-                    ["received", date("d-m-Y h:i:sa")],
-                    ["processed", date("d-m-Y h:i:sa")],
-                    ["shipped", date("d-m-Y h:i:sa")],
-                    ["delivered", date("d-m-Y h:i:sa")]
-                ];
-                
-                $output = [];
-                
-                // Loop through each status and time pair
-                foreach ($statuses as $all_status) {
-                    // Add the formatted status and time to the output array
-                    $output[] = [$all_status[0], $all_status[1]];
-                }
-                
-                // Convert the output array to a JSON string
-                $jsonOutput = json_encode($output);
-                // print_r($output);
-                // print_r($jsonOutput);
-                // die;
 
-                // // Print the JSON string
-                // echo $jsonOutput;
-                // die;
-            }
 
             for ($i = 0; $i < count($product_variant); $i++) {
 
@@ -566,7 +466,7 @@ class Order_model extends CI_Model
                     'tax_percent' => $tax_percentage[$i],
                     'tax_amount' => $tax_amount[$i],
                     'sub_total' => $subtotal[$i],
-                    'status' =>  (isset($data['is_pos_order']) && $data['is_pos_order'] == 1) ? (json_encode($output)) : json_encode(array(array($status, date("d-m-Y h:i:sa")))),
+                    'status' =>  json_encode(array(array($status, date("d-m-Y h:i:sa")))),
                     'active_status' => $status,
                     'otp' => 0,
                 ];
@@ -583,14 +483,9 @@ class Order_model extends CI_Model
             $discount_percentage = 0.00;
             foreach ($parcels as $seller_id => $parcel) {
                 $discount_percentage = ($parcel['total'] * 100) / $parcel_sub_total;
-                // print_r("total parcel :" . $parcel['total']);
-                // print_r("discount persantage : ".$discount_percentage);
                 $seller_promocode_discount =  ($promo_code_discount * $discount_percentage) / 100;
-                // print_r("seller promocode discount : ".$seller_promocode_discount);
                 $seller_delivery_charge = ($delivery_charge * $discount_percentage) / 100;
-                // print_r("seller delivery charge : ".$seller_delivery_charge);
                 $otp = mt_rand(100000, 999999);
-                // die;
                 $order_item_ids = '';
                 $varient_ids = explode(',', trim($parcel['variant_id'], ','));
                 $parcel_total = $parcel['total'] + intval($parcel['delivery_charge']) - $seller_promocode_discount;
@@ -643,30 +538,22 @@ class Order_model extends CI_Model
             //send custom notifications
             $custom_notification = fetch_details('custom_notifications', ['type' => "place_order"], '');
             $hashtag_order_id = '< order_id >';
-            // $string = json_encode($custom_notification[0]['title'], JSON_UNESCAPED_UNICODE);
-            // $hashtag = html_entity_decode($string);
-            // $data1 = str_replace($hashtag_order_id, $last_order_id, $hashtag);
-            // $title = output_escaping(trim($data1, '"'));
-            $title = 'place_order';
+            $string = json_encode($custom_notification[0]['title'], JSON_UNESCAPED_UNICODE);
+            $hashtag = html_entity_decode($string);
+            $data1 = str_replace($hashtag_order_id, $last_order_id, $hashtag);
+            $title = output_escaping(trim($data1, '"'));
             $hashtag_application_name = '< application_name >';
-            // $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
-            // $hashtag = html_entity_decode($string);
-            // $data2 = str_replace($hashtag_application_name, $system_settings['app_name'], $hashtag);
-            // $message = output_escaping(trim($data2, '"'));
-
             $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
             $hashtag = html_entity_decode($string);
-            $data1 = str_replace(array($hashtag_order_id, $hashtag_application_name), array($last_order_id, $system_settings['app_name']), $hashtag);
-            $message = output_escaping(trim($data1, '"'));
+            $data2 = str_replace($hashtag_application_name, $system_settings['app_name'], $hashtag);
+            $message = output_escaping(trim($data2, '"'));
 
-
-            $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'New order placed ID #' . $last_order_id;
-            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
+            $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'Tienes un nuevo pedido ID #' . $last_order_id;
+            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'Hola ' . $system_settings['app_name'] . ' porfavor procesa el nuevo pedido con ID #' . $last_order_id;
 
             if (trim(strtolower($data['payment_method'])) != 'paypal' || trim(strtolower($data['payment_method'])) != 'stripe') {
                 $overall_order_data = array(
                     'rows' => $cart_data,
-                    'order_id' => $last_order_id,
                     'order_data' => $overall_total,
                     'subject' => $fcm_admin_subject,
                     'user_data' => $user[0],
@@ -698,27 +585,17 @@ class Order_model extends CI_Model
                     $seller_fcm_id[0] = $seller_fcm[0]['fcm_id'];
                 }
                 $registrationIDs_chunks = array_chunk($seller_fcm_id, 1000);
-                $registrationIDs_chunks_user = array_chunk($user_fcm_id[0], 1000);
-                // print_r($seller_fcm_id);
-                if (!empty($registrationIDs_chunks) || !empty($registrationIDs_chunks_user)) {
-                    // print_r("in if ");
+
+                if (!empty($seller_fcm_id)) {
                     $fcmMsg = array(
                         'title' => $fcm_admin_subject,
                         'body' => $fcm_admin_msg,
                         'type' => "place_order",
-                        'order_id' => (string)$last_order_id,
-                        // 'content_available' => true
+                        'content_available' => true,
+                        'channel_id' => 'channel_id_test_8'
                     );
-                    $firebase_project_id = get_settings('firebase_project_id');
-                    $service_account_file = get_settings('service_account_file');
-                    // print_r($registrationIDs_chunks_user); 
-                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                        # code...
-                        if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
-                            send_notification($fcmMsg, $registrationIDs_chunks_user, $fcmMsg);
-                            send_notification($fcmMsg, $registrationIDs_chunks, $fcmMsg);
-                            // print_r("here");
-                        }
+                    if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
+                        send_notification($fcmMsg, $registrationIDs_chunks);
                     }
                 }
                 $admin_notifi = array(
@@ -730,22 +607,22 @@ class Order_model extends CI_Model
                 insert_details($admin_notifi, 'system_notification');
                 if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
                     // send_mail($user[0]['email'], 'Order received successfully', $this->load->view('admin/pages/view/email-template.php', $overall_order_data, TRUE));
-                    for ($i = 0; $i < count($seller_ids); $i++) {
-                        // $seller_email = fetch_details('users', ['id' => $seller_ids[$i]]);
-                        $sellers = fetch_details('users', ['id' => $seller_ids[$i]], ['email', 'mobile']);
-                        // print_r($sellers);
-
-                        (notify_event(
-                            "place_order",
-                            ["customer" => [$user[0]['email']], "seller" => [$sellers[0]['email']]],
-                            ["customer" => [$user[0]['mobile']],  "seller" => [$sellers[0]['mobile']]],
-                            ["orders.id" => $last_order_id]
-                        ));
-                    }
                 }
             }
 
-            $this->cart_model->remove_from_cart($data);
+            for ($i = 0; $i < count($seller_ids); $i++) {
+                // $seller_email = fetch_details('users', ['id' => $seller_ids[$i]]);
+                $sellers = fetch_details('users', ['id' => $seller_ids[$i]], ['email', 'mobile']);
+                // print_r($sellers);
+                (notify_event(
+                    "place_order",
+                    ["customer" => [$user[0]['email']], "seller" => [$sellers[0]['email']]],
+                    ["customer" => [$user[0]['mobile']],  "seller" => [$sellers[0]['mobile']]],
+                    ["orders.id" => $last_order_id]
+                ));
+            }
+
+            // $this->cart_model->remove_from_cart($data);
             $user_balance = fetch_details('users', ['id' => $data['user_id']], 'balance');
 
             $response['error'] = false;
@@ -766,7 +643,7 @@ class Order_model extends CI_Model
 
     public function get_order_details($where = NULL, $status = false, $seller_id = NULL)
     {
-        $res = $this->db->select('oi.*,ot.courier_agency,ot.tracking_id,ot.url,oi.otp as item_otp,a.name as user_name,oi.id as order_item_id,p.*,v.product_id,o.*,o.email as user_email,o.id as order_id,o.total as order_total,o.wallet_balance,oi.active_status as oi_active_status,u.email,u.username as uname, u.country_code as country_code,oi.status as order_status,p.id as product_id,p.pickup_location as pickup_location,p.slug as product_slug,p.sku as product_sku,v.sku, v.price as product_price ,p.name as pname,p.type,p.image as product_image,p.is_prices_inclusive_tax,(SELECT username FROM users db where db.id=oi.delivery_boy_id ) as delivery_boy , (SELECT mobile FROM addresses a where a.id=o.address_id ) as mobile_number ')
+        $res = $this->db->select('oi.*,ot.courier_agency,ot.tracking_id,ot.url,oi.otp as item_otp,a.name as user_name,oi.id as order_item_id,p.*,v.product_id,o.*,o.email as user_email,o.id as order_id,o.total as order_total,o.wallet_balance,oi.active_status as oi_active_status,u.email,u.username as uname,oi.status as order_status,p.id as product_id,p.pickup_location as pickup_location,p.slug as product_slug,p.sku as product_sku,v.sku, v.price as product_price ,p.name as pname,p.type,p.image as product_image,p.is_prices_inclusive_tax,(SELECT username FROM users db where db.id=oi.delivery_boy_id ) as delivery_boy , (SELECT mobile FROM addresses a where a.id=o.address_id ) as mobile_number ')
             ->join('product_variants v ', ' oi.product_variant_id = v.id', 'left')
             ->join('products p ', ' p.id = v.product_id ', 'left')
             ->join('users u ', ' u.id = oi.user_id', 'left')
@@ -877,7 +754,7 @@ class Order_model extends CI_Model
             $total = $row['total'];
         }
 
-        $search_res = $this->db->select(' o.* , u.username , u.country_code as country_code, db.username as delivery_boy')
+        $search_res = $this->db->select(' o.* , u.username, db.username as delivery_boy')
             ->join(' `users` u', 'u.id= o.user_id', 'left')
             ->join(' `order_items` oi', 'oi.order_id= o.id', 'left')
             ->join('product_variants v ', ' oi.product_variant_id = v.id', 'left')
@@ -944,9 +821,6 @@ class Order_model extends CI_Model
         $currency_symbol = get_settings('currency');
         foreach ($user_details as $row) {
 
-            // echo "<pre>";
-            // print_r($row);
-
             if (!empty($row['items'])) {
                 $items = $row['items'];
                 $items1 = '';
@@ -991,7 +865,7 @@ class Order_model extends CI_Model
                 $tempRow['final_total'] = $currency_symbol . ' ' . $final_total;
                 $final_tota_amount += intval($row['final_total']);
                 $tempRow['deliver_by'] = $row['delivery_boy'];
-                $tempRow['payment_method'] =  str_replace('_', ' ', $row['payment_method']);
+                $tempRow['payment_method'] = $row['payment_method'];
                 $updated_username = fetch_details('users', 'id =' . $row['items'][0]['updated_by'], 'username');
                 $tempRow['updated_by'] = $updated_username[0]['username'];
                 $tempRow['address'] = output_escaping(str_replace('\r\n', '</br>', $row['address']));
@@ -1003,7 +877,6 @@ class Order_model extends CI_Model
                     $operate = '<a href=' . base_url('admin/orders/edit_orders') . '?edit_id=' . $row['id'] . ' class="btn action-btn btn-primary btn-xs ml-1 mr-1 mb-1" title="View" ><i class="fa fa-eye"></i></a>';
                     $operate .= '<a href="javascript:void(0)" class="delete-orders btn btn-danger action-btn btn-xs ml-1 mr-1 mb-1" data-id=' . $row['id'] . ' title="Delete" ><i class="fa fa-trash"></i></a>';
                     $operate .= '<a href="' . base_url() . 'admin/invoice?edit_id=' . $row['id'] . '" class="btn action-btn btn-info btn-xs  ml-1 mb-1" title="Invoice" ><i class="fa fa-file"></i></a>';
-                    $operate .= '<a href="https://api.whatsapp.com/send?phone=' . $row['country_code'] . $tempRow['mobile'] . '&amp;text=Hello, ' . $row['items'][0]['uname'] . ' Your order with ID : ' . $row['items'][0]['order_id'] . ' and is ' . $row['items'][0]['active_status'] . '. Please take a note of it. If you have further queries feel free to contact us. Thank you." target="_blank" title="Send Whatsapp Notification" class="btn btn-xs ml-1 mr-1 mb-1 btn-success"><i class="fa fa-phone-alt" style="font-size: 16px;color:white"></i></a>';
                     if ($row['items'][0]['type'] != 'digital_product') {
                         $operate .= ' <a href="javascript:void(0)" class="edit_order_tracking btn action-btn btn-success btn-xs ml-1 mr-1 mb-1" title="Order Tracking" data-order_id="' . $row['id'] . '"  data-target="#order-tracking-modal" data-toggle="modal"><i class="fa fa-map-marker-alt"></i></a>';
                     }
@@ -1085,328 +958,6 @@ class Order_model extends CI_Model
             ->join('product_variants v ', ' oi.product_variant_id = v.id', 'left')
             ->join('products p ', ' p.id = v.product_id ', 'left')
             ->join('users un ', ' un.id = o.user_id', 'left');
-
-        if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
-
-            $count_res->where(" DATE(oi.date_added) >= DATE('" . $_GET['start_date'] . "') ");
-            $count_res->where(" DATE(oi.date_added) <= DATE('" . $_GET['end_date'] . "') ");
-        }
-
-        if (isset($filters) && !empty($filters)) {
-            $this->db->group_Start();
-            $count_res->or_like($filters);
-            $this->db->group_End();
-        }
-
-        if (isset($delivery_boy_id)) {
-            $count_res->where("oi.delivery_boy_id", $delivery_boy_id);
-        }
-
-        if (isset($seller_id) && $seller_id != "") {
-            $count_res->where("oi.seller_id", $seller_id);
-            $count_res->where("oi.active_status != 'awaiting'");
-        }
-
-        if (isset($_GET['user_id']) && $_GET['user_id'] != null) {
-            $count_res->where("o.user_id", $_GET['user_id']);
-        }
-
-        if (isset($_GET['seller_id']) && !empty($_GET['seller_id'])) {
-            $count_res->where("oi.seller_id", $_GET['seller_id']);
-        }
-
-        if (isset($_GET['order_status']) && !empty($_GET['order_status'])) {
-            $count_res->where('oi.active_status', $_GET['order_status']);
-        }
-        // Filter By payment
-        if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
-            $count_res->where('payment_method', $_GET['payment_method']);
-        }
-        // Filter By order type
-        if (isset($_GET['order_type']) && !empty($_GET['order_type']) && $_GET['order_type'] == 'physical_order') {
-            $count_res->where('p.type!=', 'digital_product');
-        }
-        if (isset($_GET['order_type']) && !empty($_GET['order_type']) && $_GET['order_type'] == 'digital_order') {
-            $count_res->where('p.type', 'digital_product');
-        }
-
-        $product_count = $count_res->get('order_items oi')->result_array();
-        foreach ($product_count as $row) {
-            $total = $row['total'];
-        }
-
-        $search_res = $this->db->select(' o.id as order_id,oi.id as order_item_id,o.*,oi.*,ot.courier_agency,ot.tracking_id,ot.url,t.status as transaction_status, u.username as delivery_boy, un.username as username,us.username as seller_name,p.type,p.download_allowed')
-            ->join('users u', 'u.id= oi.delivery_boy_id', 'left')
-            ->join('users us ', ' us.id = oi.seller_id', 'left')
-            ->join('order_tracking ot ', ' ot.order_item_id = oi.id', 'left')
-            ->join('orders o', 'o.id= oi.order_id', 'left')
-            ->join('product_variants v ', ' oi.product_variant_id = v.id', 'left')
-            ->join('products p ', ' p.id = v.product_id ', 'left')
-            ->join('transactions t ', ' t.order_item_id = oi.id ', 'left')
-            ->join('users un ', ' un.id = o.user_id', 'left')
-            ->group_by('oi.order_id');
-
-        if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
-            $search_res->where(" DATE(oi.date_added) >= DATE('" . $_GET['start_date'] . "') ");
-            $search_res->where(" DATE(oi.date_added) <= DATE('" . $_GET['end_date'] . "') ");
-        }
-
-        if (isset($filters) && !empty($filters)) {
-            $search_res->group_Start();
-            $search_res->or_like($filters);
-            $search_res->group_End();
-        }
-
-        if (isset($delivery_boy_id)) {
-            $search_res->where("oi.delivery_boy_id", $delivery_boy_id);
-        }
-
-        if (isset($seller_id) && $seller_id != "") {
-            $search_res->where("oi.seller_id", $seller_id);
-            $search_res->where("oi.active_status != 'awaiting'");
-        }
-
-        if (isset($_GET['seller_id']) && !empty($_GET['seller_id'])) {
-            $count_res->where("oi.seller_id", $_GET['seller_id']);
-        }
-
-        if (isset($_GET['user_id']) && !empty($_GET['user_id'])) {
-            $search_res->where("o.user_id", $_GET['user_id']);
-        }
-
-        if (isset($_GET['order_status']) && !empty($_GET['order_status'])) {
-            $search_res->where('oi.active_status', $_GET['order_status']);
-        }
-        // Filter By payment
-        if (isset($_GET['payment_method']) && !empty($_GET['payment_method'])) {
-            $count_res->where('payment_method', $_GET['payment_method']);
-        }
-
-        // Filter By order type
-        if (isset($_GET['order_type']) && !empty($_GET['order_type']) && $_GET['order_type'] == 'physical_order') {
-            $search_res->where('p.type!=', 'digital_product');
-        }
-        if (isset($_GET['order_type']) && !empty($_GET['order_type']) && $_GET['order_type'] == 'digital_order') {
-            $search_res->where('p.type', 'digital_product');
-        }
-
-
-        $user_details = $search_res->order_by($sort, "DESC")->limit($limit, $offset)->get('order_items oi')->result_array();
-        // echo $this ->db-> last_query();
-        // echo $this->db->last_query();
-
-
-        $bulkData = array();
-        $bulkData['total'] = $total;
-        $rows = array();
-        $tempRow = array();
-        $tota_amount = 0;
-        $final_tota_amount = 0;
-        $currency_symbol = get_settings('currency');
-        $count = 1;
-        foreach ($user_details as $row) {
-
-            $temp = '';
-            if (!empty($row['items'][0]['order_status'])) {
-                $status = json_decode($row['items'][0]['order_status'], 1);
-                foreach ($status as $st) {
-                    $temp .= @$st[0] . " : " . @$st[1] . "<br>------<br>";
-                }
-            }
-
-            if (trim($row['active_status']) == 'awaiting') {
-                $active_status = '<label class="badge badge-secondary">' . $row['active_status'] . '</label>';
-            }
-            if ($row['active_status'] == 'received') {
-                $active_status = '<label class="badge badge-primary">' . $row['active_status'] . '</label>';
-            }
-            if ($row['active_status'] == 'processed') {
-                $active_status = '<label class="badge badge-info">' . $row['active_status'] . '</label>';
-            }
-            if ($row['active_status'] == 'shipped') {
-                $active_status = '<label class="badge badge-warning">' . $row['active_status'] . '</label>';
-            }
-            if ($row['active_status'] == 'delivered') {
-                $active_status = '<label class="badge badge-success">' . $row['active_status'] . '</label>';
-            }
-            if ($row['active_status'] == 'returned' || $row['active_status'] == 'cancelled') {
-                $active_status = '<label class="badge badge-danger">' . $row['active_status'] . '</label>';
-            }
-            if ($row['active_status'] == 'return_request_decline') {
-                $active_status = '<label class="badge badge-danger">' . str_replace('_', ' ', $row['active_status']) . '</label>';
-            }
-            if ($row['active_status'] == 'return_request_approved') {
-                $active_status = '<label class="badge badge-success">' . str_replace('_', ' ', $row['active_status']) . '</label>';
-            }
-            if ($row['active_status'] == 'return_request_pending') {
-                $active_status = '<label class="badge badge-secondary">' . str_replace('_', ' ', $row['active_status']) . '</label>';
-            }
-            if ($row['type'] == 'digital_product' && $row['download_allowed'] == 0) {
-                if ($row['is_sent'] == 1) {
-                    $mail_status = '<label class="badge badge-success">SENT </label>';
-                } else if ($row['is_sent'] == 0) {
-                    $mail_status = '<label class="badge badge-danger">NOT SENT</label>';
-                } else {
-                    $mail_status = '';
-                }
-            } else {
-                $mail_status = '';
-            }
-
-            // if($row['transaction_status'] == 0 || $row['transaction_status'] == 'Pending'){
-
-            // }
-            if ($row['transaction_status'] == 0 || $row['transaction_status'] == 'awaiting') {
-
-                $transaction_status = '<label class="badge badge-primary">Awaiting</label>';
-            }
-            if ($row['transaction_status'] == 1 || $row['transaction_status'] == 'success') {
-                $transaction_status = '<label class="badge badge-success">Success</label>';
-            } else {
-                $transaction_status = '<label class="badge badge-warning">' . $row['transaction_status'] . '</label>';
-            }
-
-            $status = $temp;
-            $tempRow['id'] = $count;
-            $tempRow['order_id'] = $row['order_id'];
-            $tempRow['order_item_id'] = $row['order_item_id'];
-            $tempRow['user_id'] = $row['user_id'];
-            $tempRow['seller_id'] = $row['seller_id'];
-            $tempRow['notes'] = (isset($row['notes']) && !empty($row['notes'])) ? $row['notes'] : "";
-            $tempRow['username'] = $row['username'];
-            $tempRow['seller_name'] = $row['seller_name'];
-            $tempRow['is_credited'] = ($row['is_credited']) ? '<label class="badge badge-success">Credited</label>' : '<label class="badge badge-danger">Not Credited</label>';
-            $tempRow['product_name'] = $row['product_name'];
-            $tempRow['product_name'] .= (!empty($row['variant_name'])) ? '(' . $row['variant_name'] . ')' : "";
-            if (isset($row['mobile']) && !empty($row['mobile']) && $row['mobile'] != "" && $row['mobile'] != " ") {
-                $tempRow['mobile'] =  (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) ? str_repeat("X", strlen($row['mobile']) - 3) . substr($row['mobile'], -3) : $row['mobile'];
-            } else {
-                $tempRow['mobile'] = "";
-            }
-            $tempRow['sub_total'] = $currency_symbol . ' ' . $row['sub_total'];
-            $tempRow['quantity'] = $row['quantity'];
-            $final_tota_amount += intval($row['sub_total']);
-            $tempRow['delivery_boy'] = $row['delivery_boy'];
-            $tempRow['payment_method'] = $row['payment_method'];
-            $tempRow['delivery_boy_id'] = $row['delivery_boy_id'];
-            $tempRow['product_variant_id'] = $row['product_variant_id'];
-            $tempRow['delivery_date'] = $row['delivery_date'];
-            $tempRow['delivery_time'] = $row['delivery_time'];
-            $tempRow['courier_agency'] = (isset($row['courier_agency']) && !empty($row['courier_agency'])) ?  $row['courier_agency'] : "";
-            $tempRow['tracking_id'] = (isset($row['tracking_id']) && !empty($row['tracking_id'])) ? $row['tracking_id'] : "";
-            $tempRow['url'] = (isset($row['url']) && !empty($row['url'])) ? $row['url'] : "";
-            $updated_username = fetch_details('users', 'id =' . $row['updated_by'], 'username');
-            $tempRow['updated_by'] = $updated_username[0]['username'];
-            $tempRow['status'] = $status;
-            $tempRow['transaction_status'] = $transaction_status;
-            $tempRow['active_status'] = $active_status;
-            $tempRow['mail_status'] = $mail_status;
-            $tempRow['date_added'] = date('d-m-Y', strtotime($row['date_added']));
-            $operate = '<a href=' . base_url('admin/orders/edit_orders') . '?edit_id=' . $row['order_id'] . '" class="btn action-btn btn-primary btn-xs mr-1 ml-1 mb-1" title="View" ><i class="fa fa-eye"></i></a>';
-
-            if ($this->ion_auth->is_delivery_boy()) {
-                $operate = '<a href=' . base_url('delivery_boy/orders/edit_orders') . '?edit_id=' . $row['order_id'] . ' class="btn action-btn btn-primary btn-xs mr-1 mb-1 ml-1" title="View"><i class="fa fa-eye"></i></a>';
-            } else if ($this->ion_auth->is_seller()) {
-                $operate = '<a href=' . base_url('seller/orders/edit_orders') . '?edit_id=' . $row['order_id'] . ' class="btn action-btn btn-primary btn-xs mr-1 ml-1 mb-1" title="View"><i class="fa fa-eye"></i></a>';
-                $operate .= '<a href="' . base_url() . 'seller/invoice?edit_id=' . $row['order_id'] . '" class="btn btn-info action-btn btn-xs ml-1 mb-1" title="Invoice" ><i class="fa fa-file"></i></a>';
-                if ($row['type'] != 'digital_product') {
-
-                    $operate .= ' <a href="javascript:void(0)" class="edit_order_tracking btn btn-success btn-xs action-btn ml-1  mb-1" title="Order Tracking" data-order_id="' . $row['order_id'] . '" data-order_item_id="' . $row['order_item_id'] . '" data-seller_id="' . $row['seller_id'] . '" data-courier_agency="' . $row['courier_agency'] . '"  data-tracking_id="' . $row['tracking_id'] . '" data-url="' . $row['url'] . '" data-target="#transaction_modal" data-toggle="modal"><i class="fa fa-map-marker-alt"></i></a>';
-                }
-                if ($row['download_allowed'] == 0 && $row['type'] == 'digital_product') {
-                    $operate .= '<a href="javascript:void(0)" class="sendMailBtn btn action-btn btn-primary btn-xs mr-1 mb-1 ml-1" data-target="#ManageOrderSendMailModal" data-toggle="modal" title="Edit" data-email="' . $row['email']  . '" data-id="' . $row['order_item_id']  . '" data-url="seller/orders/"><i class="fas fa-paper-plane"></i></a>';
-                    $operate .= '<a href="https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=' . $row['email'] . '" class="btn action-btn btn-danger btn-xs ml-1 mr-1 mb-1" target="_blank"><i class="fab fa-google"></i></a>';
-                    $operate .= ' <a href="javascript:void(0)" class="edit_digital_order_mails action-btn btn btn-warning btn-xs ml-1 mb-1" title="Digital Order Mails" data-order_item_id="' . $row['order_item_id'] . '"  data-target="#digital-order-mails" data-toggle="modal"><i class="far fa-envelope-open"></i></a>';
-                }
-            } else if ($this->ion_auth->is_admin()) {
-                $operate = '<a href=' . base_url('admin/orders/edit_orders') . '?edit_id=' . $row['order_id'] . ' class="btn action-btn btn-primary btn-xs mr-1 mb-1" title="View" ><i class="fa fa-eye"></i></a>';
-                $operate .= '<a href="javascript:void(0)" class="delete-order-items btn action-btn btn-danger btn-xs mr-1 mb-1" data-id=' . $row['order_item_id'] . ' title="Delete" ><i class="fa fa-trash"></i></a>';
-                $operate .= '<a href="' . base_url() . 'admin/invoice?edit_id=' . $row['order_id'] . '" class="btn action-btn btn-info btn-xs mr-1 mb-1" title="Invoice" ><i class="fa fa-file"></i></a>';
-                if ($row['type'] != 'digital_product') {
-                    $operate .= ' <a href="javascript:void(0)" class="edit_order_tracking btn btn-success action-btn btn-xs mr-1 mb-1" title="Order Tracking" data-order_id="' . $row['order_id'] . '" data-order_item_id="' . $row['order_item_id'] . '" data-seller_id="' . $row['seller_id'] . '" data-courier_agency="' . $row['courier_agency'] . '"  data-tracking_id="' . $row['tracking_id'] . '" data-url="' . $row['url'] . '" data-target="#transaction_modal" data-toggle="modal"><i class="fa fa-map-marker-alt"></i></a>';
-                }
-                if ($row['download_allowed'] == 0 && $row['type'] == 'digital_product') {
-                    // $operate .= '<a href="javascript:void(0)" class="edit_btn btn action-btn btn-primary btn-xs mr-1 mb-1" title="Edit" data-id="' . $row['order_item_id']  . '" data-url="admin/orders/"><i class="fas fa-paper-plane"></i></a>';
-                    $operate .= '<a href="javascript:void(0)" class="btn sendMailBtn action-btn btn-primary btn-xs mr-1 mb-1" data-target="#ManageOrderSendMailModal" data-toggle="modal" title="Edit" data-email="' . $row['email']  . '" data-id="' . $row['order_item_id']  . '" data-url="admin/orders/"><i class="fas fa-paper-plane"></i></a>';
-                    $operate .= '<a href="https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=' . $row['email'] . '" class="btn action-btn btn-danger btn-xs mb-1" target="_blank"><i class="fab fa-google"></i></a>';
-                    $operate .= ' <a href="javascript:void(0)" class="edit_digital_order_mails btn btn-warning action-btn btn-xs mr-1 mb-1" title="Digital Order Mails" data-order_item_id="' . $row['order_item_id'] . '"  data-target="#digital-order-mails" data-toggle="modal"><i class="far fa-envelope-open"></i></a>';
-                }
-            } else {
-                $operate = "";
-            }
-            $tempRow['operate'] = $operate;
-            $rows[] = $tempRow;
-            $count++;
-        }
-        if (!empty($user_details)) {
-            $tempRow['id'] = '-';
-            $tempRow['order_id'] = '-';
-            $tempRow['order_item_id'] = '-';
-            $tempRow['user_id'] = '-';
-            $tempRow['seller_id'] = '-';
-            $tempRow['username'] = '-';
-            $tempRow['seller_name'] = '-';
-            $tempRow['is_credited'] = '-';
-            $tempRow['mobile'] = '-';
-            $tempRow['delivery_charge'] = '-';
-            $tempRow['product_name'] = '-';
-            $tempRow['sub_total'] = '<span class="badge badge-danger">' . $currency_symbol . ' ' . $final_tota_amount . '</span>';
-            $tempRow['discount'] = '-';
-            $tempRow['quantity'] = '-';
-            $tempRow['delivery_boy'] = '-';
-            $tempRow['delivery_time'] = '-';
-            $tempRow['status'] = '-';
-            $tempRow['active_status'] = '-';
-            $tempRow['transaction_status'] = '-';
-            $tempRow['date_added'] = '-';
-            $tempRow['operate'] = '-';
-            $tempRow['mail_status'] = '-';
-            array_push($rows, $tempRow);
-        }
-        $bulkData['rows'] = $rows;
-        print_r(json_encode($bulkData));
-    }
-    public function get_seller_order_items_list($delivery_boy_id = NULL, $offset = 0, $limit = 10, $sort = " oi.id ", $order = 'ASC', $seller_id = NULL)
-    {
-        $customer_privacy = false;
-        if (isset($seller_id) && $seller_id != "") {
-            $customer_privacy = get_seller_permission($seller_id, 'customer_privacy');
-        }
-
-        if (isset($_GET['offset'])) {
-            $offset = $_GET['offset'];
-        }
-        if (isset($_GET['limit'])) {
-            $limit = $_GET['limit'];
-        }
-
-        if (isset($_GET['search']) and $_GET['search'] != '') {
-            $search = $_GET['search'];
-
-            $filters = [
-                'un.username' => $search,
-                'u.username' => $search,
-                'us.username' => $search,
-                'un.email' => $search,
-                'oi.id' => $search,
-                'o.mobile' => $search,
-                'o.address' => $search,
-                'o.payment_method' => $search,
-                'oi.sub_total' => $search,
-                'o.delivery_time' => $search,
-                'oi.active_status' => $search,
-                'oi.date_added' => $search
-            ];
-        }
-
-        $count_res = $this->db->select(' COUNT(o.id) as `total` ')
-            ->join(' `users` u', 'u.id= oi.delivery_boy_id', 'left')
-            ->join('users us ', ' us.id = oi.seller_id', 'left')
-            ->join(' `orders` o', 'o.id= oi.order_id')
-            ->join('product_variants v ', ' oi.product_variant_id = v.id', 'left')
-            ->join('products p ', ' p.id = v.product_id ', 'left')
-            ->join('users un ', ' un.id = o.user_id', 'left');
-
         if (!empty($_GET['start_date']) && !empty($_GET['end_date'])) {
 
             $count_res->where(" DATE(oi.date_added) >= DATE('" . $_GET['start_date'] . "') ");
@@ -1512,9 +1063,6 @@ class Order_model extends CI_Model
 
 
         $user_details = $search_res->order_by($sort, "DESC")->limit($limit, $offset)->get('order_items oi')->result_array();
-        // echo $this ->db-> last_query();
-        // echo $this->db->last_query();
-
 
         $bulkData = array();
         $bulkData['total'] = $total;
@@ -1572,20 +1120,7 @@ class Order_model extends CI_Model
             } else {
                 $mail_status = '';
             }
-
-            // if($row['transaction_status'] == 0 || $row['transaction_status'] == 'Pending'){
-
-            // }
-            if ($row['transaction_status'] == 0 || $row['transaction_status'] == 'awaiting') {
-
-                $transaction_status = '<label class="badge badge-primary">Awaiting</label>';
-            }
-            if ($row['transaction_status'] == 1 || $row['transaction_status'] == 'success') {
-                $transaction_status = '<label class="badge badge-success">Success</label>';
-            } else {
-                $transaction_status = '<label class="badge badge-warning">' . $row['transaction_status'] . '</label>';
-            }
-
+            $transaction_status = '<label class="badge badge-primary">' . $row['transaction_status'] . '</label>';
             $status = $temp;
             $tempRow['id'] = $count;
             $tempRow['order_id'] = $row['order_id'];
@@ -2257,8 +1792,7 @@ class Order_model extends CI_Model
             $tempRow['courier_agency'] = $row['courier_agency'];
             $tempRow['tracking_id'] = $row['tracking_id'];
             $tempRow['url'] = $row['url'];
-            // $tempRow['date'] = $row['date_created'];
-            $tempRow['date'] = date('d-m-Y', strtotime($row['date_created']));
+            $tempRow['date'] = $row['date_created'];
             $tempRow['operate'] = $operate;
 
             $rows[] = $tempRow;
@@ -2470,7 +2004,7 @@ class Order_model extends CI_Model
             $tempRow['manifest_url'] = $row['manifest_url'];
             $tempRow['label_url'] = $row['label_url'];
             $tempRow['invoice_url'] = $row['invoice_url'];
-            $tempRow['date'] =  date('d-m-Y', strtotime($row['created_at']));
+            $tempRow['date'] = $row['date_created'];
             $rows[] = $tempRow;
         }
         $bulkData['rows'] = $rows;
@@ -2517,7 +2051,7 @@ class Order_model extends CI_Model
             $tempRow['courier_agency'] = $row['courier_agency'];
             $tempRow['tracking_id'] = $row['tracking_id'];
             $tempRow['url'] = $row['url'];
-            $tempRow['date'] =  date('d-m-Y', strtotime($row['created_at']));
+            $tempRow['date'] = $row['date_created'];
             $rows[] = $tempRow;
         }
         $bulkData['data'] = $rows;
@@ -2529,8 +2063,7 @@ class Order_model extends CI_Model
     {
         $order_item_details = fetch_details('orders', ['id' => $id], 'id');
 
-        $order_details =  fetch_orders($order_item_details[0]['id'], null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0);
-
+        $order_details =  fetch_orders($order_item_details[0]['id']);
         if (!empty($order_details) && !empty($order_item_details)) {
 
             $order_details = $order_details['order_data'];
@@ -2547,6 +2080,7 @@ class Order_model extends CI_Model
             //         $status = 'return_request_pending';
             //     }
             // }
+
             for ($i = 0; $i < count($order_items_details); $i++) {
                 if ($this->update_order(['status' => $status], ['id' => $order_items_details[$i]['id']], true, 'order_items')) {
                     $this->order_model->update_order(['active_status' => $status], ['id' => $order_items_details[$i]['id']], false, 'order_items');

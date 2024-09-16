@@ -26,13 +26,13 @@
                             <div class="card-body">
                                 <input type="hidden" id='user_id' name='user_id'>
                                 <div class="form-group row">
-                                    <label for="customer" class="col-sm-4 col-form-label">Customer<span class='text-danger text-sm'>*</span></label>
+                                    <label for="customer" class="col-sm-4 col-form-label">Customer</label>
                                     <div class="col-sm-8">
                                         <input type="text" class="form-control" id="customer_dtls" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="type" class="col-sm-4 col-form-label">Select Type<span class='text-danger text-sm'>*</span></label>
+                                    <label for="type" class="col-sm-4 col-form-label">Select Type</label>
                                     <div class="col-sm-8">
                                         <select name="type" class='form-control'>
                                             <option value="credit">Credit </option>
@@ -41,13 +41,13 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="amount" class="col-sm-4 col-form-label">Amount<span class='text-danger text-sm'>*</span></label>
+                                    <label for="amount" class="col-sm-4 col-form-label">Amount</label>
                                     <div class="col-sm-8">
                                         <input type="number" class="form-control" id="amount" placeholder="Enter Amount" name="amount">
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="message" class="col-sm-4 col-form-label">Message<span class='text-danger text-sm'>*</span></label>
+                                    <label for="message" class="col-sm-4 col-form-label">Message</label>
                                     <div class="col-sm-8">
                                         <textarea class="form-control" id="message" placeholder="Enter Message Here" name="message"></textarea>
                                     </div>
@@ -58,8 +58,8 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-center">
-                                <!-- <div class="form-group" id="error_box">
-                                </div> -->
+                                <div class="form-group" id="error_box">
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -71,7 +71,7 @@
                         <div class="card-header bg-white border-0 h5">Select User</div>
                         <div class="card-innr">
                             <div class="gaps-1-5x"></div>
-                            <table class='table-striped' id='customers' data-toggle="table" data-url="<?= base_url('admin/customer/view_customer') ?>" data-side-pagination="server" data-click-to-select="true" data-pagination="true" data-id-field="id" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="#toolbar" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="queryParams">
+                            <table class='table-striped' id='customers' data-toggle="table" data-url="<?= base_url('admin/customer/view_customer') ?>" data-side-pagination="server" data-click-to-select="true" data-pagination="true" data-id-field="id" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="#toolbar" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="queryParams">
                                 <thead>
                                     <tr>
                                         <th data-field="state" data-radio='true'></th>

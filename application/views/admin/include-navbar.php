@@ -19,7 +19,7 @@
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
-        
+
         <!-- google translate  -->
         <div id="google_translate_element"></div>
 
@@ -37,12 +37,18 @@
         $count_noti = fetch_details('system_notification',  ["read_by" => 0],  'count(id) as total');
         ?>
 
-        <div id="refresh_notification"> </div>
+        <div id="refresh_notification">
+            <a href="javascript:void(0);" id="notification_count" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg">
+                <i class="fas fa-bell fa-2x"></i>
+                <span class="badge badge-danger navbar-badge order_notification mt-1"><?= $count_noti[0]['total'] ?></span>
+            </a>
+        </div>
         <div id="list" class="dropdown-menu dropdown-menu-lg dropdown-menu-right"></div>
+
         <!-- end send admin notification  -->
         <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
-                <i class="fa fa-2x fa-user"></i>
+                <i class="fa fa-user fa-2x"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                 <?php if ($this->ion_auth->is_admin()) { ?>

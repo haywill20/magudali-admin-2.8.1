@@ -18,7 +18,6 @@ class Language_model extends CI_Model
         $arr = array(
             'language' => $data['language'],
             'code' => $data['code'],
-            'native_language' => $data['native_language'],
             'is_rtl' => (isset($data['is_rtl']) && $data['is_rtl'] == 1) ? 1 : 0,
         );
         return $this->db->insert('languages', $arr);
@@ -29,20 +28,6 @@ class Language_model extends CI_Model
         $arr = array(
             'is_rtl' => (isset($data['is_rtl']) && $data['is_rtl'] == 1) ? 1 : 0,
         );
-        return $this->db->where('id', $data['language_id'])->update('languages', $arr);
-    }
-
-    public function is_default_for_web($data)
-    {
-        // Initialize the array to update the 'is_default' field
-        $arr = array(
-            'is_default' => (isset($data['is_default']) && $data['is_default'] == 1) ? 1 : 0,
-        );
-    
-        // Set all 'is_default' fields to 0
-        $this->db->where('is_default', '1')->set(['is_default' => '0'])->update('languages');
-    
-        // Update the specific language with the new 'is_default' value
         return $this->db->where('id', $data['language_id'])->update('languages', $arr);
     }
 

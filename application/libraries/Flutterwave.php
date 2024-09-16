@@ -7,7 +7,7 @@
     3. create_payment($data)
 
 */
-#[\AllowDynamicProperties]
+
 class Flutterwave
 {
     private $secret_key, $public_key, $curl;

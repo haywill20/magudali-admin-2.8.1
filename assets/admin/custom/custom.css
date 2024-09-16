@@ -25,38 +25,6 @@
     height: 100% !important;
 }
 
-@media (min-width: 375px) {
-    #seller_mobile, #delivery_boy_mobile{
-        width: 142%;
-    }
-}
-@media (min-width: 375px) {
-    #seller_mobile, #delivery_boy_mobile{
-        width: 100%;
-    }
-}
-@media (min-width: 425px) {
-    #seller_mobile, #delivery_boy_mobile{
-        width: 107%;
-    }
-    #delivery_boy_mobile{
-        width: 114%;
-    }
-}
-@media (min-width: 768px) {
-    #seller_mobile{
-        width: 143%;
-    }
-    #delivery_boy_mobile{
-        width: 152%;
-    }
-}
-@media (min-width: 1000px) {
-    #delivery_boy_mobile{
-        width: 159%;
-    }
-}
-
 .login-page-bg {
     max-height: 100%;
     max-width: 100%;
@@ -92,18 +60,11 @@
     right: 25px;
 }
 
-@media only screen and (min-width: 630px) {
+@media only screen and (min-width: 430px) {
     .login-box {
         position: absolute;
         width: 520px;
         right: 120px;
-    }
-}
-@media only screen and (min-width: 430px) {
-    .login-box {
-        position: absolute;
-        /*width: 520px;*/
-        /*right: 120px;*/
     }
 }
 
@@ -436,7 +397,7 @@ body {
 .image-upload-div {
     align-content: center;
     display: flex;
-    height: 100%;
+    height: 200px;
     justify-content: center;
     overflow: hidden;
     width: 100% !important;
@@ -445,10 +406,10 @@ body {
 .image-upload-div img {
     align-content: center;
     display: flex;
-    /* height: 200px; */
+    height: 200px;
     justify-content: center;
     overflow: hidden;
-    /* width: 100% !important; */
+    width: 100% !important;
 }
 
 .product-image {
@@ -1894,14 +1855,4 @@ input.clr-color:focus {
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-
-.firebase_config .sms_gateway > p{
-    color: red;
-}
-
-.uploaded_image_here{
-    height: 120px;
-    width: 120px;
 }

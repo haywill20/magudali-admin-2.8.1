@@ -1,11 +1,6 @@
 <body class="hold-transition login-page">
-<?php 
-$auth_settings = get_settings('authentication_settings', true);
-?> 
-<div class="login-box">
+  <div class="login-box">
     <!-- /.login-logo -->
-    <input type="hidden" id="auth_settings" name="auth_settings" value='<?= isset($auth_settings['authentication_method']) ? $auth_settings['authentication_method'] : ''; ?>'>
-
     <div class="card">
       <div class="card-body login-card-body">
         <div class="login-logo">
@@ -14,9 +9,6 @@ $auth_settings = get_settings('authentication_settings', true);
         <div class="text-center h5"><?= !empty($this->lang->line('forgot_password')) ? $this->lang->line('forgot_password') : 'Forgot Password' ?></div>
         <hr class="mt-0">
         <form id="send_forgot_password_otp_form" method="POST" action="#">
-          <input type="hidden" name="forget_password_val" value="1" id="forget_password_val">
-        <!-- <input type="hidden" name="forget_password_val" value="1" id="forget_password_val"> -->
-
           <div class="col-md-12">
             <input type="text" class="form-control" name="mobile_number" id="forgot_password_number" placeholder="Mobile number" value="">
           </div>
@@ -24,7 +16,7 @@ $auth_settings = get_settings('authentication_settings', true);
             <div id="recaptcha-container-2"></div>
           </div>
           <footer>
-            <button type="submit" id="forgot_password_send_otp_btn" class="submit_btn  btn btn-primary btn-block forgot-send-otp-btn"><?= !empty($this->lang->line('send_otp')) ? $this->lang->line('send_otp') : 'Send OTP' ?></button>
+            <button type="submit" id="forgot_password_send_otp_btn" class="submit_btn  btn btn-primary btn-block"><?= !empty($this->lang->line('send_otp')) ? $this->lang->line('send_otp') : 'Send OTP' ?></button>
           </footer>
           <br>
           <p class="mt-3 mb-1">

@@ -11,11 +11,12 @@ class Cron_job extends CI_Controller
         $this->load->database();
         $this->load->library(['ion_auth', 'form_validation', 'upload']);
         $this->load->helper(['url', 'language', 'file']);
-        $this->load->model(['Seller_model', 'Promo_code_model', 'order_model', 'Cart_model']);
+        $this->load->model(['Seller_model', 'Promo_code_model']);
     }
 
     public function settle_seller_commission()
     {
+       
         $this->form_validation->set_data($this->input->get());
         $this->form_validation->set_rules('is_date', 'is_date', 'trim|required|xss_clean');
         if (!$this->form_validation->run()) {
@@ -24,8 +25,7 @@ class Cron_job extends CI_Controller
             $this->response['data'] = array();
             print_r(json_encode($this->response));
         } else {
-            $is_date = (isset($_GET['is_date']) && is_numeric($_GET['is_date']) && !empty(trim($_GET['is_date']))) ? $this->input->get('is_date', true) : false;
-
+            $is_date = (isset($_GET['is_date']) && is_numeric($_GET['is_date']) && !empty(trim($_GET['is_date']))) ? $this->input->get('is_date') : false;
             return $this->Seller_model->settle_seller_commission($is_date);
         }
     }
@@ -80,24 +80,5 @@ class Cron_job extends CI_Controller
             $this->response['error'] = true;
             $this->response['message'] = $this->upload->display_errors();
         }
-    }
-
-    public function draft_order_settel()
-    {
-        return $this->order_model->delete_draft_orders();
-    }
-
-    public function remaining_cart()
-    {
-
-        return $this->Cart_model->cart_item_remainder();
-        // $old_cart_items = $this->Cart_model->cart_item_remainder();
-
-        // foreach ($old_cart_items as $item) {
-        //     echo "<pre>";
-        //     print_r($item);
-        //     // return $item;
-        //     // $this->send_notification($item['user_id'], $item['product_varient_id']);
-        // }
     }
 }

@@ -58,13 +58,6 @@ class Area extends CI_Controller
         }
     }
 
-    public function get_cities()
-    {
-        $search = $this->input->get('search');
-        $response = $this->Area_model->get_cities_list($search);
-        echo json_encode($response);
-    }
-
     public function manage_cities()
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_seller() && ($this->ion_auth->seller_status() == 1 || $this->ion_auth->seller_status() == 0)) {

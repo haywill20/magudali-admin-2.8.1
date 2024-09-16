@@ -119,8 +119,6 @@ class Rating_model extends CI_Model
         }
         $t->db->where($where);
         $product_rating = $t->db->join('users u', 'u.id = pr.user_id', 'left')->get('product_rating pr')->result_array();
-        // echo $this->db->last_query();
-        // print_r($product_rating);
         if (!empty($product_rating)) {
             $total_rating = $t->db->select(' count(pr.id) as no_of_rating ')->join('users u', 'u.id=pr.user_id')->where('product_id', $product_id)->get('product_rating pr')->result_array();
             $total_images = $t->db->select(' ROUND (((LENGTH(`images`) - LENGTH(REPLACE(`images`, ",", ""))) / LENGTH(","))+1) as total ')->where('product_id', $product_id)->get('product_rating pr')->result_array();

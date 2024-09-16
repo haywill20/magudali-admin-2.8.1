@@ -8,14 +8,6 @@ var mode = (is_rtl == 1) ? "right" : "left";
 const is_loggedin = $('#is_loggedin').val();
 
 var auth_settings = $('#auth_settings').val();
-var allow_items_in_cart = $('#allow_items_in_cart').val();;
-var decimal_point = $('#decimal_point').val();
-var low_stock_limit = $('#low_stock_limit').val();
-
-// console.log(auth_settings);
-// console.log(allow_items_in_cart);
-// console.log(decimal_point);
-
 // console.log(auth_settings);
 
 //form-submit-event
@@ -199,7 +191,7 @@ if (auth_settings == "sms") {
                 console.log(e);
                 csrfName = e.csrfName,
                     csrfHash = e.csrfHash,
-                    // resetRecaptcha(),
+                    resetRecaptcha(),
                     $("#send-otp-form").hide(),
                     $("#otp_div").show(),
                     $("#verify-otp-form").removeClass("d-none");
@@ -259,70 +251,22 @@ if (auth_settings == "sms") {
         // })
     })
 
-    $(document).on("click", ".forgot-send-otp-btn", function (e) {
-        e.preventDefault();
-        var forgot_password_number = $('#forgot_password_number').val();
-        var forget_password_val = $('#forget_password_val').val();
-        console.log("in sms");
-        console.log(forgot_password_number);
-        console.log(forget_password_val);
-        $.ajax({
-            type: "POST",
-            async: !1,
-            url: base_url + "auth/verify_user",
-            data: {
-                mobile: forgot_password_number,
-                forget_password_val: forget_password_val,
-                [csrfName]: csrfHash
-            },
-            dataType: "json",
-            success: function (e) {
-                console.log(e);
-                csrfName = e.csrfName,
-                    csrfHash = e.csrfHash,
-                    $('#verify_forgot_password_otp_form').removeClass('d-none');
-                $('#send_forgot_password_otp_form').hide();
-                // $("#send-otp-form").hide(),
-                // $("#otp_div").show(),
-                $("#verify-otp-form").removeClass("d-none");
-            }
-        })
-    });
+    /**
 
-    $(document).on('submit', '#verify_forgot_password_otp_form', function (e) {
-        e.preventDefault();
-        var reset_pass_btn_html = $('#reset_password_submit_btn').html();
-        var code = $('#forgot_password_otp').val();
-        var formdata = new FormData(this);
-        var url = base_url + "admin/home/reset-password";
-        $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
-        formdata.append(csrfName, csrfHash);
-        formdata.append('mobile', $('#forgot_password_number').val());
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: formdata,
-            processData: false,
-            contentType: false,
-            cache: false,
-            dataType: 'json',
-            beforeSend: function () {
-                $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
-            },
-            success: function (result) {
-                csrfName = result.csrfName;
-                csrfHash = result.csrfHash;
-                $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
-                $("#set_password_error_box").html(result.message).show();
-                if (result.error == false) {
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 2000)
-                }
-            }
+ * This resets the recaptcha widget.
+
+ */
+
+    function resetRecaptcha() {
+        return window.recaptchaVerifier.render().then(function (widgetId) {
+            grecaptcha.reset(widgetId);
         });
-    });
 
+    }
+    function verifyCaptcha() {
+        const userResponse = grecaptcha.getResponse();
+        return userResponse;
+    }
 }
 
 $(document).on('submit', '.form-submit-event', function (e) {
@@ -374,53 +318,13 @@ $(document).on('submit', '.form-submit-event', function (e) {
 });
 
 
-$(document).on("click", "#logout_btn", function (e) {
-    e.preventDefault()
-    // console.log('here');
-    // returnl
-    Swal.fire({
-        title: 'Are You Sure!',
-        text: "You won't to logout",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes!',
-        showLoaderOnConfirm: true,
-        preConfirm: function () {
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    type: 'POST',
-                    url: base_url + 'login/logout',
-                    data: {
-                        [csrfName]: csrfHash
-                    },
-                    dataType: 'json',
-                    success: function (result) {
-                        csrfName = result['csrfName'];
-                        csrfHash = result['csrfHash'];
-                        Swal.fire('Success', 'Logout successfully !', 'success');
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 600);
-
-                    }
-                });
-            });
-        },
-        allowOutsideClick: false
-    }).then((result) => {
-        if (result.dismiss === Swal.DismissReason.cancel) {
-            Swal.fire('Cancelled!', 'You are logged in ', 'error');
-        }
-    });
-}),
 
 
-    function validateNumberInput(input) {
-        // Remove any non-numeric characters from the input value
-        input.value = input.value.replace(/\D/g, '');
-    }
+
+function validateNumberInput(input) {
+    // Remove any non-numeric characters from the input value
+    input.value = input.value.replace(/\D/g, '');
+}
 
 $(document).on('click', '.password-toggle', function (e) {
     e.preventDefault();
@@ -693,13 +597,12 @@ $(document).on('click', '#add_to_favorite_btn', function (e) {
     });
 });
 
-$('#add-address-modal').on('shown.bs.modal', function () {
-    // $('#myInput').trigger('focus')
-    $('.address-modal').iziModal('close');
-})
-
 $(function () {
     /* Instantiating iziModal */
+    $(".auth-modal").iziModal({
+        overlayClose: false,
+        overlayColor: 'rgba(0, 0, 0, 0.6)',
+    });
 
     if ($('#user-review-images').length) {
         var review_title = "";
@@ -873,21 +776,18 @@ $(function () {
             $('#modal-product-tags').html('');
 
             $.getJSON(base_url + 'products/get-details/' + modal.$element.data('dataProductId'), function (data) {
-                // console.log(data);
+                console.log(data);
                 var total_images = 0;
 
                 $('#modal-add-to-cart-button').attr('data-product-id', data.id);
-                $('#modal-buy-now-button').attr('data-product-id', data.id);
 
                 if (data.type == "simple_product" || data.type == "digital_product") {
 
                     $('#modal-add-to-cart-button').attr('data-product-variant-id', data.variants[0].id);
-                    $('#modal-buy-now-button').attr('data-product-variant-id', data.variants[0].id);
 
                 } else {
 
                     $('#modal-add-to-cart-button').attr('data-product-variant-id', '');
-                    $('#modal-buy-now-button').attr('data-product-variant-id', '');
 
                 }
 
@@ -910,11 +810,6 @@ $(function () {
                         "data-min": data.minimum_order_quantity // values (or variables) here
 
                     });
-                    $("#modal-buy-now-button").attr({
-
-                        "data-min": data.minimum_order_quantity // values (or variables) here
-
-                    });
 
                 } else {
 
@@ -931,11 +826,6 @@ $(function () {
                     });
 
                     $("#modal-add-to-cart-button").attr({
-
-                        "data-min": 1 // values (or variables) here
-
-                    });
-                    $("#modal-buy-now-button").attr({
 
                         "data-min": 1 // values (or variables) here
 
@@ -972,11 +862,6 @@ $(function () {
                         "data-step": data.quantity_step_size // values (or variables) here
 
                     })
-                    $("#modal-buy-now-button").attr({
-
-                        "data-step": data.quantity_step_size // values (or variables) here
-
-                    })
 
 
 
@@ -1007,11 +892,6 @@ $(function () {
                         "data-step": 1 // values (or variables) here
 
                     })
-                    $("#modal-buy-now-button").attr({
-
-                        "data-step": 1 // values (or variables) here
-
-                    })
 
 
 
@@ -1036,11 +916,6 @@ $(function () {
                         "data-max": data.total_allowed_quantity // values (or variables) here
 
                     })
-                    $("#modal-buy-now-button").attr({
-
-                        "data-max": data.total_allowed_quantity // values (or variables) here
-
-                    })
 
                 } else {
 
@@ -1057,11 +932,6 @@ $(function () {
                     });
 
                     $("#modal-add-to-cart-button").attr({
-
-                        "data-max": 1 // values (or variables) here
-
-                    })
-                    $("#modal-buy-now-button").attr({
 
                         "data-max": 1 // values (or variables) here
 
@@ -1083,14 +953,6 @@ $(function () {
 
                 $('#modal-product-short-description').text(data.short_description);
 
-                if (data.type == 'simple_product') {
-                    var product_stock = data.stock;
-                } else {
-                    product_stock = data.total_stock;
-                }
-
-                $('#modal-product-total-stock').attr({ 'data-stock': product_stock });
-
                 $('#modal-product-rating').rating('update', data.rating);
 
                 if ((data.variants[0].special_price < data.variants[0].price) && (data.variants[0].special_price != 0)) {
@@ -1102,7 +964,7 @@ $(function () {
                 // var price = data.variants[0].price
                 console.log(price);
 
-                $('#modal-product-price').html(currency + " " + price);
+                $('#modal-product-price').html(price);
 
                 //Quick View Product Modal Gallery Swiper
 
@@ -1359,115 +1221,59 @@ $(function () {
                 var err_msg = (data.zipcode != "" && typeof data.zipcode !== 'undefined') ? '<b class="text-' + className + '">Product is ' + is_not + ' delivarable on &quot; ' + data.zipcode + ' &quot; </b>' : "";
 
 
-                if (data.check_deliverability.city_wise_deliverability == 1) {
-                    if (data.type != "digital_product") {
 
-                        variant_attributes += '<form class="mt-2 validate_city_quick_view "   method="post" >' +
+                if (data.type != "digital_product") {
 
-                            '<div class="d-flex">' +
+                    variant_attributes += '<form class="mt-2 validate_zipcode_quick_view "   method="post" >' +
 
-                            '<div class=" col-md-6 pl-0">' +
+                        '<div class="d-flex">' +
 
-                            '<input type="hidden" name="product_id" value="' + data.id + '">' +
+                        '<div class=" col-md-6 pl-0">' +
 
-                            '<input type="hidden" name="' + csrfName + '" value="' + csrfHash + '">' +
+                        '<input type="hidden" name="product_id" value="' + data.id + '">' +
 
-                            '<input type="text" class="form-control" id="city" placeholder="City" name="city" required value="">' +
+                        '<input type="hidden" name="' + csrfName + '" value="' + csrfHash + '">' +
 
-                            '</div>' +
+                        '<input type="text" class="form-control" id="zipcode" placeholder="Zipcode" name="zipcode" required value="' + data.zipcode + '">' +
 
-                            '<button type="submit" class="button button-primary-outline m-0 check-availability" data-product_id="' + data.id + '"  data-city=""  id="validate_city">Check Availability</button>' +
+                        '</div>' +
 
-                            '</div>' +
+                        '<button type="submit" class="button button-primary-outline m-0 check-availability" data-product_id="' + data.id + '"  data-zipcode="' + data.zipcode + '"  id="validate_zipcode">Check Availability</button>' +
 
-                            '<div class="mt-2" id="error_box1">' +
+                        '</div>' +
 
-                            err_msg +
+                        '<div class="mt-2" id="error_box1">' +
 
-                            ' </div>' +
+                        err_msg +
 
-                            ' </form>';
+                        ' </div>' +
 
-                    } else {
+                        ' </form>';
 
-                        variant_attributes += '<form class="mt-2 validate_city_quick_view "   method="post" >' +
+                } else {
 
-                            '<div class="d-flex">' +
+                    variant_attributes += '<form class="mt-2 validate_zipcode_quick_view "   method="post" >' +
 
-                            '<div class=" col-md-6 pl-0">' +
+                        '<div class="d-flex">' +
 
-                            '<input type="hidden" name="product_id" value="' + data.id + '">' +
+                        '<div class=" col-md-6 pl-0">' +
 
-                            '<input type="hidden" name="' + csrfName + '" value="' + csrfHash + '">' +
+                        '<input type="hidden" name="product_id" value="' + data.id + '">' +
 
-                            '</div>' +
+                        '<input type="hidden" name="' + csrfName + '" value="' + csrfHash + '">' +
 
-                            '</div>' +
+                        '</div>' +
 
-                            '<div class="mt-2" id="error_box1">' +
+                        '</div>' +
 
-                            err_msg +
+                        '<div class="mt-2" id="error_box1">' +
 
-                            ' </div>' +
+                        err_msg +
 
-                            ' </form>';
+                        ' </div>' +
 
-                    }
-                }
-                if (data.check_deliverability.pincode_wise_deliverability == 1) {
-                    if (data.type != "digital_product") {
+                        ' </form>';
 
-                        variant_attributes += '<form class="mt-2 validate_zipcode_quick_view "   method="post" >' +
-
-                            '<div class="d-flex">' +
-
-                            '<div class=" col-md-6 pl-0">' +
-
-                            '<input type="hidden" name="product_id" value="' + data.id + '">' +
-
-                            '<input type="hidden" name="' + csrfName + '" value="' + csrfHash + '">' +
-
-                            '<input type="text" class="form-control" id="zipcode" placeholder="Zipcode" name="zipcode" required value="' + data.zipcode + '">' +
-
-                            '</div>' +
-
-                            '<button type="submit" class="button button-primary-outline m-0 check-availability" data-product_id="' + data.id + '"  data-zipcode="' + data.zipcode + '"  id="validate_zipcode">Check Availability</button>' +
-
-                            '</div>' +
-
-                            '<div class="mt-2" id="error_box1">' +
-
-                            err_msg +
-
-                            ' </div>' +
-
-                            ' </form>';
-
-                    } else {
-
-                        variant_attributes += '<form class="mt-2 validate_zipcode_quick_view "   method="post" >' +
-
-                            '<div class="d-flex">' +
-
-                            '<div class=" col-md-6 pl-0">' +
-
-                            '<input type="hidden" name="product_id" value="' + data.id + '">' +
-
-                            '<input type="hidden" name="' + csrfName + '" value="' + csrfHash + '">' +
-
-                            '</div>' +
-
-                            '</div>' +
-
-                            '<div class="mt-2" id="error_box1">' +
-
-                            err_msg +
-
-                            ' </div>' +
-
-                            ' </form>';
-
-                    }
                 }
 
                 $('#modal-product-variant-attributes').html(variant_attributes);
@@ -1475,12 +1281,10 @@ $(function () {
                 if (data.is_deliverable == false && data.zipcode != "" && typeof data.zipcode !== 'undefined') {
 
                     $('#modal-add-to-cart-button').attr('disabled', 'true');
-                    $('#modal-buy-now-button').attr('disabled', 'true');
 
                 } else {
 
                     $('#modal-add-to-cart-button').removeAttr('disabled');
-                    $('#modal-buy-now-button').removeAttr('disabled');
 
                 }
 
@@ -1534,12 +1338,7 @@ $(function () {
 
                 });
 
-                if (data.no_of_ratings >= 1) {
-                    $('#modal-product-no-of-ratings').text(data.no_of_ratings);
-                } else {
-                    $('#modal-product-no-of-ratings').text('No');
-
-                }
+                $('#modal-product-no-of-ratings').text(data.no_of_ratings);
 
                 if (!$.isEmptyObject(data.tags)) {
 
@@ -1680,7 +1479,6 @@ $(function () {
                             $('#modal-product-special-price').text(currency + ' ' + prices[0].price);
 
                             $('#modal-add-to-cart-button').attr('data-product-variant-id', selected_variant_id);
-                            $('#modal-buy-now-button').attr('data-product-variant-id', selected_variant_id);
 
                             $('#modal-product-special-price-div').show();
 
@@ -1693,7 +1491,6 @@ $(function () {
                             $('#modal-product-special-price-div').hide();
 
                             $('#modal-add-to-cart-button').attr('data-product-variant-id', selected_variant_id);
-                            $('#modal-buy-now-button').attr('data-product-variant-id', selected_variant_id);
 
                         }
 
@@ -1742,13 +1539,11 @@ $(function () {
         var max = $(this).attr('data-max');
 
         var step = $(this).attr('data-step');
-        var total_q_stock = $('#modal-product-total-stock').attr("data-stock");
 
         var btn = $(this);
 
         var btn_html = $(this).html();
 
-        console.log(total_q_stock);
 
 
         if (!product_variant_id) {
@@ -1875,164 +1670,48 @@ $(function () {
                 } else {
 
                     if (is_loggedin == 0) {
-                        var cart_item = {
-                            "product_variant_id": product_variant_id.trim(),
-                            "name": title,
-                            "short_description": description,
-                            "stock": total_q_stock,
-                            "qty": qty,
-                            "image": image,
-                            "price": price.trim(),
-                            "min": min,
-                            "step": step
-                        };
+
+                        Toast.fire({
+
+                            icon: 'success',
+
+                            title: "Item added to cart"
+
+                        });
+
+                        var cart_item = { "product_variant_id": product_variant_id.trim(), "name": title, "short_description": description, "qty": qty, "image": image, "price": price.trim(), "min": min, "step": step };
 
                         var cart = localStorage.getItem("cart");
+
+
+
                         cart = (localStorage.getItem("cart") !== null) ? JSON.parse(cart) : null;
-                        if (parseFloat(cart_item.stock) <= parseFloat(low_stock_limit)) {
-                            // console.log('in if done');
-                            Toast.fire({
-                                icon: "error",
-                                title: "Product is out of stock."
-                            });
-                            return;
-                        }
-                        if (cart !== null && cart.length > 0) {
-                            Toast.fire({
-                                icon: 'error',
-                                title: "Maximum " + allow_items_in_cart + " Item(s) Can Be Added Only!"
-                            });
+
+                        if (cart !== null && cart !== undefined) {
+
+                            cart.push(cart_item);
+
                         } else {
-                            Toast.fire({
-                                icon: 'success',
-                                title: "Item added to cart"
-                            });
 
-                            if (cart !== null && cart !== undefined) {
-                                cart.push(cart_item);
-                            } else {
-                                cart = [cart_item];
-                            }
+                            cart = [cart_item];
 
-                            localStorage.setItem("cart", JSON.stringify(cart));
-                            display_cart(cart);
                         }
+
+                        localStorage.setItem("cart", JSON.stringify(cart));
+
+                        display_cart(cart);
+
+                        return;
+
                     }
 
-                }
-
-            }
-
-        })
-
-    });
-
-    $('#modal-buy-now-button').on('click', function (e) {
-
-        e.preventDefault();
-
-        var qty = $("#modal-product-quantity").val();
-
-        var title = $('#modal-product-title').text();
-
-        var description = $('#modal-product-short-description').text();
-
-        var image = $('.product-view-image-container img').attr('src');
-
-        var price = $('#modal-product-price').text().replace(/\D/g, '');
-
-
-
-        $('#quick-view').data('data-product-id', $(this).data('productId'));
-
-        var product_variant_id = $(this).attr('data-product-variant-id');
-
-        var product_type = $(this).attr('data-product-type');
-
-
-
-        var min = $(this).attr('data-min');
-
-        var max = $(this).attr('data-max');
-
-        var step = $(this).attr('data-step');
-
-        var btn = $(this);
-
-        var btn_html = $(this).html();
-
-
-
-        if (!product_variant_id) {
-
-            Toast.fire({
-
-                icon: 'error',
-
-                title: "Please select variant"
-
-            });
-
-            return;
-
-        }
-
-        $.ajax({
-
-            type: 'POST',
-
-            url: base_url + 'cart/manage',
-
-            data: {
-
-                'product_variant_id': product_variant_id,
-
-                'qty': $('#modal-product-quantity').val(),
-
-                'is_saved_for_later': false,
-                'buy_now': 1,
-
-                [csrfName]: csrfHash,
-
-            },
-
-            dataType: 'json',
-
-            beforeSend: function () {
-
-                btn.html('Please Wait').text('Please Wait').attr('disabled', true);
-
-            },
-
-            success: function (result) {
-
-                csrfName = result.csrfName;
-
-                csrfHash = result.csrfHash;
-
-                btn.html(btn_html).attr('disabled', false);
-
-                if (result.error == false) {
                     Toast.fire({
-                        icon: 'success',
+
+                        icon: 'error',
+
                         title: result.message
+
                     });
-                    window.location.href = base_url + "cart";
-
-                } else {
-
-                    if (0 == is_loggedin) {
-                        console.log("not login ");
-                        // Toast.fire({
-                        //     icon: "success",
-                        //     title: "cnnot buy without login"
-                        // });
-                        $('.buy_now').addClass('disabled');
-                    }
-                    Toast.fire({
-                        icon: "error",
-                        title: result.message
-                    })
 
                 }
 
@@ -2077,40 +1756,37 @@ $(function () {
     $(document).on('opening', '.auth-modal', function (e) {
 
         console.log("here in auth modal");
-        if (auth_settings == "firebase") {
 
-            $('#verify-otp-form').addClass('d-none');
-            $(this).removeClass('d-none');
+        $('#verify-otp-form').addClass('d-none');
+        $(this).removeClass('d-none');
 
-            e.preventDefault();
+        e.preventDefault();
 
-            closeNav();
+        closeNav();
 
-            $('.send-otp-form')[0].reset();
+        $('.send-otp-form')[0].reset();
 
-            $('.send-otp-form').show();
+        $('.send-otp-form').show();
 
-            $('.sign-up-form')[0].reset();
+        $('.sign-up-form')[0].reset();
 
-            $('.sign-up-form').hide();
+        $('.sign-up-form').hide();
 
-            $('#is-user-exist-error').html('');
+        $('#is-user-exist-error').html('');
 
-            $('#sign-up-error').html('');
-
+        $('#sign-up-error').html('');
 
 
-            $('#recaptcha-container').html('');
 
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+        $('#recaptcha-container').html('');
 
-            window.recaptchaVerifier.render().then(function (widgetId) {
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
 
-                grecaptcha.reset(widgetId);
+        window.recaptchaVerifier.render().then(function (widgetId) {
 
-            });
+            grecaptcha.reset(widgetId);
 
-        }
+        });
 
 
 
@@ -3469,49 +3145,109 @@ var swiperV = new Swiper('.banner-swiper', {
 //category-swiper 
 
 var swiperS = new Swiper('.category-swiper', {
+
     slidesPerView: 5,
+
     preloadImages: false,
+
     lazyLoading: true,
+
     updateOnImagesReady: false,
+
     lazyLoadingInPrevNextAmount: 0,
+
     pagination: {
+
         el: '.category-swiper-pagination',
+
         clickable: true,
+
     },
+
     breakpoints: {
-        200: {
-            slidesPerView: 1,
-            spaceBetweenSlides: 10
-        },
-        400: {
-            slidesPerView: 2,
-            spaceBetweenSlides: 10
-        },
-        600: {
-            slidesPerView: 2,
-            spaceBetweenSlides: 10
-        },
-        700: {
-            slidesPerView: 3,
-            spaceBetweenSlides: 10
-        },
-        800: {
+
+        350: {
+
             slidesPerView: 4,
+
             spaceBetweenSlides: 10
+
         },
+
+        400: {
+
+            slidesPerView: 4,
+
+            spaceBetweenSlides: 10
+
+        },
+
+        499: {
+
+            slidesPerView: 4,
+
+            spaceBetweenSlides: 10
+
+        },
+
+        550: {
+
+            slidesPerView: 1,
+
+            spaceBetweenSlides: 10
+
+        },
+
+        600: {
+
+            slidesPerView: 2,
+
+            spaceBetweenSlides: 10
+
+        },
+
+        700: {
+
+            slidesPerView: 3,
+
+            spaceBetweenSlides: 10
+
+        },
+
+        800: {
+
+            slidesPerView: 4,
+
+            spaceBetweenSlides: 10
+
+        },
+
         999: {
+
             slidesPerView: 5,
+
             spaceBetweenSlides: 10
+
         },
+
         1900: {
-            slidesPerView: 8,
+
+            slidesPerView: 6,
+
             spaceBetweenSlides: 10
+
         },
+
         1900: {
-            slidesPerView: 8,
+
+            slidesPerView: 6,
+
             spaceBetweenSlides: 10
+
         }
+
     }
+
 });
 
 var swiperS = new Swiper('.brand-swiper', {
@@ -4960,7 +4696,6 @@ $('.attributes').on('change', function (e) {
                 if (is_variant_available) {
 
                     $('#add_cart').attr('data-product-variant-id', selected_variant_id);
-                    $('.buy_now').attr('data-product-variant-id', selected_variant_id);
 
                     galleryTop.slideTo(selected_image_index, 500, false);
 
@@ -4977,7 +4712,6 @@ $('.attributes').on('change', function (e) {
                         $('#striped-price-div').show();
 
                         $('#add_cart').removeAttr('disabled');
-                        $('.buy_now').removeAttr('disabled');
 
                     } else {
 
@@ -4988,7 +4722,6 @@ $('.attributes').on('change', function (e) {
                         $('#striped-price-div').hide();
 
                         $('#add_cart').removeAttr('disabled');
-                        $('.buy_now').removeAttr('disabled');
 
                     }
 
@@ -5003,7 +4736,6 @@ $('.attributes').on('change', function (e) {
                     $('#striped-price').html('');
 
                     $('#add_cart').attr('disabled', 'true');
-                    $('.buy_now').attr('disabled', 'true');
 
                 }
 
@@ -5086,8 +4818,6 @@ $(document).on('click', '.add_to_cart', function (e) {
     var max = $(this).attr('data-max');
 
     var step = $(this).attr('data-step');
-
-    const total_stock = $(this).attr("data-product-stock");
 
     var btn = $(this);
 
@@ -5233,22 +4963,15 @@ $(document).on('click', '.add_to_cart', function (e) {
 
                         });
 
-                        var cart_item = { "product_variant_id": product_variant_id.trim(), "name": title, "short_description": description, "stock": total_stock, "qty": min, "image": image, "price": price.trim(), "min": min, "step": step };
+                        var cart_item = { "product_variant_id": product_variant_id.trim(), "name": title, "short_description": description, "qty": min, "image": image, "price": price.trim(), "min": min, "step": step };
 
                         var cart = localStorage.getItem("cart");
 
                         cart = (localStorage.getItem("cart") !== null) ? JSON.parse(cart) : null;
 
-                        // console.log(cart);
+                        console.log(cart);
 
-                        if (parseFloat(cart_item.stock) <= parseFloat(low_stock_limit)) {
-                            // console.log('in if done');
-                            Toast.fire({
-                                icon: "error",
-                                title: "Product is out of stock."
-                            });
-                            return;
-                        }
+
 
                         if (cart !== null && cart !== undefined) {
 
@@ -5799,12 +5522,8 @@ $('#add-address-form').on('submit', function (e) {
     e.preventDefault();
 
     var formdata = new FormData(this);
-    var currentUrl = window.location.href;
-    console.log(currentUrl);
-    var pincode_test = $('#pincode option:selected').text();
-    console.log(pincode_test);
+
     formdata.append(csrfName, csrfHash);
-    formdata.append('pincode_full', pincode_test);
 
     $.ajax({
 
@@ -5841,11 +5560,7 @@ $('#add-address-form').on('submit', function (e) {
                 $('#add-address-form')[0].reset();
 
                 $('#address_list_table').bootstrapTable('refresh');
-                $('#add-address-modal').modal('hide');
-                if (currentUrl.includes('/checkout')) {
-                    $(".address-modal").iziModal('open');
-                    // $("#address-modal").modal('show');
-                }
+                $(".address-modal").iziModal();
 
             } else {
 
@@ -5883,8 +5598,6 @@ $("#city").select2({
     minimumInputLength: 1,
     theme: 'bootstrap4',
     placeholder: 'Search for cities',
-    // dropdownParent: $("#add-address-form"),
-
     // Set the predefined options as selected
 
 })
@@ -5913,13 +5626,13 @@ $('#city').on('change', function (e) {
 
         $.ajax({
 
-            type: 'GET',
+            type: 'POST',
 
             data: {
 
                 'city_id': $(this).val(),
 
-                // [csrfName]: csrfHash,
+                [csrfName]: csrfHash,
 
             },
 
@@ -6003,11 +5716,7 @@ $('#edit-address-form').on('submit', function (e) {
     e.preventDefault();
 
     var formdata = new FormData(this);
-    var pincode_test = $('#edit_pincode option:selected').text();
-    console.log(pincode_test);
-    // console.log(t);
-    // return;
-    formdata.append('pincode_full', pincode_test);
+
     formdata.append(csrfName, csrfHash);
 
     $.ajax({
@@ -6190,18 +5899,15 @@ $(document).on('click', "#forgot_password_link", function (e) {
 
     $('#forgot_password_div').removeClass('hide').siblings('section').addClass('hide');
 
-    if (auth_settings == "firebase") {
+    $('#recaptcha-container-2').html('');
 
-        $('#recaptcha-container-2').html('');
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container-2');
 
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container-2');
+    window.recaptchaVerifier.render().then(function (widgetId) {
 
-        window.recaptchaVerifier.render().then(function (widgetId) {
+        grecaptcha.reset(widgetId);
 
-            grecaptcha.reset(widgetId);
-
-        });
-    }
+    });
 
     var telInput = $("#forgot_password_number");
 
@@ -6278,107 +5984,106 @@ $(document).on('submit', '#send_forgot_password_otp_form', function (e) {
         $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
 
     } else {
-        if (auth_settings == "firebase") {
-            var appVerifier = window.recaptchaVerifier;
 
-            firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier).then(function (confirmationResult) {
+        var appVerifier = window.recaptchaVerifier;
 
-                resetRecaptcha();
+        firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier).then(function (confirmationResult) {
 
-                $('#verify_forgot_password_otp_form').removeClass('d-none');
+            resetRecaptcha();
 
-                $('#send_forgot_password_otp_form').hide();
+            $('#verify_forgot_password_otp_form').removeClass('d-none');
 
-                $('#forgot_pass_error_box').html(response.message);
+            $('#send_forgot_password_otp_form').hide();
 
-                $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
+            $('#forgot_pass_error_box').html(response.message);
 
-                $(document).on('submit', '#verify_forgot_password_otp_form', function (e) {
+            $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
 
-                    e.preventDefault();
+            $(document).on('submit', '#verify_forgot_password_otp_form', function (e) {
 
-                    var reset_pass_btn_html = $('#reset_password_submit_btn').html();
+                e.preventDefault();
 
-                    var code = $('#forgot_password_otp').val();
+                var reset_pass_btn_html = $('#reset_password_submit_btn').html();
 
-                    var formdata = new FormData(this);
+                var code = $('#forgot_password_otp').val();
 
-                    var url = base_url + "home/reset-password";
+                var formdata = new FormData(this);
 
-                    $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
+                var url = base_url + "home/reset-password";
 
-                    confirmationResult.confirm(code).then(function (result) {
+                $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
 
-                        formdata.append(csrfName, csrfHash);
+                confirmationResult.confirm(code).then(function (result) {
 
-                        formdata.append('mobile', $('#forgot_password_number').val());
+                    formdata.append(csrfName, csrfHash);
 
-                        $.ajax({
+                    formdata.append('mobile', $('#forgot_password_number').val());
 
-                            type: 'POST',
+                    $.ajax({
 
-                            url: url,
+                        type: 'POST',
 
-                            data: formdata,
+                        url: url,
 
-                            processData: false,
+                        data: formdata,
 
-                            contentType: false,
+                        processData: false,
 
-                            cache: false,
+                        contentType: false,
 
-                            dataType: 'json',
+                        cache: false,
 
-                            beforeSend: function () {
+                        dataType: 'json',
 
-                                $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
+                        beforeSend: function () {
 
-                            },
+                            $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
 
-                            success: function (result) {
+                        },
 
-                                csrfName = result.csrfName;
+                        success: function (result) {
 
-                                csrfHash = result.csrfHash;
+                            csrfName = result.csrfName;
 
-                                $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
+                            csrfHash = result.csrfHash;
 
-                                $("#set_password_error_box").html(result.message).show();
+                            $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
 
-                                if (result.error == false) {
+                            $("#set_password_error_box").html(result.message).show();
 
-                                    setTimeout(function () {
+                            if (result.error == false) {
 
-                                        window.location.reload();
+                                setTimeout(function () {
 
-                                    }, 2000)
+                                    window.location.reload();
 
-                                }
+                                }, 2000)
 
                             }
 
-                        });
-
-                    }).catch(function (error) {
-
-                        $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
-
-                        $("#set_password_error_box").html("Invalid OTP. Please Enter Valid OTP").show();
+                        }
 
                     });
 
+                }).catch(function (error) {
+
+                    $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
+
+                    $("#set_password_error_box").html("Invalid OTP. Please Enter Valid OTP").show();
+
                 });
 
-            }).catch(function (error) {
-
-                $("#forgot_pass_error_box").html(error.message).show();
-
-                $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
-
-                resetRecaptcha();
-
             });
-        }
+
+        }).catch(function (error) {
+
+            $("#forgot_pass_error_box").html(error.message).show();
+
+            $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
+
+            resetRecaptcha();
+
+        });
 
     }
 
@@ -6770,13 +6475,13 @@ $('#edit_city').on('change', function (e, pincode) {
 
         $.ajax({
 
-            type: 'GET',
+            type: 'POST',
 
             data: {
 
                 'city_id': $(this).val(),
 
-                // [csrfName]: csrfHash,
+                [csrfName]: csrfHash,
 
             },
 
@@ -7199,14 +6904,12 @@ $('#validate-zipcode-form').on('submit', function (e) {
             if (result.error == false) {
 
                 $('#add_cart').removeAttr('disabled');
-                $('.buy_now').removeAttr('disabled');
 
                 $('#error_box').html(result.message);
 
             } else {
 
                 $('#add_cart').attr('disabled', 'true');
-                $('.buy_now').attr('disabled', 'true');
 
                 $('#error_box').html(result.message);
 
@@ -7217,43 +6920,6 @@ $('#validate-zipcode-form').on('submit', function (e) {
     });
 
 });
-
-$('#validate-city-form').on('submit', function (e) {
-    e.preventDefault()
-    var formdata = new FormData(this)
-    formdata.append(csrfName, csrfHash)
-
-    $.ajax({
-        type: 'POST',
-        url: base_url + 'products/check_city',
-        data: formdata,
-        beforeSend: function () {
-            $("#validate_city").html("Please Wait..").attr("disabled", !0)
-
-            // $('#validate_city').html('<div class="spinner-border" role="status">' +
-            //     '<span class="visually-hidden">Loading...</span>' +
-            //     '</div>').attr('disabled', true);
-        },
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (result) {
-            csrfHash = result.csrfHash
-            console.log(result);
-            $('#validate_city').html('Check Availability').attr('disabled', false)
-            if (result.error == false) {
-                $('#add_cart').removeAttr('disabled')
-                $('.buy_now').removeAttr('disabled')
-                $('#error_box').html(result.message)
-            } else {
-                $('#add_cart').attr('disabled', 'true')
-                $('.buy_now').attr('disabled', 'true')
-                $('#error_box').html(result.message)
-            }
-        }
-    })
-})
 
 $(document).on('submit', '.validate_zipcode_quick_view', function (e) {
 
@@ -7296,57 +6962,12 @@ $(document).on('submit', '.validate_zipcode_quick_view', function (e) {
             if (result.error == false) {
 
                 $('#modal-add-to-cart-button').removeAttr('disabled');
-                $('#modal-buy-now-button').removeAttr('disabled');
 
                 $('#error_box1').html(result.message);
 
             } else {
 
                 $('#modal-add-to-cart-button').attr('disabled', 'true');
-                $('#modal-buy-now-button').attr('disabled', 'true');
-
-                $('#error_box1').html(result.message);
-
-            }
-
-        }
-
-    });
-
-});
-
-$(document).on('submit', '.validate_city_quick_view', function (e) {
-    e.preventDefault();
-    var formdata = new FormData(this);
-    formdata.append(csrfName, csrfHash);
-    $.ajax({
-        type: 'post',
-        url: base_url + "products/check_city",
-        data: formdata,
-        beforeSend: function () {
-            $('#validate_city').html('Please Wait..').attr('disabled', true);
-        },
-        cache: false,
-        contentType: false,
-        processData: false,
-        dataType: "json",
-        success: function (result) {
-
-            csrfHash = result.csrfHash;
-
-            $('#validate_city').html('Check Availability').attr('disabled', false);
-
-            if (result.error == false) {
-
-                $('#modal-add-to-cart-button').removeAttr('disabled');
-                $('#modal-buy-now-button').removeAttr('disabled');
-
-                $('#error_box1').html(result.message);
-
-            } else {
-
-                $('#modal-add-to-cart-button').attr('disabled', 'true');
-                $('#modal-buy-now-button').attr('disabled', 'true');
 
                 $('#error_box1').html(result.message);
 
@@ -7641,14 +7262,8 @@ function display_compare() {
                             var modal = "#quick-view";
 
                         }
-                        if (e.type == 'simple_product') {
-                            var stock_product = e.stock;
-                        } else {
-                            var stock_product = e.total_stock;
 
-                        }
-
-                        comp += '  <a href="#" class="add-to-cart add_to_cart" data-product-id="' + e.id + '" data-product-variant-id="' + variant_id + '" data-product-stock="' + stock_product + '" data-izimodal-open="' + modal + '" data-product-title="' + e.name + '" data-product-image="' + e.image + '" data-product-description="' + e.short_description + '"  data-product-price="' + variant_price + '" data-min="' + data_min + '" data-max="' + data_max + '" data-step="' + data_step + '"><i class="fas fa-cart-plus"></i> Add to Cart</a>';
+                        comp += '  <a href="#" class="add-to-cart add_to_cart" data-product-id="' + e.id + '" data-product-variant-id="' + variant_id + '" data-izimodal-open="' + modal + '" data-product-title="' + e.name + '" data-product-image="' + e.image + '" data-product-description="' + e.short_description + '"  data-product-price="' + variant_price + '" data-min="' + data_min + '" data-max="' + data_max + '" data-step="' + data_step + '"><i class="fas fa-cart-plus"></i> Add to Cart</a>';
 
                         '</td>';
 
@@ -8008,7 +7623,7 @@ $(document).ready(function () {
                                         },
                                         dataType: 'json',
                                         success: function (result) {
-                                            cart_sync();
+
                                             location.reload();
                                         }
                                     });
@@ -8027,7 +7642,6 @@ $(document).ready(function () {
                             },
                             dataType: 'json',
                             success: function (result) {
-                                cart_sync();
                                 location.reload();
                             }
                         });
@@ -8095,7 +7709,7 @@ $(document).ready(function () {
                                         },
                                         dataType: 'json',
                                         success: function (result) {
-                                            cart_sync();
+
                                             location.reload();
                                         }
                                     });
@@ -8114,7 +7728,6 @@ $(document).ready(function () {
                             },
                             dataType: 'json',
                             success: function (result) {
-                                cart_sync();
                                 location.reload();
                             }
                         });
@@ -8169,186 +7782,3 @@ $(document).ready(function () {
         });
     });
 });
-
-$(document).ready(function () {
-    // Submit chat message to backend on form submit
-    $(".reorder-btn").on("click", (event) => {
-        const variants = ($(event.target).data("variants")) + ""
-        const qty = ($(event.target).data("quantity")) + ""
-        console.log(variants)
-        console.log(qty)
-        let html = $(event.target).html()
-        $.ajax({
-            type: "POST",
-            url: base_url + "cart/manage",
-            data: {
-                product_variant_id: variants,
-                qty: qty,
-                is_saved_for_later: false,
-                [csrfName]: csrfHash
-            },
-            dataType: "json",
-            beforeSend: function () {
-                $(event.target).text("Please Wait").attr("disabled", true)
-            },
-            success: function (res) {
-                $(event.target).text(html).attr("disabled", false)
-                window.location.href = base_url + "cart/checkout"
-            }
-        })
-
-    })
-
-});
-
-// $(document).ready(function () {
-$(document).on("click", ".buy_now", function (e) {
-    e.preventDefault();
-    var productId = $(this).data('product-id');
-    var productTitle = $(this).data('product-title');
-    var productSlug = $(this).data('product-slug');
-    var productImage = $(this).data('product-image');
-    var productPrice = $(this).data('product-price');
-    var productDescription = $(this).data('product-description');
-    var step = $(this).data('step');
-    var min = $(this).data('min');
-    var max = $(this).data('max');
-    var a = $(this).attr("data-product-variant-id");
-    var d = $(this);
-
-    var productVariantId = $(this).data('product-variant-id');
-    console.log(productId);
-    // console.log(productTitle);
-    // console.log(productSlug);
-    // console.log(productImage);
-    // console.log(productPrice);
-    // console.log(productDescription);
-    // console.log(step);
-    // console.log(min);
-    // console.log(max);
-    console.log(productVariantId);
-    console.log(a);
-    console.log("here");
-    var data = {
-        product_id: productId,
-        buy_now: '1',
-        product_title: productTitle,
-        product_slug: productSlug,
-        product_image: productImage,
-        product_price: productPrice,
-        product_description: productDescription,
-        step: step,
-        min: min,
-        max: max,
-        is_saved_for_later: false,
-        product_variant_id: productVariantId
-    }
-    // console.log(data);
-    // return;
-    // Send AJAX request to add product to cart
-    $.ajax({
-        type: "POST",
-        url: base_url + "cart/manage",
-        data: data,
-        beforeSend: function () {
-            d.html("Please Wait").text("Please Wait").attr("disabled", !0)
-        },
-        success: function (response) {
-            // Redirect to checkout page
-            var res = JSON.parse(response);
-            console.log(res);
-            console.log(response);
-            if (res.error == false) {
-                Toast.fire({
-                    icon: "success",
-                    title: res.message
-                }),
-                    window.location.href = base_url + "cart";
-            } else {
-                Toast.fire({
-                    icon: "error",
-                    title: res.message
-                });
-                $('.buy_now').attr('disabled', false).html(btn_html);
-            }
-        }
-    });
-});
-// });
-
-
-
-$(document).on('click', '.ticket_button', function (e) {
-    $('.display_fields').removeClass('d-none')
-})
-
-$(document).on('click', '.ask_question', function () {
-
-    var type = $('#ticket_type').val();
-    var email = $('#email').val();
-    var subject = $('#subject').val();
-    var description = $('#description').val();
-    var id = $('#user_id').val();
-
-    $.ajax({
-        type: 'POST',
-        data: {
-            ticket_type_id: type,
-            email: email,
-            subject: subject,
-            description: description,
-            user_id: id,
-            [csrfName]: csrfHash
-        },
-        dataType: 'json',
-        url: base_url + 'Tickets/add_ticket',
-        success: function (result) {
-
-            csrfName = result['csrfName'];
-            csrfHash = result['csrfHash'];
-            if (result.error == false) {
-                Toast.fire({
-                    icon: 'success',
-                    title: result.message
-                })
-                setTimeout(function () {
-                    location.reload()
-                }, 600)
-
-
-            } else {
-                Toast.fire({
-                    icon: 'error',
-                    title: result.message
-                })
-            }
-        }
-    })
-
-})
-
-// refer and earn code
-function copyText() {
-    /* Get the text to copy */
-    const text = $("#text-to-copy").text();
-
-    /* Create a temporary input element */
-    const tempInput = $("<input>");
-    tempInput.attr("type", "text");
-    tempInput.val(text);
-    $("body").append(tempInput);
-
-    /* Select and copy the text */
-    tempInput.select();
-    document.execCommand("copy");
-
-    /* Remove the temporary input element */
-    tempInput.remove();
-
-    /* Update the copy button text */
-    const copyButton = $(".copy-button");
-    copyButton.text("Copied!");
-    setTimeout(function () {
-        copyButton.text("Tap to copy");
-    }, 1000);
-}

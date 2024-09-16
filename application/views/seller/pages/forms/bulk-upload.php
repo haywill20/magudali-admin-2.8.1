@@ -47,7 +47,7 @@
                                 <div class="form-group">
                                     <label for="file">File <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-md-4">
-                                        <input type="file" name="upload_file" class="form-control" accept=".csv" required />
+                                        <input type="file" name="upload_file" class="form-control" accept=".csv" />
                                     </div>
 
                                 </div>
@@ -59,10 +59,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <?php
-                                $date = date('Ymd');
-                                $filename = "products_" . $date . ".csv";
-                                ?>
                                 <div class="form-group row">
                                     <div class="card-body pad">
                                         <div class="form-group">
@@ -70,7 +66,6 @@
                                             <a href="<?= base_url('uploads/seller-bulk-upload-instructions.txt') ?>" class="btn btn-primary" download="seller-bulk-upload-instructions.txt">Bulk upload instructions <i class="fas fa-download"></i></a>
                                             <a href="<?= base_url('uploads/seller-product-bulk-update-sample.csv') ?>" class="btn btn-info" download="seller-product-bulk-update-sample.csv">Bulk update sample file <i class="fas fa-download"></i></a>
                                             <a href="<?= base_url('uploads/seller-bulk-update-instructions.txt') ?>" class="btn btn-primary" download="seller-bulk-update-instructions.txt">Bulk update instructions <i class="fas fa-download"></i></a>
-                                            <a href="<?= base_url('seller/product/bulk_download') ?>" class="btn btn-info" download="<?= $filename ?>">Product Bulk Download <i class="fas fa-download"></i></a>
                                         </div>
                                     </div>
                                 </div>

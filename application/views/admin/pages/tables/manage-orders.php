@@ -49,10 +49,10 @@
                                     </thead>
                                 </table>
                             </div>
-                            <!-- <div class="d-flex justify-content-center">
+                            <div class="d-flex justify-content-center">
                                 <div class="form-group" id="error_box">
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -111,10 +111,10 @@
                                     </div>
                                 </form>
                             </div>
-                            <!-- <div class="d-flex justify-content-center">
+                            <div class="d-flex justify-content-center">
                                 <div class="form-group" id="error_box">
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -133,6 +133,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="card card-info">
+                                            <!-- form start -->
                                             <form class="form-horizontal " id="order_tracking_form" action="<?= base_url('admin/orders/update-order-tracking/'); ?>" method="POST" enctype="multipart/form-data">
                                                 <input type="hidden" name="order_id" id="order_id">
                                                 <input type="hidden" name="order_item_id" id="order_item_id">
@@ -155,16 +156,23 @@
                                                         <button type="submit" class="btn btn-success" id="submit_btn">Save</button>
                                                     </div>
                                                 </div>
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="form-group" id="error_box">
+                                                    </div>
+                                                </div>
+                                                <!-- /.card-body -->
                                             </form>
                                         </div>
+                                        <!--/.card-->
                                     </div>
+                                    <!--/.col-md-12-->
                                 </div>
+                                <!-- /.row -->
                             </div>
                             </form>
                         </div>
                     </div>
                 </div>
-
                 <div class="modal fade" id="order-tracking-modal" tabindex="-1" role="dialog" aria-hidden="true">
                     <div class="modal-dialog modal-xl">
                         <div class="modal-content">
@@ -183,8 +191,8 @@
                                                 <th data-field="id" data-sortable="true">ID</th>
                                                 <th data-field="order_id" data-sortable="true">Order ID</th>
                                                 <th data-field="order_item_id" data-sortable="false">Order Item ID</th>
-                                                <th data-field="courier_agency" data-sortable="false">Courier Agency</th>
-                                                <th data-field="tracking_id" data-sortable="false">Tracking ID</th>
+                                                <th data-field="courier_agency" data-sortable="false">courier_agency</th>
+                                                <th data-field="tracking_id" data-sortable="false">tracking_id</th>
                                                 <th data-field="url" data-sortable="false">URL</th>
                                                 <th data-field="date" data-sortable="false">Date</th>
                                                 <th data-field="operate" data-sortable="false">Actions</th>
@@ -325,7 +333,6 @@
                                                 <option value="midtrans">Midtrans</option>
                                                 <option value="my_fatoorah">My Fatoorah</option>
                                                 <option value="instamojo">Instamojo</option>
-                                                <option value="phonepe">PhonePe</option>
                                             </select>
                                         </div>
                                     </div>
@@ -386,7 +393,7 @@
                                                 <th data-field="delivery_date" data-sortable='true' data-visible='false'>Delivery Date</th>
                                                 <th data-field="delivery_time" data-sortable='true' data-visible='false'>Delivery Time</th>
                                                 <th data-field="date_added" data-sortable='true'>Order Date</th>
-                                                <th data-field="operate" data-sortable="false">Action</th>
+                                                <th data-field="operate">Action</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -413,11 +420,11 @@
                                                 <th data-field="delivery_date" data-sortable='true' data-visible='false'>Delivery Date</th>
                                                 <th data-field="delivery_time" data-sortable='true' data-visible='false'>Delivery Time</th>
                                                 <th data-field="updated_by" data-sortable='true' data-visible="false">Updated by</th>
-                                                <!-- <th data-field="status" data-sortable='true' data-visible='false'>Status</th> -->
+                                                <th data-field="status" data-sortable='true' data-visible='false'>Status</th>
                                                 <th data-field="active_status" data-sortable='true' data-visible='true'>Active Status</th>
                                                 <th data-field="transaction_status" data-sortable='true' data-visible='false'>Transaction Status</th>
                                                 <th data-field="date_added" data-sortable='true'>Order Date</th>
-                                                <th data-field="operate" data-sortable="false">Action</th>
+                                                <th data-field="operate">Action</th>
                                                 <th data-field="mail_status">Mail Status</th>
                                             </tr>
                                         </thead>

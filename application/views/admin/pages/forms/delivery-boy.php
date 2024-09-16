@@ -23,8 +23,7 @@
                 <div class="col-md-12">
                     <div class="card card-info">
                         <!-- form start -->
-                        <!-- <form class="form-horizontal form-submit-event add_delivery_boy" method="POST" id="add_product_form"> -->
-                        <form class="form-horizontal form-submit-event add_delivery_boy" action="<?= base_url('admin/delivery_boys/add_delivery_boy'); ?>" method="POST" id="add_product_form">
+                        <form class="form-horizontal form-submit-event" action="<?= base_url('admin/delivery_boys/add_delivery_boy'); ?>" method="POST" id="add_product_form">
                             <?php if (isset($fetched_data[0]['id'])) { ?>
                                 <input type="hidden" name="edit_delivery_boy" value="<?= $fetched_data[0]['id'] ?>">
                             <?php
@@ -39,7 +38,7 @@
                                 <div class="form-group row">
                                     <label for="mobile" class="col-sm-2 col-form-label">Mobile <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" maxlength="16" oninput="validateNumberInput(this)" id="mobile" placeholder="Enter Mobile" name="mobile" value="<?= @$fetched_data[0]['mobile'] ?>">
+                                        <input type="number" class="form-control" id="mobile" placeholder="Enter Mobile" name="mobile" value="<?= @$fetched_data[0]['mobile'] ?>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -101,54 +100,23 @@
                                     </div>
                                 </div>
                                 <?php
-                                $pincode_wise_deliverability = (isset($system_settings['pincode_wise_deliverability']) && $system_settings['pincode_wise_deliverability'] == 1) ? $system_settings['pincode_wise_deliverability'] : '0';
-                                $city_wise_deliverability = (isset($system_settings['city_wise_deliverability']) && $system_settings['city_wise_deliverability'] == 1) ? $system_settings['city_wise_deliverability'] : '0';
+                                $zipcodes = (isset($fetched_data[0]['serviceable_zipcodes']) &&  $fetched_data[0]['serviceable_zipcodes'] != NULL) ? explode(",", $fetched_data[0]['serviceable_zipcodes']) : "";
                                 ?>
-
-                                <input type="hidden" name="city_wise_deliverability" value="<?= $city_wise_deliverability ?>">
-                                <input type="hidden" name="pincode_wise_deliverability" value="<?= $pincode_wise_deliverability ?>">
                                 <div class="form-group row">
-                                    <?php if ((isset($system_settings['pincode_wise_deliverability']) && $system_settings['pincode_wise_deliverability'] == 1) || (isset($shipping_method['local_shipping_method']) && isset($shipping_method['shiprocket_shipping_method']) && $shipping_method['local_shipping_method'] == 1 && $shipping_method['shiprocket_shipping_method'] == 1)) { ?>
-                                        <!-- <div class="form-group "> -->
-                                        <label for="serviceable_zipcodes" class="col-form-label col-sm-2">Serviceable Zipcodes <span class='text-danger text-sm'>*</span></label>
-                                        <div class="col-sm-10">
+                                    <label for="zipcodes" class="col-sm-2 col-form-label">Serviceable Zipcodes <span class='text-danger text-sm'>*</span></label>
+                                    <div class="col-sm-10">
+                                        <select name="serviceable_zipcodes[]" class="form-control search_zipcode w-100" multiple onload="multiselect()" id="deliverable_zipcodes">
                                             <?php
-                                            $zipcodes = (isset($fetched_data[0]['serviceable_zipcodes']) &&  $fetched_data[0]['serviceable_zipcodes'] != NULL) ? explode(",", $fetched_data[0]['serviceable_zipcodes']) : [];
-                                            $zipcodes_name = fetch_details('zipcodes', "", 'zipcode,id', "", "", "", "", "id", $zipcodes);
-                                            // echo "<pre>";
-                                            // print_r($fetched_data[0]);
-                                            // print_r($zipcodes);
-                                            // print_r($zipcodes_name);
+                                            if (isset($zipcodes) && !empty($zipcodes)) {
+                                                $zipcodes_name =  fetch_details('zipcodes', "",  'zipcode,id', "", "", "", "", "id", $zipcodes);
+                                                foreach ($zipcodes_name as $row) {
                                             ?>
-                                            <select name="serviceable_zipcodes[]" class="search_zipcode form-control w-100" multiple onload="multiselect()" id="deliverable_zipcodes">
-                                                <?php if (isset($zipcodes) && !empty($zipcodes)) {
-                                                    foreach ($zipcodes_name as $row) {
-                                                ?>
-                                                        <option value="<?= $row['id'] ?>" <?= (!empty($zipcodes) && in_array($row['id'], $zipcodes)) ? 'selected' : ''; ?>><?= $row['zipcode'] ?></option>
-                                                <?php }
-                                                } ?>
-                                            </select>
-                                        </div>
-
-                                    <?php  }
-                                    if (isset($system_settings['city_wise_deliverability']) && $system_settings['city_wise_deliverability'] == 1 && $shipping_method['shiprocket_shipping_method'] != 1) { ?>
-                                        <!-- <div class="form-group"> -->
-                                        <label for="cities" class="col-form-label col-sm-2">Serviceable Cities <span class='text-danger text-sm'>*</span></label>
-                                        <?php
-                                        $selected_city_ids = (isset($fetched_data[0]['serviceable_cities']) &&  $fetched_data[0]['serviceable_cities'] != NULL) ? explode(",", $fetched_data[0]['serviceable_cities']) : [];
-                                        // echo "<pre>";
-                                        // print_r($selected_city_ids);
-                                        ?>
-                                        <div class="col-sm-10">
-
-                                            <select class="form-control city_list " name="serviceable_cities[]" id="deliverable_cities" multiple>
-                                                <?php foreach ($cities as $row) { ?>
-                                                    <option value="<?= $row['id'] ?>" <?= (in_array($row['id'], $selected_city_ids)) ? 'selected' : ''; ?>><?= $row['name'] ?></option>
-                                                <?php }; ?>
-                                            </select>
-                                        </div>
-                                    <?php } ?>
-
+                                                    <option value=<?= $row['id'] ?> <?= (!empty($zipcodes) && in_array($row['id'], $zipcodes)) ? 'selected' : ''; ?>> <?= $row['zipcode'] ?></option>
+                                            <?php }
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="driving_license" class="col-sm-2 col-form-label">Driving License <span class='text-danger text-sm'>*</span></label>
@@ -165,37 +133,37 @@
                                     <?php
                                     if (isset($fetched_data[0]['driving_license']) && !empty($fetched_data[0]['driving_license'])) {
                                         $images = explode(",", $fetched_data[0]['driving_license']);
-                                        // print_r($images);
                                         foreach ($images as $row) { ?>
                                             <label class="col-sm-2 col-form-label"></label>
-                                            <div class="mx-auto col-sm-10 driving-license-image">
-                                                <a href="<?= base_url($row); ?>" data-toggle="lightbox" data-gallery="gallery_seller">
-                                                    <img src="<?= base_url($row); ?>" class="img-fluid rounded">
-                                                </a>
-                                            </div>
+                                            <div class="mx-auto col-sm-10 driving-license-image"><a href="<?= base_url($row); ?>" data-toggle="lightbox" data-gallery="gallery_seller"><img src="<?= base_url($row); ?>" class="img-fluid rounded"></a></div>
                                     <?php
                                         }
                                     } ?>
                                 </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Status <span class='text-danger text-sm'>*</span></label>
-                                    <div id="status" class="btn-group">
-                                        <label class="btn btn-primary" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
-                                            <input type="radio" name="status" value="1" <?= (isset($fetched_data[0]['status']) && $fetched_data[0]['status'] == '1') ? 'Checked' : '' ?>> Approved
-                                        </label>
-                                        <label class="btn btn-danger" data-toggle-class="btn-danger" data-toggle-passive-class="btn-default">
-                                            <input type="radio" name="status" value="0" <?= (isset($fetched_data[0]['status']) && $fetched_data[0]['status'] == '0') ? 'Checked' : '' ?>> Not-Approved
-                                        </label>
+                                
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label">Status <span class='text-danger text-sm'>*</span></label>
+                                        <div id="status" class="btn-group">
+                                            <label class="btn btn-primary" data-toggle-class="btn-primary" data-toggle-passive-class="btn-default">
+                                                <input type="radio" name="status" value="1" <?= (isset($fetched_data[0]['status']) && $fetched_data[0]['status'] == '1') ? 'Checked' : '' ?>> Approved
+                                            </label>
+                                            <label class="btn btn-danger" data-toggle-class="btn-danger" data-toggle-passive-class="btn-default">
+                                                <input type="radio" name="status" value="0" <?= (isset($fetched_data[0]['status']) && $fetched_data[0]['status'] == '0') ? 'Checked' : '' ?>> Not-Approved
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
 
                                 <div class="form-group">
                                     <button type="reset" class="btn btn-warning">Reset</button>
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Delivery Boy' : 'Add Delivery Boy' ?></button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                    <div class="card text-white d-none mb-3">
+                                    </div>
+                                </div>
+                            </div>
                             <!-- /.card-footer -->
                         </form>
                     </div>

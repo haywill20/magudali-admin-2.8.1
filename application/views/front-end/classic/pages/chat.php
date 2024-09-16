@@ -1,8 +1,3 @@
-<script src="<?= THEME_ASSETS_URL . 'js/stisla.js' ?>"></script>
-<script src="<?= THEME_ASSETS_URL . 'js/Markdown.Converter.js' ?>"></script>
-<script src="<?= THEME_ASSETS_URL . 'js/Markdown.Sanitizer.js' ?>"></script>
-<script src="<?= THEME_ASSETS_URL . 'js/Markdown.Editor.js' ?>"></script>
-
 <!-- breadcrumb -->
 <section class="breadcrumb-title-bar colored-breadcrumb">
     <div class="main-content responsive-breadcrumb">
@@ -18,7 +13,7 @@
 </section>
 
 <section class="my-account-section">
-    <div class="main-content deeplink_wrapper">
+    <div class="main-content">
         <div class="col-md-12 mt-5 mb-3">
             <div class="user-detail align-items-center">
                 <div class="ml-3">
@@ -35,7 +30,7 @@
                 <div class="card chat-theme-light chat-scroll chat-min">
                     <select name="select_user_id[]" id="chat_user" class="search_user w-100" multiple data-placeholder=" Type to search and select users" onload="multiselect()">
                         <?php
-                        $user_details = fetch_details('users', ['active' => 1]);
+                        $user_details = fetch_details('users', ['active' => 1],);
                         if (!empty($user_details)) {
                         ?>
                             <option value="<?= $user_details[0]['id'] ?>"> <?= $user_details[0]['username'] ?></option>
@@ -46,7 +41,7 @@
                     </select>
                     <div id="add-scroll-js ">
                         <div class="card-header chat-card-header text-color mt-4">
-                            <h4><?= !empty($this->lang->line('personal_chat')) ? $this->lang->line('personal_chat') : 'Personal Chat'; ?></h4>
+                            <h4>Personal Chat</h4>
                         </div>
                         <div class="chat-card-body">
                             <ul class="list-unstyled list-unstyled-border chat-list-unstyled-border">
@@ -57,7 +52,7 @@
                                 ?>
                                             <li class="media">
                                                 <div class="media-body">
-                                                    <div class="chat-person" data-picture="" data-type="person" data-id="<?= $user['opponent_user_id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fas fa-circle text-success' : 'far fa-circle'; ?> "></i> <?= $user['opponent_username'] ?> (You)</div>
+                                                    <div class="chat-person" data-picture="" data-type="person" data-id="<?= $user['id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fas fa-circle text-success' : 'far fa-circle'; ?> "></i> <?= $user['username'] ?> (You)</div>
                                                 </div>
                                             </li>
                                 <?php }
@@ -70,7 +65,7 @@
                                         if (isset($user['id']) && !empty($user['id']) && $user['id'] != '' &&  $user['id'] != $_SESSION['user_id']) { ?>
                                             <li class="media">
                                                 <div class="media-body">
-                                                    <div data-unread_msg="<?= $user['unread_msg'] ?>" class="chat-person <?= ($user['unread_msg'] > 0) ? 'new-msg-rcv' : ''; ?>" data-picture="<?= $user['picture'] ?>" data-type="person" data-id="<?= $user['opponent_user_id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fas fa-circle text-success' : 'far fa-circle'; ?> "></i> <?= $user['opponent_username'] ?>
+                                                    <div data-unread_msg="<?= $user['unread_msg'] ?>" class="chat-person <?= ($user['unread_msg'] > 0) ? 'new-msg-rcv' : ''; ?>" data-picture="<?= $user['picture'] ?>" data-type="person" data-id="<?= $user['id'] ?>"><i class="<?= ($user['is_online'] == 1) ? 'fas fa-circle text-success' : 'far fa-circle'; ?> "></i> <?= $user['username'] ?>
                                                         <?= ($user['unread_msg'] > 0) ? (($user['unread_msg'] > 9) ? '<div class="badge-chat">9 +</div>' : '<div class="badge-chat">' . $user['unread_msg'] . '</div>') : ''; ?>
                                                     </div>
                                                 </div>
@@ -151,7 +146,7 @@
                     <div class="card-body d-none" id="chat-dropbox">
                         <div class="dropzone" id="myAlbum"></div>
                         <div class="text-center mt-3">
-                            <button class="btn btn-danger shadow-none" onclick="closeDropZone();"><?= !empty($this->lang->line('close')) ? $this->lang->line('close') : 'Close'; ?>
+                            <button class="btn btn-danger shadow-none" onclick="closeDropZone();"><?= !empty($this->lang->line('label_close')) ? $this->lang->line('label_close') : 'Close'; ?>
                             </button>
                         </div>
                     </div>
@@ -200,14 +195,14 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><?= !empty($this->lang->line('search')) ? $this->lang->line('search') : 'Search'; ?></h5>
+                <h5 class="modal-title">Search</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <form class="modal-part" id="modal-search-msg-part">
-                    <div id="modal-title" class="d-none"><?= !empty($this->lang->line('search')) ? $this->lang->line('search') : 'Search'; ?></div>
+                    <div id="modal-title" class="d-none"><?= !empty($this->lang->line('label_search')) ? $this->lang->line('label_search') : 'Search'; ?></div>
                     <div class="row">
                         <div class="col-md-12 form-group">
                             <div class="input-group">

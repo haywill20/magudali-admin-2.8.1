@@ -27,8 +27,6 @@ class Language extends CI_Controller
             $this->data['meta_description'] = 'Languages  | ' . $settings['app_name'];
             $this->data['settings'] = get_settings('system_settings', true);
             $this->data['languages'] = get_languages();
-            $this->data['default_language'] = get_languages('', '', '', '', 1);
-            // print_r($this->data['default_language']);
 
             if (isset($_GET['id'])) {
                 $this->data['language'] = get_languages($_GET['id']);
@@ -47,23 +45,13 @@ class Language extends CI_Controller
         }
     }
 
-   public function create()
+    public function create()
     {
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
             if (print_msg(!has_permissions('update', 'settings'), PERMISSION_ERROR_MSG, 'settings')) {
                 return false;
             }
-            if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
-                $this->response['error'] = true;
-                $this->response['message'] = DEMO_VERSION_MSG;
-                echo json_encode($this->response);
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
-                return false;
-                exit();
-            }
             $this->form_validation->set_rules('language', 'Language', 'trim|required|xss_clean|strtolower|alpha|is_unique[languages.language]|strtolower', array('is_unique' => 'This Language is already exists.'));
-            $this->form_validation->set_rules('native_language', 'Native Language', 'trim|required|xss_clean');
             $this->form_validation->set_rules('code', 'Code', 'trim|required|xss_clean|strtolower|is_unique[languages.language]', array('is_unique' => 'This Code is already exists.'));
             $this->form_validation->set_rules('is_rtl', 'RTL', 'trim|xss_clean');
             if (!$this->form_validation->run()) {
@@ -81,39 +69,12 @@ class Language extends CI_Controller
                 if (!is_dir('./application/language/' . $language . '/')) {
                     mkdir('./application/language/' . $language . '/', 0777, TRUE);
                 }
+
                 if (file_exists('./application/language/' . $language . '/web_labels_lang.php')) {
                     delete_files('./application/language/' . $language . '/web_labels_lang.php');
                     write_file('./application/language/' . $language . '/web_labels_lang.php', $langstr_final);
                 } else {
                     write_file('./application/language/' . $language . '/web_labels_lang.php', $langstr_final);
-                }
-                $language_directory = './system/language/' . $language . '/';
-                if (!is_dir($language_directory)) {
-                    mkdir($language_directory, 0777, true); // Creates the directory recursively
-                }
-
-                // Array of files to be created
-                $files_to_create = array(
-                    'calendar_lang.php',
-                    'date_lang.php',
-                    'db_lang.php',
-                    'email_lang.php',
-                    'form_validation_lang.php',
-                    'ftp_lang.php',
-                    'imglib_lang.php',
-                    'migration_lang.php',
-                    'number_lang.php',
-                    'pagination_lang.php',
-                    'profiler_lang.php',
-                    'unit_test_lang.php',
-                    'upload_lang.php'
-                );
-
-                foreach ($files_to_create as $file) {
-                    if (!file_exists($language_directory . $file)) {
-                        // Create files with empty content
-                        write_file($language_directory . $file, "<?php defined('BASEPATH') OR exit('No direct script access allowed');\n\n");
-                    }
                 }
                 $this->response['error'] = false;
                 $this->response['csrfName'] = $this->security->get_csrf_token_name();
@@ -137,15 +98,6 @@ class Language extends CI_Controller
         if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
             if (print_msg(!has_permissions('update', 'settings'), PERMISSION_ERROR_MSG, 'settings')) {
                 return false;
-            }
-            if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
-                $this->response['error'] = true;
-                $this->response['message'] = DEMO_VERSION_MSG;
-                echo json_encode($this->response);
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
-                return false;
-                exit();
             }
             $this->form_validation->set_rules('language_id', 'ID', 'trim|required|xss_clean|numeric');
             $this->form_validation->set_rules('is_rtl', 'RTL', 'trim|xss_clean');
@@ -216,40 +168,6 @@ class Language extends CI_Controller
         } else {
             redirect('admin/login', 'refresh');
         }
-    }
-
-    public function set_default_for_web()
-    {
-        
-        if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
-            if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
-                $this->response['error'] = true;
-                $this->response['message'] = DEMO_VERSION_MSG;
-                echo json_encode($this->response);
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
-                return false;
-                exit();
-            }
-            if (isset($_POST['language_id'])) {
-                $data['language_id'] = $_POST['language_id'];
-            }
-            if (isset($_POST['is_default'])) {
-                $data['is_default'] = 1;
-            } else {
-                $data['is_default'] = 0;
-            }
-            if ($this->language_model->is_default_for_web($data)) {
-                $this->response['error'] = false;
-                $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                $this->response['message'] = "Language set successfully.";
-                print_r(json_encode($this->response));
-                return false;
-            }
-        }
-        // print_r($_POST);
-        // die;
     }
 
     public function get_list()

@@ -8,7 +8,6 @@
 
     0. curl($url, $method = 'GET', $data = [])
 */
-#[\AllowDynamicProperties]
 class Instamojo
 {
     private $client_id = "";

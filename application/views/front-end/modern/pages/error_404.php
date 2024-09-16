@@ -1,4 +1,4 @@
-<section class='error_404 deeplink_wrapper'>
+<section class='error_404'>
     
 <h1 data-shadow='oops!'>oops!</h1>
 <div class='col-12'>

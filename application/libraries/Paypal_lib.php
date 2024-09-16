@@ -14,7 +14,7 @@
  * @link        http://www.codexworld.com
  * @version     2.0
  */
-#[\AllowDynamicProperties]
+
 class Paypal_lib
 {
 

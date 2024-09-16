@@ -73,7 +73,7 @@
                                     <div class="form-group slider-url <?= $hiddenStatus ?> ">
 
                                         <label for="slider_url"> Link <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" placeholder="https://example.com" name="link" value="<?= isset($fetched_data[0]['link']) ? output_escaping($fetched_data[0]['link']) : "" ?>">
+                                        <input type="text" class="form-control" placeholder="https://example.com" name="link" value="<?= isset($fetched_data[0]['link'])?output_escaping($fetched_data[0]['link']):"" ?>">
                                     </div>
                                     <?php $hiddenStatus = (isset($fetched_data[0]['id']) && $fetched_data[0]['type']  == 'products') ? '' : 'd-none' ?>
                                     <div class="form-group row slider-products <?= $hiddenStatus ?>">
@@ -123,7 +123,11 @@
                                     <button type="reset" class="btn btn-warning">Reset</button>
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Slider' : 'Add Slider' ?></button>
                                 </div>
+                                <div class="d-flex justify-content-center">
+                                    <div class="form-group" id="error_box">
 
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>

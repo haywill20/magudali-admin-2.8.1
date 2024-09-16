@@ -9,15 +9,13 @@ class My_account extends CI_Controller
         parent::__construct();
         $this->load->database();
         $this->load->library(['ion_auth', 'form_validation', 'pagination']);
-        $this->load->helper(['url', 'language', 'function_helper']);
+        $this->load->helper(['url', 'language']);
         $this->load->model(['chat_model', 'media_model', 'cart_model', 'category_model', 'address_model', 'order_model', 'Transaction_model', 'Promo_code_model', 'Customer_model', 'Area_model']);
         $this->lang->load('auth');
         $this->data['is_logged_in'] = ($this->ion_auth->logged_in()) ? 1 : 0;
         $this->data['user'] = ($this->ion_auth->logged_in()) ? $this->ion_auth->user()->row() : array();
         $this->data['settings'] = get_settings('system_settings', true);
         $this->data['web_settings'] = get_settings('web_settings', true);
-        $this->data['auth_settings'] = get_settings('authentication_settings', true);
-        $this->data['web_logo'] = get_settings('web_logo');
         $this->response['csrfName'] = $this->security->get_csrf_token_name();
         $this->response['csrfHash'] = $this->security->get_csrf_hash();
     }
@@ -25,6 +23,11 @@ class My_account extends CI_Controller
 
     public function index()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->data['is_logged_in']) {
             $this->data['main_page'] = 'dashboard';
             $this->data['title'] = 'Dashboard | ' . $this->data['web_settings']['site_title'];
@@ -38,12 +41,15 @@ class My_account extends CI_Controller
 
     public function profile()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $identity_column = $this->config->item('identity', 'ion_auth');
             $this->data['users'] = $this->ion_auth->user()->row();
-            // echo "<pre>";
-            // print_R($this->data['users']);
-            $this->data['system_settings'] = $this->data['settings'];
+            $this->data['system_settings'] = get_settings('system_settings', true);
             $this->data['identity_column'] = $identity_column;
             $this->data['main_page'] = 'profile';
             $this->data['title'] = 'Profile | ' . $this->data['web_settings']['site_title'];
@@ -57,16 +63,18 @@ class My_account extends CI_Controller
 
     public function orders()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $this->data['main_page'] = 'orders';
             $this->data['title'] = 'Orders | ' . $this->data['web_settings']['site_title'];
             $this->data['keywords'] = 'Orders, ' . $this->data['web_settings']['meta_keywords'];
             $this->data['description'] = 'Orders | ' . $this->data['web_settings']['meta_description'];
             $total = fetch_orders(false, $this->data['user']->id, false, false, 1, NULL, NULL, NULL, NULL);
-            //             $total = fetch_orders(30);
-            //             echo "<pre>";
-            // print_r($total);
-            // die;
+
             $limit = 10;
             $config['base_url'] = base_url('my-account/orders');
             $config['total_rows'] = $total['total'];
@@ -122,6 +130,11 @@ class My_account extends CI_Controller
 
     public function order_details()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $bank_transfer = array();
             $this->data['main_page'] = 'order-details';
@@ -148,9 +161,14 @@ class My_account extends CI_Controller
 
     public function order_invoice($order_id)
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $this->data['main_page'] = VIEW . 'api-order-invoice';
-            $settings = $this->data['settings'];
+            $settings = get_settings('system_settings', true);
             $this->data['title'] = 'Invoice Management |' . $settings['app_name'];
             $this->data['meta_description'] = 'Invoice Management | ' . $this->data['web_settings']['meta_description'];;
             if (isset($order_id) && !empty($order_id)) {
@@ -182,7 +200,7 @@ class My_account extends CI_Controller
                     $this->data['items'] = $items;
                     $this->data['promo_code'] = $promo_code;
                     $this->data['print_btn_enabled'] = true;
-                    $this->data['settings'] = $this->data['settings'];
+                    $this->data['settings'] = get_settings('system_settings', true);
                     $this->load->view('admin/invoice-template', $this->data);
                 } else {
                     redirect(base_url(), 'refresh');
@@ -204,7 +222,7 @@ class My_account extends CI_Controller
             $this->response['message'] = strip_tags(validation_errors());
             $this->response['data'] = array();
         } else {
-            $this->response = $this->order_model->update_order_item($_POST['order_item_id'], trim($_POST['status']), fromapp: true);
+            $this->response = $this->order_model->update_order_item($_POST['order_item_id'], trim($_POST['status']));
             if (trim($_POST['status']) != 'returned' && $this->response['error'] == false) {
                 process_refund($_POST['order_item_id'], trim($_POST['status']), 'order_items');
             }
@@ -244,8 +262,8 @@ class My_account extends CI_Controller
                 if ($this->order_model->update_order(['status' => $_POST['status']], ['order_id' => $_POST['order_id']], true, 'order_items')) {
 
                     $this->order_model->update_order(['active_status' => $_POST['status']], ['order_id' => $_POST['order_id']], false, 'order_items');
+                    process_refund($_POST['order_id'], $_POST['status'], 'orders');
                     if (trim($_POST['status'] == 'cancelled')) {
-                        process_refund($_POST['order_id'], $_POST['status'], 'orders');
                         $data = fetch_details('order_items', ['order_id' => $_POST['order_id']], 'product_variant_id,quantity');
                         $product_variant_ids = [];
                         $qtns = [];
@@ -268,6 +286,11 @@ class My_account extends CI_Controller
 
     public function notifications()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $this->data['main_page'] = 'notifications';
             $this->data['title'] = 'Notification | ' . $this->data['web_settings']['site_title'];
@@ -281,6 +304,11 @@ class My_account extends CI_Controller
 
     public function manage_address()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $this->data['main_page'] = 'address';
             $this->data['title'] = 'Address | ' . $this->data['web_settings']['site_title'];
@@ -299,15 +327,14 @@ class My_account extends CI_Controller
         $response = $this->Area_model->get_cities_list($search);
         echo json_encode($response);
     }
-    public function get_zipcodes_list()
-    {
-        $search = $this->input->get('search');
-        $response = $this->Area_model->get_zipcodes($search);
-        echo json_encode($response);
-    }
 
     public function wallet()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $this->data['main_page'] = 'wallet';
             $this->data['title'] = 'Wallet | ' . $this->data['web_settings']['site_title'];
@@ -321,6 +348,11 @@ class My_account extends CI_Controller
 
     public function transactions()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $this->data['main_page'] = 'transactions';
             $this->data['title'] = 'Transactions | ' . $this->data['web_settings']['site_title'];
@@ -345,9 +377,8 @@ class My_account extends CI_Controller
             $this->form_validation->set_rules('city_name', 'City', 'trim|xss_clean');
             $this->form_validation->set_rules('area_name', 'Area', 'trim|xss_clean');
             $this->form_validation->set_rules('area_id', 'Area', 'trim|xss_clean');
-            $this->form_validation->set_rules('city_id', 'City', 'trim|xss_clean|required');
+            $this->form_validation->set_rules('city_id', 'City', 'trim|xss_clean');
             $this->form_validation->set_rules('pincode', 'Pincode', 'trim|numeric|xss_clean');
-            $this->form_validation->set_rules('pincode_name', 'Pincode', 'trim|numeric|xss_clean');
             $this->form_validation->set_rules('state', 'State', 'trim|xss_clean|required');
             $this->form_validation->set_rules('country', 'Country', 'trim|xss_clean|required');
             $this->form_validation->set_rules('latitude', 'Latitude', 'trim|xss_clean');
@@ -500,35 +531,32 @@ class My_account extends CI_Controller
     public function get_promo_codes()
     {
         if ($this->ion_auth->logged_in()) {
-            // $this->form_validation->set_rules('sort', 'sort', 'trim|xss_clean');
-            // $this->form_validation->set_rules('limit', 'limit', 'trim|numeric|xss_clean');
-            // $this->form_validation->set_rules('offset', 'offset', 'trim|numeric|xss_clean');
-            // $this->form_validation->set_rules('order', 'order', 'trim|xss_clean');
+            $this->form_validation->set_rules('sort', 'sort', 'trim|xss_clean');
+            $this->form_validation->set_rules('limit', 'limit', 'trim|numeric|xss_clean');
+            $this->form_validation->set_rules('offset', 'offset', 'trim|numeric|xss_clean');
+            $this->form_validation->set_rules('order', 'order', 'trim|xss_clean');
 
-            // if (!$this->form_validation->run()) {
+            if (!$this->form_validation->run()) {
 
-            //     $this->response['error'] = true;
-            //     $this->response['message'] = strip_tags(validation_errors());
-            //     $this->response['data'] = array();
-            //     print_r(json_encode($this->response));
-            //     return;
-            // } else {
-            $limit = (isset($_POST['limit']) && is_numeric($_POST['limit']) && !empty(trim($_POST['limit']))) ? $this->input->post('limit', true) : 25;
-            $offset = (isset($_POST['offset']) && is_numeric($_POST['offset']) && !empty(trim($_POST['offset']))) ? $this->input->post('offset', true) : 0;
-            $order = (isset($_POST['order']) && !empty(trim($_POST['order']))) ? $_POST['order'] : 'DESC';
-            $sort = (isset($_POST['sort']) && !empty(trim($_POST['sort']))) ? $_POST['sort'] : 'id';
-            $this->response['error'] = false;
-            $this->response['message'] = 'Promocodes retrived Successfully !';
-
-            $result = $this->Promo_code_model->get_promo_codes($limit, $offset, $sort, $order);
-            $this->response['total'] = $result['total'];
-            $this->response['csrfName'] = $this->security->get_csrf_token_name();
-            $this->response['csrfHash'] = $this->security->get_csrf_hash();
-            $this->response['offset'] = (isset($offset) && !empty($offset)) ? $offset : '0';
-            $this->response['promo_codes'] = $result['data'];
-            print_r(json_encode($this->response));
-            return;
-            // }
+                $this->response['error'] = true;
+                $this->response['message'] = strip_tags(validation_errors());
+                $this->response['data'] = array();
+                print_r(json_encode($this->response));
+                return;
+            } else {
+                $limit = (isset($_POST['limit']) && is_numeric($_POST['limit']) && !empty(trim($_POST['limit']))) ? $this->input->post('limit', true) : 25;
+                $offset = (isset($_POST['offset']) && is_numeric($_POST['offset']) && !empty(trim($_POST['offset']))) ? $this->input->post('offset', true) : 0;
+                $order = (isset($_POST['order']) && !empty(trim($_POST['order']))) ? $_POST['order'] : 'DESC';
+                $sort = (isset($_POST['sort']) && !empty(trim($_POST['sort']))) ? $_POST['sort'] : 'id';
+                $this->response['error'] = false;
+                $this->response['message'] = 'Promocodes retrived Successfully !';
+                $result = $this->Promo_code_model->get_promo_codes($limit, $offset, $sort, $order);
+                $this->response['total'] = $result['total'];
+                $this->response['offset'] = (isset($offset) && !empty($offset)) ? $offset : '0';
+                $this->response['promo_codes'] = $result['data'];
+                print_r(json_encode($this->response));
+                return;
+            }
         } else {
             $this->response['error'] = true;
             $this->response['message'] = 'Unauthorized access is not allowed';
@@ -543,8 +571,6 @@ class My_account extends CI_Controller
             return $this->address_model->get_address_list($this->data['user']->id);
         } else {
             $this->response['error'] = true;
-            $this->response['csrfName'] = $this->security->get_csrf_token_name();
-            $this->response['csrfHash'] = $this->security->get_csrf_hash();
             $this->response['message'] = 'Unauthorized access is not allowed';
             print_r(json_encode($this->response));
             return false;
@@ -566,22 +592,16 @@ class My_account extends CI_Controller
             $areas = fetch_details('areas', ['city_id' => $city_id]);
             if (empty($areas)) {
                 $this->response['error'] = true;
-                $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                $this->response['csrfHash'] = $this->security->get_csrf_hash();
                 $this->response['message'] = "No Areas found for this City.";
                 print_r(json_encode($this->response));
                 return false;
             }
             $this->response['error'] = false;
-            $this->response['csrfName'] = $this->security->get_csrf_token_name();
-            $this->response['csrfHash'] = $this->security->get_csrf_hash();
             $this->response['data'] = $areas;
             print_r(json_encode($this->response));
             return false;
         } else {
             $this->response['error'] = true;
-            $this->response['csrfName'] = $this->security->get_csrf_token_name();
-            $this->response['csrfHash'] = $this->security->get_csrf_hash();
             $this->response['message'] = 'Unauthorized access is not allowed';
             print_r(json_encode($this->response));
             return false;
@@ -590,17 +610,15 @@ class My_account extends CI_Controller
     public function get_zipcode()
     {
         if ($this->ion_auth->logged_in()) {
-            // $this->form_validation->set_rules('city_id', 'City Id', 'trim|required|xss_clean');
-            // if (!$this->form_validation->run()) {
-            //     $this->response['error'] = true;
-            //     $this->response['message'] = validation_errors();
-            //     print_r(json_encode($this->response));
-            //     return false;
-            // }
+            $this->form_validation->set_rules('city_id', 'City Id', 'trim|required|xss_clean');
+            if (!$this->form_validation->run()) {
+                $this->response['error'] = true;
+                $this->response['message'] = validation_errors();
+                print_r(json_encode($this->response));
+                return false;
+            }
 
-            // $city_id = $this->input->post('city_id', true);
-            $city_id = $this->input->get('city_id', true);
-            // print_r($city_id);
+            $city_id = $this->input->post('city_id', true);
 
             //if zipcode table is not sync with area table then gte zipcode list from area table 
             if ($this->db->field_exists('minimum_free_delivery_order_amount', 'zipcodes')) {
@@ -613,23 +631,16 @@ class My_account extends CI_Controller
 
             if (empty($zipcodes)) {
                 $this->response['error'] = true;
-                $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                $this->response['csrfHash'] = $this->security->get_csrf_hash();
                 $this->response['message'] = "No Zipcodes found for this area.";
                 print_r(json_encode($this->response));
                 return false;
             }
             $this->response['error'] = false;
-            $this->response['csrfName'] = $this->security->get_csrf_token_name();
-            $this->response['csrfHash'] = $this->security->get_csrf_hash();
             $this->response['data'] = $zipcodes;
-            // print_r($this->response);
             print_r(json_encode($this->response));
             return false;
         } else {
             $this->response['error'] = true;
-            $this->response['csrfName'] = $this->security->get_csrf_token_name();
-            $this->response['csrfHash'] = $this->security->get_csrf_hash();
             $this->response['message'] = 'Unauthorized access is not allowed';
             print_r(json_encode($this->response));
             return false;
@@ -638,22 +649,27 @@ class My_account extends CI_Controller
 
     public function favorites()
     {
-        if ($this->ion_auth->logged_in()) {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
+        if ($this->data['is_logged_in']) {
             $this->data['main_page'] = 'favorites';
-            $this->data['title'] = 'Favorite | ' . $this->data['web_settings']['site_title'];
-            $this->data['keywords'] = 'Favorite, ' . $this->data['web_settings']['meta_keywords'];
-            $this->data['description'] = 'Favorite | ' . $this->data['web_settings']['meta_description'];
+            $this->data['title'] = 'Dashboard | ' . $this->data['web_settings']['site_title'];
+            $this->data['keywords'] = 'Dashboard, ' . $this->data['web_settings']['meta_keywords'];
+            $this->data['description'] = 'Dashboard | ' . $this->data['web_settings']['meta_description'];
             $this->data['products'] = get_favorites($this->data['user']->id);
-            $this->data['settings'] = $this->data['settings'];
+            $this->data['settings'] = get_settings('system_settings', true);
             $this->load->view('front-end/' . THEME . '/template', $this->data);
         } else {
-            redirect(base_url(), 'refresh');
+            // redirect(base_url(), 'refresh');
         }
     }
 
     public function manage_favorites()
     {
-        if ($this->ion_auth->logged_in()) {
+        if ($this->data['is_logged_in']) {
             $this->form_validation->set_rules('product_id', 'Product Id', 'trim|numeric|required|xss_clean');
             if (!$this->form_validation->run()) {
                 $this->response['error'] = true;
@@ -667,8 +683,6 @@ class My_account extends CI_Controller
                 if (is_exist($data, 'favorites')) {
                     $this->db->delete('favorites', $data);
                     $this->response['error']   = false;
-                    $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                    $this->response['csrfHash'] = $this->security->get_csrf_hash();
                     $this->response['message'] = "Product removed from favorite !";
                     print_r(json_encode($this->response));
                     return false;
@@ -676,16 +690,12 @@ class My_account extends CI_Controller
                 $data = escape_array($data);
                 $this->db->insert('favorites', $data);
                 $this->response['error'] = false;
-                $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                $this->response['csrfHash'] = $this->security->get_csrf_hash();
                 $this->response['message'] = 'Product Added to favorite';
                 print_r(json_encode($this->response));
                 return false;
             }
         } else {
             $this->response['error'] = true;
-            $this->response['csrfName'] = $this->security->get_csrf_token_name();
-            $this->response['csrfHash'] = $this->security->get_csrf_hash();
             $this->response['message'] = "Login First to Add Products in Favorite List.";
             print_r(json_encode($this->response));
             return false;
@@ -721,11 +731,6 @@ class My_account extends CI_Controller
         if (!$this->form_validation->run()) {
             $this->response['error'] = true;
             $this->response['message'] = strip_tags(validation_errors());
-            $this->response['message'] = array(
-                'user_id' => form_error('user_id'),
-                'payment_address' => form_error('payment_address'),
-                'amount' => form_error('amount'),
-            );;
             $this->response['data'] = array();
             print_r(json_encode($this->response));
         } else {
@@ -750,21 +755,15 @@ class My_account extends CI_Controller
                         $this->Customer_model->update_balance_customer($amount, $user_id, 'deduct');
                         $userData = fetch_details('users', ['id' => $_POST['user_id']], 'balance');
                         $this->response['error'] = false;
-                        $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                        $this->response['csrfHash'] = $this->security->get_csrf_hash();
                         $this->response['message'] = 'Withdrawal Request Sent Successfully';
                         $this->response['data'] = $userData[0]['balance'];
                     } else {
                         $this->response['error'] = true;
-                        $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                        $this->response['csrfHash'] = $this->security->get_csrf_hash();
                         $this->response['message'] = 'Cannot sent Withdrawal Request.Please Try again later.';
                         $this->response['data'] = array();
                     }
                 } else {
                     $this->response['error'] = true;
-                    $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                    $this->response['csrfHash'] = $this->security->get_csrf_hash();
                     $this->response['message'] = 'You don\'t have enough balance to sent the withdraw request.';
                     $this->response['data'] = array();
                 }
@@ -788,15 +787,20 @@ class My_account extends CI_Controller
 
     public function chat()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
             $this->data['main_page'] = 'chat';
-            $this->data['title'] = 'Chat | ' . $this->data['web_settings']['site_title'];
-            $this->data['keywords'] = 'Chat, ' . $this->data['web_settings']['meta_keywords'];
-            $this->data['description'] = 'Chat | ' . $this->data['web_settings']['meta_description'];
+            $this->data['title'] = 'Transactions | ' . $this->data['web_settings']['site_title'];
+            $this->data['keywords'] = 'Transactions, ' . $this->data['web_settings']['meta_keywords'];
+            $this->data['description'] = 'Transactions | ' . $this->data['web_settings']['meta_description'];
 
-            // $settings = get_settings('system_settings', true);
-            // $this->data['title'] = 'Update Notification Settings | ' . $settings['app_name'];
-            // $this->data['meta_description'] = ' Update Notification Settings  | ' . $settings['app_name'];
+            $settings = get_settings('system_settings', true);
+            $this->data['title'] = 'Update Notification Settings | ' . $settings['app_name'];
+            $this->data['meta_description'] = ' Update Notification Settings  | ' . $settings['app_name'];
             $this->data['fcm_server_key'] = get_settings('fcm_server_key');
             $users = $this->chat_model->get_chat_history($_SESSION['user_id'], 10, 0);
             $user = array();
@@ -874,11 +878,8 @@ class My_account extends CI_Controller
         if (!$this->ion_auth->logged_in()) {
             redirect('auth', 'refresh');
         } else {
-            $this->response['response'] = get_settings('firebase_settings');
-            $this->response['vap_id_key'] = get_settings('vap_id_key');
-            // echo "<pre>";
-            // print_r($this->response);
-            echo json_encode($this->response);
+            $response = get_settings('firebase_settings');
+            echo json_encode($response);
         }
     }
 
@@ -899,11 +900,11 @@ class My_account extends CI_Controller
 
             $users = $this->chat_model->get_chat_history($user_id, 20, 0);
 
-            // print_r($users);
-            $user_ids = array_column($users, 'opponent_user_id');
 
-            // $user_ids =  json_encode($idArray);
-            // print_r($user_ids);
+            $user_ids = explode(',', $users[0]['id']);
+            $section = array_map('trim', $user_ids);
+            $user_ids = $section;
+
 
             $members = $this->chat_model->get_members($user_ids);
             $member = array();
@@ -936,19 +937,82 @@ class My_account extends CI_Controller
 
             if (!empty($member)) {
                 $response['error'] = false;
-                // $response['csrfName'] = $this->security->get_csrf_token_name();
-                // $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['data'] = $data1;
                 echo json_encode($response);
             } else {
                 $response['error'] = true;
-                // $response['csrfName'] = $this->security->get_csrf_token_name();
-                // $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['message'] = 'Not Successful';
                 echo json_encode($response);
             }
         }
     }
+
+    // public function create_group()
+    // {
+
+    //     if ($this->ion_auth->logged_in()) {
+
+
+    //         $user_id = $this->session->userdata('user_id');
+
+    //         $this->form_validation->set_rules('title', 'Titel', 'trim|required|xss_clean');
+    //         $this->form_validation->set_rules('description', 'Description', 'trim|required|xss_clean');
+    //         if (!$this->form_validation->run()) {
+
+    //             $this->response['error'] = true;
+    //             $this->response['csrfName'] = $this->security->get_csrf_token_name();
+    //             $this->response['csrfHash'] = $this->security->get_csrf_hash();
+    //             $this->response['message'] = validation_errors();
+    //             print_r(json_encode($this->response));
+    //         } else {
+    //             $admin_id = $this->session->userdata('user_id');
+
+    //             if (!empty($this->input->post('users'))) {
+    //                 $group_mem_ids = implode(",", $this->input->post('users')) . ',' . $admin_id;
+    //                 $group_mem_ids = explode(",", $group_mem_ids);
+    //             } else {
+    //                 $group_mem_ids = array($this->session->userdata('user_id'));
+    //             }
+
+
+    //             $no_of_mem = count($group_mem_ids);
+
+    //             $data = array(
+    //                 'title' => strip_tags($this->input->post('title', true)),
+    //                 'description' => strip_tags($this->input->post('description', true)),
+    //                 'created_by' => $this->session->userdata('user_id'),
+    //                 'no_of_members' => $no_of_mem
+    //             );
+
+    //             $group_id = $this->chat_model->create_group($data);
+
+    //             if ($group_id != false) {
+
+    //                 foreach ($group_mem_ids as $user_id) {
+    //                     $data1 = array(
+    //                         'group_id' => $group_id,
+    //                         'user_id' => $user_id,
+    //                     );
+    //                     $this->chat_model->add_group_members($data1);
+    //                 }
+    //                 $admins_ids = array($admin_id);
+    //                 $this->chat_model->make_group_admin($group_id, $admins_ids);
+
+    //                 $this->session->set_flashdata('message', 'Group Created successfully.');
+    //                 $this->session->set_flashdata('message_type', 'success');
+    //             } else {
+    //                 $this->session->set_flashdata('message', 'Group could not Created! Try again!');
+    //                 $this->session->set_flashdata('message_type', 'error');
+    //             }
+
+    //             $response['error'] = false;
+    //             $response['message'] = 'Successful';
+    //             echo json_encode($response);
+    //         }
+    //     } else {
+    //         redirect('admin/login', 'refresh');
+    //     }
+    // }
 
     public function update_web_fcm()
     {
@@ -957,18 +1021,13 @@ class My_account extends CI_Controller
         } else {
             $fcm = $this->input->post('web_fcm');
             $user_id = $this->session->userdata('user_id');
-            // print_r($user_id);
             if ($this->chat_model->update_web_fcm($user_id, $fcm)) {
 
                 $response['error'] = false;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['message'] = 'Successful';
                 echo json_encode($response);
             } else {
                 $response['error'] = true;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['message'] = 'Not Successful';
                 echo json_encode($response);
             }
@@ -1152,20 +1211,85 @@ class My_account extends CI_Controller
                         echo 'Error:' . curl_error($ch);
 
                     curl_close($ch);
+                } else {
+
+                    // group user msg
+                    $group_id = $this->input->post('opposite_user_id');
+
+                    $users = $this->chat_model->get_group_members($group_id);
+                    foreach ($users as $user) {
+                        // $userdata = $this->users_model->get_user_by_id($user['user_id']);
+                        $userdata = fetch_details('users', ['active' => 1, 'id' => $user['user_id']]);
+                        if ($user['user_id'] != $this->session->userdata('user_id')) {
+                            $fcm_ids[] = $userdata[0]['web_fcm'];
+                        }
+                    }
+
+                    $registrationIDs = $fcm_ids;
+
+                    // this is the user who going to send FCM msg
+                    // $senders_info = $this->users_model->get_user_by_id($this->session->userdata('user_id'));
+                    $senders_info = fetch_details('users', ['active' => 1, 'id' => $this->session->userdata('user_id')]);
+
+                    $data = $notification = array();
+                    $notification['title'] = '#' . $users[0]['title'] . ' - ' . $senders_info[0]['username'];
+                    // $notification['picture'] = mb_substr($senders_info[0]['first_name'], 0, 1) . '' . mb_substr($senders_info[0]['last_name'], 0, 1);
+
+                    // $notification['profile'] = !empty($senders_info[0]['profile']) ? $senders_info[0]['profile'] : '';
+
+                    $notification['senders_name'] = $senders_info[0]['username'];
+                    $notification['type'] = 'message';
+                    $notification['message_type'] = 'group';
+                    $notification['from_id'] = $from_id;
+                    $notification['to_id'] = $group_id;
+                    $notification['msg_id'] = $msg_id;
+                    $notification['registrationIDs'] = $registrationIDs;
+                    $notification['new_msg'] = json_encode($new_msg);
+                    $notification['body'] = $this->input->post('chat-input-textarea');
+                    // $notification['icon'] = 'assets/icons/' . (!empty(get_half_logo()) ? get_half_logo() : 'logo-half.png');
+                    $notification['base_url'] = base_url('chat');
+                    $data['data']['data'] = $notification;
+                    $data['data']['webpush']['fcm_options']['link'] = base_url('chat');
+                    $data['registration_ids'] = $registrationIDs;
+
+                    $ch = curl_init();
+                    $fcm_key = get_settings('firebase_settings');
+
+                    $fcm_key = !empty($fcm_key) ? json_decode($fcm_key) : '';
+
+                    $fcm_key = !empty($fcm_key->fcm_server_key) ? $fcm_key->fcm_server_key : '';
+
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    $headers = array();
+                    $headers[] = "Authorization: key = " . $fcm_key;
+
+                    $headers[] = "Content-Type: application/json";
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+                    curl_setopt($ch, CURLOPT_URL, "https://fcm.googleapis.com/fcm/send");
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+                    $result['error'] = false;
+
+                    $this->chat_model->set_group_msg_as_unread($group_id, $this->session->userdata('user_id'));
+
+                    $result['response'] = curl_exec($ch);
+                    if (curl_errno($ch))
+                        echo 'Error:' . curl_error($ch);
+
+                    curl_close($ch);
                 }
 
                 $response['error'] = false;
                 $response['message'] = 'Successful';
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['msg_id'] = $msg_id;
                 $response['new_msg'] = $new_msg;
 
                 echo json_encode($response);
             } else {
                 $response['error'] = true;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['message'] = 'Not Successful';
                 echo json_encode($response);
             }
@@ -1183,15 +1307,10 @@ class My_account extends CI_Controller
             $from_id = $this->input->post('from_id');
             if ($this->chat_model->mark_msg_read($type, $from_id, $to_id)) {
                 $response['error'] = false;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['message'] = 'Successful';
                 echo json_encode($response);
             } else {
-
                 $response['error'] = true;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['message'] = 'Not Successful';
                 echo json_encode($response);
             }
@@ -1215,21 +1334,17 @@ class My_account extends CI_Controller
 
             if ($this->chat_model->delete_msg($from_id, $msg_id)) {
                 $response['error'] = false;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['message'] = 'Successful';
                 echo json_encode($response);
             } else {
                 $response['error'] = true;
-                $response['csrfName'] = $this->security->get_csrf_token_name();
-                $response['csrfHash'] = $this->security->get_csrf_hash();
                 $response['message'] = 'Not Successful';
                 echo json_encode($response);
             }
         }
     }
 
-    public function load_chat()
+     public function load_chat()
     {
         if (!$this->ion_auth->logged_in()) {
             redirect('auth', 'refresh');
@@ -1282,9 +1397,6 @@ class My_account extends CI_Controller
                 }
                 $i++;
             }
-            $message['csrfName'] = $this->security->get_csrf_token_name();
-            $message['csrfHash'] = $this->security->get_csrf_hash();;
-            // print_r($message);
             print_r(json_encode($message));
         }
     }
@@ -1298,15 +1410,12 @@ class My_account extends CI_Controller
             $id = $this->input->post('from_id');
             $users = $this->chat_model->switch_chat($id, $type);
             // $grp_members = $this->chat_model->get_group_members($id);
-            // print_r($type);
-            // print_r($id);
-            // print_r($users);
+            // print_R($users);
             // die;
 
             $user = array();
             $i = 0;
             foreach ($users as $row) {
-                // print_r($row);
 
                 $user[$i] = $row;
                 if (($type == 'person') || ($type == 'supporter')) {
@@ -1324,8 +1433,6 @@ class My_account extends CI_Controller
                 $i++;
             }
             // $user['grp_members'] = $grp_members;
-            $user['csrfName'] = $this->security->get_csrf_token_name();
-            $user['csrfHash'] = $this->security->get_csrf_hash();
 
             print_r(json_encode($user));
         }
@@ -1395,22 +1502,25 @@ class My_account extends CI_Controller
 
     public function floating_chat_classic()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
-            $this->data['title'] = 'Chat | ' . $this->data['web_settings']['site_title'];
-            $this->data['keywords'] = 'Chat, ' . $this->data['web_settings']['meta_keywords'];
-            $this->data['description'] = 'Chat | ' . $this->data['web_settings']['meta_description'];
+            $this->data['title'] = 'Transactions | ' . $this->data['web_settings']['site_title'];
+            $this->data['keywords'] = 'Transactions, ' . $this->data['web_settings']['meta_keywords'];
+            $this->data['description'] = 'Transactions | ' . $this->data['web_settings']['meta_description'];
 
-            // $settings = get_settings('system_settings', true);
-            // $this->data['title'] = 'Update Notification Settings | ' . $settings['app_name'];
-            // $this->data['meta_description'] = ' Update Notification Settings  | ' . $settings['app_name'];
+            $settings = get_settings('system_settings', true);
+            $this->data['title'] = 'Update Notification Settings | ' . $settings['app_name'];
+            $this->data['meta_description'] = ' Update Notification Settings  | ' . $settings['app_name'];
             $this->data['fcm_server_key'] = get_settings('fcm_server_key');
             // echo "<pre>";
             // print_r($_SESSION['user_id']);
             // die;    
             $user = array();
             $users = $this->chat_model->get_chat_history($_SESSION['user_id'], 10, 0);
-            // print_R($users);
-            // die;
             $i = 0;
             $type = 'person';
             $to_id = $this->session->userdata('user_id');
@@ -1456,14 +1566,19 @@ class My_account extends CI_Controller
     }
     public function floating_chat_modern()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         if ($this->ion_auth->logged_in()) {
-            $this->data['title'] = 'Chat | ' . $this->data['web_settings']['site_title'];
-            $this->data['keywords'] = 'Chat, ' . $this->data['web_settings']['meta_keywords'];
-            $this->data['description'] = 'Chat | ' . $this->data['web_settings']['meta_description'];
+            $this->data['title'] = 'Transactions | ' . $this->data['web_settings']['site_title'];
+            $this->data['keywords'] = 'Transactions, ' . $this->data['web_settings']['meta_keywords'];
+            $this->data['description'] = 'Transactions | ' . $this->data['web_settings']['meta_description'];
 
-            // $settings = get_settings('system_settings', true);
-            // $this->data['title'] = 'Update Notification Settings | ' . $settings['app_name'];
-            // $this->data['meta_description'] = ' Update Notification Settings  | ' . $settings['app_name'];
+            $settings = get_settings('system_settings', true);
+            $this->data['title'] = 'Update Notification Settings | ' . $settings['app_name'];
+            $this->data['meta_description'] = ' Update Notification Settings  | ' . $settings['app_name'];
             $this->data['fcm_server_key'] = get_settings('fcm_server_key');
             // echo "<pre>";
             // print_r($_SESSION['user_id']);
@@ -1517,13 +1632,13 @@ class My_account extends CI_Controller
     public function search_user()
     {
         $this->db->select('*');
-        $this->db->from('users');
-        $this->db->join('users_groups', 'users_groups.user_id = users.id', 'left');
-        $this->db->where("users_groups.group_id != 2 ");
-        $this->db->where("users_groups.group_id != 3 ");
-        $this->db->where("users.username like '%" . $_GET['search'] . "%'");
+        $this->db->from('seller_data');
+        $this->db->join('users as seller_user', 'seller_data.user_id = seller_user.id');
 
-        // echo $this->db->last_query();
+        
+        // Fetch users
+        // $this->db->select('*');
+        $this->db->where("seller_user.username like '%" . $_GET['search'] . "%'");
         $fetched_records = $this->db->get();
         $users = $fetched_records->result_array();
         // Initialize Array with fetched data
@@ -1536,88 +1651,4 @@ class My_account extends CI_Controller
 
     // =================================== end code for chat ==========================================
 
-    public function tickets()
-    {
-        if ($this->ion_auth->logged_in()) {
-            $limits = ($this->input->get('per-page')) ? $this->input->get('per-page', true) : 4;
-
-            $total_row = fetch_details('tickets', ['user_id' => $_SESSION['user_id']], 'id');
-            // foreach ($total_row as $total_rows) {
-
-            $total = count($total_row);
-
-            $config['base_url'] = base_url('my_account/tickets');
-            $config['total_rows'] = $total;
-            $config['per_page'] = $limits;
-            $config['use_page_numbers'] = TRUE;
-            $config['uri_segment'] = 3;
-            $config['num_links'] = 7;
-            $config['use_page_numbers'] = TRUE;
-            $config['reuse_query_string'] = TRUE;
-            $config['page_query_string'] = FALSE;
-
-            $config['attributes'] = array('class' => 'page-link');
-            $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
-            $config['full_tag_close'] = '</ul>';
-
-            $config['first_tag_open'] = '<li class="page-item">';
-            $config['first_link'] = 'First';
-            $config['first_tag_close'] = '</li>';
-
-            $config['last_tag_open'] = '<li class="page-item">';
-            $config['last_link'] = 'Last';
-            $config['last_tag_close'] = '</li>';
-
-            $config['prev_tag_open'] = '<li class="page-item">';
-            $config['prev_link'] = '<i class="fa fa-arrow-left"></i>';
-            $config['prev_tag_close'] = '</li>';
-
-            $config['next_tag_open'] = '<li class="page-item">';
-            $config['next_link'] = '<i class="fa fa-arrow-right"></i>';
-            $config['next_tag_close'] = '</li>';
-
-            $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link">';
-            $config['cur_tag_close'] = '</a></li>';
-
-            $config['num_tag_open'] = '<li class="page-item">';
-            $config['num_tag_close'] = '</li>';
-            $page_no = (empty($this->uri->segment(3))) ? 1 : $this->uri->segment(3);
-            if (!is_numeric($page_no)) {
-                redirect(base_url('my_account/tickets'));
-            }
-            $offset = ($page_no - 1) * $limits;
-            $this->pagination->initialize($config);
-            $this->data['links'] =  $this->pagination->create_links();
-
-
-
-            // }
-
-            $this->data['main_page'] = 'tickets';
-            $this->data['title'] = 'Customer Support | ' . $this->data['web_settings']['site_title'];
-            $this->data['keywords'] = 'Customer Support, ' . $this->data['web_settings']['meta_keywords'];
-            $this->data['description'] = 'Customer Support | ' . $this->data['web_settings']['meta_description'];
-            $this->data['meta_description'] = 'Customer Support | ' . $this->data['web_settings']['site_title'];
-            $this->data['ticket_types'] = fetch_details('ticket_types');
-            $this->data['tickets'] = fetch_details('tickets', ['user_id' => $_SESSION['user_id']], '*', $limits, $offset, 'DESC');
-            $this->load->view('front-end/' . THEME . '/template', $this->data);
-        } else {
-            redirect(base_url(), 'refresh');
-        }
-    }
-
-    public function refer_and_earn()
-    {
-        if ($this->ion_auth->logged_in()) {
-            $_SESSION['user_id'];
-            $data = fetch_details('users', ['id' => $_SESSION['user_id']],  'mobile,password');
-            if ($this->ion_auth->logged_in()) {
-                $this->data['main_page'] = 'refer-and-earn';
-                $this->data['title'] = 'Refer and earn | ' . $this->data['web_settings']['site_title'];
-                $this->data['keywords'] = 'Refer and earn, ' . $this->data['web_settings']['meta_keywords'];
-                $this->data['description'] = 'Refer and earn | ' . $this->data['web_settings']['meta_description'];
-                $this->load->view('front-end/' . THEME . '/template', $this->data);
-            }
-        }
-    }
 }

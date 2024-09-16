@@ -53,20 +53,20 @@ function cssBundleMain() {
 }
 exports.cssBundleMain = cssBundleMain;
 
-function cssBundleMainRTL() {
-    return src([
-        'assets/front_end/modern/css/bootstrap.min.css',
-        'assets/front_end/modern/css/style.css',
-        'assets/front_end/modern/css/custom.css',
-        'assets/front_end/modern/css/products.css',
-    ])
-        .pipe(sourcemaps.init())
-        .pipe(concat('eshop-bundle-main.css'))
-        .pipe(postcss([autoprefixer(), cssnano()])) //not all plugins work with postcss only the ones mentioned in their documentation
-        .pipe(sourcemaps.write('.'))
-        .pipe(dest('assets/front_end/modern/css/rtl'));
-}
-exports.cssBundleMainRTL = cssBundleMainRTL;
+// function cssBundleMainRTL() {
+//     return src([
+//         'assets/front_end/modern/css/bootstrap.min.css',
+//         'assets/front_end/modern/css/style.css',
+//         'assets/front_end/modern/css/custom.css',
+//         'assets/front_end/modern/css/products.css',
+//     ])
+//         .pipe(sourcemaps.init())
+//         .pipe(concat('eshop-bundle-main.css'))
+//         .pipe(postcss([autoprefixer(), cssnano()])) //not all plugins work with postcss only the ones mentioned in their documentation
+//         .pipe(sourcemaps.write('.'))
+//         .pipe(dest('assets/front_end/modern/css/rtl'));
+// }
+// exports.cssBundleMainRTL = cssBundleMainRTL;
 
 
 

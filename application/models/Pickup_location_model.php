@@ -40,7 +40,7 @@ class Pickup_location_model extends CI_Model
         $offset = 0;
         $limit = 10;
         $sort = 'id';
-        $order = 'DESC';
+        $order = 'ASC';
         $multipleWhere = '';
         $where = [];
 
@@ -75,13 +75,13 @@ class Pickup_location_model extends CI_Model
         if (isset($_GET['search']) and $_GET['search'] != '') {
             $search = $_GET['search'];
             if ($table == 'pickup_locations') {
-                $multipleWhere = ['pickup_locations.id' => $search, 'pickup_locations.pickup_location' => $search, 'pickup_locations.email' => $search, 'pickup_locations.phone' => $search, 'pickup_locations.name' => $search];
+                $multipleWhere = ['pickup_locations.id' => $search, 'pickup_locations.pickup_location' => $search, 'pickup_locations.email' => $search, 'pickup_locations.phone' => $search];
             }
         }
         if (isset($_POST['search']) and $_POST['search'] != '') {
             $search = $_POST['search'];
             if ($table == 'pickup_locations') {
-                $multipleWhere = ['pickup_locations.id' => $search, 'pickup_locations.pickup_location' => $search, 'pickup_locations.email' => $search, 'pickup_locations.phone' => $search, 'pickup_locations.name' => $search];
+                $multipleWhere = ['pickup_locations.id' => $search, 'pickup_locations.pickup_location' => $search, 'pickup_locations.email' => $search, 'pickup_locations.phone' => $search];
             }
         }
         if (isset($_GET['seller_id']) and $_GET['seller_id'] != '') {

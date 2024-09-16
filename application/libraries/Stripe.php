@@ -13,7 +13,6 @@
 */
 
 const DEFAULT_TOLERANCE = 300;
-#[\AllowDynamicProperties]
 class Stripe
 {
     private $secret_key = "";

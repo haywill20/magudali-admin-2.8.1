@@ -41,16 +41,17 @@ $(document).ready(function () {
         dataType: 'json',
         success: function (result) {
 
-            var res = JSON.parse(result.response);
 
-            csrfName = result.csrfName,
-                csrfHash = result.csrfHash
+            var res = JSON.parse(result);
+
+            csrfName = res['csrfName'];
+            csrfHash = res['csrfHash'];
             // const app = firebase.initializeApp(res);
             const app = initializeApp(res);
 
             const messaging = getMessaging();
             requestPermission();
-            getToken(messaging, { vapidKey: result.vap_id_key }).then((currentToken) => {
+            getToken(messaging, { vapidKey: 'BFEiHMx_xNqwKyUpJWziDBrlNc4bvUWVp0LeHfG1KTWK5kz1cXljFut7791iQ712nNQf2Syki3JzXIK0eaP_tj4' }).then((currentToken) => {
                 console.log("Inside get Token");
                 if (currentToken) {
                     console.log("Token :", currentToken);
@@ -111,7 +112,7 @@ $(document).ready(function () {
             onMessage(messaging, (payload) => {
                 console.log(payload);
                 var notification = JSON.parse(payload.data.data);
-
+            
                 if (notification.type == 'typing') {
                     console.log("in typing");
                     var from_id_fmc = notification.from_id;
@@ -323,7 +324,7 @@ function getOnlineMemebers() {
         success: function (result) {
             var data = JSON.parse(result);
 
-            $.each(data?.data?.members, function (key, val) {
+            $.each(data.data.members, function (key, val) {
 
                 var i = $("li").find("[data-id='" + val.id + "'][data-type='person'] i");
                 if (val.is_online == 1) {
@@ -353,20 +354,20 @@ function getOnlineMemebers() {
 
             });
 
-            // $.each(data.data.groups, function (key, val) {
+            $.each(data.data.groups, function (key, val) {
 
-            //     if (val.is_read != 0) {
-            //         if (window_is_focused == false) {
-            //             newLoadChat(val.group_id, 'group');
-            //         }
-            //         var i = $("li").find("[data-id='" + val.group_id + "'][data-type='group']");
-            //         i.addClass("new-msg-rcv");
-            //         i.find(".badge-group-chat").remove();
-            //         i.append('<div class="badge-chat badge-group-chat">New</div>');
-            //     }
+                if (val.is_read != 0) {
+                    if (window_is_focused == false) {
+                        newLoadChat(val.group_id, 'group');
+                    }
+                    var i = $("li").find("[data-id='" + val.group_id + "'][data-type='group']");
+                    i.addClass("new-msg-rcv");
+                    i.find(".badge-group-chat").remove();
+                    i.append('<div class="badge-chat badge-group-chat">New</div>');
+                }
 
 
-            // });
+            });
 
             setTimeout(getOnlineMemebers, 10000);
 
@@ -432,8 +433,7 @@ $(document).on('keyup', '#in-chat-search', function () {
             data: {
                 from_id: from_id,
                 type: type,
-                search: search,
-                [csrfName]: csrfHash
+                search: search
             },
             dataTpe: 'json',
             success: function (result) {
@@ -708,7 +708,6 @@ $(document).on('submit', '#chat-form2', function (e) {
                 data: {
                     from_id: from_id,
                     type: type,
-                    [csrfName]: csrfHash
                 },
                 dataTpe: 'json',
                 success: function (result) {
@@ -750,6 +749,35 @@ $(document).on('submit', '#chat-form2', function (e) {
     return false;
 });
 
+
+$(document).on('click', '#delete_group', function (e) {
+    e.preventDefault();
+    var group_id = $(this).data("id");
+    Swal.fire({
+        title: 'Are you sure want to delete group ?',
+        text: 'All messages and related media & attachments will be deleted forever, you will not be able to recover it later!',
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    })
+        .then((willDelete) => {
+
+            if (willDelete) {
+                deleteGroup(group_id);
+            }
+        });
+});
+
+function deleteGroup(group_id) {
+    $.ajax({
+        url: base_url + "seller/chat/delete_group/" + group_id,
+        type: "POST",
+        data: csrfName + "=" + csrfHash,
+        success: function (result) {
+            location.reload();
+        }
+    });
+}
 
 $(document).on('click', '.delete-msg-alert', function (e) {
     e.preventDefault();
@@ -899,8 +927,7 @@ function markMsgRead(from_id, type) {
         type: "POST",
         data: {
             from_id: from_id,
-            type: type,
-            [csrfName]: csrfHash
+            type: type
         },
         dataTpe: 'json',
         success: function (result) {
@@ -931,8 +958,7 @@ function newLoadChat(from_id, type, offset = '', limit = '', sort = '', order = 
             offset: offset,
             limit: limit,
             sort: sort,
-            order: order,
-            [csrfName]: csrfHash
+            order: order
         },
         dataTpe: 'json',
         success: function (result) {
@@ -999,8 +1025,7 @@ function loadChat(from_id, type, offset = '', limit = '', sort = '', order = '')
             offset: offset,
             limit: limit,
             sort: sort,
-            order: order,
-            [csrfName]: csrfHash
+            order: order
         },
         dataTpe: 'json',
         success: function (result) {
@@ -1034,8 +1059,7 @@ function sendFCM(receiver_id, title, msg, type, message_type = '') {
             title: title,
             msg: msg,
             type: type,
-            message_type: message_type,
-            [csrfName]: csrfHash
+            message_type: message_type
         },
         dataTpe: 'json',
         success: function (result) { }
@@ -1116,8 +1140,7 @@ function switchChat(from_id, type) {
         type: "POST",
         data: {
             from_id: from_id,
-            type: type,
-            [csrfName]: csrfHash
+            type: type
         },
         dataTpe: 'json',
         success: function (result) {
@@ -1144,6 +1167,24 @@ function switchChat(from_id, type) {
                     $("#chat_online_status").removeClass("text-success");
                     $("#chat_online_status").html("<i class='far fa-circle'></i> Offline");
                 }
+
+            } else {
+
+                if (person[0].is_admin == true) {
+                    var is_admin = "<a href='#' data-id='" + person[0].id + "' class='btn btn-xl edit_btn text-blue' data-toggle='modal' data-target='#modal-edit-group'><i class='fa fa-edit'></i> Edit</a>";
+                    var is_admin_delete = "<a href='#' data-id='" + person[0].id + "' class='delete_grp btn btn-xl text-danger' ><i class='fa fa-trash'></i> Delete</a>";
+                } else {
+                    var is_admin = "<a href='#' data-id='" + person[0].id + "' id='modal-info-group-call'> Info</a>";
+                }
+
+                if (is_admin_delete != '' && is_admin_delete != undefined) {
+                    $("#chat_title").html(person[0].title + ' ' + is_admin + '  ' + is_admin_delete);
+                } else {
+                    $("#chat_title").html(person[0].title + ' ' + is_admin);
+                }
+                var html = '<figure class="avatar avatar-md" data-initial="' + person[0].picture + '"></figure>';
+                $("#chat-avtar-main").html(html);
+                $("#chat_online_status").html('');
             }
 
         }
@@ -1151,6 +1192,92 @@ function switchChat(from_id, type) {
 
 }
 
+$(document).on('click', '.edit_btn', function () {
+    var grp_id = $(this).data('id')
+
+    $.ajax({
+        type: "POST",
+        url: base_url + "seller/chat/get_group_members",
+        data: {
+            group_id: grp_id
+        },
+        dataType: "json",
+        success: function (result) {
+            var title = result['data'][0].title;
+            var description = result['data'][0].description;
+            var update_id = result['data'][0].group_id;
+
+            var user_ids = [];
+            var admin_ids = [];
+            $.each(result['data'], function (key, val) {
+                user_ids[key] = val.user_id;
+                if (val.is_admin == 1) {
+                    admin_ids[key] = val.user_id;
+                }
+            });
+
+            $('#update_id').val(update_id);
+            $('#delete_group').attr("data-id", update_id);
+            $('#update_title').val(title);
+            $('#update_description').val(description);
+            $('#update_users').val(user_ids);
+            $('#update_users').trigger('change');
+
+            $('#update_admins').val(admin_ids);
+            $('#update_admins').trigger('change');
+
+            // $("#modal-edit-group").trigger("click");
+        }
+    });
+});
+
+$(document).on('click', '.delete_grp', function () {
+    var grp_id = $(this).data('id')
+
+    Swal.fire({
+        title: 'Are You Sure!',
+        text: "You won't be able to revert this!",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        showLoaderOnConfirm: true,
+        preConfirm: function () {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'POST',
+                    url: base_url + 'seller/chat/delete_group',
+                    data: {
+                        grp_id: grp_id,
+                        [csrfName]: csrfHash
+                    },
+                    dataType: 'json',
+                    success: function (result) {
+                        csrfName = result['csrfName'];
+                        csrfHash = result['csrfHash'];
+                        if (result.error == false) {
+
+                            Swal.fire('Success', 'Group Deleted !', 'success');
+                            setTimeout(function () {
+                                location.reload();
+                            }, 600);
+                        } else {
+                            Swal.fire('Oops...', 'Something went wrong with ajax !', 'error');
+                        }
+
+                    }
+                });
+            });
+        },
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.cancel) {
+            Swal.fire('Cancelled!', 'Your data is  safe.', 'error');
+        }
+    });
+
+});
 
 function onSrollTopLoadChat() {
     if ($("#chat-box-content").scrollTop() == 0) {
@@ -1245,6 +1372,86 @@ $(document).on('click', '.go-to-bottom-btn', function () {
     $(".go-to-bottom-btn").hide();
 });
 
+$(document).on("click", "#modal-edit-group-call", function () {
+
+    var id = $(this).data("id");
+    $.ajax({
+        type: "POST",
+        url: base_url + "seller/chat/get_group_members",
+        data: {
+            group_id: id
+        },
+        dataType: "json",
+        success: function (result) {
+            var title = result['data'][0].title;
+            var description = result['data'][0].description;
+            var update_id = result['data'][0].group_id;
+
+            var user_ids = [];
+            var admin_ids = [];
+            $.each(result['data'], function (key, val) {
+                user_ids[key] = val.user_id;
+                if (val.is_admin == 1) {
+                    admin_ids[key] = val.user_id;
+                }
+            });
+
+            $('#update_id').val(update_id);
+            $('#delete_group').attr("data-id", update_id);
+            $('#update_title').val(title);
+            $('#update_description').val(description);
+            $('#update_users').val(user_ids);
+            $('#update_users').trigger('change');
+
+            $('#update_admins').val(admin_ids);
+            $('#update_admins').trigger('change');
+
+            $("#modal-edit-group").trigger("click");
+        }
+    });
+
+});
+
+$(document).on("click", "#modal-info-group-call", function () {
+
+    var id = $(this).data("id");
+    $.ajax({
+        type: "POST",
+        url: base_url + "seller/chat/get_group_members",
+        data: {
+            group_id: id
+        },
+        dataType: "json",
+        success: function (result) {
+            var title = result['data'][0].title;
+            var description = result['data'][0].description;
+            var update_id = result['data'][0].group_id;
+
+            var user_ids = [];
+            var admin_ids = [];
+
+            $.each(result['data'], function (key, val) {
+                user_ids[key] = val.user_id;
+                if (val.is_admin == 1) {
+                    admin_ids[key] = val.user_id;
+                }
+            });
+
+            $('#update_id_info').val(update_id);
+            $('#update_title_info').val(title);
+            $('#update_description_info').val(description);
+            $('#update_users_info').val(user_ids);
+            $('#update_users_info').trigger('change');
+
+            $('#update_admins_info').val(admin_ids);
+            $('#update_admins_info').trigger('change');
+
+            $("#modal-info-group").trigger("click");
+            $('#modal-info-group').modal('show')
+        }
+    });
+
+});
 
 Dropzone.autoDiscover = false;
 var myDropzone = new Dropzone("#myAlbum", {

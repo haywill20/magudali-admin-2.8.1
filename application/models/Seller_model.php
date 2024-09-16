@@ -19,21 +19,21 @@ class Seller_model extends CI_Model
 
         $seller_data = [
             'user_id' => $data['user_id'],
-            'national_identity_card' => (isset($data['national_identity_card']) && !empty($data['national_identity_card'])) ? $data['national_identity_card'] : '',
-            'address_proof' => (isset($data['address_proof']) && !empty($data['address_proof'])) ?  $data['address_proof'] : '',
+            'national_identity_card' => $data['national_identity_card'],
+            'address_proof' => $data['address_proof'],
             'logo' => $data['store_logo'],
-            'authorized_signature' => (isset($data['authorized_signature']) && !empty($data['authorized_signature'])) ? $data['authorized_signature'] : '',
+            'authorized_signature' => $data['authorized_signature'],
             'status' => (isset($data['status']) && $data['status'] != "") ? $data['status'] : 2,
-            'pan_number' => (isset($data['pan_number']) && !empty($data['pan_number'])) ? $data['pan_number'] : '',
-            'tax_number' => (isset($data['tax_number']) && !empty($data['tax_number'])) ? $data['tax_number'] : '',
-            'tax_name' => (isset($data['tax_name']) && !empty($data['tax_name'])) ? $data['tax_name'] : '',
-            'bank_name' => (isset($data['bank_name']) && !empty($data['bank_name'])) ? $data['bank_name'] : '',
-            'bank_code' => (isset($data['bank_code']) && !empty($data['bank_code'])) ? $data['bank_code'] : '',
-            'account_name' => (isset($data['account_name']) && !empty($data['account_name'])) ? $data['account_name'] : '',
-            'account_number' => (isset($data['account_number']) && !empty($data['account_number'])) ? $data['account_number'] : '',
-            'store_description' => (isset($data['store_description']) && !empty($data['store_description'])) ?  $data['store_description'] : '',
-            'store_url' => (isset($data['store_url']) && !empty($data['store_url'])) ? $data['store_url'] : '',
-            'store_name' => (isset($data['store_name']) && !empty($data['store_name'])) ? $data['store_name'] : '',
+            'pan_number' => $data['pan_number'],
+            'tax_number' => $data['tax_number'],
+            'tax_name' => $data['tax_name'],
+            'bank_name' => $data['bank_name'],
+            'bank_code' => $data['bank_code'],
+            'account_name' => $data['account_name'],
+            'account_number' => $data['account_number'],
+            'store_description' => $data['store_description'],
+            'store_url' => $data['store_url'],
+            'store_name' => $data['store_name'],
             'commission' => (isset($data['global_commission']) && $data['global_commission'] != "") ? $data['global_commission'] : 0,
             'category_ids' => (isset($data['categories']) && $data['categories'] != "") ? $data['categories'] : null,
             'permissions' => (isset($data['permissions']) && $data['permissions'] != "") ? json_encode($data['permissions']) : null,
@@ -87,9 +87,8 @@ class Seller_model extends CI_Model
         $this->db->set($data)->where('id', $data['id'])->update('seller_data');
     }
 
-    function get_sellers_list($get_sellers_list = "")
+    function get_sellers_list()
     {
-        // print_r($get_sellers_list);
         $offset = 0;
         $limit = 10;
         $sort = 'u.id';
@@ -128,19 +127,6 @@ class Seller_model extends CI_Model
             $count_res->where($where);
         }
 
-        if ($get_sellers_list == "approved") {
-            $count_res->where('sd.status', '1');
-        }
-        if ($get_sellers_list == "not_approved") {
-            $count_res->where('sd.status', '2');
-        }
-        if ($get_sellers_list == "deactive") {
-            $count_res->where('sd.status', '0');
-        }
-        if ($get_sellers_list == "removed") {
-            $count_res->where('sd.status', '7');
-        }
-
         $offer_count = $count_res->get('users u')->result_array();
         foreach ($offer_count as $row) {
             $total = $row['total'];
@@ -157,21 +143,6 @@ class Seller_model extends CI_Model
             $search_res->where($where);
         }
 
-        if ($get_sellers_list == "approved") {
-            $search_res->where('sd.status', '1');
-        }
-        if ($get_sellers_list == "not_approved") {
-            $search_res->where('sd.status', '2');
-        }
-        if ($get_sellers_list == "deactive") {
-            $search_res->where('sd.status', '0');
-        }
-        if ($get_sellers_list == "removed") {
-            $search_res->where('sd.status', '7');
-        }
-        // echo $this->db->last_query();
-
-
         $offer_search_res = $search_res->order_by($sort, $order)->limit($limit, $offset)->get('users u')->result_array();
 
         $bulkData = array();
@@ -182,9 +153,9 @@ class Seller_model extends CI_Model
         foreach ($offer_search_res as $row) {
             $row = output_escaping($row);
             $operate = " <a href='manage-seller?edit_id=" . $row['user_id'] . "' data-id=" . $row['user_id'] . " class='btn action-btn btn-success btn-xs mr-2 mb-1' title='Edit' ><i class='fa fa-pen'></i></a>";
-            $operate .= '<a  href="javascript:void(0)" class="delete-sellers btn action-btn btn-danger btn-xs mr-2 mb-1" title="Delete Seller with related seller data "   data-id="' . $row['user_id'] . '" ><i class="fa fa-trash"></i></a>';
+            $operate .= '<a  href="javascript:void(0)" class="delete-sellers btn action-btn btn-danger btn-xs mr-2 mb-1" title="Delete"   data-id="' . $row['user_id'] . '" ><i class="fa fa-trash"></i></a>';
             if ($row['status'] == '1' || $row['status'] == '0' || $row['status'] == '2') {
-                $operate .= '<a  href="javascript:void(0)" class="remove-sellers action-btn btn btn-warning btn-xs mr-2 mb-1" title="Remove Seller only"  data-id="' . $row['user_id'] . '" data-seller_status="' . $row['status'] . '" ><i class="fas fa-user-slash"></i></a>';
+                $operate .= '<a  href="javascript:void(0)" class="remove-sellers action-btn btn btn-warning btn-xs mr-2 mb-1" title="Remove Seller"  data-id="' . $row['user_id'] . '" data-seller_status="' . $row['status'] . '" ><i class="fas fa-user-slash"></i></a>';
             } else if ($row['status'] == '7') {
                 $operate .= '<a  href="javascript:void(0)" class="remove-sellers action-btn btn btn-primary btn-xs mr-2 mb-1" title="Restore Seller"  data-id="' . $row['user_id'] . '" data-seller_status="' . $row['status'] . '" ><i class="fas fa-user"></i></a>';
             }
@@ -227,63 +198,20 @@ class Seller_model extends CI_Model
             else if ($row['status'] == 7)
                 $tempRow['status'] = "<label class='badge badge-danger'>Removed</label>";
 
-            $categories = explode(",", $row['category_ids']);
-            $category_names = array();
+            $tempRow['category_ids'] = $row['category_ids'];
 
-            if (isset($categories) && count($categories) > 0 && !empty($categories)) {
-                foreach ($categories as $category_id) {
-                    $category = fetch_details('categories', ['id' => $category_id], 'name');
-                    if (!empty($category)) {
-                        $category_names[] = str_replace('\\', ' ', $category[0]['name']);
-                    }
-                }
-            }
-            // $tempRow['category_ids'] = $row['category_ids'];
-            $tempRow['category_ids'] = implode(' , ', $category_names);
+            $row['logo'] = base_url() . $row['logo'];
+            $tempRow['logo'] = '<div class="mx-auto product-image image-box-100"><a href=' . $row['logo'] . ' data-toggle="lightbox" data-gallery="gallery"><img src=' . $row['logo'] . ' class="rounded"></a></div>';
 
-            if (empty($row['logo'])) {
-                $row['logo_img'] = base_url() . NO_IMAGE;
-            } else {
-                $row['logo_img'] = base_url() . $row['logo'];
-            }
-            // $row['logo'] = base_url() . $row['logo'];
-            $tempRow['logo'] = '<div class="mx-auto product-image image-box-100"><a href=' . $row['logo_img'] . ' data-toggle="lightbox" data-gallery="gallery"><img src=' . $row['logo_img'] . ' class="rounded"></a></div>';
-
-            if (empty($row['national_identity_card'])) {
-                $row['national_identity_card'] = base_url() . NO_IMAGE;
-            } else {
-                $row['national_identity_card'] = base_url() . $row['national_identity_card'];
-            }
             $row['national_identity_card'] = get_image_url($row['national_identity_card']);
             $tempRow['national_identity_card'] = '<div class="mx-auto product-image image-box-100"><a href=' . $row['national_identity_card'] . ' data-toggle="lightbox" data-gallery="gallery"><img src=' . $row['national_identity_card'] . ' class="rounded"></a></div>';
 
-            if (empty($row['address_proof'])) {
-                $row['address_proof'] = base_url() . NO_IMAGE;
-            } else {
-                $row['address_proof'] = base_url() . $row['address_proof'];
-            }
             $row['address_proof'] = get_image_url($row['address_proof']);
             $tempRow['address_proof'] = '<div class="mx-auto product-image image-box-100"><a href=' . $row['address_proof'] . ' data-toggle="lightbox" data-gallery="gallery"><img src=' . $row['address_proof'] . ' class="rounded"></a></div>';
 
-            $permissions = $row['permissions'];
-            $permissions_data = json_decode($permissions, true);
-
-            if (isset($permissions_data) && !empty($permissions_data)) {
-                $permissions_html = ''; // Initialize an empty string to store permissions HTML
-
-                foreach ($permissions_data as $key => $value) {
-                    $permissions_key = str_replace('_', ' ', $key);
-                    $permissions_value = ($value == 1) ? "<label class='badge badge-success'>Yes</label>" : "<label class='badge badge-danger'>No</label>";
-                    // Concatenate each permission to the HTML string
-                    $permissions_html .= '<div class="' . htmlspecialchars($permissions_key) . '">' . htmlspecialchars($permissions_key) . ' -> ' . $permissions_value . '</div>';
-                }
-                // Assign the concatenated HTML string to $row['permissions']
-                $row['permissions'] = $permissions_html;
-            }
-            // $tempRow['permissions'] = $row['permissions'];
             $tempRow['permissions'] = $row['permissions'];
             $tempRow['balance'] =  $row['balance'] == null || $row['balance'] == 0 || empty($row['balance']) ? "0" : number_format($row['balance'], 2);
-            $tempRow['date'] = date('d-m-Y', strtotime($row['created_at']));
+            $tempRow['date'] = $row['created_at'];
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }
@@ -362,8 +290,6 @@ class Seller_model extends CI_Model
 
         $offer_search_res = $search_res->group_by('u.id')->order_by($sort, $order)->limit($limit, $offset)->get('users u')->result_array();
         $bulkData = array();
-
-        // echo $this->db->last_query();
         $bulkData['error'] = (empty($offer_search_res)) ? true : false;
         $bulkData['message'] = (empty($offer_search_res)) ? 'Seller(s) does not exist' : 'Seller retrieved successfully';
         $bulkData['total'] = (empty($offer_search_res)) ? 0 : $total;
@@ -389,7 +315,6 @@ class Seller_model extends CI_Model
             $tempRow['store_url'] = $row['store_url'];
             $tempRow['store_description'] = $row['store_description'];
             $tempRow['seller_profile'] = base_url() . $row['logo'];
-            $tempRow['seller_profile_path'] = $row['logo'];
             $tempRow['balance'] =  $row['balance'] == null || $row['balance'] == 0 || empty($row['balance']) ? "0" : number_format($row['balance'], 2);
             $tempRow['total_products'] = $total[0]['total'];
             $rows[] = $tempRow;
@@ -465,8 +390,6 @@ class Seller_model extends CI_Model
                 foreach ($seller_ids as $seller) {
                     //custom message
                     $settings = get_settings('system_settings', true);
-                    $firebase_project_id = get_settings('firebase_project_id');
-                    $service_account_file = get_settings('service_account_file');
                     $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                     $user_res = fetch_details('users', ['id' => $seller], 'username,fcm_id,email,mobile');
                     $custom_notification = fetch_details('custom_notifications', ['type' => "settle_seller_commission"], '');
@@ -486,14 +409,14 @@ class Seller_model extends CI_Model
                         ["users.mobile" => $user_res[0]['mobile']]
                     ));
                     $fcm_ids = array();
-                    if (!empty($user_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                    if (!empty($user_res[0]['fcm_id'])) {
                         $fcmMsg = array(
                             'title' => $customer_title,
                             'body' => $customer_msg,
                             'type' => "commission",
                         );
                         $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                        send_notification($fcmMsg, $fcm_ids);
                     }
                 }
             } else {
@@ -552,7 +475,7 @@ class Seller_model extends CI_Model
             $multipleWhere = ['u.`id`' => $search, 'u.`username`' => $search, 'u.`email`' => $search, 'u.`mobile`' => $search, 'u.`address`' => $search, 'u.`balance`' => $search];
         }
 
-        $count_res = $this->db->select(' COUNT(u.id) as `total` ')->where('sd.status', 1)->join('users_groups ug', ' ug.user_id = u.id ')->join('seller_data sd', ' sd.user_id = u.id ');
+        $count_res = $this->db->select(' COUNT(u.id) as `total` ')->where('status', 1)->join('users_groups ug', ' ug.user_id = u.id ')->join('seller_data sd', ' sd.user_id = u.id ');
 
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $count_res->group_start();
@@ -569,7 +492,7 @@ class Seller_model extends CI_Model
             $total = $row['total'];
         }
 
-        $search_res = $this->db->select(' u.*,sd.* ')->join('users_groups ug', ' ug.user_id = u.id ')->join('seller_data sd', ' sd.user_id = u.id ')->where('sd.status', 1);
+        $search_res = $this->db->select(' u.*,sd.* ')->join('users_groups ug', ' ug.user_id = u.id ')->join('seller_data sd', ' sd.user_id = u.id ')->where('status', 1);
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $search_res->group_start();
             $search_res->or_like($multipleWhere);
@@ -638,7 +561,7 @@ class Seller_model extends CI_Model
 
             $tempRow['permissions'] = $row['permissions'];
             $tempRow['balance'] =  $row['balance'] == null || $row['balance'] == 0 || empty($row['balance']) ? "0" : $row['balance'];
-            $tempRow['date'] =  date('d-m-Y', strtotime($row['created_at']));
+            $tempRow['date'] = $row['created_at'];
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }
@@ -691,9 +614,7 @@ class Seller_model extends CI_Model
             $total = $row['total'];
         }
 
-        $search_res = $this->db->select(' u.*,sd.*')->where('sd.status', '2')->join('users_groups ug', ' ug.user_id = u.id ')->join('seller_data sd', ' sd.user_id = u.id ');
-        // echo $this->db->last_query();
-        // die;
+        $search_res = $this->db->select(' u.*,sd.* ')->where('status', '2')->join('users_groups ug', ' ug.user_id = u.id ')->join('seller_data sd', ' sd.user_id = u.id ');
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $search_res->group_start();
             $search_res->or_like($multipleWhere);
@@ -762,7 +683,7 @@ class Seller_model extends CI_Model
 
             $tempRow['permissions'] = $row['permissions'];
             $tempRow['balance'] =  $row['balance'] == null || $row['balance'] == 0 || empty($row['balance']) ? "0" : $row['balance'];
-            $tempRow['date'] =  date('d-m-Y', strtotime($row['created_at']));
+            $tempRow['date'] = $row['created_at'];
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }
@@ -815,7 +736,7 @@ class Seller_model extends CI_Model
             $total = $row['total'];
         }
 
-        $search_res = $this->db->select(' u.*,sd.* ')->where('sd.status', '0')->join('users_groups ug', ' ug.user_id = u.id ')->join('seller_data sd', ' sd.user_id = u.id ');
+        $search_res = $this->db->select(' u.*,sd.* ')->where('status', '0')->join('users_groups ug', ' ug.user_id = u.id ')->join('seller_data sd', ' sd.user_id = u.id ');
         if (isset($multipleWhere) && !empty($multipleWhere)) {
             $search_res->group_start();
             $search_res->or_like($multipleWhere);
@@ -884,7 +805,7 @@ class Seller_model extends CI_Model
 
             $tempRow['permissions'] = $row['permissions'];
             $tempRow['balance'] =  $row['balance'] == null || $row['balance'] == 0 || empty($row['balance']) ? "0" : $row['balance'];
-            $tempRow['date'] =  date('d-m-Y', strtotime($row['created_at']));
+            $tempRow['date'] = $row['created_at'];
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }

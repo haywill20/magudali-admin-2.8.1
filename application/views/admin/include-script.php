@@ -84,7 +84,7 @@
 <!-- Firebase.js -->
 <script type="text/javascript" src="<?= base_url('assets/admin/js/firebase-app.js') ?>"></script>
 <script type="text/javascript" src="<?= base_url('assets/admin/js/firebase-auth.js') ?>"></script>
-<script type="module" src="<?= base_url('firebase-config.js') ?>"></script>
+<script type="text/javascript" src="<?= base_url('firebase-config.js') ?>"></script>
 
 
 <!-- Custom -->

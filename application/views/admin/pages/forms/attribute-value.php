@@ -43,11 +43,11 @@
                                 <div class="form-group row">
                                     <label for="value" class="col-sm-2 col-form-label">Value <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" pattern="^[^,]*$" id="value" placeholder="value" name="value" value="<?= @$fetched_data[0]['value'] ?>">
+                                        <input type="text" class="form-control" id="value" placeholder="value" name="value" value="<?= @$fetched_data[0]['value'] ?>">
                                     </div>
                                 </div>
                                 <?php
-                                $no_display_image =  $no_display_color = "";
+                                 $no_display_image =  $no_display_color = "";
                                 if (isset($fetched_data[0]['id'])) { ?>
                                     <input type="hidden" name="edit_attribute_value" value="<?= @$fetched_data[0]['id'] ?>">
                                 <?php  } ?>
@@ -63,25 +63,25 @@
                                 <div class="form-group row">
                                     <label for="attribute_value_type" class="col-sm-2 col-form-label">Select Attribute Swatche Type </label>
                                     <div class="col-sm-10">
-                                        <select class="form-control swatche_type" name="swatche_type">
-                                            <option value="0" <?= (@$fetched_data[0]['swatche_type'] == "0") ? "selected" : ""; ?>> Default </option>
-                                            <option value="1" <?= (@$fetched_data[0]['swatche_type'] == "1") ? "selected" : ""; ?>> Color </option>
-                                            <option value="2" <?= (@$fetched_data[0]['swatche_type'] == "2") ? "selected" : ""; ?>> Image </option>
+                                        <select class="form-control swatche_type"  name="swatche_type">
+                                            <option value="0" <?=(@$fetched_data[0]['swatche_type'] == "0") ? "selected": ""; ?>> Default </option>
+                                            <option value="1" <?=(@$fetched_data[0]['swatche_type'] == "1") ? "selected": ""; ?>> Color </option>
+                                            <option value="2" <?=(@$fetched_data[0]['swatche_type'] == "2") ? "selected": ""; ?>> Image </option>
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group row" id="swatche_color" <?= $no_display_color  ?>>
+                                <div class="form-group row" id="swatche_color" <?=$no_display_color  ?>>
                                     <label for="value" class="col-sm-2 col-form-label">Select Color </label>
                                     <div class="col-sm-10">
-                                        <input type="color" class="form-control" id="swatche_value" placeholder="Color hex" name="swatche_value" value="<?= (isset($fetched_data[0]['swatche_type']) && !empty($fetched_data) && $fetched_data[0]['swatche_type'] == "1") ? $fetched_data[0]['swatche_value'] : "" ?>">
+                                        <input type="color" class="form-control" id="swatche_value" placeholder="Color hex" name="swatche_value" value="<?=(isset($fetched_data[0]['swatche_type']) && !empty($fetched_data) && $fetched_data[0]['swatche_type'] == "1") ? $fetched_data[0]['swatche_value'] : "" ?>">
                                     </div>
                                 </div>
-                                <div class="form-group row" id="swatche_image" <?= $no_display_image  ?>>
+                                <div class="form-group row" id="swatche_image" <?=$no_display_image  ?>>
                                     <label for="value" class="col-sm-2 col-form-label">Select Image </label>
                                     <div class="col-sm-10">
                                         <div class='col-md-3'><a class="uploadFile img btn btn-primary text-white btn-sm" data-input='swatche_value' data-isremovable='0' data-is-multiple-uploads-allowed='0' data-toggle="modal" data-target="#media-upload-modal" value="Upload Photo"><i class='fa fa-upload'></i> Upload</a></div>
                                         <?php
-                                        if (file_exists(FCPATH  . @$fetched_data[0]['swatche_value']) && !empty(@$fetched_data[0]['swatche_value']) && @$fetched_data[0]['swatche_type'] == "2") {
+                                        if (file_exists(FCPATH  . @$fetched_data[0]['swatche_value']) && !empty(@$fetched_data[0]['swatche_value']) && @$fetched_data[0]['swatche_type'] == "2" ) {
                                             $fetched_data[0]['swatche_value'] = get_image_url($fetched_data[0]['swatche_value']);
                                         ?>
                                             <div class="container-fluid row image-upload-section">
@@ -91,7 +91,8 @@
                                                 </div>
                                             </div>
                                         <?php
-                                        } else { ?>
+                                        } 
+                                        else { ?>
                                             <div class="container-fluid row image-upload-section">
                                                 <div class="col-md-3 col-sm-12 shadow p-3 mb-5 bg-white rounded m-4 text-center grow image d-none">
                                                 </div>
@@ -104,7 +105,10 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Attribute Value' : 'Add Attribute Value' ?></button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                </div>
+                            </div>
                         </form>
                     </div>
                     <!--/.card-->

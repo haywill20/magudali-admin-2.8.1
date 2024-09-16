@@ -28781,11 +28781,6 @@ figure img {
   min-height: 15rem;
 }
 
-.map-full iframe{
-  height: 100% !important;
-  width: 100% !important;
-}
-
 [class*=mt-n],
 [class*=mb-n] {
   position: relative;
@@ -40471,7 +40466,7 @@ button.hamburger span {
 }
 
 .swiper-controls .swiper-pagination {
-  /* bottom: -2.8rem; */
+  bottom: -2.8rem;
   position: absolute !important;
   pointer-events: all;
 }
@@ -47572,7 +47567,7 @@ video.player {
     height: 1px;
     background: none;
     border-top: 1px solid rgba(164, 174, 198, 0.2);
-    top: 1.2rem;
+    top: 1.5rem;
     z-index: 1;
     left: 3rem;
   }

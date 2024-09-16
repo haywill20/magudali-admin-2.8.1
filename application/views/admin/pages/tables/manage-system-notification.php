@@ -26,7 +26,7 @@
                                 </div>
                             </div>
                             <div class="gaps-1-5x"></div>
-                            <table class='table-striped' id='system_notofication_table' data-toggle="table" data-url="<?= base_url('admin/Notification_settings/get_notifications_data') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="read_by" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="noti_query_params">
+                            <table class='table-striped' id='system_notofication_table' data-toggle="table" data-url="<?= base_url('admin/Notification_settings/get_notifications_data') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="read_by" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="noti_query_params">
                                 <thead>
                                     <tr>
                                         <th data-field="id" data-sortable="true" data-align='center'>ID</th>

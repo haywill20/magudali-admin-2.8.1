@@ -35,15 +35,11 @@
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="support_number">Support Number <span class='text-danger text-xs'>*</span></label>
-                                        <input type="text" maxlength="16" oninput="validateNumberInput(this)" class="form-control" name="support_number" value="<?= (isset($settings['support_number'])) ? $settings['support_number'] : '' ?>" placeholder="Customer support mobile number - used in whole system" />
+                                        <input type="number" class="form-control" name="support_number" value="<?= (isset($settings['support_number'])) ? $settings['support_number'] : '' ?>" placeholder="Customer support mobile number - used in whole system" />
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="support_email">Support Email <span class='text-danger text-xs'>*</span></label>
                                         <input type="text" class="form-control" name="support_email" value="<?= (isset($settings['support_email'])) ? $settings['support_email'] : '' ?>" placeholder="Customer support email - used in whole system" />
-                                    </div>
-                                    <div class="form-group col-md-12">
-                                        <label for="address">Copyright Details <span class='text-danger text-xs'>*</span></label>
-                                        <textarea name="copyright_details" id="copyright_details" class="form-control" cols="30" rows="3"><?= (isset($settings['copyright_details'])) ? output_escaping($settings['copyright_details']) : '' ?></textarea>
                                     </div>
                                     <div class="form-group col-md-12">
                                         <div class="row">
@@ -118,7 +114,7 @@
                                     <hr>
                                     <?php $class = isset($settings['area_wise_delivery_charge']) && $settings['area_wise_delivery_charge'] == '1' ? 'col-md-6' : 'col-md-4' ?>
                                     <div class="form-group area_wise_delivery_charge <?= $class ?>">
-                                        <label for="area_wise_delivery_charge">Zipcode Wise Delivery Charge <small>( Enable / Disable )</small></label>
+                                        <label for="area_wise_delivery_charge">Area Wise Delivery Charge <small>( Enable / Disable )</small></label>
                                         <div class="card-body">
                                             <input type="checkbox" name="area_wise_delivery_charge" id="area_wise_delivery_charge" value="area_wise_delivery_charge" <?= (isset($settings['area_wise_delivery_charge']) && $settings['area_wise_delivery_charge'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
                                         </div>
@@ -206,9 +202,8 @@
                                             <label for="cart_btn_on_list "> Google </label>
                                             <input type="checkbox" name="google_login" class="mr-3" <?= (isset($settings['google_login']) && $settings['google_login'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
 
-                                            <!-- <label for="cart_btn_on_list"> Facebook </label>
-                                            <input type="checkbox" name="facebook_login" <? //= (isset($settings['facebook_login']) && $settings['facebook_login'] == '1') ? 'Checked' : ''  
-                                                                                            ?> data-bootstrap-switch data-off-color="danger" data-on-color="success"> -->
+                                            <label for="cart_btn_on_list"> Facebook </label>
+                                            <input type="checkbox" name="facebook_login" <?= (isset($settings['facebook_login']) && $settings['facebook_login'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
 
                                             <label for="cart_btn_on_list"> Apple </label>
                                             <input type="checkbox" name="apple_login" <?= (isset($settings['apple_login']) && $settings['apple_login'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
@@ -224,7 +219,7 @@
                                         <div class="row">
                                             <div class="form-group col-md-12 d-flex justify-content-between">
                                                 <label class="mb-2" for="social_login">Whatsapp</label>
-                                                <a class="form-switch mr-1 mb-1" title="Deactivate" href="javascript:void(0)"> <input type="checkbox" class="form-check-input " id="whatsapp_status" role="switch" name="whatsapp_status" <?= (isset($settings['whatsapp_status']) && $settings['whatsapp_status'] == true) ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success" /></a>
+                                                <a class="form-switch mr-1 mb-1" title="Deactivate" href="javascript:void(0)"> <input type="checkbox" class="form-check-input " id="whatsapp_status" role="switch" name="whatsapp_status" <?= (isset($settings['whatsapp_status']) && $settings['whatsapp_status'] == true) ? 'Checked' : ''  ?> /></a>
                                             </div>
                                             <div>
                                                 <input type="number" class="form-control <?= (isset($settings['whatsapp_status']) && $settings['whatsapp_status'] == 1) ? '' : 'collapse'  ?>" name="whatsapp_number" id="whatapp_number_input" placeholder="Whatsapp Number" value="<?= isset($settings['whatsapp_number']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $settings['whatsapp_number'])) : ""; ?>">
@@ -234,27 +229,7 @@
                                             </div>
                                         </div> -->
                                     </div>
-                                    
-                                </div>
-                                <h4>Native Link Settings For APP</h4>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-md-6">
-                                        <label for="android_app_store_link">android Play Store Link <span class='text-danger text-xs'>*</span></label>
-                                        <input type="text" class="form-control" id="android_app_store_link" name="android_app_store_link" value="<?= (isset($settings['android_app_store_link'])) ? output_escaping($settings['android_app_store_link']) : '' ?>" placeholder="android App Store Link" />
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="ios_app_store_link">ios App Store Link<span class='text-danger text-xs'>*</span></label>
-                                        <input type="text" class="form-control" id="ios_app_store_link" name="ios_app_store_link" value="<?= (isset($settings['ios_app_store_link'])) ? output_escaping($settings['ios_app_store_link']) : '' ?>" placeholder="ios App Store Link" />
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="scheme">Scheme For APP <span class='text-danger text-xs'>*</span></label>
-                                        <input type="text" class="form-control" id="scheme" name="scheme" value="<?= (isset($settings['scheme'])) ? output_escaping($settings['scheme']) : '' ?>" placeholder="Scheme For APP" />
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="host">Domain name For APP<span class='text-danger text-xs'>*</span></label>
-                                        <input type="text" class="form-control" id="host" name="host" value="<?= (isset($settings['host'])) ? output_escaping($settings['host']) : '' ?>" placeholder="Host For APP" />
-                                    </div>
+
                                 </div>
                                 <h4>Refer & Earn Settings</h4>
                                 <hr>
@@ -308,17 +283,19 @@
                                     </div>
                                 </div>
 
-                                <!-- <div class="row">
+                                <div class="row">
                                     <div class="col-md-12 form-group">
                                         <span class="d-flex align-items-center ">
                                             <h4>Upload Other Attachments &nbsp;</h4>
                                         </span>
+                                        <!-- <b class="m-2">Upload Other Attachments </b> -->
                                         <hr>
 
                                         <div class="form-group col-md-12 d-flex">
                                             <label class="mb-2" for="allow_order_attachments"> Allow Upload Order Attachment? </label>
                                             <div class="mx-5">
-                                                <a class="toggle form-switch  mr-1 mb-1" title="Deactivate" href="javascript:void(0)"> <input type="checkbox" class="form-check-input " role="switch" name="allow_order_attachments" <?= (isset($settings['allow_order_attachments']) && $settings['allow_order_attachments'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success" /></a>
+
+                                                <a class="toggle form-switch  mr-1 mb-1" title="Deactivate" href="javascript:void(0)"> <input type="checkbox" class="form-check-input " role="switch" name="allow_order_attachments" <?= (isset($settings['allow_order_attachments']) && $settings['allow_order_attachments'] == '1') ? 'Checked' : ''  ?>  data-bootstrap-switch data-off-color="danger" data-on-color="success"/></a>
                                             </div>
                                         </div>
 
@@ -326,187 +303,123 @@
                                             <label class="mb-2" for="upload_limit"> Maximum upload limit </label>
                                             <input type="number" min="0" name="upload_limit" min="1" class="form-control mb-2" value="<?= (isset($settings['upload_limit']) && $settings['upload_limit'] != '') ? $settings['upload_limit'] : ''  ?>" max="10" placeholder="Maximum upload limit" />
                                         </div>
+
+
+
                                     </div>
-                                </div> -->
-
-                                <?php $shipping_settings = get_settings('shipping_method', true); ?>
-                                <!-- <div class="col-md-4 mt-4"> -->
-                                <?php
-                                if (isset($shipping_settings) && !empty($shipping_settings)) { ?>
-
-
-                                    <div class="row">
-                                        <div class="col-md-12 form-group">
-                                            <!-- <div class="card card-body"> -->
-                                            <span class="d-flex align-items-center ">
-                                                <h4 class="m-2">Product Deliverability</h4>
-                                            </span>
-                                            <hr>
-                                            <div class="row">
-                                                <div class="form-group col-md-12 d-flex">
-                                                    <label class="mb-2" for="social_login">Pincode Wise Deliverability</label>
-                                                    <div class="mx-5">
-                                                        <a class="toggle form-switch  mr-1 mb-1" title="Deactivate" href="javascript:void(0)"> <input type="checkbox" class="form-check-input " role="switch" name="pincode_wise_deliverability" <?= (isset($settings['pincode_wise_deliverability']) && $settings['pincode_wise_deliverability'] == true) ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success" /></a>
-                                                    </div>
-                                                    <!-- <a class="form-switch mr-1 mb-1" title="Deactivate" href="javascript:void(0)"> <input type="checkbox" class="form-check-input" id="" role="switch" name="pincode_wise_deliverability" <?= (isset($settings['pincode_wise_deliverability']) && $settings['pincode_wise_deliverability'] == true) ? 'Checked' : ''  ?> /></a> -->
-                                                </div>
-                                                <div class="form-group col-md-12 d-flex">
-                                                    <label class="mb-2" for="social_login">City Wise Deliverability
-                                                        <?php if ($shipping_settings['shiprocket_shipping_method'] == 1) { ?>
-                                                            <small class="text-muted">(Disabled because standard shipping is on from shipping method)</small>
-                                                        <?php } ?></label>
-                                                    <div class="mx-5">
-                                                        <a class="toggle form-switch  mr-1 mb-1" title="Deactivate" href="javascript:void(0)">
-                                                            <input type="checkbox" class="form-check-input" role="switch" name="city_wise_deliverability" <?= (isset($settings['city_wise_deliverability']) && $settings['city_wise_deliverability'] == true) ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success" <?= ($shipping_settings['shiprocket_shipping_method'] == 1) ? 'disabled' : '' ?> /></a>
-                                                    </div>
-                                                    <!-- <a class="form-switch mr-1 mb-1" title="Deactivate" href="javascript:void(0)">
-                                                    <input type="checkbox" class="form-check-input" id="" role="switch" name="city_wise_deliverability" <?= (isset($settings['city_wise_deliverability']) && $settings['city_wise_deliverability'] == true) ? 'checked' : '' ?> <?= ($shipping_settings['shiprocket_shipping_method'] == 1) ? 'disabled' : '' ?> />
-                                                </a> -->
-
-                                                </div>
-
-
-                                            </div>
-                                            <!-- </div> -->
-                                        </div>
-                                    </div>
-                                    <!-- </div> -->
-                                <?php }
-                                ?>
+                                </div>
 
                             </div>
-                            <div class="card-body">
-                                <span class="d-flex align-items-center ">
-                                    <h4>Country Currency &nbsp;</h4>
-                                </span>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-md-4">
-                                        <label for="supported_locals">Country Currency Code</label>
-                                        <select name="supported_locals" class="form-control">
-                                            <?php
-                                            $CI = &get_instance();
-                                            $CI->config->load('eshop');
-                                            $supported_methods = $CI->config->item('supported_locales_list');
-                                            foreach ($supported_methods as $key => $value) {
-                                                $text = "$key - $value "; ?>
-                                                <option value="<?= $key ?>" <?= (isset($settings['supported_locals']) && !empty($settings['supported_locals']) && $key == $settings['supported_locals']) ? "selected" : "" ?>><?= $key . ' - ' . $value ?></option>
-                                            <?php  }
-                                            ?>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="currency">Store Currency ( Symbol or Code - $ or USD - Anyone ) <span class='text-danger text-xs'>*</span></label>
-                                        <input type="text" class="form-control" name="currency" value="<?= (isset($settings['currency'])) ? $settings['currency'] : '' ?>" placeholder="Either Symbol or Code - For Example $ or USD" />
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="currency">Decimal Point</label>
-                                        <select name="decimal_point" class="form-control">
-                                            <?php
-                                            $CI = &get_instance();
-                                            $CI->config->load('eshop');
-                                            $decimal_points = $CI->config->item('decimal_point');
-                                            foreach ($decimal_points as $key => $value) {
-                                                $text = "$key - $value "; ?>
-                                                <option value="<?= $key ?>" <?= (isset($settings['decimal_point']) && !empty($settings['decimal_point']) && $key == $settings['decimal_point']) ? "selected" : "" ?>><?= $value ?></option>
-                                            <?php  }
-                                            ?>
-                                        </select>
+                            <span class="d-flex align-items-center ">
+                                <h4>Country Currency &nbsp;</h4>
+                            </span>
+                            <hr>
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label for="supported_locals">Country Currency Code</label>
+                                    <select name="supported_locals" class="form-control">
+                                        <?php
+                                        $CI = &get_instance();
+                                        $CI->config->load('eshop');
+                                        $supported_methods = $CI->config->item('supported_locales_list');
+                                        foreach ($supported_methods as $key => $value) {
+                                            $text = "$key - $value "; ?>
+                                            <option value="<?= $key ?>" <?= (isset($settings['supported_locals']) && !empty($settings['supported_locals']) && $key == $settings['supported_locals']) ? "selected" : "" ?>><?= $key . ' - ' . $value ?></option>
+                                        <?php  }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="currency">Store Currency ( Symbol or Code - $ or USD - Anyone ) <span class='text-danger text-xs'>*</span></label>
+                                    <input type="text" class="form-control" name="currency" value="<?= (isset($settings['currency'])) ? $settings['currency'] : '' ?>" placeholder="Either Symbol or Code - For Example $ or USD" />
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="currency">Decimal Point</label>
+                                    <select name="decimal_point" class="form-control">
+                                        <?php
+                                        $CI = &get_instance();
+                                        $CI->config->load('eshop');
+                                        $decimal_points = $CI->config->item('decimal_point');
+                                        foreach ($decimal_points as $key => $value) {
+                                            $text = "$key - $value "; ?>
+                                            <option value="<?= $key ?>" <?= (isset($settings['decimal_point']) && !empty($settings['decimal_point']) && $key == $settings['decimal_point']) ? "selected" : "" ?>><?= $value ?></option>
+                                        <?php  }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <hr>
+                            <h4>Order Settings</h4>
+                            <hr>
+                            <div class="row">
+                                <div class="form-group col-md-12 col-sm-12">
+                                    <label for="is_single_seller_order"> Single Seller Order System
+                                    </label>
+                                    <div class="card-body">
+                                        <input type="checkbox" name="is_single_seller_order" <?= (isset($settings['is_single_seller_order']) && $settings['is_single_seller_order'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
                                     </div>
                                 </div>
-                                <hr>
-                                <h4>Order Settings</h4>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-md-12 col-sm-12">
-                                        <div class="card-body">
-                                            <label for="is_single_seller_order"> Single Seller Order System
-                                            </label>
-                                            <input type="checkbox" name="is_single_seller_order" <?= (isset($settings['is_single_seller_order']) && $settings['is_single_seller_order'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                                        </div>
+                            </div>
+                            <h4>Maintenance Mode</h4><small>(If you Enable Maintenance Mode of App your App Will be in "Under Maintenance")</small>
+                            <hr>
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label for="is_customer_app_under_maintenance"> Customer App</label>
+                                    <div class="card-body pl-0">
+                                        <input type="checkbox" name="is_customer_app_under_maintenance" <?= (isset($settings['is_customer_app_under_maintenance']) && $settings['is_customer_app_under_maintenance'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
+                                    </div>
+                                    <label for="message_for_customer_app"> Message for Customer App</label>
+                                    <div class="card-body pl-0">
+                                        <textarea type="text" class="form-control" id="message_for_customer_app" placeholder="Message for Customer App" name="message_for_customer_app"><?= isset($settings['message_for_customer_app']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $settings['message_for_customer_app'])) : ""; ?></textarea>
                                     </div>
                                 </div>
-                                <!-- <div class="">
-                                    <input class="mb-2" type="checkbox" name="is_single_seller_order" <?= (isset($settings['is_single_seller_order']) && $settings['is_single_seller_order'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                                </div> -->
-
-                                <h4>Maintenance Mode</h4><small>(If you Enable Maintenance Mode of App your App Will be in "Under Maintenance")</small>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-md-3">
-                                        <label for="is_customer_app_under_maintenance"> Customer App</label>
-                                        <div class="card-body pl-0">
-                                            <input type="checkbox" name="is_customer_app_under_maintenance" <?= (isset($settings['is_customer_app_under_maintenance']) && $settings['is_customer_app_under_maintenance'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                                        </div>
-                                        <label for="message_for_customer_app"> Message for Customer App</label>
-                                        <div class="card-body pl-0">
-                                            <textarea type="text" class="form-control" id="message_for_customer_app" placeholder="Message for Customer App" name="message_for_customer_app"><?= isset($settings['message_for_customer_app']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $settings['message_for_customer_app'])) : ""; ?></textarea>
-                                        </div>
+                                <div class="form-group col-md-4">
+                                    <label for="is_seller_app_under_maintenance"> Seller App</label>
+                                    <div class="card-body pl-0">
+                                        <input type="checkbox" name="is_seller_app_under_maintenance" <?= (isset($settings['is_seller_app_under_maintenance']) && $settings['is_seller_app_under_maintenance'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
                                     </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="is_seller_app_under_maintenance"> Seller App</label>
-                                        <div class="card-body pl-0">
-                                            <input type="checkbox" name="is_seller_app_under_maintenance" <?= (isset($settings['is_seller_app_under_maintenance']) && $settings['is_seller_app_under_maintenance'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                                        </div>
-                                        <label for="message_for_seller_app"> Message for Seller App</label>
-                                        <div class="card-body pl-0">
-                                            <textarea type="text" class="form-control" id="message_for_seller_app" placeholder="Message for Seller App" name="message_for_seller_app"><?= isset($settings['message_for_seller_app']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $settings['message_for_seller_app'])) : ""; ?></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="is_delivery_boy_app_under_maintenance"> Delivery boy App</label>
-                                        <div class="card-body pl-0">
-                                            <input type="checkbox" name="is_delivery_boy_app_under_maintenance" <?= (isset($settings['is_delivery_boy_app_under_maintenance']) && $settings['is_delivery_boy_app_under_maintenance'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                                        </div>
-                                        <label for="message_for_delivery_boy_app"> Message for Delivery boy App</label>
-                                        <div class="card-body pl-0">
-                                            <textarea type="text" class="form-control" id="message_for_delivery_boy_app" placeholder="Message for Delivery boy App" name="message_for_delivery_boy_app"><?= isset($settings['message_for_delivery_boy_app']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $settings['message_for_delivery_boy_app'])) : ""; ?></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="is_web_under_maintenance"> Web Maintenance Mode</label>
-                                        <div class="card-body pl-0">
-                                            <input type="checkbox" name="is_web_under_maintenance" <?= (isset($settings['is_web_under_maintenance']) && $settings['is_web_under_maintenance'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                                        </div>
-                                        <label for="message_for_web"> Message for Web</label>
-                                        <div class="card-body pl-0">
-                                            <textarea type="text" class="form-control" id="message_for_web" placeholder="Message for Web" name="message_for_web"><?= isset($settings['message_for_web']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $settings['message_for_web'])) : ""; ?></textarea>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <h4>Cron Job URL for Seller commission</h4>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-md-8">
-                                        <label for="app_name">Cron Job URL <span class='text-danger text-xs'>*</span> <small>(Set this URL at your server cron job list for "once a day")</small></label>
-                                        <a class="btn btn-xs btn-primary text-white mb-2" data-toggle="modal" data-target="#howItWorksModal" title="How it works">How seller commission works?</a>
-                                        <input type="text" class="form-control" name="app_name" value="<?= base_url('admin/cron-job/settle-seller-commission') ?>" disabled />
+                                    <label for="message_for_seller_app"> Message for Seller App</label>
+                                    <div class="card-body pl-0">
+                                        <textarea type="text" class="form-control" id="message_for_seller_app" placeholder="Message for Seller App" name="message_for_seller_app"><?= isset($settings['message_for_seller_app']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $settings['message_for_seller_app'])) : ""; ?></textarea>
                                     </div>
                                 </div>
-                                <h4>Cron Job URL for Add Promo Code Discount</h4>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-md-8">
-                                        <label for="app_name">Add Promo Code Discount URL <span class='text-danger text-xs'>*</span> <small>(Set this URL at your server cron job list for "once a day")</small></label>
-                                        <a class="btn btn-xs btn-primary text-white mb-2" data-toggle="modal" data-target="#howItWorksModal1" title="How it works">How Promo Code Discount works?</a>
-                                        <input type="text" class="form-control" name="app_name" value="<?= base_url('admin/cron_job/settle_cashback_discount') ?>" disabled />
+                                <div class="form-group col-md-4">
+                                    <label for="is_delivery_boy_app_under_maintenance"> Delivery boy App</label>
+                                    <div class="card-body pl-0">
+                                        <input type="checkbox" name="is_delivery_boy_app_under_maintenance" <?= (isset($settings['is_delivery_boy_app_under_maintenance']) && $settings['is_delivery_boy_app_under_maintenance'] == '1') ? 'Checked' : ''  ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
                                     </div>
-                                </div>
-                                <h4>Cron Job URL for Remaining Item in cart</h4>
-                                <hr>
-                                <div class="row">
-                                    <div class="form-group col-md-8">
-                                        <label for="app_name">Add Promo Code Discount URL <span class='text-danger text-xs'>*</span> <small>(Set this URL at your server cron job list for "once a day")</small></label>
-                                        <!-- <a class="btn btn-xs btn-primary text-white mb-2" data-toggle="modal" data-target="#howItWorksModal1" title="How it works">How Promo Code Discount works?</a> -->
-                                        <input type="text" class="form-control" name="app_name" value="<?= base_url('admin/cron_job/remaining_cart') ?>" disabled />
+                                    <label for="message_for_delivery_boy_app"> Message for Delivery boy App</label>
+                                    <div class="card-body pl-0">
+                                        <textarea type="text" class="form-control" id="message_for_delivery_boy_app" placeholder="Message for Delivery boy App" name="message_for_delivery_boy_app"><?= isset($settings['message_for_delivery_boy_app']) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $settings['message_for_delivery_boy_app'])) : ""; ?></textarea>
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <button type="reset" class="btn btn-warning">Reset</button>
-                                    <button type="submit" class="btn btn-success" id="submit_btn">Update Settings</button>
+                            </div>
+                            <h4>Cron Job URL for Seller commission</h4>
+                            <hr>
+                            <div class="row">
+                                <div class="form-group col-md-8">
+                                    <label for="app_name">Cron Job URL <span class='text-danger text-xs'>*</span> <small>(Set this URL at your server cron job list for "once a day")</small></label>
+                                    <a class="btn btn-xs btn-primary text-white mb-2" data-toggle="modal" data-target="#howItWorksModal" title="How it works">How seller commission works?</a>
+                                    <input type="text" class="form-control" name="app_name" value="<?= base_url('admin/cron-job/settle-seller-commission') ?>" disabled />
                                 </div>
+                            </div>
+                            <h4>Cron Job URL for Add Promo Code Discount</h4>
+                            <hr>
+                            <div class="row">
+                                <div class="form-group col-md-8">
+                                    <label for="app_name">Add Promo Code Discount URL <span class='text-danger text-xs'>*</span> <small>(Set this URL at your server cron job list for "once a day")</small></label>
+                                    <a class="btn btn-xs btn-primary text-white mb-2" data-toggle="modal" data-target="#howItWorksModal1" title="How it works">How Promo Code Discount works?</a>
+                                    <input type="text" class="form-control" name="app_name" value="<?= base_url('admin/cron_job/settle_cashback_discount') ?>" disabled />
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="reset" class="btn btn-warning">Reset</button>
+                                <button type="submit" class="btn btn-success" id="submit_btn">Update Settings</button>
                             </div>
                     </div>
                     </form>

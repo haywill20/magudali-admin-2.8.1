@@ -19,7 +19,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-
+             
                 <div class="col-md-12">
                     <div class="card card-info">
                         <!-- form start -->
@@ -35,16 +35,10 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="form-group col-md-4">
-                                        <label for="city_name">Zipcode <span class='text-danger text-sm'>*</span>
-                                            <?php if (isset($settings['city_wise_deliverability']) && $settings['city_wise_deliverability'] == 1) { ?>
-                                                <span class="text-info" title="You can enable Pincode wise deliverability from System -> store settings -> prodct deliverability ">(?)</span>
-                                            <?php } ?>
-                                            <!-- <p class="text-info" title="You can enable Pincode wise deliverability from System -> store settings -> prodct deliverability ">(why disable?)</p> -->
-                                        </label>
-
+                                        <label for="city_name">Zipcode <span class='text-danger text-sm'>*</span></label>
                                     </div>
                                     <div class="form-group col-md-8">
-                                        <input type="text" class="form-control" name="zipcode" id="zipcode" value="<?= (isset($fetched_data[0]['zipcode']) ? $fetched_data[0]['zipcode'] : '') ?>" <?= isset($settings['pincode_wise_deliverability']) && $settings['pincode_wise_deliverability'] == 1 ? '' : 'disabled' ?>>
+                                        <input type="text" class="form-control" name="zipcode" id="zipcode" value="<?= (isset($fetched_data[0]['zipcode']) ? $fetched_data[0]['zipcode'] : '') ?>">
                                     </div>
                                 </div>
                                 <div class="row city_list_select">
@@ -52,7 +46,7 @@
                                         <label for="city" class="control-label">City <span class='text-danger text-xs'>*</span></label>
                                     </div>
                                     <div class="form-group col-md-8">
-                                        <select class="form-control city_list" name="city" id="city_list">
+                                        <select class="form-control" name="city" id="city_list">
                                             <option value=" ">Select City</option>
                                             <?php foreach ($city as $row) { ?>
                                                 <option value="<?= $row['id'] ?>" <?= (isset($fetched_data[0]['city_id']) && $row['id'] == $fetched_data[0]['city_id']) ? 'selected' : ' ' ?>><?= $row['name'] ?></option>
@@ -84,7 +78,10 @@
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                </div>
+                            </div>
                         </form>
                     </div>
                     <!--/.card-->
@@ -116,22 +113,15 @@
                                 </div>
                             </div>
                             <div class="gaps-1-5x"></div>
-                            <div id="zipcodeToolbar">
-                                        <button id="zipcode_remove" class="btn btn-danger">
-                                            <i class="fa fa-trash mr-2"></i> Delete
-                                        </button>
-                                    </div>
-                            <table class='table-striped' data-toolbar="#zipcodeToolbar" id='zipcode-table' data-toggle="table" data-url="<?= base_url('admin/area/view_zipcodes') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-single-select='false' data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="zipcodeToolbar" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="queryParams">
-
+                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/area/view_zipcodes') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="queryParams">
                                 <thead>
                                     <tr>
-                                        <th data-field="state" data-checkbox="true"></th>
                                         <th data-field="id" data-sortable="true">ID</th>
                                         <th data-field="zipcode" data-sortable="false">Zipcode</th>
                                         <th data-field="city_name" data-sortable="false">City Name</th>
                                         <th data-field="minimum_free_delivery_order_amount" data-sortable="false">Minimum Free Delivery Order Amount</th>
                                         <th data-field="delivery_charges" data-sortable="false">Delivery Charges</th>
-                                        <th data-field="operate" data-sortable="false">Actions</th>
+                                        <th data-field="operate" data-sortable="true">Actions</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -143,21 +133,4 @@
         </div><!-- /.container-fluid -->
     </section>
     <!-- /.content -->
-
-    <!-- Modal -->
-    <div class="modal fade bd-example-modal-lg" id="zipcode_instuction_modal" tabindex="-1" role="dialog" aria-labelledby="zipcode_instuction_modal_Label" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <!-- <div class="modal-header"> -->
-                <!-- <h5 class="modal-title" id="zipcode_instuction_modal_Label">Sms Gateway Configuration</h5> -->
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <!-- </div> -->
-                <div class="modal-body">
-                    <p>You can enable pincode wise deliverabi;ity from store setting </p>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>

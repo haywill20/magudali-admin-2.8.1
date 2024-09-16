@@ -10,10 +10,7 @@ class Orders extends CI_Controller
         $this->load->database();
         $this->load->library(['razorpay', 'stripe', 'paystack', 'flutterwave', 'midtrans']);
         $this->load->helper(['url', 'language', 'timezone_helper']);
-        $this->load->model(['Order_model', 'Transaction_model']);
-
-        $this->data['firebase_project_id'] = get_settings('firebase_project_id');
-        $this->data['service_account_file'] = get_settings('service_account_file');
+        $this->load->model('Order_model');
 
         if (!has_permissions('read', 'orders')) {
             $this->session->set_flashdata('authorize_flag', PERMISSION_ERROR_MSG);
@@ -39,8 +36,6 @@ class Orders extends CI_Controller
             $orders_count['delivered'] = orders_count("delivered");
             $orders_count['cancelled'] = orders_count("cancelled");
             $orders_count['returned'] = orders_count("returned");
-            $orders_count['draft'] = orders_count("draft");
-            $orders_count['return_request_approved'] = orders_count("return_request_approved");
             $this->data['status_counts'] = $orders_count;
 
             if (isset($_GET['edit_id'])) {
@@ -231,9 +226,6 @@ class Orders extends CI_Controller
             }
             $msg = '';
             $order_method = fetch_details('orders', ['id' => $_POST['orderid']], 'payment_method');
-            $firebase_project_id = $this->data['firebase_project_id'];
-            $service_account_file = $this->data['service_account_file'];
-
             if ($order_method[0]['payment_method'] == 'bank_transfer') {
                 $bank_receipt = fetch_details('order_bank_transfer', ['order_id' => $_POST['orderid']]);
                 $transaction_status = fetch_details('transactions', ['order_id' => $_POST['orderid']], 'status');
@@ -316,9 +308,7 @@ class Orders extends CI_Controller
                 }
                 if (!empty($user_res[0]['fcm_id'])) {
                     $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
-                    }
+                    send_notification($fcmMsg, $fcm_ids);
                 }
                 $where = [
                     'id' => $_POST['orderid']
@@ -428,9 +418,7 @@ class Orders extends CI_Controller
                                 );
 
                                 $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                                if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                                    send_notification($fcmMsg, $fcm_ids, $fcmMsg);
-                                }
+                                send_notification($fcmMsg, $fcm_ids);
                             }
                             notify_event(
                                 $type['type'],
@@ -495,19 +483,18 @@ class Orders extends CI_Controller
                 if (!empty($area_id) && $area_id[0]['area_id'] != 0) {
                     $zipcode_id = fetch_details('areas', ['id' => $area_id[0]['area_id']], 'zipcode_id');
                     if (!empty($zipcode_id)) {
-                        $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1, 'u.status' => 1])->where('find_in_set(' . $zipcode_id[0]['zipcode_id'] . ', u.serviceable_zipcodes)!=', 0)->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
+                        $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1])->where('find_in_set(' . $zipcode_id[0]['zipcode_id'] . ', u.serviceable_zipcodes)!=', 0)->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
                     } else {
-                        $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1, 'u.status' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
+                        $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
                     }
                 } else {
-                    $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1, 'u.status' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
+                    $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
                 }
             } else {
-                $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1, 'u.status' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
+                $this->data['delivery_res'] = $this->db->where(['ug.group_id' => '3', 'u.active' => 1])->join('users_groups ug', 'ug.user_id = u.id')->get('users u')->result_array();
             }
             if ($res[0]['payment_method'] == "bank_transfer") {
                 $bank_transfer = fetch_details('order_bank_transfer', ['order_id' => $res[0]['order_id']]);
-                $transaction_search_res = fetch_details('transactions', ['order_id' => $res[0]['order_id']]);
             }
             if (isset($_GET['edit_id']) && !empty($_GET['edit_id']) && is_numeric($_GET['edit_id'])) {
                 // check for notification param
@@ -516,7 +503,6 @@ class Orders extends CI_Controller
                 }
                 $items = [];
                 foreach ($res as $row) {
-                    // echo "<pre>";
                     // print_R($row);
                     $multipleWhere = ['seller_id' => $row['seller_id'], 'order_id' => $row['id']];
                     $order_charge_data = $this->db->where($multipleWhere)->get('order_charges')->result_array();
@@ -557,15 +543,11 @@ class Orders extends CI_Controller
                     $temp['product_slug'] = $row['product_slug'];
                     $temp['sku'] = isset($row['product_sku']) && !empty($row['product_sku']) ? $row['product_sku'] : $row['sku'];
                     $temp['address_number'] = $address_number[0]['mobile'];
-                    $temp['county_code'] = $row[0]['county_code'];
                     array_push($items, $temp);
                 }
-                // echo "<pre>";
-                // print_r($res[0]);
-                // die;
+
                 $this->data['order_detls'] = $res;
                 $this->data['bank_transfer'] = $bank_transfer;
-                $this->data['transaction_search_res'] = $transaction_search_res;
                 $this->data['items'] = $items;
                 $this->data['settings'] = get_settings('system_settings', true);
                 $this->data['shipping_method'] = get_settings('shipping_method', true);
@@ -644,8 +626,6 @@ class Orders extends CI_Controller
             $order_data = fetch_details('order_items', ['id' => $order_itam_ids[0]], 'product_variant_id')[0]['product_variant_id'];
             $product_id = fetch_details('product_variants', ['id' => $order_data], 'product_id')[0]['product_id'];
             $product_type = fetch_details('products', ['id' => $product_id], 'type')[0]['type'];
-            $firebase_project_id = $this->data['firebase_project_id'];
-            $service_account_file = $this->data['service_account_file'];
 
             if ($product_type == 'digital_product' && in_array(0, $s)) {
                 $this->response['error'] = true;
@@ -712,23 +692,8 @@ class Orders extends CI_Controller
             $delivery_boy_updated = 0;
             $delivery_boy_id = (isset($_POST['deliver_by']) && !empty(trim($_POST['deliver_by']))) ? $this->input->post('deliver_by', true) : 0;
 
-            // assign delivery boy when status is processed
-            // print_r($_POST['status']);
-            // print_r($delivery_boy_id);
-            // die;
-            if (isset($_POST['status']) && !empty($_POST['status']) && $_POST['status'] == 'processed') {
-                if (!isset($delivery_boy_id) || empty($delivery_boy_id) || $delivery_boy_id == 0) {
-                    $this->response['error'] = true;
-                    $this->response['message'] = "Please select delivery boy to mark this order as processed.";
-                    $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                    $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                    $this->response['data'] = array();
-                    print_r(json_encode($this->response));
-                    return false;
-                }
-            }
-
             // validate delivery boy when status is shipped
+
             if (isset($_POST['status']) && !empty($_POST['status']) && $_POST['status'] == 'shipped') {
                 if (!isset($current_status[0]['delivery_boy_id']) || empty($current_status[0]['delivery_boy_id']) || $current_status[0]['delivery_boy_id'] == 0) {
                     $this->response['error'] = true;
@@ -872,7 +837,7 @@ class Orders extends CI_Controller
                                         'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : " You have new order to deliver",
                                         'body' => $customer_msg,
                                         'type' => "order",
-                                        'order_id' => (string)$order_items[0]['order_id']
+                                        'order_id' => $order_items[0]['order_id']
                                     );
                                     $message = 'Delivery Boy Updated.';
                                     $delivery_boy_updated = 1;
@@ -888,8 +853,8 @@ class Orders extends CI_Controller
                                 }
                             }
                         }
-                        if (!empty($fcm_ids) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                        if (!empty($fcm_ids)) {
+                            send_notification($fcmMsg, $fcm_ids);
                         }
 
                         if ($this->Order_model->update_order(['delivery_boy_id' => $delivery_boy_id], $order_itam_ids, false, 'order_items')) {
@@ -937,10 +902,8 @@ class Orders extends CI_Controller
                         ->where(['id' => $order_item_id])
                         ->get('order_items oi')->result_array();
 
-                    // print_r($order_item_res);
                     if ($this->Order_model->update_order(['status' => $_POST['status']], ['id' => $order_item_res[0]['id']], true, 'order_items')) {
                         $this->Order_model->update_order(['active_status' => $_POST['status']], ['id' => $order_item_res[0]['id']], false, 'order_items');
-                        // die;
                         process_refund($order_item_res[0]['id'], $_POST['status'], 'order_items');
                         if (trim($_POST['status']) == 'cancelled' || trim($_POST['status']) == 'returned') {
                             $data = fetch_details('order_items', ['id' => $order_item_id], 'product_variant_id,quantity');
@@ -989,13 +952,11 @@ class Orders extends CI_Controller
                         'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : " Order status updated",
                         'body' => $customer_msg,
                         'type' => "order",
-                        'order_id' => (string)$order_item_res[0]['order_id'],
+                        'order_id' => $order_item_res[0]['order_id'],
                     );
 
                     $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
-                    }
+                    send_notification($fcmMsg, $fcm_ids);
                 }
                 notify_event(
                     $type['type'],
@@ -1019,13 +980,11 @@ class Orders extends CI_Controller
                         'title' => (!empty($custom_notification)) ? $custom_notification[0]['title'] : " Order status updated",
                         'body' => $customer_msg,
                         'type' => "order",
-                        'order_id' => (string)$order_item_res[0]['order_id'],
+                        'order_id' => $order_item_res[0]['order_id'],
                     );
 
                     $fcm_ids[0][] = $seller_res[0]['fcm_id'];
-                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
-                    }
+                    send_notification($fcmMsg, $fcm_ids);
                 }
                 notify_event(
                     $type['type'],
@@ -1128,8 +1087,7 @@ class Orders extends CI_Controller
                 $order_id = $this->input->post('order_id', true);
                 $user_id = $this->input->post('user_id', true);
                 $status = $this->input->post('status', true);
-                $firebase_project_id = $this->data['firebase_project_id'];
-                $service_account_file = $this->data['service_account_file'];
+
                 if (update_details(['status' => $status], ['order_id' => $order_id], 'order_bank_transfer')) {
                     if ($status == 1) {
                         $status = "Rejected";
@@ -1144,18 +1102,15 @@ class Orders extends CI_Controller
                     //custom message
                     $custom_notification =  fetch_details('custom_notifications', ['type' => "bank_transfer_receipt_status"], '');
                     $hashtag_status = '< status >';
-                    // print_r($status); 
                     $hashtag_order_id = '< order_id >';
                     $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
                     $hashtag = html_entity_decode($string);
                     $data = str_replace(array($hashtag_status, $hashtag_order_id), array($status, $order_id), $hashtag);
                     $message = output_escaping(trim($data, '"'));
                     $customer_title = (!empty($custom_notification)) ? $custom_notification[0]['title'] : 'Bank Transfer Receipt Status';
-                    // print_r($message); 
                     $customer_msg = (!empty($custom_notification)) ? $message : 'Bank Transfer Receipt' . $status . ' for order ID: ' . $order_id;
                     $user = fetch_details("users", ['id' => $user_id], 'email,fcm_id');
-                    // send_mail($user[0]['email'], $customer_title, $customer_msg);          
-                    // print_r($order_id);          
+                    // send_mail($user[0]['email'], $customer_title, $customer_msg);                    
                     notify_event(
                         'bank_transfer_recipt_status',
                         ["customer" => [$user[0]['email']]],
@@ -1163,19 +1118,16 @@ class Orders extends CI_Controller
                         ["orders.id" => $order_id]
                     );
                     $fcm_ids[0][] = $user[0]['fcm_id'];
-                    // print_r($fcm_ids);          
                     if (!empty($fcm_ids)) {
                         $fcmMsg = array(
                             'title' => $customer_title,
                             'body' =>   $customer_msg,
                             'type' => "order",
                         );
-                        if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
-                            send_notification($fcmMsg, $fcm_ids, $fcmMsg);
-                        }
+                        send_notification($fcmMsg, $fcm_ids);
                     }
                     $this->response['error'] = false;
-                    $this->response['message'] = 'Updated Successfully';
+                    $this->response['message'] = 'Updtated Successfully';
                     $this->response['csrfName'] = $this->security->get_csrf_token_name();
                     $this->response['csrfHash'] = $this->security->get_csrf_hash();
                 } else {
@@ -1599,32 +1551,6 @@ class Orders extends CI_Controller
                 $this->response['data'] = array();
             }
             print_r(json_encode($this->response));
-        } else {
-            redirect('admin/login', 'refresh');
-        }
-    }
-
-    public function edit_transactions()
-    {
-        if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin()) {
-            $this->form_validation->set_rules('status', 'status', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('txn_id', 'txn_id', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('id', 'id', 'trim|required|xss_clean');
-            if (!$this->form_validation->run()) {
-                $this->response['error'] = true;
-                $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                $this->response['message'] = validation_errors();
-                print_r(json_encode($this->response));
-            } else {
-                $_POST['message'] = (isset($_POST['message']) && trim($_POST['message']) != "") ? $this->input->post('message', true) : "";
-                $this->Transaction_model->edit_transactions($_POST);
-                $this->response['error'] = false;
-                $this->response['csrfName'] = $this->security->get_csrf_token_name();
-                $this->response['csrfHash'] = $this->security->get_csrf_hash();
-                $this->response['message'] = "Transaction Updated Successfuly.";
-                print_r(json_encode($this->response));
-            }
         } else {
             redirect('admin/login', 'refresh');
         }

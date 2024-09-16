@@ -439,56 +439,12 @@ function midtrans_setup(midtrans_transaction_token, order_id) {
     })
 }
 
-function wallet_refill() {
-    let myForm = document.getElementById('wallet_form')
-    var formdata = new FormData(myForm)
-    formdata.append(csrfName, csrfHash)
-    var latitude =
-        sessionStorage.getItem('latitude') === null ?
-            '' :
-            sessionStorage.getItem('latitude')
-    var longitude =
-        sessionStorage.getItem('longitude') === null ?
-            '' :
-            sessionStorage.getItem('longitude')
-    formdata.append('latitude', latitude)
-    formdata.append('longitude', longitude)
-    return $.ajax({
-        type: 'POST',
-        data: formdata,
-        url: base_url + 'cart/wallet_refill',
-        dataType: 'json',
-        cache: false,
-        processData: false,
-        contentType: false,
-        beforeSend: function () {
-            $('#place_order_btn').attr('disabled', true).html('Please Wait...')
-        },
-        success: function (data) {
-            csrfName = data.csrfName
-            csrfHash = data.csrfHash
-            $('#place_order_btn').attr('disabled', false).html('Place Order')
-            if (data.error == false) {
-                Toast.fire({
-                    icon: 'success',
-                    title: data.message
-                })
-            } else {
-                Toast.fire({
-                    icon: 'error',
-                    title: data.message
-                })
-            }
-        }
-    })
-}
-
-
 var fatoorah_url = '';
 function my_fatoorah_setup() {
     window.location.replace(fatoorah_url)
 
 }
+
 
 
 $(document).on('click', '#wallet_refill', function () {
@@ -587,39 +543,6 @@ $(document).on('click', '#wallet_refill', function () {
                 'json'
             )
         }
-        else if (payment_methods == 'phonepe') {
-            var amount = $('#amount').val()
-            var user_id = $('#user_id').val()
-            var order_id = $('#order_id').val()
-            $.post(
-                base_url + 'payment/phonepe', {
-                [csrfName]: csrfHash,
-                amount: amount,
-                user_id: user_id,
-                type: 'wallet',
-                order_id: order_id,
-            },
-                function (data) {
-                    console.log(data);
-                    let url = (data["data"]["data"]['instrumentResponse']['redirectInfo']['url']) ? data["data"]["data"]['instrumentResponse']['redirectInfo']['url'] : ""
-                    let message = (data['message']) ? data['message'] : ""
-                    wallet_refill().done(function (result) {
-                        console.log(result);
-                        if (url != "") {
-                            window.location.replace(url);
-                        } else {
-                            Toast.fire({
-                                icon: 'error',
-                                title: message
-                            })
-                        }
-                    })
-                },
-                'json'
-            )
-
-        }
-
         else if (payment_methods == 'Paystack') {
             var key = $('#paystack_key_id').val()
             var user_email = $('#user_email').val()
@@ -834,6 +757,7 @@ $(document).on('click', '#withdraw_amount', function () {
         dataType: 'json',
         url: base_url + 'my_account/withdraw_money',
         success: function (result) {
+
             csrfName = result['csrfName'];
             csrfHash = result['csrfHash'];
             if (result.error == false) {
@@ -847,17 +771,10 @@ $(document).on('click', '#withdraw_amount', function () {
 
 
             } else {
-                $.each(result.message, function (key, errorMessage) {
-                    if (errorMessage.trim() !== "") {
-                        error_box.append("<p>" + errorMessage.trim() + "</p>");
-                        // Show each error message in a separate iziToast
-                        Toast.fire({
-                            icon: 'error',
-                            title: errorMessage.trim()
-                        })
-                        allMessages += errorMessage.trim() + "\n";
-                    }
-                });
+                Toast.fire({
+                    icon: 'error',
+                    title: result.message
+                })
             }
         }
     })

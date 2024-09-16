@@ -11,10 +11,10 @@ class Contact_us extends CI_Controller
         $this->load->helper(['url', 'language', 'timezone_helper']);
         $this->load->model('Setting_model');
 
-        // if (!has_permissions('read', 'contact_us')) {
-        //     $this->session->set_flashdata('authorize_flag', PERMISSION_ERROR_MSG);
-        //     redirect('admin/home', 'refresh');
-        // }
+        if (!has_permissions('read', 'contact_us')) {
+            $this->session->set_flashdata('authorize_flag', PERMISSION_ERROR_MSG);
+            redirect('admin/home', 'refresh');
+        }
     }
 
     public function index()

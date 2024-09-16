@@ -28,7 +28,6 @@ Common-Functions or events
  23. whatsapp status
 --------------------------------------------------------------------------------------------------------------------------------------------------- */
 
-var auth_settings = $('#auth_settings').val();
 
 $(document).ready(function () {
     $('#loading').hide();
@@ -163,8 +162,6 @@ var attributes_values = [];
 var all_attributes_values = [];
 var counter = 0;
 var variant_counter = 0;
-var currentDate = new Date();
-var currentYear = currentDate.getFullYear();
 
 //-------------
 //- CATEGORY EISE PRODUCT SALE CHART -
@@ -461,6 +458,7 @@ function create_variants(preproccessed_permutation_result = false, from) {
         },
         dataType: 'json',
         success: function (data) {
+            console.log(data);
             var result = data['result'];
             html += '<div ondragstart="return false;"><a class="btn btn-outline-primary btn-sm mb-3" href="javascript:void(0)" id="expand_all">Expand All</a>' +
                 '<a class="btn btn-outline-primary btn-sm mb-3 ml-4" href="javascript:void(0)" id="collapse_all">Collapse All</a></div>';
@@ -1208,144 +1206,11 @@ function brand_query_params(p) {
     };
 }
 
-$(document).ready(function () {
-    $('#media_remove').click(function () {
-        var ids = $.map($('#media-table').bootstrapTable('getSelections'), function (row) {
-            return row.id;
-        });
-
-        if (ids.length > 0) {
-
-            Swal.fire({
-                title: 'Are You Sure!',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!',
-                showLoaderOnConfirm: true,
-                preConfirm: function () {
-                    return new Promise((resolve, reject) => {
-                        $.ajax({
-                            method: 'POST',
-                            url: base_url + from + '/media/media_delete',
-                            data: { 'ids': ids, [csrfName]: csrfHash },
-                            dataType: 'json',
-                            success: function (response) {
-                                if (response.success) {
-                                    $('#media-table').bootstrapTable('remove', {
-                                        field: 'id',
-                                        values: ids
-                                    });
-                                    $('#media-table').bootstrapTable('refresh');
-                                    window.location.reload();
-                                    Swal.fire('Success', 'Files Deleted!', 'success');
-                                } else {
-                                    Swal.fire('Oops...', result['message'], 'error');
-                                }
-                                resolve();
-                            },
-                            error: function (xhr, status, error) {
-                                Swal.fire('Oops...', 'Something went wrong!', 'error');
-                                reject(error);
-                            }
-                        });
-                    });
-                },
-                allowOutsideClick: false
-            }).then((result) => {
-                if (result.dismiss === Swal.DismissReason.cancel) {
-                    Swal.fire('Cancelled!', 'Your data is safe.', 'error');
-                }
-            });
-        } else {
-            alert('Please select at least one item to delete.');
-        }
-    });
-});
-$(document).ready(function () {
-    $('#zipcode_remove').click(function () {
-        var ids = $.map($('#zipcode-table').bootstrapTable('getSelections'), function (row) {
-            return row.id;
-        });
-
-        if (ids.length > 0) {
-
-            Swal.fire({
-                title: 'Are You Sure!',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!',
-                showLoaderOnConfirm: true,
-                preConfirm: function () {
-                    return new Promise((resolve, reject) => {
-                        $.ajax({
-                            method: 'POST',
-                            url: base_url + from + '/Area/delete_zipcode_multi',
-                            data: { 'ids': ids, [csrfName]: csrfHash },
-                            dataType: 'json',
-                            success: function (response) {
-                                if (response.success) {
-                                    $('#zipcode-table').bootstrapTable('remove', {
-                                        field: 'id',
-                                        values: ids
-                                    });
-                                    $('#zipcode-table').bootstrapTable('refresh');
-                                    window.location.reload();
-                                    Swal.fire('Success', 'Files Deleted!', 'success');
-                                } else {
-                                    Swal.fire('Oops...', result['message'], 'error');
-                                }
-                                resolve();
-                            },
-                            error: function (xhr, status, error) {
-                                Swal.fire('Oops...', 'Something went wrong!', 'error');
-                                reject(error);
-                            }
-                        });
-                    });
-                },
-                allowOutsideClick: false
-            }).then((result) => {
-                if (result.dismiss === Swal.DismissReason.cancel) {
-                    Swal.fire('Cancelled!', 'Your data is safe.', 'error');
-                }
-            });
-        } else {
-            alert('Please select at least one item to delete.');
-        }
-    });
-});
 function product_query_params(p) {
     return {
         "category_id": $('#category_parent').val(),
         "seller_id": $('#seller_filter').val(),
         "status": $('#status_filter').val(),
-        limit: p.limit,
-        sort: p.sort,
-        order: p.order,
-        offset: p.offset,
-        search: p.search
-    };
-}
-
-function seller_status_params(s) {
-    return {
-        "seller_status": $('#seller_status_filter').val(),
-        limit: s.limit,
-        sort: s.sort,
-        order: s.order,
-        offset: s.offset,
-        search: s.search
-    };
-}
-function delivery_boy_status_params(p) {
-    return {
-        "delivery_boy_status": $('#delivery_boy_status_filter').val(),
         limit: p.limit,
         sort: p.sort,
         order: p.order,
@@ -1469,20 +1334,16 @@ $(document).on("change", "#send_to", function (e) {
 $(document).on('change', '.type_event_trigger', function (e, data) {
     e.preventDefault();
     var type_val = $(this).val();
-    if (type_val != 'default' && type_val != '') {
+    if (type_val != 'default' && type_val != ' ') {
         if (type_val == 'categories') {
             $('.slider-categories').removeClass('d-none');
             $('.notification-categories').removeClass('d-none');
-            $('.offer-products').addClass('d-none');
-            $('.offer-categories').removeClass('d-none');
             $('.slider-products').addClass('d-none');
             $('.notification-products').addClass('d-none');
             $('.slider-url').addClass('d-none');
             $('.offer-url').addClass('d-none');
             $('.notification-url').addClass('d-none');
         } else if (type_val == 'products') {
-            $('.offer-products').removeClass('d-none');
-            $('.offer-categories').addClass('d-none');
             $('.slider-products').removeClass('d-none');
             $('.notification-products').removeClass('d-none');
             $('.slider-categories').addClass('d-none');
@@ -1496,21 +1357,16 @@ $(document).on('change', '.type_event_trigger', function (e, data) {
             $('.notification-categories').addClass('d-none');
             $('.slider-products').addClass('d-none');
             $('.offer-url').removeClass('d-none');
-            $('.offer-categories').addClass('d-none');
             $('.notification-products').addClass('d-none');
             $('.notification-url').addClass('d-none');
         } else if (type_val == 'offer_url') {
             $('.offer-url').removeClass('d-none');
-            $('.offer-categories').addClass('d-none');
-            $('.offer-products').addClass('d-none');
             $('.slider-categories').addClass('d-none');
             $('.notification-categories').addClass('d-none');
             $('.slider-products').addClass('d-none');
             $('.notification-products').addClass('d-none');
             $('.notification-url').addClass('d-none');
         } else if (type_val == 'notification_url') {
-            $('.offer-products').addClass('d-none');
-            $('.offer-categories').addClass('d-none');
             $('.notification-url').removeClass('d-none');
             $('.offer-url').addClass('d-none');
             $('.slider-categories').addClass('d-none');
@@ -1523,8 +1379,6 @@ $(document).on('change', '.type_event_trigger', function (e, data) {
         $('.slider-url').addClass('d-none');
         $('.slider-products').addClass('d-none');
         $('.offer-url').addClass('d-none');
-        $('.offer-products').addClass('d-none');
-        $('.offer-categories').addClass('d-none');
         $('.notification-categories').addClass('d-none');
         $('.notification-products').addClass('d-none');
         $('.notification-url').addClass('d-none');
@@ -1543,12 +1397,16 @@ $(document).on('click', '.sendMailBtn', function () {
 
 });
 $(document).ready(function () {
-    //     $('#sms-gateway-modal').on('show.bs.modal', function () {
-    //         $('.smsgateway_setting_form', this).addClass('d-none');
-    //         $('.update_notification_module', this).addClass('d-none');
-    //         // $('.card-body').empty(); // Clear the content
-    //     });
+//     $('#sms-gateway-modal').on('show.bs.modal', function () {
+//         console.log('Modal is show');
+
+
+//         $('.smsgateway_setting_form', this).addClass('d-none');
+//         $('.update_notification_module', this).addClass('d-none');
+//         // $('.card-body').empty(); // Clear the content
+//     });
     $('#sms-gateway-modal').on('hidden.bs.modal', function () {
+        console.log('Modal is closed');
 
         $('.smsgateway_setting_form').removeClass('d-none');
         $('.update_notification_module').removeClass('d-none');
@@ -1562,24 +1420,24 @@ $(document).on('click', '.edit_sms_modal', function () {
     $('#sms-gateway-modal').modal('show');
     var id = $(this).data('id');
     var url = $(this).data('url');
+    // var formData = new FormData(this);
+    console.log("in edit sms modal");
     $.ajax({
-        type: "POST",
-        url: base_url + "admin/custom_sms/view_sms_by_id",
-        data: {
-            id
-        },
-        dataType: "json",
+        type: "GET",
+        url: base_url + url + '?edit_id=' + id,
+        // data: formData,
+        // dataType: "dataType",
         success: function (response) {
-            // var formSubmitEventHtml = $(response).find('.form-submit-event');
-            // $('.sms-modal').find('.modal-body').html(formSubmitEventHtml);
 
-            $('#edit_title').val(response.data.title);
-            $('#edit-text-box').val(response.data.message);
-            $('#selected_type').val(response.data.type);
-            var type = response.data.type;
-            if (type) {
-                $('.' + type).removeClass('d-none');
-            }
+            var formSubmitEventHtml = $(response).find('.form-submit-event');
+            $('.sms-modal').find('.modal-body').html(formSubmitEventHtml);
+
+            // console.log($(this).closest('.smsgateway_setting_form'));
+            // if ($("#sms-gateway-modal").hasClass('show')) {
+                // $(this).closest('.smsgateway_setting_form').find('class:card-body').addClass('d-none');
+                $('.smsgateway_setting_form').addClass('d-none');
+                $('.update_notification_module').addClass('d-none');
+            // }
 
             $(".hashtag").click(function () {
                 var data = $("textarea#text-box").text();
@@ -1712,29 +1570,26 @@ $(document).on('click', '.edit_btn', function () {
             placeholder: 'Search for products'
         });
 
-        custommessageAutoFill()
 
+        $(".hashtag").click(function () {
+            var data = $("textarea#text-box").text();
+            var tab = $.trim($(this).text());
+            var message = data + tab;
+            $('textarea#text-box').val(message);
+        });
+        $(".hashtag_input").click(function () {
+            var data = $("#udt_title").val();
+            var tab = $.trim($(this).text());
+            var message = data + tab;
+            $('input#update_title').val(message);
+        });
         searchable_zipcodes();
-        searchable_cities();
         setTimeout(function () {
             $('.edit-modal-lg').unblock();
         }, 2000);
 
     });
 });
-
-function custommessageAutoFill() {
-    const inputs = document.querySelectorAll(".text-box")
-    const titleInput = document.querySelectorAll(".update_title")
-
-    if (inputs.length == 2) {
-        initializeInputFiller(".hashtag", inputs[1])
-        initializeInputFiller(".hashtag_input", titleInput[1])
-    } else {
-        initializeInputFiller(".hashtag", inputs[0])
-        initializeInputFiller(".hashtag_input", titleInput[0])
-    }
-}
 
 
 
@@ -1783,34 +1638,6 @@ function searchable_zipcodes() {
     return search_zipcodes;
 }
 
-function searchable_cities() {
-    return $(".city_list").select2({
-        ajax: {
-            url: base_url + from + '/area/get_cities',
-            type: "GET",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return {
-                    search: params.term, // search term
-                };
-            },
-            processResults: function (response) {
-                return {
-                    results: response
-                };
-            },
-            cache: true
-        },
-
-        minimumInputLength: 1,
-        theme: 'bootstrap4',
-        placeholder: 'Search for cities',
-        allowClear: Boolean($(this).data('allow-clear')),
-
-    });
-}
-
 function searchable_zipcodes_deliveryboy() {
     var search_zipcodes = $(".deliveryboy_search_zipcode").select2({
         ajax: {
@@ -1855,36 +1682,6 @@ function searchable_zipcodes_deliveryboy() {
     });
     return search_zipcodes;
 }
-
-function searchable_cities_deliveryboy() {
-    return $(".deliveryboy_search_cities").select2({ // Add return statement here
-        ajax: {
-            url: base_url + 'delivery_boy/login/get_cities',
-            // url: base_url + from + '/area/get_zipcodes',
-            type: "GET",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return {
-                    search: params.term, // search term
-                };
-            },
-            processResults: function (response, params) {
-                return {
-                    results: response,
-                };
-            },
-            cache: true
-        },
-        minimumInputLength: 1,
-        theme: 'bootstrap4',
-        placeholder: 'Search for cities',
-        allowClear: Boolean($(this).data('allow-clear')),
-    });
-}
-
-
-
 
 
 $(document).on('click', '.view_address', function () {
@@ -1942,6 +1739,7 @@ $(document).on('submit', '.container-fluid .form-submit-event', function (e) {
         processData: false,
         dataType: 'json',
         success: function (result) {
+
             csrfName = result['csrfName'];
             csrfHash = result['csrfHash'];
 
@@ -1963,9 +1761,6 @@ $(document).on('submit', '.container-fluid .form-submit-event', function (e) {
                 error_box.html(result['message']);
                 submit_btn.html(button_text);
                 submit_btn.attr('disabled', false);
-                if ($('.form-submit-event').hasClass('brand_add')) {
-                    window.location.href = base_url + 'admin/brand/';
-                }
                 setTimeout(function () {
                     $('.modal').modal('hide');
                 }, 1000);
@@ -1991,9 +1786,6 @@ $(document).on('submit', '.container-fluid .form-submit-event', function (e) {
 // 1.login
 
 //forgot_page
-$(document).ready(function () {
-    custommessageAutoFill()
-})
 $(document).ready(function () {
     $('#forgot_password_page').on('submit', function (e) {
         e.preventDefault();
@@ -2028,7 +1820,7 @@ var edit_product_id = $('input[name=edit_product_id]').val();
 
 if (edit_product_id) {
 
-    create_fetched_attributes_html(from).done(function () {
+    create_fetched_attributes_html('seller').done(function () {
         $('.no-attributes-added').hide();
         $('#save_attributes').removeClass('d-none');
         $('.no-variants-added').hide();
@@ -2075,19 +1867,8 @@ $(document).on('change', '#seller_filter', function () {
     $('#products_table').bootstrapTable('refresh');
     $('#pickup_location_table').bootstrapTable('refresh');
 });
-$(document).on('change', '#seller_status_filter', function () {
-    $('#seller_table').bootstrapTable('refresh');
-    // $('#pickup_location_table').bootstrapTable('refresh');
-});
-$(document).on('change', '#delivery_boy_status_filter', function () {
-    $('#delivery_boy_data').bootstrapTable('refresh');
-    // $('#pickup_location_table').bootstrapTable('refresh');
-});
 $(document).on('change', '#user_filter', function () {
     $('#payment_request_table').bootstrapTable('refresh');
-});
-$(document).on('change', '#message_type', function () {
-    $('#system_notofication_table').bootstrapTable('refresh');
 });
 $(document).on('change', '#status_filter', function () {
     $('#products_table').bootstrapTable('refresh');
@@ -2695,9 +2476,7 @@ $(document).on('click', ' #add_attributes , #tab-for-variations', function (e) {
         } else {
             $('#note').removeClass('d-none');
             var html = '<div class="form-group row move my-auto p-2 border rounded bg-gray-light product-attr-selectbox" id=' + attr_name + '><div class="col-md-1 col-sm-12 text-center my-auto"><i class="fas fa-sort"></i></div><div class="col-md-4 col-sm-12"> <select name="attribute_id[]" class="attributes select_single" data-placeholder=" Type to search and select attributes"><option value=""></option>' + $options + '</select></div><div class="col-md-4 col-sm-12 "> <select name="attribute_value_ids[]" class="multiple_values" multiple="" data-placeholder=" Type to search and select attributes values"><option value=""></option> </select></div><div class="col-md-2 col-sm-6 text-center py-1 align-self-center"><input type="checkbox" name="variations[]" class="is_attribute_checked custom-checkbox "></div><div class="col-md-1 col-sm-6 text-center py-1 align-self-center "> <button type="button" class="btn btn-tool remove_attributes"> <i class="text-danger far fa-times-circle fa-2x "></i> </button></div></div>';
-            // var edit_html = attrIds;
         }
-        // $('#edit_attributes_process').val(edit_html);
         $('#attributes_process').append(html);
 
         $("#attributes_process").last().find(".attributes").select2({
@@ -2853,7 +2632,9 @@ $(document).on('select2:select', '#product-type', function () {
 $(document).on('change', '#product_type_menu', function () {
     var value = $(this).val();
     if (value == 'digital_product') {
-        var html = '<option value="digital_product">Digital Product</option>';
+        var html = ' <option value=" ">Select Type</option>' +
+            '<option value="simple_product">Simple Product</option>' +
+            '<option value="variable_product">Variable Product</option>';
 
         $('#product-type').html(html);
         $('#variant_stock_level').hide(200);
@@ -3503,7 +3284,7 @@ $(document).on('submit', '#bulk_area_update_form', function (e) {
 
 
 
-$(document).on('click', '.delete-category', function () {
+$(document).on('click', '.delete-categoty', function () {
     var cat_id = $(this).data('id');
     Swal.fire({
         title: 'Are You Sure!',
@@ -3927,6 +3708,7 @@ $(document).on('click', '.update_status_admin_bulk', function (e) {
 
                     dataType: 'json',
                     success: function (result) {
+                        console.log(result);
                         csrfName = result['csrfName'];
                         csrfHash = result['csrfHash'];
                         if (result['error'] == false) {
@@ -3990,9 +3772,6 @@ $(document).on('click', '.update_status_delivery_boy', function (e) {
                             iziToast.success({
                                 message: result['message'],
                             });
-                            setTimeout(function () {
-                                location.reload();
-                            }, 1000);
                         } else {
                             iziToast.error({
                                 message: result['message'],
@@ -4101,7 +3880,7 @@ $(document).on('click', '.remove-sellers', function () {
     var id = $(this).data('id');
     var status = $(this).data('seller_status');
     Swal.fire({
-        title: 'Are You Sure! You want to remove this Seller',
+        title: 'Are You Sure! All data & media will be remove related to this seller',
         text: "You won't be able to revert this!",
         type: 'warning',
         showCancelButton: true,
@@ -4201,40 +3980,6 @@ $('.search_admin_product').each(function () {
     $(this).select2({
         ajax: {
             url: base_url + 'admin/product/get_product_data',
-            dataType: 'json',
-            delay: 250,
-            data: function (data) {
-                return {
-                    search: data.term, // search term
-                    limit: 10
-                };
-            },
-            processResults: function (response) {
-
-                return {
-                    results: response.rows
-                };
-            },
-            cache: true
-        },
-        escapeMarkup: function (markup) {
-            return markup;
-        },
-        minimumInputLength: 1,
-        templateResult: formatRepo,
-        templateSelection: formatRepoSelection,
-        placeholder: 'Search for products',
-        theme: 'bootstrap4',
-        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-        placeholder: $(this).data('placeholder'),
-        allowClear: Boolean($(this).data('allow-clear')),
-    });
-});
-
-$('.search_admin_faq_product').each(function () {
-    $(this).select2({
-        ajax: {
-            url: base_url + 'admin/product/get_product_faq_data',
             dataType: 'json',
             delay: 250,
             data: function (data) {
@@ -4724,7 +4469,7 @@ $('#customers').on('check.bs.table', function (e, row) {
 });
 
 //16.Fund-Transder-Module
-$("#delivery_boy_data").on("click-cell.bs.table", function (field, value, row, $el) {
+$("#fund_transfer").on("click-cell.bs.table", function (field, value, row, $el) {
     $('#name').val($el.name);
     $('#mobile').val($el.mobile);
     $('#balance').val($el.balance);
@@ -5368,41 +5113,6 @@ $('#selected_language').on('change', function () {
     var id = $(this).val();
     window.location.href = base_url + 'admin/language?id=' + id;
 });
-
-$(document).ready(function () {
-    // Event listener for the change event of the dropdown
-    $('#is_default_for_web').on('change', function () {
-        // Get the selected language ID
-        var languageId = $(this).val();
-        // Send AJAX request to update database
-        $.ajax({
-            url: base_url + 'admin/language/set_default_for_web',
-            method: 'POST',
-            data: {
-                is_default: '1',
-                language_id: languageId
-            },
-            success: function (response) {
-                // Handle success response
-                var response = JSON.parse(response);
-                if (response.error == false) {
-                    iziToast.success({
-                        message: response.message,
-                    });
-                    setTimeout(function () {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    iziToast.error({
-                        message: response.message,
-                    });
-                }
-            }
-        });
-    });
-});
-
-
 $('#update-language-form').on('submit', function (e) {
     e.preventDefault();
     var formdata = new FormData(this);
@@ -6137,15 +5847,6 @@ $(document).on('click', '#delete-zipcode', function () {
 
 var searchable_zipcodes_deliveryboy = searchable_zipcodes_deliveryboy();
 
-var $searchable_cities_deliveryboy = searchable_cities_deliveryboy(); // Assign the return value to a variable
-$searchable_cities_deliveryboy.on('select2:select', function (e) {
-    // Your event handling code here
-    var data = e.params.data;
-    if (data.link != undefined && data.link != null) {
-        window.location.href = data.link;
-    }
-});
-
 searchable_zipcodes_deliveryboy.on('select2:select', function (e) {
     var data = e.params.data;
     if (data.link != undefined && data.link != null) {
@@ -6153,24 +5854,9 @@ searchable_zipcodes_deliveryboy.on('select2:select', function (e) {
     }
 });
 
-// searchable_cities_deliveryboy.on('select2:select', function (e) {
-//     var data = e.params.data;
-//     if (data.link != undefined && data.link != null) {
-//         window.location.href = data.link;
-//     }
-// });
-
 var search_zipcodes = searchable_zipcodes();
 
 search_zipcodes.on('select2:select', function (e) {
-    var data = e.params.data;
-    if (data.link != undefined && data.link != null) {
-        window.location.href = data.link;
-    }
-});
-
-var $search_cities = searchable_cities();
-$search_cities.on('select2:select', function (e) {
     var data = e.params.data;
     if (data.link != undefined && data.link != null) {
         window.location.href = data.link;
@@ -6185,15 +5871,6 @@ $(document).on('change', '#deliverable_type', function () {
         $('#deliverable_zipcodes').prop('disabled', false);
     }
 });
-
-$(document).on('change', '#deliverable_city_type', function () {
-    var type = $(this).val()
-    if (type == '1' || type == '0') {
-        $('#deliverable_cities').prop('disabled', 'disabled')
-    } else {
-        $('#deliverable_cities').prop('disabled', false)
-    }
-})
 
 var cat_html = "";
 var count_view = 0;
@@ -6280,7 +5957,7 @@ function load_category_section(cat_html, is_edit = false, option_html = "", comm
             '</select>' +
             '</div>' +
             '<div class="col-sm-5">' +
-            '<input type="number" step="any"  min="0" max="100" class="form-control"  placeholder="Enter Commission" name="commission"  value="0">' +
+            '<input type="number" step="any"  min="0" class="form-control"  placeholder="Enter Commission" name="commission"  value="0">' +
             '</div>' +
             '<div class="col-sm-2"> ' +
             '<button type="button" class="btn btn-tool remove_category_section" > <i class="text-danger far fa-times-circle fa-2x "></i> </button>' +
@@ -6302,12 +5979,7 @@ function load_category_section(cat_html, is_edit = false, option_html = "", comm
 }
 
 $(document).on('click', '.remove_category_section', function () {
-    if ($('#category_section').children('.form-group').length > 1) {
-        $(this).closest('.row').remove();
-    } else {
-        alert('At least one category section must be present.');
-    }
-    // $(this).closest('.row').remove();
+    $(this).closest('.row').remove();
 });
 
 $("#seller_table").on("click-cell.bs.table", function (field, value, row, $el) {
@@ -6500,6 +6172,7 @@ $(document).on('click', '.sync-zipcode-with-area', function () {
                     dataType: 'json',
                 })
                     .done(function (response, textStatus) {
+                        console.log(response);
                         if (response.error == false) {
                             Swal.fire('Done!', response.message, 'success');
                             $('table').bootstrapTable('refresh');
@@ -6508,6 +6181,9 @@ $(document).on('click', '.sync-zipcode-with-area', function () {
                         }
                     })
                     .fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                        console.log(jqXHR);
                         Swal.fire('Oops...', 'Something went wrong with ajax !', 'error');
                     });
             });
@@ -6692,9 +6368,9 @@ $(".country_list").select2({
     placeholder: 'Search for countries',
 });
 
-$(".city_list").select2({
+$("#city_list").select2({
     ajax: {
-        url: base_url + from + '/area/get_cities',
+        url: base_url + 'admin/area/get_cities',
         type: "GET",
         dataType: 'json',
         delay: 250,
@@ -6717,7 +6393,7 @@ $(".city_list").select2({
 })
 $("#zipcode_list").select2({
     ajax: {
-        url: base_url + from + '/area/get_zipcode_list',
+        url: base_url + 'admin/area/get_zipcode_list',
         type: "GET",
         dataType: 'json',
         delay: 250,
@@ -7100,7 +6776,6 @@ $(".search_product").select2({
     placeholder: 'Search for products'
 });
 searchable_zipcodes();
-searchable_cities();
 setTimeout(function () {
     $('.edit-modal-lg').unblock();
 }, 2000);
@@ -7116,27 +6791,19 @@ function faqParams(p) {
     };
 }
 // custom_notification_message
-function initializeInputFiller(spanSelector, inputelement) {
-    const inputField = inputelement;
-    const fillerSpans = document.querySelectorAll(spanSelector);
 
-    fillerSpans.forEach(function (span) {
-        span.addEventListener('click', function () {
-            const text = this.textContent;
-            const startPos = inputField.selectionStart;
-            const endPos = inputField.selectionEnd;
-            const currentValue = inputField.value;
-            const newValue =
-                currentValue.substring(0, startPos) +
-                text +
-                currentValue.substring(endPos);
-            inputField.value = newValue;
-            inputField.focus();
-            inputField.setSelectionRange(startPos + text.length, startPos + text.length);
-        });
+$(document).ready(function () {
+    $(".hashtag").click(function () {
+        var txt = $.trim($(this).text());
+        var box = $("#text-box");
+        box.val(box.val() + txt);
     });
-}
-
+    $(".hashtag_input").click(function () {
+        var txt = $.trim($(this).text());
+        var box = $("#update_title");
+        box.val(box.val() + txt);
+    });
+});
 
 $(document).on('show.bs.modal', '#product-faqs-modal', function (event) {
     var triggerElement = $(event.relatedTarget);
@@ -7220,6 +6887,7 @@ function googleTranslateElementInit() {
 $(document).ready(function () {
     googleTranslateElementInit();
 });
+
 
 
 // send admin notification
@@ -7566,8 +7234,7 @@ $(document).ready(function () {
                     });
 
                     reader.onload = function (e) {
-                        const imageUrl = base_url + "uploads/media/" + currentYear + "/" + filename;
-                        callback(imageUrl.replace(/&quot;/g, ''));
+                        callback(base_url + "uploads/media/2022/" + filename);
                     };
                     reader.readAsDataURL(file);
 
@@ -8768,84 +8435,6 @@ $('.get_blog_category').select2({
 })
 
 //forgot password
-$(document).ready(function () {
-    var telInput = $("#forgot_password_number");
-
-    // Set defaultCountry before calling intlTelInput
-    telInput.intlTelInput({
-        allowExtensions: true,
-        formatOnDisplay: true,
-        autoFormat: true,
-        autoHideDialCode: true,
-        autoPlaceholder: true,
-        defaultCountry: "in",
-        ipinfoToken: "yolo",
-        nationalMode: false,
-        numberType: "MOBILE",
-        preferredCountries: ["in", "ae", "qa", "om", "bh", "kw", "ma"],
-        preventInvalidNumbers: true,
-        separateDialCode: true,
-        geoIpLookup: function (callback) {
-            $.get("https://ipinfo.io", function () { }, "jsonp").always(function (resp) {
-                var countryCode = (resp && resp.country) ? resp.country : "";
-                callback(countryCode);
-            });
-        },
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"
-    });
-});
-$(document).ready(function () {
-    var telInput = $("#seller_mobile");
-
-    // Set defaultCountry before calling intlTelInput
-    telInput.intlTelInput({
-        allowExtensions: true,
-        formatOnDisplay: true,
-        autoFormat: true,
-        autoHideDialCode: true,
-        autoPlaceholder: true,
-        defaultCountry: "in",
-        ipinfoToken: "yolo",
-        nationalMode: false,
-        numberType: "MOBILE",
-        preferredCountries: ["in", "ae", "qa", "om", "bh", "kw", "ma"],
-        preventInvalidNumbers: true,
-        separateDialCode: true,
-        geoIpLookup: function (callback) {
-            $.get("https://ipinfo.io", function () { }, "jsonp").always(function (resp) {
-                var countryCode = (resp && resp.country) ? resp.country : "";
-                callback(countryCode);
-            });
-        },
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"
-    });
-});
-$(document).ready(function () {
-    var telInput = $("#delivery_boy_mobile");
-
-    // Set defaultCountry before calling intlTelInput
-    telInput.intlTelInput({
-        allowExtensions: true,
-        formatOnDisplay: true,
-        autoFormat: true,
-        autoHideDialCode: true,
-        autoPlaceholder: true,
-        defaultCountry: "in",
-        ipinfoToken: "yolo",
-        nationalMode: false,
-        numberType: "MOBILE",
-        preferredCountries: ["in", "ae", "qa", "om", "bh", "kw", "ma"],
-        preventInvalidNumbers: true,
-        separateDialCode: true,
-        geoIpLookup: function (callback) {
-            $.get("https://ipinfo.io", function () { }, "jsonp").always(function (resp) {
-                var countryCode = (resp && resp.country) ? resp.country : "";
-                callback(countryCode);
-            });
-        },
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"
-    });
-});
 
 $(document).on('click', "#forgot_password_link", function (e) {
     e.preventDefault();
@@ -8859,9 +8448,9 @@ $(document).on('click', "#forgot_password_link", function (e) {
         });
     }
     var telInput = $("#forgot_password_number");
-
-    // Set defaultCountry before calling intlTelInput
+    // initialise plugin
     telInput.intlTelInput({
+
         allowExtensions: true,
         formatOnDisplay: true,
         autoFormat: true,
@@ -8869,11 +8458,13 @@ $(document).on('click', "#forgot_password_link", function (e) {
         autoPlaceholder: true,
         defaultCountry: "in",
         ipinfoToken: "yolo",
+
         nationalMode: false,
         numberType: "MOBILE",
-        preferredCountries: ["in", "ae", "qa", "om", "bh", "kw", "ma"],
+        preferredCountries: ['in', 'ae', 'qa', 'om', 'bh', 'kw', 'ma'],
         preventInvalidNumbers: true,
         separateDialCode: true,
+        initialCountry: "auto",
         geoIpLookup: function (callback) {
             $.get("https://ipinfo.io", function () { }, "jsonp").always(function (resp) {
                 var countryCode = (resp && resp.country) ? resp.country : "";
@@ -8882,9 +8473,7 @@ $(document).on('click', "#forgot_password_link", function (e) {
         },
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"
     });
-
 });
-
 
 function is_user_exist(phone_number = '') {
     if (phone_number == '') {
@@ -8962,147 +8551,61 @@ $(document).on('submit', '#send_forgot_password_otp_form', function (e) {
     var phoneNumber = $('.selected-dial-code').html() + $('#forgot_password_number').val();
     var appVerifier = window.recaptchaVerifier;
     var response = is_user_exist($('#forgot_password_number').val());
-    if (response.error == true) {
-        $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
-        iziToast.error({
-            message: response.message
-        });
-    }
     if (response.error == false) {
         $('#forgot_pass_error_box').html("You have not registered using this number.");
         $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
     } else {
-        if (auth_settings == "firebase") {
-            firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier).then(function (confirmationResult) {
-                resetRecaptcha();
-                $('#verify_forgot_password_otp_form').removeClass('d-none');
-                $('#send_forgot_password_otp_form').hide();
-                $('#forgot_pass_error_box').html(response.message);
-                $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
-                $(document).on('submit', '#verify_forgot_password_otp_form', function (e) {
-                    e.preventDefault();
-                    var reset_pass_btn_html = $('#reset_password_submit_btn').html();
-                    var code = $('#forgot_password_otp').val();
-                    var formdata = new FormData(this);
-                    var url = base_url + "admin/home/reset-password";
-                    $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
-                    confirmationResult.confirm(code).then(function (result) {
-                        formdata.append(csrfName, csrfHash);
-                        formdata.append('mobile', $('#forgot_password_number').val());
-                        $.ajax({
-                            type: 'POST',
-                            url: url,
-                            data: formdata,
-                            processData: false,
-                            contentType: false,
-                            cache: false,
-                            dataType: 'json',
-                            beforeSend: function () {
-                                $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
-                            },
-                            success: function (result) {
-                                csrfName = result.csrfName;
-                                csrfHash = result.csrfHash;
-                                $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
-                                $("#set_password_error_box").html(result.message).show();
-                                if (result.error == false) {
-                                    setTimeout(function () {
-                                        window.location.reload();
-                                    }, 2000)
-                                } else {
-                                    $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
-                                    setTimeout(function () {
-                                        iziToast.error({
-                                            message: e.message,
-                                        });
-                                    }, 2000)
-                                }
+        firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier).then(function (confirmationResult) {
+            resetRecaptcha();
+            $('#verify_forgot_password_otp_form').removeClass('d-none');
+            $('#send_forgot_password_otp_form').hide();
+            $('#forgot_pass_error_box').html(response.message);
+            $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
+            $(document).on('submit', '#verify_forgot_password_otp_form', function (e) {
+                e.preventDefault();
+                var reset_pass_btn_html = $('#reset_password_submit_btn').html();
+                var code = $('#forgot_password_otp').val();
+                var formdata = new FormData(this);
+                var url = base_url + "admin/home/reset-password";
+                $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
+                confirmationResult.confirm(code).then(function (result) {
+                    formdata.append(csrfName, csrfHash);
+                    formdata.append('mobile', $('#forgot_password_number').val());
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: formdata,
+                        processData: false,
+                        contentType: false,
+                        cache: false,
+                        dataType: 'json',
+                        beforeSend: function () {
+                            $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
+                        },
+                        success: function (result) {
+                            csrfName = result.csrfName;
+                            csrfHash = result.csrfHash;
+                            $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
+                            $("#set_password_error_box").html(result.message).show();
+                            if (result.error == false) {
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 2000)
                             }
-                        });
-                    }).catch(function (error) {
-                        $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
-                        $("#set_password_error_box").html("Invalid OTP. Please Enter Valid OTP").show();
+                        }
                     });
+                }).catch(function (error) {
+                    $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
+                    $("#set_password_error_box").html("Invalid OTP. Please Enter Valid OTP").show();
                 });
-            }).catch(function (error) {
-                $("#forgot_pass_error_box").html(error.message).show();
-                $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
-                resetRecaptcha();
             });
-
-        }
+        }).catch(function (error) {
+            $("#forgot_pass_error_box").html(error.message).show();
+            $('#forgot_password_send_otp_btn').html(send_otp_btn).attr('disabled', false);
+            resetRecaptcha();
+        });
     }
 })
-if (auth_settings == "sms") {
-    $(document).on("click", ".forgot-send-otp-btn", function (e) {
-        e.preventDefault();
-        var forgot_password_number = $('#forgot_password_number').val();
-        var forget_password_val = $('#forget_password_val').val();
-        $.ajax({
-            type: "POST",
-            async: !1,
-            url: base_url + "auth/verify_user",
-            data: {
-                mobile: forgot_password_number,
-                forget_password_val: forget_password_val,
-                [csrfName]: csrfHash
-            },
-            dataType: "json",
-            success: function (e) {
-                if (e.error == false) {
-                    csrfName = e.csrfName,
-                        csrfHash = e.csrfHash,
-                        resetRecaptcha(),
-                        $('#verify_forgot_password_otp_form').removeClass('d-none');
-                    $('#send_forgot_password_otp_form').hide();
-                    // $("#send-otp-form").hide(),
-                    // $("#otp_div").show(),
-                    $("#verify-otp-form").removeClass("d-none");
-
-                } else {
-                    iziToast.error({
-                        message: e.message,
-                    });
-                }
-            }
-        })
-    });
-
-    $(document).on('submit', '#verify_forgot_password_otp_form', function (e) {
-        e.preventDefault();
-        var reset_pass_btn_html = $('#reset_password_submit_btn').html();
-        var code = $('#forgot_password_otp').val();
-        var formdata = new FormData(this);
-        var url = base_url + "admin/home/reset-password";
-        $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
-        formdata.append(csrfName, csrfHash);
-        formdata.append('mobile', $('#forgot_password_number').val());
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: formdata,
-            processData: false,
-            contentType: false,
-            cache: false,
-            dataType: 'json',
-            beforeSend: function () {
-                $('#reset_password_submit_btn').html('Please Wait...').attr('disabled', true);
-            },
-            success: function (result) {
-                csrfName = result.csrfName;
-                csrfHash = result.csrfHash;
-                $('#reset_password_submit_btn').html(reset_pass_btn_html).attr('disabled', false);
-                $("#set_password_error_box").html(result.message).show();
-                if (result.error == false) {
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 2000)
-                }
-            }
-        });
-    });
-
-}
 
 function resetRecaptcha() {
     return window.recaptchaVerifier.render().then(function (widgetId) {
@@ -9467,10 +8970,17 @@ $(document).on('change', '#whatsapp_status', function (e, data) {
 
 
 var sms_data = $("#sms_gateway_data").val() ? $("#sms_gateway_data").val() : [];
+console.log(sms_data);
 if (sms_data.length != 0) {
     var sms_data = JSON.parse(sms_data);
 
 }
+console.log(typeof (sms_data));
+console.log(sms_data.header_key);
+console.log(sms_data.header_value);
+console.log(sms_data.body_key);
+console.log(sms_data.body_value);
+
 
 
 // body data
@@ -9482,6 +8992,8 @@ $(document).on('click', '#add_sms_body', function (e) {
 function load_sms_body_section(cat_html, is_edit = false, body_keys = [], body_values = []) {
     var body_keys = sms_data.body_key;
     var body_values = sms_data.body_value;
+    // console.log(body_keys);
+    // console.log(body_values);
 
     if (is_edit == true) {
 
@@ -9591,6 +9103,8 @@ function load_sms_params_section(cat_html, is_edit = false, key_params = [], val
 
     var key_params = sms_data.params_key;
     var value_params = sms_data.params_value;
+    console.log(typeof (key_params));
+    console.log(typeof (value_params));
     var key = $().val();
     if (is_edit == true) {
         var html = '';
@@ -9649,12 +9163,15 @@ $(document).ready(function () {
         event.preventDefault(); // Prevent the default form submission
         const form = $("#smsgateway_setting_form")
         var formData = $(form).serialize();
+        console.log($(form).attr("method"));
+        console.log($(form).attr("action"));
         // return 
         $.ajax({
             type: $(form).attr("method"), // or "GET" depending on your server-side code
             url: base_url + 'admin/Sms_gateway_settings/add_sms_data', // Replace with your server-side script
             data: formData,
             success: function (response) {
+                console.log(response);
                 var response = jQuery.parseJSON(response);
 
                 if (response.error == false) {
@@ -9675,24 +9192,30 @@ $(document).ready(function () {
     });
 });
 
+// var sms_data = $("#auth_setting").val();
+// var sms_data = JSON.parse(sms_data);
+// console.log(sms_data.authentication_method);
+
 $('input[type=radio][name=authentication_method]').change(function () {
     var firebaseRadio = $('input[type=radio][id="firebaseRadio"]:checked').val();
     var smsRadio = $('input[type=radio][id="smsRadio"]:checked').val();
     if (firebaseRadio == 'firebase') {
+        console.log('in firebase');
         $('.firebase_config').removeClass('d-none');
         $('.sms_gateway').addClass('d-none');
 
     } else if (smsRadio == 'sms') {
+        console.log('in sms');
         $('.sms_gateway').removeClass('d-none');
         $('.firebase_config').addClass('d-none');
     }
 })
 
+
 $(document).ready(function () {
-    $('#product-body-tab').on('click', function (event) {
+    $('#product-body-tab').click(function (event) {
         event.preventDefault();
         $('#product-text').addClass('show');
-        $('#product-text').addClass('active');
         $('#product-formdata').addClass('show');
     });
 
@@ -9721,549 +9244,3 @@ $(document).ready(function () {
 
 });
 
-function validateNumberInput(input) {
-    // Remove any non-numeric characters from the input value
-    input.value = input.value.replace(/\D/g, '');
-}
-
-function createHeader() {
-    const username = document.getElementById("converterInputAccountSID").value;
-    const password = document.getElementById("converterInputAuthToken").value;
-
-    if (username && password) {
-        const stringToEncode = `${username}:${password}`;
-        document.getElementById("basicToken").innerText = `Authorization: Basic ${btoa(stringToEncode)}`;
-    } else {
-        // Handle the case where either username or password is empty
-        alert("Please provide both account SID and Auth Token.");
-    }
-}
-
-$('.add_delivery_boy').on('submit', function (e) {
-    e.preventDefault();
-
-    var formData = new FormData(this);
-    formData.append(csrfName, csrfHash);
-
-    $.ajax({
-        type: 'POST',
-        url: base_url + "admin/delivery_boys/add_delivery_boy",
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (response) {
-            csrfName = response.csrfName,
-                csrfHash = response.csrfHash
-            if (response.error == false) {
-                iziToast.success({
-                    message: response.message,
-                });
-                setTimeout(function () {
-                    location.reload();
-                }, 1000);
-            } else {
-                iziToast.error({
-                    message: response.message,
-                });
-            }
-        }
-    });
-});
-
-$('.add_slider_form').on('submit', function (e) {
-    e.preventDefault();
-
-    var formData = new FormData(this);
-    formData.append(csrfName, csrfHash);
-
-    $.ajax({
-        type: 'POST',
-        url: base_url + "admin/slider/add_slider",
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (response) {
-            csrfName = response.csrfName,
-                csrfHash = response.csrfHash
-            if (response.error == false) {
-                iziToast.success({
-                    message: response.message,
-                });
-                setTimeout(function () {
-                    location.reload();
-                }, 1000);
-            } else {
-                iziToast.error({
-                    message: response.message,
-                });
-                $('#submit_btn').attr('disabled', false).html('Save Slider');
-            }
-        }
-    });
-});
-
-$('.add_offer_form').on('submit', function (e) {
-    e.preventDefault();
-
-    var formData = new FormData(this);
-    formData.append(csrfName, csrfHash);
-
-    $.ajax({
-        type: 'POST',
-        url: base_url + "admin/offer/add_offer",
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (response) {
-            csrfName = response.csrfName,
-                csrfHash = response.csrfHash
-            if (response.error == false) {
-                iziToast.success({
-                    message: response.message,
-                });
-                setTimeout(function () {
-                    location.reload();
-                }, 1000);
-            } else {
-                iziToast.error({
-                    message: response.message,
-                });
-                $('#submit_btn').attr('disabled', false).html('Save Offer');
-            }
-        }
-    });
-});
-$('.add_promocode_form').on('submit', function (e) {
-    e.preventDefault();
-    var formData = new FormData(this);
-    formData.append(csrfName, csrfHash);
-
-    $.ajax({
-        type: 'POST',
-        url: base_url + "admin/promo_code/add_promo_code",
-        data: formData,
-        contentType: false,
-        processData: false,
-        dataType: 'json',
-        success: function (response) {
-            csrfName = response.csrfName,
-                csrfHash = response.csrfHash
-            if (response.error == false) {
-                iziToast.success({
-                    message: response.message,
-                });
-                setTimeout(function () {
-                    location.reload();
-                }, 1000);
-            } else {
-                iziToast.error({
-                    message: response.message,
-                });
-                $('#submit_btn').attr('disabled', false).html('Add Promo Code');
-            }
-        }
-    });
-});
-
-$(document).on('click', '.edit_slider', function (e) {
-    e.preventDefault();
-    var slider_id = $(this).data('id');
-    var slider_url = $(this).attr('href');
-
-    var urlParams = new URLSearchParams(slider_url.split('?')[1]);
-    var edit_id = urlParams.get('slider_edit_id');
-
-    $.ajax({
-        type: 'POST',
-        // url: base_url + "admin/slider/manage_slider",
-        url: slider_url,
-        data: {
-            edit_id: edit_id,
-            [csrfName]: csrfHash
-        },
-        dataType: 'json',
-        success: function (response) {
-            csrfName = response.csrfName,
-                csrfHash = response.csrfHash
-            response = response.fetched_data;
-            $('#add_slider').val('');
-            $('#slider_type').val(response[0].type);
-            $('#edit_slider').val(response[0].id);
-            if (response[0].type == "default") {
-                $('.slider-url').addClass('d-none');
-                $('.slider-products').addClass('d-none');
-                $('.slider-categories').addClass('d-none');
-                // $('#slider_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                if (response[0].image != '') {
-                    $('#slider_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                } else {
-                    $('.image-upload-section"').addClass('d-none');
-                }
-            }
-            if (response[0].type == "categories") {
-                $('.slider-categories').removeClass('d-none');
-                $('.slider-url').addClass('d-none');
-                $('.slider-products').addClass('d-none');
-
-                var typeID = response[0].type_id;
-
-                // Update the Select2 element with the selected user
-                $('#category_parent').val(typeID).trigger('change');
-
-                // $('#category_select_id option').each(function () {
-                //     if ($(this).val() === response[0].type_id) {
-                //         $(this).prop('selected', true);
-                //     }
-                // });
-                if (response[0].image != '') {
-                    $('#slider_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                } else {
-                    $('.image-upload-section"').addClass('d-none');
-                }
-                // $('#slider_uploaded_image').attr('src', base_url + '/' + response[0].image);
-            }
-            if (response[0].type == "products") {
-                $('.slider-products').removeClass('d-none');
-                $('.slider-url').addClass('d-none');
-                $('.slider-categories').addClass('d-none');
-
-                var typeId = response[0].type_id;
-
-                // Find the option element with the matching value
-                var $option = $('#product_select_id option[value="' + typeId + '"]');
-
-                // If the option exists, update the Select2 value
-                if ($option.length) {
-                    $("#product_select_id").val(typeId).trigger('change');
-                } else {
-                    // Handle the case when the option doesn't exist
-                    console.log("Option with value " + typeId + " not found in the select element.");
-                }
-
-                if (response[0].image != '') {
-                    $('#slider_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                } else {
-                    $('.image-upload-section"').addClass('d-none');
-                }
-            }
-            if (response[0].type == "slider_url") {
-                $('.slider-url').removeClass('d-none');
-                $('.slider-products').addClass('d-none');
-                $('.slider-categories').addClass('d-none');
-                $('#slider_url_val').val(response[0].link);
-                // $('#slider_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                if (response[0].image != '') {
-                    $('#slider_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                } else {
-                    $('.image-upload-section"').addClass('d-none');
-                }
-            }
-        }
-    });
-})
-$(document).on('click', '.edit_offer', function (e) {
-    e.preventDefault();
-    var offer_id = $(this).data('id');
-    var offer_url = $(this).attr('href');
-
-    var urlParams = new URLSearchParams(offer_url.split('?')[1]);
-    var edit_id = urlParams.get('offer_edit_id');
-
-    $.ajax({
-        type: 'POST',
-        // url: base_url + "admin/offer/manage_offer",
-        url: offer_url,
-        data: {
-            edit_id: edit_id,
-            [csrfName]: csrfHash
-        },
-        dataType: 'json',
-        success: function (response) {
-            csrfName = response.csrfName;
-            csrfHash = response.csrfHash;
-            response = response.fetched_data;
-            $('#add_offer').val('');
-            $('#offer_type').val(response[0].type);
-            $('#edit_offer').val(response[0].id);
-            if (response[0].type == "default") {
-                $('.offer-url').addClass('d-none');
-                $('.offer-products').addClass('d-none');
-                $('.offer-categories').addClass('d-none');
-                if (response[0].image != '') {
-                    $('.image-upload-section').removeClass('d-none');
-                    $('.image-upload-section').attr('src', base_url + '/' + response[0].image);
-                } else {
-                    $('.image-upload-section').addClass('d-none');
-                }
-            }
-            if (response[0].type == "categories") {
-                $('.offer-categories').removeClass('d-none');
-                $('.offer-url').addClass('d-none');
-                $('.offer-products').addClass('d-none');
-
-                var typeID = response[0].type_id;
-
-                // Update the Select2 element with the selected user
-                $('#category_parent').val(typeID).trigger('change');
-
-                // $('#category_offer_id option').each(function () {
-                //     if ($(this).val() === response[0].type_id) {
-                //         $(this).prop('selected', true);
-                //     }
-                // });
-                if (response[0].image != '') {
-                    $('.image-upload-section').removeClass('d-none');
-                    $('#offer_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                } else {
-                    $('.image-upload-section').addClass('d-none');
-                }
-            }
-            if (response[0].type == "products") {
-                $('.offer-products').removeClass('d-none');
-                $('.offer-url').addClass('d-none');
-                $('.offer-categories').addClass('d-none');
-
-                var typeId = response[0].type_id;
-
-                // Find the option element with the matching value
-                var $option = $('#product_offer_id option[value="' + typeId + '"]');
-
-                // If the option exists, update the Select2 value
-                if ($option.length) {
-                    $("#product_offer_id").val(typeId).trigger('change');
-                } else {
-                    // Handle the case when the option doesn't exist
-                    console.log("Option with value " + typeId + " not found in the select element.");
-                }
-
-                if (response[0].image != '') {
-                    $('.image-upload-section').removeClass('d-none');
-                    $('#offer_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                } else {
-                    $('.image-upload-section').addClass('d-none');
-                }
-            }
-            if (response[0].type == "offer_url") {
-                $('.offer-url').removeClass('d-none');
-                $('.offer-products').addClass('d-none');
-                $('.offer-categories').addClass('d-none');
-                $('#offer_url_val').val(response[0].link);
-                if (response[0].image != '') {
-                    $('.image-upload-section').removeClass('d-none');
-                    $('#offer_uploaded_image').attr('src', base_url + '/' + response[0].image);
-                } else {
-                    $('.image-upload-section').addClass('d-none');
-                }
-            }
-        }
-    });
-})
-$(document).on('click', '.edit_promocode', function (e) {
-    e.preventDefault();
-    var offer_id = $(this).data('id');
-    var offer_url = $(this).attr('href');
-
-    var urlParams = new URLSearchParams(offer_url.split('?')[1]);
-    var edit_id = urlParams.get('promocode_edit_id');
-
-    $.ajax({
-        type: 'POST',
-        // url: base_url + "admin/offer/manage_offer",
-        url: offer_url,
-        data: {
-            edit_id: edit_id,
-            [csrfName]: csrfHash
-        },
-        dataType: 'json',
-        success: function (response) {
-            csrfName = response.csrfName,
-                csrfHash = response.csrfHash
-            response = response.fetched_data;
-            console.log(response);
-            console.log(csrfName);
-            $('#add_promocode').val('');
-            $('#edit_promo_code').val(response[0].id);
-            $('#promo_code').val(response[0].promo_code);
-            $('#message').val(response[0].message);
-            $('#start_date').val(response[0].start_date);
-            $('#end_date').val(response[0].end_date);
-            $('#no_of_users').val(response[0].no_of_users);
-            $('#minimum_order_amount').val(response[0].minimum_order_amount);
-            $('#discount').val(response[0].discount);
-            $('#max_discount_amount').val(response[0].max_discount_amount);
-            $('#no_of_repeat_usage').val(response[0].no_of_repeat_usage);
-            $('#uploaded_image_here_val').val(response[0].image);
-
-            $('#discount_type_select option').each(function () {
-                if ($(this).val() === response[0].discount_type) {
-                    $(this).prop('selected', true);
-                }
-            });
-            $('#repeat_usage option').each(function () {
-                if ($(this).val() === response[0].repeat_usage) {
-                    $(this).prop('selected', true);
-                }
-            });
-            if (response[0].is_cashback == 1) {
-                // $(this).prop('Checked', true);
-                $('#is_cashback').bootstrapSwitch('state', true);
-
-            }
-            if (response[0].list_promocode == '1') {
-                // $(this).prop('Checked', true);
-                $('#list_promocode').bootstrapSwitch('state', true);
-            }
-            $('#status option').each(function () {
-                if ($(this).val() === response[0].status) {
-                    $(this).prop('selected', true);
-                }
-            });
-            if (response[0].repeat_usage == "1") {
-                $('#repeat_usage_html').removeClass('d-none');
-            }
-            $('#uploaded_image_here').attr('src', base_url + '/' + response[0].image);
-
-
-        }
-    });
-})
-$('#seller-select').select2({
-    ajax: {
-        url: base_url + 'admin/product/get_sellers_data',
-        type: "GET",
-        dataType: 'json',
-        delay: 250,
-        data: function (params) {
-            return {
-                search: params.term, // search term
-            };
-        },
-        processResults: function (data) {
-            return {
-                results: $.map(data, function (item) {
-                    return {
-                        text: item.name,
-                        id: item.id
-                    }
-                })
-            };
-        },
-        cache: true
-    },
-    minimumInputLength: 1,
-    theme: 'bootstrap4',
-    placeholder: 'Select a seller',
-    dropdownParent: $("#save-product"),
-});
-$('#seller_filter').select2({
-    ajax: {
-        url: base_url + 'admin/product/get_sellers_data',
-        type: "GET",
-        dataType: 'json',
-        delay: 250,
-        data: function (params) {
-            return {
-                search: params.term, // search term
-            };
-        },
-        processResults: function (data) {
-            return {
-                results: $.map(data, function (item) {
-                    return {
-                        text: item.name,
-                        id: item.id
-                    }
-                })
-            };
-        },
-        cache: true
-    },
-    minimumInputLength: 1,
-    theme: 'bootstrap4',
-    placeholder: 'Select a seller',
-});
-
-
-$(document).on('submit', "#add_dboy_form", function (e) {
-    e.preventDefault();
-    console.log('here in click');
-    var data = new FormData(this);
-    data.append(csrfName, csrfHash);
-    data.append("country_code", $(".selected-dial-code").text());
-    $.ajax({
-        type: "POST",
-        url: base_url + 'delivery_boy/login/create_delivery_boy',
-        data: data,
-        processData: !1,
-        contentType: !1,
-        cache: !1,
-        dataType: "json",
-
-        success: function (response) {
-            console.log(response);
-            // return;
-            csrfName = response.csrfName,
-                csrfHash = response.csrfHash;
-            if (response.error == true) {
-                iziToast.error({
-                    message: response.message,
-                });
-                setTimeout(function () {
-                    window.location.reload();
-                }, 3000)
-
-            } else {
-                iziToast.success({
-                    message: response.message,
-                });
-                setTimeout(function () {
-                    window.location.reload();
-                }, 3000)
-
-            }
-        }
-    })
-});
-$(document).on('submit', "#add_seller_form", function (e) {
-    e.preventDefault();
-    console.log('here in click');
-    var data = new FormData(this);
-    data.append(csrfName, csrfHash);
-    data.append("country_code", $(".selected-dial-code").text());
-    $.ajax({
-        type: "POST",
-        url: base_url + 'seller/auth/create-seller',
-        data: data,
-        processData: !1,
-        contentType: !1,
-        cache: !1,
-        dataType: "json",
-
-        success: function (response) {
-            console.log(response);
-            // return;
-            csrfName = response.csrfName,
-                csrfHash = response.csrfHash;
-            if (response.error == true) {
-                iziToast.error({
-                    message: response.message,
-                });
-                setTimeout(function () {
-                    window.location.reload();
-                }, 3000)
-
-            } else {
-                iziToast.success({
-                    message: response.message,
-                });
-                setTimeout(function () {
-                    window.location.reload();
-                }, 3000)
-
-            }
-        }
-    })
-});

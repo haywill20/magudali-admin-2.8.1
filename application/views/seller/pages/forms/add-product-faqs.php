@@ -27,7 +27,7 @@
                                 <div class="form-group row">
                                     <label for="attributes" class="col-sm-2 col-form-label">Select Product <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <select name="product_id" class="search_product w-100" data-placeholder=" Type to search and select products" required>
+                                        <select name="product_id" class="search_product w-100" data-placeholder=" Type to search and select products">
                                             <?php
                                             if (isset($fetched_data[0]['id'])) {
                                                 $product_id = explode(",", $fetched_data[0]['product_ids']);
@@ -60,7 +60,10 @@
                                     <button type="submit" class="btn btn-success" id="submit_btn">Add Product FAQs</button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                </div>
+                            </div>
                         </form>
                     </div>
                     <!--/.card-->

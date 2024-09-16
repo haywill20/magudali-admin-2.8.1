@@ -1,5 +1,5 @@
 <!-- breadcrumb -->
-<div class="content-wrapper deeplink_wrapper">
+<div class="content-wrapper">
     <section class="wrapper bg-soft-grape">
         <div class="container py-3 py-md-5">
             <nav class="d-inline-block" aria-label="breadcrumb">
@@ -32,14 +32,19 @@
                     </h3>
                     <hr class="mt-7 mb-6">
                     <div class="bg-white mt-5">
-                        <!-- select pickup -->
-                        <?php $shiprocket_settings = get_settings('shipping_method', true); ?>
-
-                        <div class="ship-details-wrapper address-details">
-
+                        <div class="ship-details-wrapper">
+                            <?php
+                            // echo "<pre>";
+                            // print_r($cart);
+                            // die; 
+                            ?>
                             <input type="hidden" name="product_type" id="product_type" value="<?= $cart[0]['type']; ?>">
                             <input type="hidden" name="download_allowed" value="<?= in_array(0, $cart['download_allowed']) ? 0 : 1 ?>">
                             <?php if ($cart[0]['type'] != 'digital_product') { ?>
+                                <!-- <div class="align-item-center ship-title-details justify-content-between user-add d-flex">
+                                    <h5 class="pb-3"><?= !empty($this->lang->line('shipping_address')) ? $this->lang->line('shipping_address') : 'Shipping Address' ?></h5>
+                                    <a href="#" data-izimodal-open=".address-modal"><i class="fas fa-edit edit-icon"></i></a>
+                                </div> -->
                                 <div class="align-item-center ship-title-details justify-content-between user-add d-flex">
                                     <h5 class="pb-3"><?= !empty($this->lang->line('shipping_address')) ? $this->lang->line('shipping_address') : 'Shipping Address' ?></h5>
                                     <a href="#" class="float-end text-decoration-none" data-bs-toggle="modal" data-bs-target="#address-modal">
@@ -51,7 +56,7 @@
 
                                 <div class="shipped-details mt-3">
                                     <p class="text-muted m-0" id="address-name-type"><?= isset($default_address) && !empty($default_address) ? $default_address[0]['name'] . ' - ' . ucfirst($default_address[0]['type']) : '' ?></p>
-                                    <p class="text-muted m-0" id="address-full"><?= isset($default_address) && !empty($default_address) ? $default_address[0]['address'] . ' , ' .$default_address[0]['area'] . ' , ' . $default_address[0]['city'] : '' ?></p>
+                                    <p class="text-muted m-0" id="address-full"><?= isset($default_address) && !empty($default_address) ? $default_address[0]['area'] . ' , ' . $default_address[0]['city'] : '' ?></p>
                                     <p class="text-muted m-0" id="address-country"><?= isset($default_address) && !empty($default_address) ? $default_address[0]['state'] . ' , ' . $default_address[0]['country'] . ' - ' . $default_address[0]['pincode'] : '' ?></p>
                                     <p class="text-muted m-0" id="address-mobile"><?= isset($default_address) && !empty($default_address) ? $default_address[0]['mobile'] : '' ?></p>
                                 </div>
@@ -78,40 +83,14 @@
                                             }
                                     ?>
                                             <b class="text-danger"><?= $deliverable_error_msg ?></b>
-                                        <?php }
-                                    } else { ?>
-                                        <b class="text-danger"><?= !empty($this->lang->line('please_select_address')) ? $this->lang->line('please_select_address') : 'Please select address.'; ?></b>
-                                    <?php } ?>
+                                    <?php }
+                                    } ?>
                                 </div>
                             <?php } ?>
-
-                            <?php 
-                            // echo "<pre>";
-                            // print_r($cart);
-                            // $settings = get_settings('system_settings', true);
-                            // $upload_attachments = isset($settings['allow_order_attachments']) ? $settings['allow_order_attachments'] : '';
-                            // $upload_limit = isset($settings['upload_limit']) ? $settings['upload_limit'] : '';
-
-                            ?>
-                            <?php if ($cart[0]['type'] != 'digital_product' && $cart['is_attachment_required'] == 1) {
-                                //If Allow Upload Attachment On
-                            ?>
-
-                                <h4 class="mt-3"><?= !empty($this->lang->line('allow_order_attachments')) ? $this->lang->line('allow_order_attachments') : 'Upload Order Attachments if you have any(Only images and docs are allowded)' ?></h4>
-                                <div class="input-group">
-                                    <input type="file" class="form-control" name="documents[]" multiple id="documents">
-                                </div>
-                            <?php } ?>
-
-                            <?php 
-                            // echo "<pre>";
-                            // print_r(in_array(0, $cart['download_allowed']));
-                            // print_r($cart);
-                            // die;
-                            
-                            if (($cart[0]['type'] == 'digital_product')) { ?>
+                            <?php if (in_array(0, $cart['download_allowed']) && $cart[0]['type'] == 'digital_product') { ?>
                                 <div class="mt-3">
-                                    <input name="email" type="text" id="mail" class="form-control" placeholder="<?= !empty($this->lang->line('please_enter_your_email_id')) ? $this->lang->line('please_enter_your_email_id') : 'Please enter your email ID'; ?>">
+                                    <label for="mail" class="form-label fw-bold text-dark">Please Enter Yor mail ID here for recive your order </label>
+                                    <input name="email" type="text" id="mail" class="form-control" placeholder="Please enter your email ID ">
                                 </div>
                             <?php } ?>
 
@@ -119,22 +98,21 @@
                             <input type="hidden" name="mobile" id="mobile" value="<?= isset($default_address) && !empty($default_address) ? $default_address[0]['mobile'] : $wallet_balance[0]['mobile'] ?>" />
                         </div>
                         <hr class="mt-4 mb-4">
-                        <input type="hidden" name="total" value="<?= format_price($cart['sub_total']) ?>">
+                        <input type="hidden" name="total" value="<?= number_format($cart['sub_total'], 2) ?>">
                         <input type="hidden" id="temp_total" name="temp_total" value="<?= $cart['total_arr'] ?>">
                         <input type="hidden" name="product_variant_id" value="<?= implode(',', array_column($cart, 'id')) ?>">
                         <input type="hidden" name="quantity" value="<?= implode(',', array_column($cart, 'qty')) ?>">
-                        <input type="hidden" id="current_wallet_balance" value="<?= format_price($wallet_balance[0]['balance']) ?>">
-                        <input type="hidden" id="wallet_used" name="wallet_used">   
+                        <input type="hidden" id="current_wallet_balance" value="<?= number_format($wallet_balance[0]['balance'], 2) ?>">
+                        <input type="hidden" id="wallet_used" name="wallet_used">
                         <input type="hidden" name="is_time_slots_enabled" id="is_time_slots_enabled" value="<?= (isset($time_slot_config['is_time_slots_enabled']) && $time_slot_config['is_time_slots_enabled'] == 1) ? 1 : 0 ?>">
                         <input type="hidden" name="product_type" id="product_type" value="<?= $cart[0]['type'] ?>">
                         <?php if (isset($time_slot_config['is_time_slots_enabled']) && $time_slot_config['is_time_slots_enabled'] == 1 && $cart[0]['type'] != 'digital_product') {
                             //If Time Slot is Enabled
                         ?>
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="<?= !empty($this->lang->line('special_note_for_order')) ? $this->lang->line('special_note_for_order') : 'Special Note for Order' ?>" name="order_note" id="order_note">
+                                <input type="text" class="form-control" placeholder="Special Note for Order" name="order_note" id="order_note">
                             </div>
                             <hr class="mt-4 mb-4">
-                            <!-- <div class="date-time-section"> -->
                             <h4 class="mt-3"><?= !empty($this->lang->line('preferred_delivery_date_time')) ? $this->lang->line('preferred_delivery_date_time') : 'Preferred Delivery Date / Time' ?></h4>
                             <div class="input-group">
                                 <div class="input-group-prepend">
@@ -146,16 +124,19 @@
                             <div class="mt-3" id="time_slots">
                                 <?php foreach ($time_slots as $row) { ?>
                                     <div class="custom-control custom-radio">
-                                        <input id="<?= $row['id'] ?>" name="delivery_time" type="radio" class="time-slot-inputs form-check-input" data-last_order_time="<?= $row['last_order_time'] ?>" value="<?= $row['title'] ?>">
+                                        <input id="<?= $row['id'] ?>" name="delivery_time" type="radio" class="time-slot-inputs form-check-input" data-last_order_time="<?= $row['last_order_time'] ?>" value="<?= $row['title'] ?>" required>
                                         <label class="form-check-label" for="<?= $row['id'] ?>"><?= $row['title'] ?></label>
                                     </div>
                                 <?php } ?>
                             </div>
-                            <!-- </div> -->
 
 
-                        <?php } ?>
+                        <?php }
+                        $settings = get_settings('system_settings', true);
+                        $upload_attachments = isset($settings['allow_order_attachments']) ? $settings['allow_order_attachments'] : '';
+                        $upload_limit = isset($settings['upload_limit']) ? $settings['upload_limit'] : '';
 
+                        ?>
 
                         <?php
                         foreach ($cart as $row) {
@@ -164,14 +145,17 @@
                             // print_r($upload_attachments);
                             // print_r($upload_limit);
                             // die;
-                            // if (isset($row['is_attachment_required']) && $row['is_attachment_required'] == 1 && $cart[0]['type'] != 'digital_product') { ?>
-                                <!-- <h5 class="pt-3">Upload Order Attachments if you have any(Only images and docs are allowded)</h5>
+                            if (isset($row['is_attachment_required']) && $row['is_attachment_required'] == 1 && $cart[0]['type'] != 'digital_product') {
+
+                                //If Allow Upload Attachment On
+                        ?>
+                                <h5 class="pt-3">Upload Order Attachments if you have any(Only images and docs are allowded)</h5>
                                 <div class="input-group">
                                     <input type="file" class="form-controls" name="documents[]" multiple id="documents">
                                 </div>
-                                <span class="text-danger">Attachments is required</span> -->
+                                <span class="text-danger">Attachments is required</span>
                         <?php }
-                        //} ?>
+                        } ?>
                         <hr class="mt-4 mb-4">
                         <input type="hidden" name="delivery_date" id="delivery_date" class="form-control float-right">
                         <div class="align-item-center ship-title-details justify-content-between d-flex">
@@ -181,7 +165,7 @@
                         <div class="form-check d-flex">
                             <input class="form-check-input" type="checkbox" value="" id="wallet_balance" <?= $disabled ?>>
                             <label class="form-check-label d-flex" for="wallet_balance">
-                                <?= !empty($this->lang->line('available_balance')) ? $this->lang->line('available_balance') : 'Available balance' ?> : <?= $currency . '<span id="available_balance">' . format_price($wallet_balance[0]['balance']) . '</span>' ?>
+                                <?= !empty($this->lang->line('available_balance')) ? $this->lang->line('available_balance') : 'Available balance' ?> : <?= $currency . '<span id="available_balance">' . number_format($wallet_balance[0]['balance'], 2) . '</span>' ?>
                             </label>
                         </div>
 
@@ -202,11 +186,11 @@
                                                     </td>
                                                     <td>
                                                         <label for="cod">
-                                                            <img loading="lazy" src="<?= THEME_ASSETS_URL . 'img/payments/cod.png' ?>" class="payment-gateway-images" alt="COD" style="height: 30px; <?= isset($cart[0]['is_cod_allowed']) && $cart[0]['is_cod_allowed'] == 0 ? 'filter: grayscale(100%)' : '' ?>">
+                                                            <img loading="lazy" src="<?= THEME_ASSETS_URL . 'img/payments/cod.png' ?>" class="payment-gateway-images" alt="COD" style="height: 30px;">
                                                         </label>
                                                     </td>
                                                     <td>
-                                                        <label for="cod" class="<?= isset($cart[0]['is_cod_allowed']) && $cart[0]['is_cod_allowed'] == 0 ? 'text-inverse' : '' ?>">
+                                                        <label for="cod">
                                                             <?= !empty($this->lang->line('cash_on_delivery')) ? $this->lang->line('cash_on_delivery') : 'Cash On Delivery' ?>
                                                         </label>
                                                     </td>
@@ -431,25 +415,6 @@
                                                 </td>
                                             </tr>
                                         <?php } ?>
-                                        <?php if (isset($payment_methods['phonepe_payment_method']) && $payment_methods['phonepe_payment_method'] == 1) { ?>
-                                            <tr>
-                                                <td>
-                                                    <label for="phonepe">
-                                                        <input id="phonepe" class="form-check-input" name="payment_method" type="radio" value="phonepe">
-                                                    </label>
-                                                </td>
-                                                <td>
-                                                    <label for="phonepe">
-                                                        <img loading="lazy" src="<?= THEME_ASSETS_URL . 'img/payments/phonepay-logo.png' ?>" class="payment-gateway-images" alt="phonepe" style="height: 30px;">
-                                                    </label>
-                                                </td>
-                                                <td>
-                                                    <label for="phonepe">
-                                                        PhonePe
-                                                    </label>
-                                                </td>
-                                            </tr>
-                                        <?php } ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -490,7 +455,7 @@
                                         </div>
                                         <div class="alert alert-info col-md-12">
                                             <strong><?= !empty($this->lang->line('extra_details')) ? $this->lang->line('extra_details') : 'Extra Details' ?>! </strong> <br><br>
-                                            <p><?= (isset($payment_methods['notes'])) ? str_replace('\"', '', str_replace('\r\n', '&#13;&#10;', $payment_methods['notes'])) : "" ?></p>
+                                            <p><?= (isset($payment_methods['notes'])) ? $payment_methods['notes'] : "" ?></p>
                                         </div>
                                     </div>
                                 <?php } ?>
@@ -505,7 +470,6 @@
                         <input type="hidden" name="logo" id="logo" value="<?= base_url(get_settings('web_logo')) ?>" />
                         <input type="hidden" name="order_amount" id="amount" value="" />
                         <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" value="" />
-                        <input type="hidden" name="phonepe_transaction_id" id="phonepe_transaction_id" value="" />
                         <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id" value="" />
                         <input type="hidden" name="razorpay_signature" id="razorpay_signature" value="" />
 
@@ -529,8 +493,6 @@
                         <input type="hidden" name="flutterwave_transaction_id" id="flutterwave_transaction_id" value="" />
                         <input type="hidden" name="flutterwave_transaction_ref" id="flutterwave_transaction_ref" value="" />
                         <input type="hidden" name="promo_set" id="promo_set" value="" />
-                        <input type="hidden" name="promo_is_cashback" id="promo_is_cashback" value="" />
-
 
                         <input type="hidden" name="instamojo_order_id" id="instamojo_order_id" value="" />
                         <input type="hidden" name="instamojo_payment_id" id="instamojo_payment_id" value="" />
@@ -547,16 +509,12 @@
                             <div class="product-checkout-wrapper">
                                 <div class="product-checkout-title">
                                     <h2 class="clearfix mb-0 text-muted fs-16">
-                                        <a class="#"><?= isset($cart[0]['cart_count']) && !empty($cart[0]['cart_count']) ? $cart[0]['cart_count'] : 0 ?> <?= !empty($this->lang->line('items_in_cart')) ? $this->lang->line('items_in_cart') : ' Item(s) in Cart' ?></a>
+                                        <a class="#"><?= isset($cart[0]['cart_count']) && !empty($cart[0]['cart_count']) ? $cart[0]['cart_count'] : 0 ?> Item(s) in Cart</a>
                                     </h2>
                                 </div>
                                 <div>
                                     <div class="product-checkout mt-4">
-                                        <?php
-                                        // echo "<pre>";
-                                        // print_r($cart);
-                                        // die;
-                                        if (isset($cart) && !empty($cart)) {
+                                        <?php if (isset($cart) && !empty($cart)) {
                                             if ($cart[0]['type'] != 'digital_product') {
                                                 $product_not_delivarable = array_column($product_not_delivarable, "product_id");
                                             }
@@ -589,11 +547,11 @@
                                                                     </div>
                                                                     <?php if (isset($row['item_tax_percentage']) && !empty($row['item_tax_percentage'])) { ?>
                                                                         <div>
-                                                                            <span class="text-muted"><?= !empty($this->lang->line('net_amount')) ? $this->lang->line('net_amount') : 'Net Amount' ?> :<?= $settings['currency'] ?><?= format_price((($amount) - (calculate_tax_inclusive(($amount), $row['item_tax_percentage'])))) ?></i></span>
+                                                                            <span class="text-muted"><?= !empty($this->lang->line('net_amountD')) ? $this->lang->line('net_amount') : 'Net Amount' ?> :<?= $settings['currency'] ?><?= number_format((($amount) - (calculate_tax_inclusive(($amount), $row['item_tax_percentage']))), 2) ?></i></span>
                                                                         </div>
                                                                         <div>
                                                                             <span class="text-muted"><?= !empty($row['tax_title']) ? $row['tax_title'] : 'Tax' ?> :</span>
-                                                                            <span class="text-muted"><?= $settings['currency'] ?><?= format_price(calculate_tax_inclusive(($amount), $row['item_tax_percentage'])) ?></span>
+                                                                            <span class="text-muted"><?= $settings['currency'] ?><?= number_format(calculate_tax_inclusive(($amount), $row['item_tax_percentage']), 2) ?></span>
 
                                                                         </div>
                                                                     <?php } ?>
@@ -603,7 +561,7 @@
                                                         <div class="ms-2 d-flex align-items-center">
                                                             <p class="">
                                                                 <span class="amount">
-                                                                    <?= $settings['currency'] ?><?= format_price($row['qty'] * $price) ?>
+                                                                    <?= $settings['currency'] ?><?= number_format($row['qty'] * $price, 2) ?>
                                                                 </span>
                                                             </p>
                                                         </div>
@@ -620,21 +578,21 @@
                                             <tr>
                                                 <td><strong class="text-dark"><?= !empty($this->lang->line('subtotal')) ? $this->lang->line('subtotal') : 'Subtotal' ?></strong></td>
                                                 <td class="text-end">
-                                                    <p class="price d-flex gap-1"><?= $settings['currency'] . ' <span class="sub_total">' . format_price($cart['sub_total']) . '</span>' ?></p>
+                                                    <p class="price d-flex gap-1"><?= $settings['currency'] . ' <span class="sub_total">' . number_format($cart['sub_total'], 2) . '</span>' ?></p>
                                                 </td>
                                             </tr>
 
                                             <?php if (!empty($cart['tax_percentage'])) { ?>
                                                 <tr class="cart-product-tax d-none">
                                                     <td class="text-muted"><?= !empty($this->lang->line('tax')) ? $this->lang->line('tax') : 'Tax' ?> (<?= $cart['tax_percentage'] ?>%)</td>
-                                                    <td class="text-muted"><?= $settings['currency'] . ' ' . format_price($cart['tax_amount']) ?></td>
+                                                    <td class="text-muted"><?= $settings['currency'] . ' ' . number_format($cart['tax_amount'], 2) ?></td>
                                                 </tr>
                                             <?php } ?>
                                             <?php
-                                            // $shiprocket_settings = get_settings('shipping_method', true);
+                                            $shiprocket_settings = get_settings('shipping_method', true);
                                             if (isset($shiprocket_settings['shiprocket_shipping_method']) && $shiprocket_settings['shiprocket_shipping_method'] == 1 && $cart[0]['type'] != 'digital_product') {
                                             ?>
-                                                <tr class="all-delivery-charges">
+                                                <tr>
                                                     <td>
                                                         <div class="row ">
                                                             <?php if ($cart[0]['type'] != 'digital_product') { ?>
@@ -654,7 +612,7 @@
                                                                 <?= $settings['currency'] . ' ' ?><span class="shipping_method"></span>
                                                             </div>
                                                         </div>
-                                                        <div class="d-flex <?= isset($cart[0]['is_cod_allowed']) && $cart[0]['is_cod_allowed'] == 0 ? 'd-none' : '' ?>">
+                                                        <div class="d-flex">
                                                             <div class="delivery_charge">
                                                                 <h6 class="fs-15">
                                                                     <?= !empty($this->lang->line('delivery_charge_with_cod')) ? $this->lang->line('delivery_charge_with_cod') : 'Delivery Charge with COD :' ?>
@@ -701,7 +659,7 @@
                                                                 </div>
 
                                                             </div>
-                                                            <div class="d-flex <?= isset($cart[0]['is_cod_allowed']) && $cart[0]['is_cod_allowed'] == 0 ? 'd-none' : '' ?>">
+                                                            <div class="d-flex">
                                                                 <div class="delivery_charge">
                                                                     <h6 class="fs-15">
                                                                         <?= !empty($this->lang->line('delivery_charge_with_cod')) ? $this->lang->line('delivery_charge_with_cod') : 'Delivery Charge with COD :' ?>
@@ -736,7 +694,7 @@
 
                                             </tr>
                                             <tr id="promocode_div" class="d-none">
-                                                <td class="text-muted"><?= !empty($this->lang->line('promocode')) ? $this->lang->line('promocode') : 'Promo code' ?> <span id="promocode"></span></td>
+                                                <td class="text-muted"><?= !empty($this->lang->line('promocode')) ? $this->lang->line('promocode') : 'Promocode' ?> <span id="promocode"></span></td>
                                                 <td class="text-muted text-end"> <i><?= $settings['currency'] ?></i> <span id="promocode_amount"></span></td>
                                             </tr>
                                         </tbody>
@@ -745,7 +703,7 @@
                                             <tr class="total-price">
                                                 <td><strong class="text-dark"><?= !empty($this->lang->line('total')) ? $this->lang->line('total') : 'Total' ?></strong></td>
                                                 <td class="d-flex gap-1 fw-bold">
-                                                    <?= $settings['currency'] ?><span id="final_total"><?= format_price($cart['sub_total']) ?> </span></p>
+                                                    <?= $settings['currency'] ?><span id="final_total"><?= number_format($cart['sub_total'], 2) ?> </span></p>
                                                 </td>
                                             </tr>
                                             </tr>
@@ -760,7 +718,7 @@
                                     <!-- <a href="#" data-izimodal-open=".promo_code_modal" class="mb-4 pl-3 text-decoration-none text-blue fw-bold"><?= !empty($this->lang->line('see_all_offers')) ? $this->lang->line('see_all_offers') : 'See All Offers' ?>(%)</i></a> -->
                                 </div>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="<?= !empty($this->lang->line('promocode')) ? $this->lang->line('promocode') : 'Promo code' ?>" id="promocode_input">
+                                    <input type="text" class="form-control" placeholder="Promo code" id="promocode_input">
                                     <div class="input-group-append">
                                         <button class="btn btn-primary rounded-end" id="redeem_btn"><?= !empty($this->lang->line('redeem')) ? $this->lang->line('redeem') : 'Redeem' ?></button>
                                         <button class="btn btn-danger d-none" id="clear_promo_btn"><?= !empty($this->lang->line('clear')) ? $this->lang->line('clear') : 'Clear' ?></button>
@@ -804,17 +762,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 <section id="address_form">
                     <div class="h4"><?= !empty($this->lang->line('shipping_address')) ? $this->lang->line('shipping_address') : 'Shipping Address' ?></div>
-                    <ul id="address-list" class="pl-0"></ul>
+                    <ul id="address-list"></ul>
                     <div class="col-12 text-right mt-2">
-                        <!-- <a target="_blank" href="<? //= base_url('my-account/manage-address') 
-                                                        ?>"><? //= !empty($this->lang->line('create_a_new_address')) ? $this->lang->line('create_a_new_address') : 'Create a New Address' 
-                                                            ?></a> -->
-                        <a href="#" class="float-end " data-bs-toggle="modal" data-bs-target="#add-address-modal">
-                            <?= !empty($this->lang->line('create_a_new_address')) ? $this->lang->line('create_a_new_address') : 'Create a New Address' ?>
-                        </a>
-                        <!-- <a target="_blank" href="<? //= base_url('my-account/manage-address') 
-                                                        ?>"><? //= !empty($this->lang->line('create_a_new_address')) ? $this->lang->line('create_a_new_address') : 'Create a New Address' 
-                                                            ?></a> -->
+                        <a target="_blank" href="<?= base_url('my-account/manage-address') ?>"><?= !empty($this->lang->line('create_a_new_address')) ? $this->lang->line('create_a_new_address') : 'Create a New Address' ?></a>
                     </div>
                     <footer class="mt-4">
                         <button data-bs-dismiss="modal" class="btn btn-sm btn-soft-dark rounded-pill"><?= !empty($this->lang->line('cancel')) ? $this->lang->line('cancel') : 'Cancel' ?></button>
@@ -848,110 +798,6 @@
     <!--/.modal-dialog -->
 </div>
 <!--/.modal -->
-
-<div class="modal fade" id="add-address-modal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header pb-0">
-                <h5 class="modal-title"><?= !empty($this->lang->line('add_address')) ? $this->lang->line('add_address') : 'Add Address'; ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
-                <form action="<?= base_url('my-account/add-address') ?>" method="POST" id="add-address-form" class="">
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12 col-xs-12 form-group">
-                            <label for="name" class="control-label"><?= !empty($this->lang->line('name')) ? $this->lang->line('name') : 'Name' ?></label>
-                            <input type="text" class="form-control" id="address_name" name="name" placeholder="<?= !empty($this->lang->line('name')) ? $this->lang->line('name') : 'Name' ?>" />
-                        </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
-                            <label for="mobile_number" class="control-label"><?= !empty($this->lang->line('mobile_number')) ? $this->lang->line('mobile_number') : 'Mobile Number' ?></label>
-                            <input type="text" class="form-control" id="mobile_number" name="mobile" placeholder="<?= !empty($this->lang->line('mobile_number')) ? $this->lang->line('mobile_number') : 'Mobile Number' ?>" />
-                        </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
-                            <label for="alternate_mobile" class="control-label"><?= !empty($this->lang->line('alternate_mobile')) ? $this->lang->line('alternate_mobile') : 'Alternate Mobile Number' ?></label>
-                            <input type="text" class="form-control" id="alternate_mobile" name="alternate_mobile" placeholder="<?= !empty($this->lang->line('alternate_mobile')) ? $this->lang->line('alternate_mobile') : 'Alternate Mobile Number' ?>" />
-                        </div>
-                        <div class="col-md-12 col-sm-12 col-xs-12 form-group">
-                            <label for="address" class="control-label"><?= !empty($this->lang->line('address')) ? $this->lang->line('address') : 'Address' ?></label>
-                            <textarea name="address" class="form-control" id="address" cols="30" rows="4" placeholder="#Door no, Street Address, Locality, Area, Pincode"></textarea>
-                        </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group city">
-                            <label for="city" class="control-label"><?= !empty($this->lang->line('city')) ? $this->lang->line('city') : 'City' ?></label>
-                            <select class="form-control" name="city_id" id="city">
-                                <option value=""><?= !empty($this->lang->line('select_city')) ? $this->lang->line('select_city') : '--Select City--' ?></option>
-                                <?php foreach ($cities as $row) { ?>
-                                    <option value="<?= $row['id'] ?>"><?= $row['name'] ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group area">
-                            <label for="area" class="control-label"><?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?></label>
-                            <input type="text" class="form-control" id="area" name="general_area_name" placeholder="<?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?>" />
-                        </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group area">
-                            <label for="pincode" class="control-label"><?= !empty($this->lang->line('pincode')) ? $this->lang->line('pincode') : 'Zipcode' ?></label>
-                            <select name="pincode" id="pincode" class="form-control">
-                                <option value=""><?= !empty($this->lang->line('select_zipcode')) ? $this->lang->line('select_zipcode') : '--Select Zipcode--' ?></option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group city_name d-none">
-                            <label for="city" class="control-label"><?= !empty($this->lang->line('city')) ? $this->lang->line('city') : 'City Name' ?></label>
-                            <input type="text" class="form-control " id="city_name" name="city_name" placeholder="<?= !empty($this->lang->line('city')) ? $this->lang->line('city') : 'City Name' ?>" />
-                        </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group area_name d-none">
-                            <label for="area" class="control-label"><?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?></label>
-                            <input type="text" class="form-control " id="area_name" name="area_name" placeholder="<?= !empty($this->lang->line('area')) ? $this->lang->line('area') : 'Area' ?>" />
-                        </div>
-
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group pincode_name d-none">
-                            <label for="area" class="control-label"><?= !empty($this->lang->line('pincode')) ? $this->lang->line('pincode') : 'Zipcode' ?></label>
-                            <input type="text" class="form-control " id="pincode_name" name="pincode_name" placeholder="<?= !empty($this->lang->line('pincode')) ? $this->lang->line('pincode') : 'Zipcode' ?>" />
-                        </div>
-
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
-                            <label for="state" class="control-label"><?= !empty($this->lang->line('state')) ? $this->lang->line('state') : 'State' ?></label>
-                            <input type="text" class="form-control" id="state" name="state" placeholder="<?= !empty($this->lang->line('state')) ? $this->lang->line('state') : 'State' ?>" />
-                        </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
-                            <label for="country" class="control-label"><?= !empty($this->lang->line('country')) ? $this->lang->line('country') : 'Country' ?></label>
-                            <input type="text" class="form-control" name="country" id="country" placeholder="<?= !empty($this->lang->line('country')) ? $this->lang->line('country') : 'Country' ?>" />
-                        </div>
-                        <div class="col-md-12 col-sm-12 col-xs-12 form-group">
-                            <label for="country" class="control-label"><?= !empty($this->lang->line('type')) ? $this->lang->line('type') : 'Type : ' ?></label>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" name="type" id="home" value="home" />
-                                <label for="home" class="form-check-label text-dark"><?= !empty($this->lang->line('home')) ? $this->lang->line('home') : 'Home' ?></label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" name="type" id="office" value="office" placeholder="Office" />
-                                <label for="office" class="form-check-label text-dark"><?= !empty($this->lang->line('office')) ? $this->lang->line('office') : 'Office' ?></label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" name="type" id="other" value="other" placeholder="Other" />
-                                <label for="other" class="form-check-label text-dark"><?= !empty($this->lang->line('other')) ? $this->lang->line('other') : 'Other' ?></label>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12 col-sm-12 col-xs-12">
-                            <input type="submit" class="btn btn-primary btn-sm" id="save-address-submit-btn" value="Save" />
-                        </div>
-                        <div class="col-md-12 col-sm-12 col-xs-12 text-center">
-                            <div id="save-address-result"></div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <!--/.modal-content -->
-        </div>
-        <!--/.modal-body -->
-    </div>
-    <!--/.modal-dialog -->
-</div>
-<!--/.modal -->
-
-
 
 
 <?php if (isset($payment_methods['paytm_payment_method']) && $payment_methods['paytm_payment_method'] == 1) {

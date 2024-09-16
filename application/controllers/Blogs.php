@@ -13,8 +13,6 @@ class Blogs extends CI_Controller
         $this->data['user'] = ($this->ion_auth->logged_in()) ? $this->ion_auth->user()->row() : array();
         $this->data['settings'] = get_settings('system_settings', true);
         $this->data['web_settings'] = get_settings('web_settings', true);
-        $this->data['auth_settings'] = get_settings('authentication_settings', true);
-        $this->data['web_logo'] = get_settings('web_logo');
         $this->load->library(['pagination']);
         $this->response['csrfName'] = $this->security->get_csrf_token_name();
         $this->response['csrfHash'] = $this->security->get_csrf_hash();
@@ -22,6 +20,11 @@ class Blogs extends CI_Controller
 
     public function index()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         $limit = ($this->input->get('per-page')) ? $this->input->get('per-page', true) : 12;
         $category_id = ($this->input->get('category_id')) ? $this->input->get('category_id', true) : NULL;
         $blog_search = ($this->input->get('blog_search')) ? $this->input->get('blog_search', true) : '';
@@ -81,6 +84,11 @@ class Blogs extends CI_Controller
 
     public function view_detail()
     {
+        $web_doctor_brown = get_settings('web_doctor_brown', true);
+        if ((!isset($web_doctor_brown) || empty($web_doctor_brown))) {
+            /* redirect him to the page where he can enter the purchase code */
+            redirect(base_url("admin/purchase-code"));
+        }
         $this->data['main_page'] = 'view_blog';
         $this->data['title'] = 'View Blog | ' . $this->data['web_settings']['site_title'];
         $this->data['keywords'] = 'View Blog, ' . $this->data['web_settings']['meta_keywords'];

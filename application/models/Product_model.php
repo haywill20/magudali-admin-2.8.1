@@ -14,15 +14,7 @@ class Product_model extends CI_Model
     public function add_product($data)
     {
         $data = escape_array($data);
-        // print_r($data);
-        if (isset($data['attribute_id'])) {
-            $commaSeparated = implode(', ', $data['attribute_id']);
-        } else {
-            $commaSeparated = '';
-        }
-        // print_r($commaSeparated);
-        // die;
-        // die;
+
 
         if ($data['product_type'] == 'simple_product' || $data['product_type'] == 'variable_product') {
             $pro_type = ($data['product_type'] == 'simple_product') ? 'simple_product' : 'variable_product';
@@ -37,7 +29,7 @@ class Product_model extends CI_Model
         $permits = fetch_details('seller_data', ['user_id' => $seller_id], 'permissions');
         $s_permits = json_decode($permits[0]['permissions'], true);
         if (isset($data['edit_product_id']) && !empty($data['edit_product_id'])) {
-            $edit_status = fetch_details('products', ['id' => $data['edit_product_id']], ['status', 'name', 'slug']);
+            $edit_status = fetch_details('products', ['id' => $data['edit_product_id']], 'status');
             $require_products_approval = isset($data['status']) && ($data['status'] != '') ? $data['status'] : $edit_status[0]['status'];
         } else {
             $is_permit = (isset($s_permits['require_products_approval']) && $s_permits['require_products_approval'] == 0) ? 1 : 2;
@@ -49,15 +41,7 @@ class Product_model extends CI_Model
         $description = $data['pro_input_description'];
         $extra_description = $data['extra_input_description'];
         $tags = (!empty($data['tags'])) ? $data['tags'] : "";
-        // check slug 
-        $edit_product_name = isset($edit_status[0]['name']) ? $edit_status[0]['name'] : '';
-        if ($edit_product_name != $data['pro_input_name']) {
-            $slug   = create_unique_slug($data['pro_input_name'], 'products');
-        } else {
-            $slug = $edit_status[0]['slug'];
-        }
-
-        // $slug   = create_unique_slug($data['pro_input_name'], 'products');
+        $slug   = create_unique_slug($data['pro_input_name'], 'products');
         $main_image_name = $data['pro_input_image'];
         $other_images = (isset($data['other_images']) && !empty($data['other_images'])) ? $data['other_images'] : [];
         if (isset($data['product_type']) && $data['product_type'] == 'digital_product') {
@@ -77,6 +61,7 @@ class Product_model extends CI_Model
         $download_type = (isset($data['download_link_type']) && !empty($data['download_link_type'])) ? $data['download_link_type'] : "";
         $download_link = (!empty($download_type)) ? (($download_type == 'add_link') ? $data['download_link'] : $data['pro_input_zip']) : "";
         $pickup_location = (isset($data['pickup_location'])) ? $data['pickup_location'] : null;
+
         $pro_data = [
             'name' => $data['pro_input_name'],
             'short_description' => $short_description,
@@ -102,21 +87,15 @@ class Product_model extends CI_Model
             'description' => $description,
             'extra_description' => $extra_description,
             'deliverable_type' => isset($data['deliverable_type']) && !empty($data['deliverable_type']) ? $data['deliverable_type'] : 0,
-            'deliverable_city_type' => isset($data['deliverable_city_type']) && !empty($data['deliverable_city_type']) ? $data['deliverable_city_type'] : 0,
-            'deliverable_zipcodes' => (isset($data['deliverable_type']) && !empty($data['deliverable_type']) && ($data['deliverable_type'] == ALL || $data['deliverable_type'] == NONE)) ? NULL : $data['zipcodes'],
-            'deliverable_cities' => (isset($data['deliverable_city_type']) && !empty($data['deliverable_city_type']) && ($data['deliverable_city_type'] == ALL || $data['deliverable_city_type'] == NONE)) ? NULL : $data['cities'],
+            'deliverable_zipcodes' => ($data['deliverable_type'] == ALL || $data['deliverable_type'] == NONE) ? NULL : $data['zipcodes'],
             'hsn_code' => $hsn_code,
             'pickup_location' => $pickup_location,
             'is_attachment_required' => $is_attachment_required,
-            // 'attribute_order' => $commaSeparated
         ];
-        // print_r($pro_data);
 
         if ($data['product_type'] == 'simple_product') {
             if (isset($data['simple_product_stock_status']) && empty($data['simple_product_stock_status'])) {
                 $pro_data['stock_type'] = NULL;
-                $pro_data['sku'] = NULL;
-                $pro_data['stock'] = NULL;
             }
 
             if (isset($data['simple_product_stock_status'])  && in_array($data['simple_product_stock_status'], array('0', '1'))) {
@@ -198,9 +177,7 @@ class Product_model extends CI_Model
         $pro_attr_data = [
             'product_id' => $p_id,
             'attribute_value_ids' => strval($data['attribute_values']),
-            // 'attribute_order' => $commaSeparated,
         ];
-        // print_r($pro_attr_data);
 
 
         if (isset($data['edit_product_id'])) {
@@ -213,8 +190,7 @@ class Product_model extends CI_Model
             $pro_variance_data = [
                 'product_id' => $p_id,
                 'price' => $data['simple_price'],
-                'special_price' => (isset($data['simple_special_price']) && !empty($data['simple_special_price'])) ? $data['simple_special_price'] : $data['simple_price'],
-                'stock' => (isset($data['product_total_stock'])) ? floatval($data['product_total_stock']) : '',
+                'special_price' => (isset($data['simple_special_price']) && !empty($data['simple_special_price'])) ? $data['simple_special_price'] : '0',
                 'weight' => (isset($data['weight'])) ? floatval($data['weight']) : 0,
                 'height' => (isset($data['height'])) ? $data['height'] : 0,
                 'breadth' => (isset($data['breadth'])) ? $data['breadth'] : 0,
@@ -234,7 +210,7 @@ class Product_model extends CI_Model
             $pro_variance_data = [
                 'product_id' => $p_id,
                 'price' => $data['simple_price'],
-                'special_price' => (isset($data['simple_special_price']) && !empty($data['simple_special_price'])) ? $data['simple_special_price'] : $data['simple_price'],
+                'special_price' => (isset($data['simple_special_price']) && !empty($data['simple_special_price'])) ? $data['simple_special_price'] : '0',
             ];
 
             if (isset($data['edit_product_id'])) {
@@ -255,7 +231,7 @@ class Product_model extends CI_Model
                     $pro_variance_data['stock'] = $data['total_stock_variant_type'];
                     $pro_variance_data['availability']  = $data['variant_status'];
                     $variant_price = $data['variant_price'];
-                    $variant_special_price = (isset($data['variant_special_price']) && !empty($data['variant_special_price'])) ? $data['variant_special_price'] : $data['variant_price'];
+                    $variant_special_price = (isset($data['variant_special_price']) && !empty($data['variant_special_price'])) ? $data['variant_special_price'] : '0';
                     $variant_weight = $data['weight'];
                     $variant_height = (isset($data['height'])) ? $data['height'] : 0.0;
                     $variant_breadth = (isset($data['breadth'])) ? $data['breadth'] : 0.0;
@@ -263,7 +239,7 @@ class Product_model extends CI_Model
                 } else {
                     $flag = "variant_level";
                     $variant_price = $data['variant_price'];
-                    $variant_special_price =  (isset($data['variant_special_price']) && !empty($data['variant_special_price'])) ? $data['variant_special_price'] : $data['variant_price'];
+                    $variant_special_price =  (isset($data['variant_special_price']) && !empty($data['variant_special_price'])) ? $data['variant_special_price'] : '0';
                     $variant_sku = $data['variant_sku'];
                     $variant_total_stock = $data['variant_total_stock'];
                     $variant_stock_status = $data['variant_level_stock_status'];
@@ -275,10 +251,7 @@ class Product_model extends CI_Model
             } else {
 
                 $variant_price = $data['variant_price'];
-                $variant_special_price = (isset($data['variant_special_price']) && !empty($data['variant_special_price'])) ? $data['variant_special_price'] : $data['variant_price'];
-                // $variant_sku = $data['variant_sku'];
-                // $variant_total_stock = $data['variant_total_stock'];
-                // $variant_stock_status = $data['variant_level_stock_status'];
+                $variant_special_price = (isset($data['variant_special_price']) && !empty($data['variant_special_price'])) ? $data['variant_special_price'] : '0';
                 $variant_weight = $data['weight'];
                 $variant_height = (isset($data['height'])) ? $data['height'] : 0.0;
                 $variant_breadth = (isset($data['breadth'])) ? $data['breadth'] : 0.0;
@@ -299,7 +272,7 @@ class Product_model extends CI_Model
                     $value = str_replace(' ', ',', trim($variants_ids[$i]));
                     if ($flag == "variant_level") {
                         $pro_variance_data['price'] = $variant_price[$i];
-                        $pro_variance_data['special_price'] =  (isset($variant_special_price[$i]) && !empty($variant_special_price[$i])) ? $variant_special_price[$i] : $variant_price[$i];
+                        $pro_variance_data['special_price'] =  (isset($variant_special_price[$i]) && !empty($variant_special_price[$i])) ? $variant_special_price[$i] : '0';
                         $pro_variance_data['weight'] = $variant_weight[$i];
                         $pro_variance_data['height'] = $variant_height[$i];
                         $pro_variance_data['breadth'] = $variant_breadth[$i];
@@ -309,7 +282,7 @@ class Product_model extends CI_Model
                         $pro_variance_data['availability'] = $variant_stock_status[$i];
                     } else {
                         $pro_variance_data['price'] = $variant_price[$i];
-                        $pro_variance_data['special_price'] = (isset($variant_special_price[$i]) && !empty($variant_special_price[$i])) ? $variant_special_price[$i] : $variant_price[$i];
+                        $pro_variance_data['special_price'] = (isset($variant_special_price[$i]) && !empty($variant_special_price[$i])) ? $variant_special_price[$i] : '0';
                         $pro_variance_data['weight'] = $variant_weight[$i];
                         $pro_variance_data['height'] = $variant_height[$i];
                         $pro_variance_data['breadth'] = $variant_breadth[$i];
@@ -426,7 +399,6 @@ class Product_model extends CI_Model
         }
 
         $product_count = $count_res->get('products p')->result_array();
-        // echo $this->db->last_query();
 
         foreach ($product_count as $row) {
             $total = $row['total'];
@@ -530,15 +502,8 @@ class Product_model extends CI_Model
                     }
                     $attr_name = explode(',', $variants['attr_name']);
                     $varaint_values = explode(',', $variants['variant_values']);
-                    // print_r($attr_name);
                     for ($i = 0; $i < count($attr_name); $i++) {
-                        if (isset($varaint_values) && !empty($varaint_values[$i])) {
-                            $variations .= '<b>' . $attr_name[$i] . '</b> : ' . $varaint_values[$i] . '&nbsp;&nbsp;<b> Varient id : </b>' . $variants['id'] . '<br>';
-                            # code...
-                        } else {
-                            $variations .= '&nbsp;&nbsp;<b> Varient id : </b>' . $variants['id'] . '<br>';
-                            # code...
-                        }
+                        $variations .= '<b>' . $attr_name[$i] . '</b> : ' . $varaint_values[$i] . '&nbsp;&nbsp;<b> Varient id : </b>' . $variants['id'] . '<br>';
                     }
                 }
             }
@@ -667,7 +632,6 @@ class Product_model extends CI_Model
         // Fetch users
         $this->db->select('*');
         $this->db->where("name like '%" . $search_term . "%'");
-        $this->db->where("status", 1);
         $fetched_records = $this->db->get('brands');
         $brands = $fetched_records->result_array();
         // Initialize Array with fetched data
@@ -731,6 +695,7 @@ class Product_model extends CI_Model
     }
 
     function get_brand_list($search = "", $offset = 0, $limit = 25)
+
     {
         $multipleWhere = '';
         $where = array();
@@ -1050,7 +1015,10 @@ class Product_model extends CI_Model
         print_r(json_encode($bulkData));
     }
 
+
+
     public function get_stock_details()
+
     {
 
         $filters['show_only_stock_product'] = true;
@@ -1163,36 +1131,73 @@ class Product_model extends CI_Model
         print_r(json_encode($bulkData));
     }
 
+
+
     public function get_seller_stock_details()
+
     {
+
         $seller_id = $_SESSION['user_id'];
+
         $filters['show_only_stock_product'] = true;
+
         $offset = 0;
+
         $limit = 10;
+
         $sort = 'id';
+
         $order = 'ASC';
+
         $filters['search'] =  (isset($_GET['search'])) ? $_GET['search'] : null;
+
         // $filter['search'] = (isset($_GET['search']) && !empty($_GET['search'])) ? $_GET['search'] : '';
+
         if (isset($_GET['offset']))
+
             $offset = $_GET['offset'];
+
         if (isset($_GET['limit']))
+
             $limit = $_GET['limit'];
+
         if (isset($_GET['order']))
+
             $order = $_GET['order'];
+
         if (isset($_GET['category_id'])) {
+
             $category_id = $_GET['category_id'];
         }
+
+
+
         $products = fetch_product("", (isset($filters)) ? $filters : null, "", isset($category_id) ? $category_id : '', $limit, $offset, $sort, $order, "", "", $seller_id);
+
         $total = $products['total'];
+
         $bulkData = $rows = $tempRow = array();
+
         $bulkData['total'] = $total;
 
+
+
+
+
         foreach ($products['product'] as $product) {
+
             $category_id = $product['category_id'];
+
             $category_name = fetch_details('categories', ['id' => $category_id], 'name');
+
             $operate = $stock = "";
+
             $variants = get_variants_values_by_pid($product['id']);
+
             $stock = implode("<br/>", array_column($variants, 'stock'));
+
+
+
             $tempRow['id'] = $product['variants'][0]['id'];
 
             $tempRow['name'] = $product['name'];
@@ -1239,39 +1244,5 @@ class Product_model extends CI_Model
 
 
         print_r(json_encode($bulkData));
-    }
-
-    public function getProductsAndVariants()
-    {
-        $products = $this->db->get('products')->result_array();
-
-        foreach ($products as &$product) {
-            $product_id = $product['id'];
-            $variants = $this->db->get_where('product_variants', array('product_id' => $product_id))->result_array();
-            $product['variants'] = $variants;
-        }
-
-        return $products;
-    }
-
-    public function get_sellers($search = "")
-    {
-        // Fetch users
-        $sellers = $this->db->select(' u.username as seller_name,u.id as seller_id,sd.category_ids,sd.id as seller_data_id ,sd.status as seller_status')
-            ->join('users_groups ug', ' ug.user_id = u.id ')
-            ->join('seller_data sd', ' sd.user_id = u.id ')
-            ->where(['ug.group_id' => '4'])
-            ->where(['sd.status' => 1])
-            ->where("u.username like '%" . $search . "%'")
-            ->get('users u')->result_array();
-        // Initialize Array with fetched data
-        // echo $this->db->last_query();
-        $data = array();
-        // print_r($sellers);
-        // die;
-        foreach ($sellers as $seller) {
-            $data[] = array("id" => $seller['seller_id'], "name" => $seller['seller_name']);
-        }
-        return $data;
     }
 }

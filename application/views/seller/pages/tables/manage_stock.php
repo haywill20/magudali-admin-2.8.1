@@ -104,7 +104,7 @@
                                         <th data-field="name" data-sortable="false">Name</th>
                                         <th data-field="category_name" data-sortable="false" data-visible="false">Category</th>
                                         <th data-field="image" data-sortable="false">Image</th>
-                                        <th data-field="operate" data-sortable="false" >Variants - Stock</th>
+                                        <th data-field="operate" data-sortable="true">Variants - Stock</th>
                                     </tr>
                                 </thead>
                             </table>

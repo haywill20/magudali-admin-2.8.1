@@ -39,7 +39,7 @@ class About_us extends CI_Controller
             if (print_msg(!has_permissions('update', 'about_us'), PERMISSION_ERROR_MSG, 'about_us')) {
                 return false;
             }
-            $this->form_validation->set_rules('about_us_input_description', 'About Us', 'trim|required|xss_clean');
+            $this->form_validation->set_rules('about_us_input_description', 'About Us', 'trim|required');
             if (!$this->form_validation->run()) {
                 $this->response['error'] = true;
                 $this->response['csrfName'] = $this->security->get_csrf_token_name();

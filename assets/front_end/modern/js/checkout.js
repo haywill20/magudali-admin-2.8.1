@@ -299,7 +299,6 @@ $(document).ready(function () {
     $("#checkout_form").on('submit', function (event) {
         event.preventDefault();
         var fatoorah_order_id = "";
-        // var local_pick_up = $("input[name='local_pickup']:checked").val()
 
         var address_id = $("#address_id").val();
         var product_type = $("#product_type").val();
@@ -311,7 +310,6 @@ $(document).ready(function () {
         }
 
         var promo_set = $('#promo_set').val();
-        // console.log(local_pick_up);
         var promo_code = '';
         if (promo_set == 1) {
             promo_code = $('#promocode_input').val();
@@ -329,24 +327,14 @@ $(document).ready(function () {
             return false;
         }
         var address_id = $('#address_id').val();
-        if (product_type != 'digital_product') {
-            if (address_id == null || address_id == undefined || address_id == '') {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Please add/choose address.'
-                })
-                $('#place_order_btn').attr('disabled', false).html(btn_html)
-                return false
-            }
+        if ((address_id == null || address_id == undefined || address_id == '') && $('#product_type').val() != 'digital_product') {
+            Toast.fire({
+                icon: 'error',
+                title: "Please add/choose address."
+            });
+            $('#place_order_btn').attr('disabled', false).html(btn_html);
+            return false;
         }
-        // if ((address_id == null || address_id == undefined || address_id == '') && $('#product_type').val() != 'digital_product') {
-        //     Toast.fire({
-        //         icon: 'error',
-        //         title: "Please add/choose address."
-        //     });
-        //     $('#place_order_btn').attr('disabled', false).html(btn_html);
-        //     return false;
-        // }
         if (documents === "") {
             return Toast.fire({
                 icon: 'error',
@@ -360,7 +348,7 @@ $(document).ready(function () {
                 'payment_method': 'Stripe',
                 'wallet_used': wallet_used,
                 'address_id': address_id,
-                'product_type': product_type,
+                'product_type' : product_type,
                 'promo_code': promo_code,
                 'documents': documents
             }, function (data) {
@@ -584,62 +572,6 @@ $(document).ready(function () {
             }, "json");
         } else if (payment_methods == "Flutterwave") {
             flutterwave_payment();
-        } else if (payment_methods == 'phonepe') {
-            var amount = $('#amount').val()
-            var user_id = $('#user_id').val()
-            var address_id = $('#address_id').val()
-            if ($('#wallet_balance').is(':checked')) {
-                var wallet_used = 1
-            } else {
-                var wallet_used = 0
-            }
-
-            var promo_set = $('#promo_set').val()
-            var promo_code = ''
-            if (promo_set == 1) {
-                promo_code = $('#promocode_input').val()
-            }
-            // if ($("#datepicker").length > 0 && $("#start_date").val() == "") {
-            //     $("#datepicker").focus();
-            //     Toast.fire({
-            //         icon: 'error',
-            //         title: "Please select delivery date and time!"
-            //     })
-            //     return false;
-            // }
-            $.post(
-                base_url + 'payment/phonepe', {
-                [csrfName]: csrfHash,
-                amount: amount,
-                user_id: user_id,
-                address_id: address_id,
-                wallet_used: wallet_used,
-                promo_code: promo_code,
-            },
-                function (data) {
-                    var url = (data['url']) ? data['url'] : ""
-                    var message = (data['data']['message']) ? data['data']['message'] : ""
-                    $("#phonepe_transaction_id").val((data['transaction_id']) ? data['transaction_id'] : "");
-                    if (url != "") {
-                        place_order().done(function (result) {
-                            if (result.error == false) {
-                                window.location.replace(url);
-                            } else {
-                                Toast.fire({
-                                    icon: 'error',
-                                    title: message
-                                })
-                            }
-                        })
-                    } else {
-                        Toast.fire({
-                            icon: 'error',
-                            title: message
-                        })
-                    }
-                },
-                'json'
-            )
         } else if (payment_methods == "COD" || payment_methods == "Direct Bank Transfer") {
             place_order().done(function (result) {
                 if (result.error == false) {
@@ -658,10 +590,7 @@ $(document).ready(function () {
             place_order().done(function (result) {
 
                 if (result.error == false) {
-                    // window.location.reload();
-                    setTimeout(function () {
-                        location.href = base_url + 'payment/success';
-                    }, 3000);
+                    window.location.reload();
                 } else {
                     Toast.fire({
                         icon: 'error',
@@ -671,14 +600,6 @@ $(document).ready(function () {
 
             });
 
-        } else {
-            // console.log("here");
-            $('#place_order_btn').attr('disabled', false).html(btn_html);
-            return Toast.fire({
-                icon: 'error',
-                title: 'Please select Payment method.'
-            })
-            // return false;
         }
 
     });
@@ -771,7 +692,7 @@ $(document).ready(function () {
         }
     });
 
-    // redeem button
+// redeem button
     $("#redeem_btn").on('click', function (event) {
         event.preventDefault();
         var formdata = new FormData();
@@ -811,31 +732,22 @@ $(document).ready(function () {
                         delivery_charge = delivery_charge.replace(',', '');
                     }
 
-                    var is_cashback = data.data[0].is_cashback;
+
                     var final_total = data.data[0].final_total;
                     var final_discount = parseFloat(data.data[0].final_discount);
-                    // console.log(final_discount);
+                    console.log(final_discount);
                     console.log(final_total);
-                    // console.log(wallet_used);
-                    // console.log(delivery_charge);
+                    console.log(wallet_used);
+                    console.log(delivery_charge);
+                    final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge)
 
-                    // if (is_cashback == 1) {
-                    //     // console.log(is_cashback);
-                    //     final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge)
-                    //     // console.log(final_total);
-                    // } else {
-                    //     final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge)
-                    //     console.log(final_total);
-                    // }
-
-                    // console.log(final_total);
+                    console.log(final_total);
 
                     $('#promocode_div').removeClass('d-none');
                     $('#promocode').text('(' + data.data[0].promo_code + ')');
                     $('#promocode_amount').text(final_discount.toLocaleString(undefined, { maximumFractionDigits: 2 }));
                     $('#final_total').text(final_total.toLocaleString(undefined, { maximumFractionDigits: 2 }));
                     $('#amount').val(final_total);
-                    $('#promo_is_cashback').val(is_cashback);
                     $('#clear_promo_btn').removeClass('d-none');
                     $('#redeem_btn').hide();
                     $("#promo_set").val(1);
@@ -891,10 +803,9 @@ $(document).ready(function () {
         } else {
             delivery_charge = delivery_charge.replace(',', '')
         }
-        console.log(delivery_charge);
-        console.log(parseFloat(delivery_charge));
-        console.log(parseFloat(promocode_amount));
-        var new_final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(wallet_used);
+console.log(delivery_charge);
+console.log(parseFloat(delivery_charge));
+        var new_final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(promocode_amount) - parseFloat(wallet_used);
         $('#final_total').text(
             new_final_total.toLocaleString(undefined, {
                 maximumFractionDigits: 2
@@ -944,7 +855,7 @@ $(document).ready(function () {
                             '</div>' +
                             '<div class="row text-start col-11">' +
                             '<div class="text-dark"><i class="fa fa-map-marker"></i> ' + e.name + ' - ' + e.type + '</div>' +
-                            '<small class="col-12 text-muted">' + e.address + ' ,' + e.area + ' , ' + e.city + ' , ' + e.state + ' , ' + e.country + ' - ' + e.pincode + '</small>' +
+                            '<small class="col-12 text-muted">' + e.area + ' , ' + e.city + ' , ' + e.state + ' , ' + e.country + ' - ' + e.pincode + '</small>' +
                             '<small class="col-12 text-muted">' + e.mobile + '</small>' +
                             '</div>' +
                             '</li></label>';
@@ -964,47 +875,30 @@ $(document).ready(function () {
     })
 
     document.getElementById("promo-code-modal").addEventListener("show.bs.modal", () => {
-        var data = { [csrfName]: csrfHash };
-        console.log(data);
         $.ajax({
-            type: 'GET',
-            // data: data,
-            url: base_url + 'my-account/get_promo_codes',
+            type: 'POST',
+            data: {
+                [csrfName]: csrfHash,
+            },
+            url: base_url + 'my-account/get_promo_codes/',
             dataType: 'json',
             success: function (data) {
+
                 csrfName = data.csrfName;
                 csrfHash = data.csrfHash;
                 var html = '';
                 if ((data.promo_codes).length != 0) {
                     $.each(data.promo_codes, function (i, e) {
-                        var promocode_name = e.promo_code;
-                        console.log(promocode_name);
-                        html += '<div class="card mb-2">' +
-                        '<label for="promo-code-' + e.id + '">' +
-                            '<li class="list-group-item d-flex align-items-center mt-3">' +
-                                '<div class="promo-code-img">' +
-                                    '<img src="' + e.image + '" style="max-width:80px;max-height:80px;"/>' +
-                                '</div>' +
-                                '<div class="text-start">' +
-                                    '<div class="copy-promo-code d-flex gap-2 p-2 text-dark" title="Copy promocode" id="redeem_promocode" data-value="' + e.promo_code + '">' + 
-                                        e.promo_code + 
-                                        '<i class="fa fa-copy text-blue"></i>' +
-                                    '</div>' +
-                                    '<small class="text-muted">' + e.message + '</small>' +
-                                '</div>' +
-                            '</li>' +
-                        '</label>' +
-                    '</div>';
-            
+                        html += '<div class="card mb-2"><label for="promo-code-' + e.id + '"><li class="list-group-item d-flex align-item-center mt-3">' +
+                            '<div class="promo-code-img"><img src="' + e.image + '" style="max-width:80px;max-height:80px;"/></div>' +
+                            '<div class="text-start">' +
+                            '<div class="text-dark p-2 copy-promo-code" title="Copy promocode" id="redeem_promocode" data-value = ' + e.promo_code  + '>' + e.promo_code + '<i class="fa fa-copy text-blue"></i></div>' +
+                            '<small class="text-muted">' + e.message + '</small>' +
+                            '</div>' +
+                            '</li></label></div>';
                     });
                 } else {
-                    // html += '<div class="no-promo-code-img"><img src="' + base_url + '/assets/front_end/modern/img/no-offer-2.jpeg" /></div>' + '<div class="col-12 text-dark d-flex justify-content-center">Opps...No Offers Avilable</small>';
-                    html += '<div class="align-items-center d-flex flex-column">' +
-                        '<div class="empty-compare">' +
-                        '<img src="' + base_url + 'assets/front_end/modern/img/no-offer-2.jpeg" alt="Opps...No Offers Avilable">' +
-                        '</div>' +
-                        '<div class="h5">Opps...No Offers Avilable</div>' +
-                        '</div>';
+                    html += '<div class="col-12 text-dark d-flex justify-content-center">Opps...No Offers Avilable</small>';
                 }
                 $('#promocode-list').html(html);
             }
@@ -1026,7 +920,7 @@ $(document).ready(function () {
             promocode_amount = promocode_amount.replace(',', '');
         }
         $('#address-name-type').html(address.name + ' - ' + address.type);
-        $('#address-full').html(address.address + ' , ' + address.area + ' , ' + address.city);
+        $('#address-full').html(address.area + ' , ' + address.city);
         $('#address-country').html(address.state + ' , ' + address.country + ' - ' + address.pincode);
         $('#address-mobile').html(address.mobile);
         $('#address_id').val(address.id);
@@ -1045,7 +939,7 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (result) {
 
-                // console.log(result.csrfHash);
+
                 csrfName = result.csrfName;
                 csrfHash = result.csrfHash;
                 var is_time_slots_enabled = 0
@@ -1082,8 +976,6 @@ $(document).ready(function () {
                 var delivery_charge = result.delivery_charge_with_cod
                 var delivery_charge_with_cod = result.delivery_charge_with_cod
                 var delivery_charge_without_cod = result.delivery_charge_without_cod
-                // console.log(delivery_charge_with_cod);
-                // console.log(delivery_charge_without_cod);
                 result.availability_data.forEach(product => {
                     if (product.delivery_by == 'standard_shipping') {
                         $('.date-time-label').addClass('d-none')
@@ -1102,45 +994,26 @@ $(document).ready(function () {
                 } else {
                     wallet_used = wallet_used.replace(',', '');
                 }
-                // console.log(wallet_used);
-                // $('input[type=radio][name=payment_method]').change(function () {
-                    var selectedPaymentMethod = $('input[type=radio][name=payment_method]:checked').val();
-                    var delivery_charge = 0;
-                    if (selectedPaymentMethod === 'COD') {
-                        // delivery_charge = parseFloat(delivery_charge_with_cod);
-                        // if (delivery_charge_with_cod.indexOf(',') !== -1) {
-                            delivery_charge = delivery_charge_with_cod.replace(',', '');
-                        // }
-                    } else {
-                        // console.log(delivery_charge_without_cod);
-                        // delivery_charge = delivery_charge_without_cod;
-                        delivery_charge = delivery_charge_without_cod.replace(',', '');
 
-                    }
-                    // console.log(delivery_charge);
-
-                    var delivery_charge = delivery_charge.toLocaleString(undefined, { maximumFractionDigits: 5 });
-                    // console.log(delivery_charge);
-                    var final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(wallet_used) - parseFloat(promocode_amount);
-                    final_total = final_total.toLocaleString(undefined, { maximumFractionDigits: 2 });
-                    console.log(final_total);
-                    $('#final_total').html(final_total);
-                    var final_total = final_total.replace(',', '');
-                    // console.log(typeof(parseFloat(final_total)));
-                    $('#amount').val(final_total);
-                    if (final_total != 0) {
-                        $('#cod').prop('required', true);
-                        $('#paypal').prop('required', true);
-                        $('#razorpay').prop('required', true);
-                        $('#paystack').prop('required', true);
-                        $('#payumoney').prop('required', true);
-                        $('#flutterwave').prop('required', true);
-                        $('#stripe').prop('required', true);
-                        $('#paytm').prop('required', true);
-                        $('#bank_transfer').prop('required', true);
-                        $('.payment-methods').show();
-                    }
-                // })
+                var delivery_charge = delivery_charge.toLocaleString(undefined, { maximumFractionDigits: 5 });
+                delivery_charge = delivery_charge.replace(',', '');
+                var final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(wallet_used) - parseFloat(promocode_amount);
+                final_total = final_total.toLocaleString(undefined, { maximumFractionDigits: 2 });
+                $('#final_total').html(final_total);
+                var final_total = final_total.replace(',', '');
+                $('#amount').val(final_total);
+                if (final_total != 0) {
+                    $('#cod').prop('required', true);
+                    $('#paypal').prop('required', true);
+                    $('#razorpay').prop('required', true);
+                    $('#paystack').prop('required', true);
+                    $('#payumoney').prop('required', true);
+                    $('#flutterwave').prop('required', true);
+                    $('#stripe').prop('required', true);
+                    $('#paytm').prop('required', true);
+                    $('#bank_transfer').prop('required', true);
+                    $('.payment-methods').show();
+                }
             }
         });
         // $.ajax({
@@ -1243,7 +1116,7 @@ $(document).ready(function () {
         url: base_url + 'cart/get-delivery-charge',
         dataType: 'json',
         success: function (result) {
-            // console.log(result);
+            console.log(result);
             csrfName = result.csrfName;
             csrfHash = result.csrfHash;
             var className = result.error == true ? 'danger' : 'success'
@@ -1307,106 +1180,104 @@ $(document).ready(function () {
 
 //wallt balance 
 $(document).on('click', '#wallet_balance', function () {
-    var current_wallet_balance = $('#current_wallet_balance').val();
-    var wallet_balance = current_wallet_balance.replace(",", "");
-    var final_total = $('#final_total').text();
-    var is_cashback = $('#promo_is_cashback').val();
-    final_total = final_total.replace(",", "");
-    console.log(final_total);
-    // console.log(is_cashback);
+        var current_wallet_balance = $('#current_wallet_balance').val();
+        var wallet_balance = current_wallet_balance.replace(",", "");
+        var final_total = $('#final_total').text();
+        final_total = final_total.replace(",", "");
 
-    var sub_total = $("#sub_total").val();
-    console.log(sub_total);
-    var delivery_charge_with_cod = $(".delivery_charge_with_cod").val();
-    var delivery_charge_without_cod = $(".delivery_charge_without_cod").val();
+        var sub_total = $("#sub_total").val();
+        var delivery_charge = $(".delivery_charge_with_cod").val();
 
-    if (delivery_charge_without_cod != undefined) {
+        if (delivery_charge != undefined) {
 
-        if (delivery_charge_without_cod == '') {
-            delivery_charge_without_cod = 0;
-        } else {
-            delivery_charge_without_cod = delivery_charge_without_cod.replace(',', '');
-        }
-    } else {
-        delivery_charge_without_cod = 0;
-    }
-    var promo_set = $('#promo_set').val()
-    var promocode_amount = ''
-    if (promo_set == 1) {
-        promocode_amount = $('#promocode_amount').text();
-        promocode_amount = promocode_amount.replace(',', '');
-    } else {
-        promocode_amount = 0;
-    }
-    var wallet_used = $('.wallet_used').text();
-    if (wallet_used == '') {
-        wallet_used = 0;
-    } else {
-        wallet_used = wallet_used.replace(',', '');
-    }
-    if ($(this).is(':checked')) {
-        $("#wallet_used").val(1);
-        wallet_balance = parseFloat(wallet_balance.replace(',', ''));
-
-        // final_total = parseFloat(sub_total) + parseFloat(delivery_charge_without_cod);
-        if (is_cashback == 1) {
-            // console.log(is_cashback);
-            final_total = parseFloat(sub_total) + parseFloat(delivery_charge_without_cod)
-            // console.log(final_total);
-        } else {
-            final_total = parseFloat(sub_total) + parseFloat(delivery_charge_without_cod) - parseFloat(promocode_amount);
-            // console.log(final_total);
-        }
-
-        console.log(delivery_charge_without_cod);
-        console.log("if checked then final total is if" + final_total);
-        if (final_total - wallet_balance <= 0) {
-
-            var available_balance = wallet_balance - final_total;
-            available_balance = parseFloat(available_balance).toFixed(2);
-            $(".wallet_used").html(final_total.toLocaleString(undefined, {
-                maximumFractionDigits: 2
-            }));
-            $('#available_balance').html(available_balance.toLocaleString(undefined, {
-                maximumFractionDigits: 2
-            }));
-            $('#final_total').html('0.00');
-            $('#cod').prop('required', false);
-            $('#paypal').prop('required', false);
-            $('#razorpay').prop('required', false);
-            $('#midtrans').prop('required', false);
-            $('#my_fatoorah').prop('required', false);
-            $('#paystack').prop('required', false);
-            $('#payumoney').prop('required', false);
-            $('#flutterwave').prop('required', false);
-            $('#paytm').prop('required', false);
-            $('#bank_transfer').prop('required', false);
-            $('#stripe').prop('required', false);
-            $('#paytm').prop('required', false);
-            $('#bank_transfer').prop('required', false);
-            $('.wallet-section').removeClass('d-none')
-            $('.payment-methods').hide();
-        } else {
-
-            $(".wallet_used").html(current_wallet_balance);
-            $('#available_balance').html('0.00');
-            if (is_cashback == 1) {
-
-                console.log(is_cashback);
-                final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge_without_cod)
-                console.log(final_total);
+            if (delivery_charge == '') {
+                delivery_charge = 0;
             } else {
-                final_total = parseFloat(final_total) - parseFloat(wallet_used) + parseFloat(delivery_charge_without_cod)
-                console.log(final_total);
+                delivery_charge = delivery_charge.replace(',', '');
             }
-            final_total = parseFloat(sub_total) - parseFloat(wallet_balance) - parseFloat(promocode_amount) + parseFloat(delivery_charge_without_cod);
-            console.log(delivery_charge_without_cod);
-            console.log("if checked then final total is else" + final_total);
+        } else {
+            delivery_charge = 0;
+        }
+        var promo_set = $('#promo_set').val()
+        var promocode_amount = ''
+        if (promo_set == 1) {
+            promocode_amount = $('#promocode_amount').text();
+            promocode_amount = promocode_amount.replace(',', '');
+        } else {
+            promocode_amount = 0;
+        }
+        var wallet_used = $('.wallet_used').text();
+        if (wallet_used == '') {
+            wallet_used = 0;
+        } else {
+            wallet_used = wallet_used.replace(',', '');
+        }
+        if ($(this).is(':checked')) {
+            $("#wallet_used").val(1);
+            wallet_balance = parseFloat(wallet_balance.replace(',', ''));
 
+            if (final_total - wallet_balance <= 0) {
+
+                var available_balance = wallet_balance - final_total;
+                available_balance = parseFloat(available_balance);
+                $(".wallet_used").html(final_total.toLocaleString(undefined, {
+                    maximumFractionDigits: 2
+                }));
+                $('#available_balance').html(available_balance.toLocaleString(undefined, {
+                    maximumFractionDigits: 2
+                }));
+                $('#final_total').html('0.00');
+                $('#cod').prop('required', false);
+                $('#paypal').prop('required', false);
+                $('#razorpay').prop('required', false);
+                $('#midtrans').prop('required', false);
+                $('#my_fatoorah').prop('required', false);
+                $('#paystack').prop('required', false);
+                $('#payumoney').prop('required', false);
+                $('#flutterwave').prop('required', false);
+                $('#paytm').prop('required', false);
+                $('#bank_transfer').prop('required', false);
+                $('#stripe').prop('required', false);
+                $('#paytm').prop('required', false);
+                $('#bank_transfer').prop('required', false);
+                $('.wallet-section').removeClass('d-none')
+                $('.payment-methods').hide();
+            } else {
+
+                $(".wallet_used").html(current_wallet_balance);
+                $('#available_balance').html('0.00');
+                final_total = parseFloat(sub_total) - parseFloat(wallet_balance) - parseFloat(promocode_amount) + parseFloat(delivery_charge);
+
+                $('#final_total').html(final_total.toLocaleString(undefined, {
+                    maximumFractionDigits: 2
+                }));
+                $('#amount').val(final_total);
+                $('#cod').prop('required', true);
+                $('#paypal').prop('required', true);
+                $('#razorpay').prop('required', true);
+                $('#paystack').prop('required', true);
+                $('#payumoney').prop('required', true);
+                $('#flutterwave').prop('required', true);
+                $('#paytm').prop('required', true);
+                $('#bank_transfer').prop('required', true);
+                $('#stripe').prop('required', true);
+                $('#paytm').prop('required', true);
+                $('#bank_transfer').prop('required', true);
+                $('.payment-methods').show();
+            }
+
+        } else {
+            $("#wallet_used").val(1);
+            var final_total = parseFloat(sub_total) + parseFloat(delivery_charge) - parseFloat(promocode_amount);
+
+            $(".wallet_used").html('0.00');
             $('#final_total').html(final_total.toLocaleString(undefined, {
                 maximumFractionDigits: 2
             }));
             $('#amount').val(final_total);
+            $('#available_balance').html(current_wallet_balance);
+            $('.wallet-section').addClass('d-none')
+            $('.payment-methods').show();
             $('#cod').prop('required', true);
             $('#paypal').prop('required', true);
             $('#razorpay').prop('required', true);
@@ -1418,45 +1289,9 @@ $(document).on('click', '#wallet_balance', function () {
             $('#stripe').prop('required', true);
             $('#paytm').prop('required', true);
             $('#bank_transfer').prop('required', true);
-            $('.payment-methods').show();
+
         }
-
-    } else {
-        $("#wallet_used").val(0);
-
-        console.log(final_total);
-        if (is_cashback == 1) {
-            // console.log(is_cashback);
-            final_total = parseFloat(sub_total) + parseFloat(delivery_charge_with_cod)
-        } else {
-            final_total = parseFloat(sub_total) + parseFloat(delivery_charge_with_cod) - parseFloat(promocode_amount);
-            // console.log(final_total);
-        }
-
-        console.log("if not checked then final total is " + final_total);
-
-        $(".wallet_used").html('0.00');
-        $('#final_total').html(final_total.toLocaleString(undefined, {
-            maximumFractionDigits: 2
-        }));
-        $('#amount').val(final_total);
-        $('#available_balance').html(current_wallet_balance);
-        $('.wallet-section').addClass('d-none')
-        $('.payment-methods').show();
-        $('#cod').prop('required', true);
-        $('#paypal').prop('required', true);
-        $('#razorpay').prop('required', true);
-        $('#paystack').prop('required', true);
-        $('#payumoney').prop('required', true);
-        $('#flutterwave').prop('required', true);
-        $('#paytm').prop('required', true);
-        $('#bank_transfer').prop('required', true);
-        $('#stripe').prop('required', true);
-        $('#paytm').prop('required', true);
-        $('#bank_transfer').prop('required', true);
-
-    }
-});
+    });
 
 function paytm_setup(txnToken, orderId, amount, app_name, logo, username, user_email, user_contact) {
     var config = {
@@ -1580,44 +1415,3 @@ function printDiv(divName) {
     setTimeout(function () { window.print(); }, 600);
     setTimeout(() => { document.body.innerHTML = originalContents; }, 1000);
 }
-
-var global_final_total = 0
-var global_delivery_charge = 0
-$('#pickup_from_store').on('change', function (e) {
-    e.preventDefault()
-    var final_time = $('#final_total').text()
-    var delivery_charge = parseInt($('.delivery-charge').text())
-    var sub_total = $('.sub_total').text()
-    global_final_total = final_time
-    global_delivery_charge = delivery_charge
-
-    $('.address').hide()
-    $('.address-details').hide();
-    $('.all-delivery-charges').hide();
-    $('.date-time-section').hide();
-    $('.delivery_charge').hide()
-    // $('#time_slots').hide()
-    // $('.delivery_charge_with_cod').hide()
-    // $('.delivery_charge_without_cod').hide()
-    // $('.estimate_date').hide()
-    // $('.deliverycharge_currency').hide()
-    // $('.deliverable_status').hide()
-    $('.delivery-charge').text('0.00')
-    $('#final_total').text(sub_total)
-})
-$('#door_step').on('change', function (e) {
-    e.preventDefault()
-    $('.address').show()
-    $('.delivery_charge').show()
-    $('.address-details').show()
-    $('.all-delivery-charges').show()
-    $('.date-time-section').show()
-    $('#time_slots').show()
-    // $('.delivery_charge_with_cod').show()
-    // $('.delivery_charge_without_cod').show()
-    // $('.estimate_date').show()
-    // $('.deliverycharge_currency').show()
-    // $('.deliverable_status').show()
-    $('.delivery-charge').text(global_delivery_charge)
-    $('#final_total').text(global_final_total)
-})

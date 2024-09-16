@@ -56,7 +56,10 @@
                                             <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($fetched_data[0]['id'])) ? 'Update Product Faq' : 'Add Product FAQ' ?></button>
                                         </div>
                                     </div>
-
+                                    <div class="d-flex justify-content-center">
+                                        <div class="form-group" id="error_box">
+                                        </div>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -81,7 +84,6 @@
                                         <th data-field="id" data-sortable="true" data-align='center'>ID</th>
                                         <th data-field="user_id" data-sortable="false" data-visible='false' data-align='center'>User Id</th>
                                         <th data-field="product_id" data-sortable="false" data-visible='false' data-align='center'>Product Id</th>
-                                        <th data-field="product_name" data-sortable="false" data-align='center'>Product Name</th>
                                         <th data-field="question" data-sortable="false" data-align='center'>Question</th>
                                         <th data-field="answer" data-sortable="false">Answer</th>
                                         <th data-field="answered_by" data-sortable="false" data-visible='false' data-align='center'>Answered by</th>

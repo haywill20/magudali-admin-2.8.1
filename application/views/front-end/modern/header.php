@@ -1,35 +1,17 @@
 <?php
+$this->load->model('category_model');
+$categories = $this->category_model->get_categories(null, 8);
 $language = get_languages();
 $cookie_lang = $this->input->cookie('language', TRUE);
-if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0) {
-    $daynamic_lang = '';
-} else {
-    $daynamic_lang = $this->config->item('language');
-}
 $language_index = 0;
 if (!empty($cookie_lang)) {
     $language_index = array_search($cookie_lang, array_column($language, "language"));
-} else if (!empty($daynamic_lang)) {
-    $language_index = array_search($daynamic_lang, array_column($language, "language"));
 }
-$allow_items_in_cart = $settings;
-// $web_doctor_brown = get_settings('web_doctor_brown', true);
-// $web_doctor_brown = (isset($web_doctor_brown) && !empty($web_doctor_brown)) ? $web_doctor_brown['code_bravo'] : '';
-// print_r($web_doctor_brown);
-// print_r($web_doctor_brown);
+$auth_settings = get_settings('authentication_settings', true);
 ?>
 <?php $current_url = current_url(); ?>
 <input type="hidden" id="currency" class="form-control" value="<?= $settings['currency'] ?>">
-<input type="hidden" id="allow_items_in_cart" name="allow_items_in_cart" value='<?= isset($allow_items_in_cart['max_items_cart']) ? $allow_items_in_cart['max_items_cart'] : '10'; ?>'>
-<input type="hidden" id="low_stock_limit" name="low_stock_limit" value='<?= isset($allow_items_in_cart['low_stock_limit']) ? $allow_items_in_cart['low_stock_limit'] : '10'; ?>'>
-<input type="hidden" id="auth_settings" name="auth_settings" value='<?= isset($auth_settings['authentication_method']) ? $auth_settings['authentication_method'] : ''; ?>'>
-<input type="hidden" id="decimal_point" name="decimal_point" value='<?= isset($allow_items_in_cart['decimal_point']) ? $allow_items_in_cart['decimal_point'] : '2'; ?>'>
-<input type="hidden" name="android_app_store_link" id="android_app_store_link" value="<?= (isset($settings['android_app_store_link']) && !empty($settings['android_app_store_link'])) ? $settings['android_app_store_link'] : '' ?>">
-<input type="hidden" name="ios_app_store_link" id="ios_app_store_link" value="<?= (isset($settings['ios_app_store_link']) && !empty($settings['ios_app_store_link'])) ? $settings['ios_app_store_link'] : '' ?>">
-<input type="hidden" name="scheme" id="scheme" value="<?= (isset($settings['scheme']) && !empty($settings['scheme'] )) ? $settings['scheme'] : '' ?>">
-<input type="hidden" name="host" id="host" value="<?= (isset($settings['host']) && !empty($settings['host'])) ? $settings['host'] : '' ?>">
-<!-- <input type="hidden" name="web_doctor_brown" id="web_doctor_brown" value="<?//= $web_doctor_brown ?>"> -->
-<input type="hidden" name="share_slug" id="share_slug" value="true">
+ <input type="hidden" id="auth_settings" name="auth_settings" value='<?= isset($auth_settings['authentication_method']) ? $auth_settings['authentication_method'] : ''; ?>'>
 
 <!-- header starts -->
 <header class="wrapper bg-soft-primary">
@@ -55,20 +37,13 @@ $allow_items_in_cart = $settings;
                                 <a class="text-decoration-none dropdown-toggle py-0" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <?php if ($cookie_lang) { ?>
                                         <span class="text-primary font-weight-bold"><?= ucfirst($language[$language_index]['code']) ?></span>
-                                    <?php } else  if ($daynamic_lang) { ?>
-                                        <span class="text-dark font-weight-bold"><?= ucfirst($language[$language_index]['code']) ?></span>
                                     <?php } else { ?>
                                         <span class="text-primary font-weight-bold">En</span>
                                     <?php } ?>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-lg">
                                     <?php foreach ($language as $row) { ?>
-                                        <a href="<?= base_url('home/lang/' . strtolower($row['language'])) ?>" class="dropdown-item"><?= strtoupper($row['code']) . ' - ' . ucfirst($row['language']);
-                                                                                                                                        if (!empty($row['native_language'])) {
-                                                                                                                                            echo ' (' . $row['native_language'] . ')';
-                                                                                                                                        }
-                                                                                                                                        ?></a>
-
+                                        <a href="<?= base_url('home/lang/' . strtolower($row['language'])) ?>" class="dropdown-item"><?= strtoupper($row['code']) . ' - ' . ucfirst($row['language']) ?></a>
                                     <?php } ?>
                                 </div>
                             </li>
@@ -86,9 +61,9 @@ $allow_items_in_cart = $settings;
 
                                     <div class="dropdown-menu dropdown-menu-lg">
                                         <a href="<?= base_url('my-account/wallet') ?>" class="dropdown-item text-decoration-none" aria-label="wallet"><i class="uil uil-wallet mr-2 text-primary link-color"></i> <?= $settings['currency']  ?><?= ' ' . isset($user->balance) && !empty($user->balance) ? number_format($user->balance, 2) : 0.0 ?></a>
-                                        <a href="<?= base_url('my-account/profile') ?>" class="dropdown-item text-decoration-none" aria-label="my profile"><i class="uil uil-user text-primary link-color mr-2"></i> <?= !empty($this->lang->line('profile')) ? $this->lang->line('profile') : 'Profile' ?> </a>
+                                        <a href="<?= base_url('my-account') ?>" class="dropdown-item text-decoration-none" aria-label="my profile"><i class="uil uil-user text-primary link-color mr-2"></i> <?= !empty($this->lang->line('profile')) ? $this->lang->line('profile') : 'Profile' ?> </a>
                                         <a href="<?= base_url('my-account/orders') ?>" class="dropdown-item text-decoration-none" aria-label="orders"><i class="link-color mr-2 text-primary uil uil-history"></i> <?= !empty($this->lang->line('orders')) ? $this->lang->line('orders') : 'Orders' ?> </a>
-                                        <a href="" class="dropdown-item text-decoration-none" id="user_logout" aria-label="logout"><i class="link-color mr-2 text-primary uil uil-signout"></i><?= !empty($this->lang->line('logout')) ? $this->lang->line('logout') : 'Logout' ?></a>
+                                        <a href="<?= base_url('login/logout') ?>" class="dropdown-item text-decoration-none" aria-label="logout"><i class="link-color mr-2 text-primary uil uil-signout"></i><?= !empty($this->lang->line('logout')) ? $this->lang->line('logout') : 'Logout' ?></a>
                                     </div>
                                 </li>
 
@@ -118,7 +93,8 @@ $allow_items_in_cart = $settings;
                             <?php if (ALLOW_MODIFICATION == 0) { ?>
                                 <img src="<?= base_url("assets/front_end/modern/img/logo/orange.png") ?>" alt="site-logo image" class="brand-logo-link logo-img" style="object-fit: contain;">
                             <?php } else { ?>
-                                <a href="<?= base_url() ?>"><img src="<?= base_url($web_logo) ?>" data-src="<?= base_url($web_logo) ?>" class="brand-logo-link" alt="site-logo image"></a>
+                                <?php $logo = get_settings('web_logo'); ?>
+                                <a href="<?= base_url() ?>"><img src="<?= base_url($logo) ?>" data-src="<?= base_url($logo) ?>" class="brand-logo-link" alt="site-logo image"></a>
                             <?php } ?>
                         </a>
                     </div>
@@ -127,7 +103,8 @@ $allow_items_in_cart = $settings;
                             <?php if (ALLOW_MODIFICATION == 0) { ?>
                                 <img src="<?= base_url("assets/front_end/modern/img/logo/orange.png") ?>" class="brand-logo-link logo-img h-10" alt="site-logo image">
                             <?php } else { ?>
-                                <a href="<?= base_url() ?>"><img src="<?= base_url($web_logo) ?>" data-src="<?= base_url($web_logo) ?>" class="brand-logo-link h-10" alt="site-logo image"></a>
+                                <?php $logo = get_settings('web_logo'); ?>
+                                <a href="<?= base_url() ?>"><img src="<?= base_url($logo) ?>" data-src="<?= base_url($logo) ?>" class="brand-logo-link h-10" alt="site-logo image"></a>
                             <?php } ?>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                         </div>
@@ -137,7 +114,7 @@ $allow_items_in_cart = $settings;
                                     <a class="nav-link <?= ($current_url == base_url('')) ? 'active' : '' ?>" aria-current="page" aria-label="home" href="<?= base_url() ?>"><?= !empty($this->lang->line('home')) ? $this->lang->line('home') : 'Home' ?></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link <?= ($current_url == base_url('products')) ? 'active' : '' ?>" href="<?= base_url('products') ?>" aria-label="products"><?= !empty($this->lang->line('shop')) ? $this->lang->line('shop') : 'Shop' ?></a>
+                                    <a class="nav-link <?= ($current_url == base_url('products')) ? 'active' : '' ?>" href="<?= base_url('products') ?>" aria-label="products"><?= !empty($this->lang->line('products')) ? $this->lang->line('products') : 'Products' ?></a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link <?= ($current_url == base_url('sellers')) ? 'active' : '' ?>" href="<?= base_url('sellers') ?>" aria-label="sellers"><?= !empty($this->lang->line('sellers')) ? $this->lang->line('sellers') : 'Sellers' ?></a>
@@ -160,17 +137,14 @@ $allow_items_in_cart = $settings;
                         <!-- /.offcanvas-body -->
                     </div>
                     <!-- /.navbar-collapse -->
-
                     <div class="navbar-other w-100 d-flex ms-auto position_rtl">
                         <ul class="navbar-nav flex-row align-items-center ms-auto ul_rtl">
-                            <li class="nav-item"><a class="nav-link desktop-search" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-search"><i class="uil uil-search"></i></a></li>
-                            <?php if ($this->ion_auth->logged_in()) { ?>
-                                <li class="nav-item">
-                                    <a href="<?= base_url('my-account/favorites') ?>" class="nav-link" aria-label="favorites">
-                                        <i class="uil uil-heart"></i>
-                                    </a>
-                                </li>
-                            <?php } ?>
+                            <li class="nav-item"><a class="nav-link" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-search"><i class="uil uil-search"></i></a></li>
+                            <li class="nav-item">
+                                <a href="<?= base_url('my-account/favorites') ?>" class="nav-link" aria-label="favorites">
+                                    <i class="uil uil-heart"></i>
+                                </a>
+                            </li>
                             <li class="nav-item d-flex flex-row align-items-center">
                                 <a href="<?= base_url('compare') ?>" class="nav-link d-flex" onclick=display_compare() data-product-id="<?= ($row['id']) != 0 ? $row['id'] : '' ?>" aria-label="compare">
                                     <i class="uil uil-exchange-alt"></i>
@@ -205,13 +179,6 @@ $allow_items_in_cart = $settings;
                 <!-- /.container -->
             </nav>
             <!-- /.navbar -->
-            <div class="container d-lg-none pb-1 mobile-searchbar">
-                <div class="w-100">
-                    <div class="col-12 mobile-search px-0 mb-1">
-                        <select class='search_product_mobile w-100 ' name="search"></select>
-                    </div>
-                </div>
-            </div>
 
             <div class="offcanvas offcanvas-end bg-light" id="offcanvas-cart" data-bs-scroll="true" aria-modal="true" role="dialog">
                 <input type="hidden" name="is_loggedin" id="is_loggedin" value="<?= (isset($user->id)) ? 1 : 0 ?>">
@@ -219,14 +186,12 @@ $allow_items_in_cart = $settings;
                     <h3 class="mb-0"><?= !empty($this->lang->line('shopping_cart')) ? $this->lang->line('shopping_cart') : 'Shopping Cart' ?></h3>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
-                <div class="offcanvas-body d-flex flex-column px-3" id="cart-item-sidebar">
+                <div class="offcanvas-body d-flex flex-column" id="cart-item-sidebar">
                     <?php
                     if (isset($user->id)) {
                         $cart_items = $this->cart_model->get_user_cart($user->id);
                         if (count($cart_items) != 0) {
                             foreach ($cart_items as $items) {
-                                // echo "<pre>";
-                                // print_r($items);
                                 $price = $items['special_price'] != '' && $items['special_price'] > 0 && $items['special_price'] != null ? $items['special_price'] : $items['price']; ?>
                                 <div class="shopping-cart">
                                     <div class="shopping-cart-item d-flex justify-content-between mb-4">
@@ -234,23 +199,12 @@ $allow_items_in_cart = $settings;
 
                                             <figure class="rounded cart-img">
                                                 <a href="<?= base_url('products/details/' . $items['product_slug']) ?>">
-                                                    <?php
-                                                    // $variant_img = json_decode($items['product_variants'][0]['images']);
-                                                    // print_r($items['product_variants'][0]['images'] =! '[]');
-                                                    if (isset($items['product_variants'][0]['images']) && !empty($items['product_variants'][0]['images']) && $items['product_variants'][0]['images'] != '[]') {
-                                                        // print_r('here');
-                                                        $variant_img = json_decode($items['product_variants'][0]['images']);
-                                                    ?>
-                                                        <img src="<?= base_url($variant_img[0]) ?>" alt="<?= html_escape($items['name']) ?>" title="<?= html_escape($items['name']) ?>" style="object-fit: contain;">
-
-                                                    <?php } else { ?>
-                                                        <img src="<?= base_url($items['image']) ?>" alt="<?= html_escape($items['name']) ?>" title="<?= html_escape($items['name']) ?>" style="object-fit: contain;">
-                                                    <?php } ?>
+                                                    <img src="<?= base_url($items['image']) ?>" alt="<?= html_escape($items['name']) ?>" title="<?= html_escape($items['name']) ?>" style="object-fit: contain;">
                                                 </a>
                                             </figure>
                                             <div class="w-100">
-                                                <h3 class="post-title fs-16 lh-xs mb-1 title_wrap w-19">
-                                                    <?= output_escaping(str_replace('\r\n', '&#13;&#10;', $items['name'])) ?> <?= (isset($check_current_stock_status['error'])  && $check_current_stock_status['error'] == TRUE) ? "<span class='badge badge-danger'>  Out of Stock </span>" :  "" ?>
+                                                <h3 class="post-title fs-16 lh-xs mb-1">
+                                                    <?= short_description_word_limit(strip_tags(output_escaping(str_replace('\r\n', '&#13;&#10;', $items['name']))), 35) ?> <?= (isset($check_current_stock_status['error'])  && $check_current_stock_status['error'] == TRUE) ? "<span class='badge badge-danger'>  Out of Stock </span>" :  "" ?>
                                                 </h3>
                                                 <span>
                                                     <?php if (!empty($items['product_variants'])) { ?>
@@ -264,7 +218,7 @@ $allow_items_in_cart = $settings;
 
                                                 <div class="product-pricing d-flex py-2 w-100">
                                                     <div class="product-quantity product-sm-quantity">
-                                                        <input type="number" name="header_qty" class="form-control d-flex align-content-center h-9 w-14 header_qty" value="<?= $items['qty'] ?>" data-id="<?= $items['product_variant_id'] ?>" data-price="<?= $price ?>" min="<?= $items['minimum_order_quantity'] ?>" max="<?= $items['total_allowed_quantity'] ?>" step="<?= $items['quantity_step_size'] ?>">
+                                                        <input type="number" name="header_qty" class="form-control d-flex align-content-center h-9 w-14" value="<?= $items['qty'] ?>" data-id="<?= $items['product_variant_id'] ?>" data-price="<?= $price ?>" min="<?= $items['minimum_order_quantity'] ?>" max="<?= $items['total_allowed_quantity'] ?>" step="<?= $items['quantity_step_size'] ?>">
                                                     </div>
                                                     <div class="product-line-price align-self-center px-1"><?= $settings['currency'] . ' ' . number_format($items['qty'] * $price, 2) ?></div>
                                                 </div>
@@ -286,15 +240,13 @@ $allow_items_in_cart = $settings;
                             <h1 class="h4 text-center">
                                 <?= !empty($this->lang->line('empty_cart_message')) ? $this->lang->line('empty_cart_message') : 'Your cart is empty' ?>
                             </h1>
-                            <!--<img src="<?= base_url('assets/front_end/modern/img/new/empty-cart(4).png') ?>" alt="Empty Cart" class="mt-16" />-->
-                            <img src="<?= base_url('media/image?path=assets/front_end/modern/img/new/empty-cart(4).png&width=370&quality=80') ?>" alt="Empty Cart" class="mt-16" />
+                            <img src="<?= base_url('assets/front_end/modern/img/new/empty-cart(4).png') ?>" alt="Empty Cart" class="mt-16" />
                         <?php } ?>
                     <?php } else { ?>
                         <h1 class="h4 text-center">
                             <?= !empty($this->lang->line('empty_cart_message')) ? $this->lang->line('empty_cart_message') : 'Your cart is empty' ?>
                         </h1>
-                        <!--<img src="<?= base_url('assets/front_end/modern/img/new/empty-cart(4).png') ?>" alt="Empty Cart" class="mt-16" />-->
-                        <img src="<?= base_url('media/image?path=assets/front_end/modern/img/new/empty-cart(4).png&width=370&quality=80') ?>" alt="Empty Cart" class="mt-16" />
+                        <img src="<?= base_url('assets/front_end/modern/img/new/empty-cart(4).png') ?>" alt="Empty Cart" class="mt-16" />
                     <?php } ?>
 
 
@@ -325,9 +277,11 @@ $allow_items_in_cart = $settings;
                 <!-- /.offcanvas-body -->
             </div>
 
-            <div class="offcanvas offcanvas-top bg-light" id="offcanvas-search" data-bs-scroll="true">
-                <div class="container d-flex flex-row py-4">
-                    <select class="form-control rounded-0 search_product" type="text" aria-label="Search"></select>
+            <div class="offcanvas offcanvas-top bg-light h-16" id="offcanvas-search" data-bs-scroll="true">
+                <div class="container d-flex flex-row py-6">
+                    <form class="w-100">
+                        <select class="form-control my-0 py-1 p-2 rounded-0 search_product" type="text" aria-label="Search"></select>
+                    </form>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
             </div>
@@ -340,3 +294,9 @@ $allow_items_in_cart = $settings;
 
 </header>
 <!-- header ends -->
+
+<div class="progress-wrap">
+    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+    </svg>
+</div>

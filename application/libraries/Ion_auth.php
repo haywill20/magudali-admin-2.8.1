@@ -25,7 +25,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 /**
  * Class Ion_auth
  */
-#[\AllowDynamicProperties]
 class Ion_auth
 {
 	/**

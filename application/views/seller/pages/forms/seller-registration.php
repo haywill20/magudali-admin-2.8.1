@@ -7,8 +7,7 @@
                 <div class="col-md-12">
                     <div class="card_seller card-info m-0 form-card">
                         <!-- form start -->
-                        <!-- <form class="form-horizontal form-submit-event" action="<?//= base_url('seller/auth/create-seller'); ?>" method="POST" id="add_product_form"> -->
-                        <form class="form-horizontal form-submit-event" method="POST" id="add_seller_form">
+                        <form class="form-horizontal form-submit-event" action="<?= base_url('seller/auth/create-seller'); ?>" method="POST" id="add_product_form">
                             <?php if (isset($user_data) && !empty($user_data)) { ?>
                                 <input type="hidden" name="user_id" value="<?= $user_data['to_be_seller_id'] ?>">
                                 <input type='hidden' name='user_name' value='<?= $user_data['to_be_seller_name'] ?>'>
@@ -31,7 +30,7 @@
                                 <div class="form-group row">
                                     <label for="mobile" class="col-sm-2 col-form-label">Mobile <span class='text-danger text-sm'>*</span></label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="seller_mobile" placeholder="Enter Mobile" name="mobile" <?= (isset($user_data) && !empty($user_data) && !empty($user_data['to_be_seller_id'])) ? 'disabled' : ''; ?> value="<?= @$user_data['to_be_seller_mobile'] ?>">
+                                        <input type="number" class="form-control" id="mobile" placeholder="Enter Mobile" name="mobile" <?= (isset($user_data) && !empty($user_data) && !empty($user_data['to_be_seller_id'])) ? 'disabled' : ''; ?> value="<?= @$user_data['to_be_seller_mobile'] ?>">
                                     </div>
                                 </div>
 
@@ -64,15 +63,15 @@
                                     </div>
                                 <?php } ?>
                                 <div class="form-group row">
-                                    <label for="authorized_signature" class="col-sm-2 col-form-label">Authorized Signature <span class='text-danger text-sm'>*</span></label>
-                                    <div class="col-sm-10">
-                                        <input type="file" class="form-control" name="authorized_signature" id="authorized_signature" accept="image/*" />
-                                    </div>
-                                </div>
-                                <!-- <div class="form-group row">
                                     <label for="address_proof" class="col-sm-2 col-form-label">Address Proof <span class='text-danger text-sm'>*</span> </label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" name="address_proof" id="address_proof" accept="image/*" />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="authorized_signature" class="col-sm-2 col-form-label">Authorized Signature <span class='text-danger text-sm'>*</span></label>
+                                    <div class="col-sm-10">
+                                        <input type="file" class="form-control" name="authorized_signature" id="authorized_signature" accept="image/*" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -80,7 +79,7 @@
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" name="national_identity_card" id="national_identity_card" accept="image/*" />
                                     </div>
-                                </div> -->
+                                </div>
 
                                 <h5>Store Details</h5>
                                 <hr>
@@ -99,8 +98,7 @@
                                 <div class="form-group row">
                                     <label for="store_url" class="col-sm-2 col-form-label">URL </label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="store_url" pattern="\b((http|https)://)?(www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(/[a-zA-Z0-9#?&%=._-]*)*\b
-" placeholder="Store URL" name="store_url">
+                                        <input type="text" class="form-control" id="store_url" placeholder="Store URL" name="store_url">
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -110,7 +108,7 @@
                                     </div>
                                 </div>
 
-                                <!-- <h5>Store Tax Details</h5>
+                                <h5>Store Tax Details</h5>
                                 <hr>
                                 <div class="form-group row">
                                     <label for="tax_name" class="col-sm-2 col-form-label">Tax Name <span class='text-danger text-sm'>*</span></label>
@@ -156,14 +154,19 @@
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" id="bank_name" placeholder="Bank Name" name="bank_name">
                                     </div>
-                                </div> -->
+                                </div>
 
                                 <div class="form-group">
                                     <button type="reset" class="btn btn-warning">Reset</button>
                                     <button type="submit" class="btn btn-success" id="submit_btn">Submit</button>
                                 </div>
                             </div>
-
+                            <div class="d-flex justify-content-center">
+                                <div class="form-group" id="error_box">
+                                    <div class="card text-white d-none mb-3">
+                                    </div>
+                                </div>
+                            </div>
                             <!-- /.card-footer -->
                         </form>
                     </div>

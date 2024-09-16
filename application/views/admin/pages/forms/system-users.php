@@ -42,7 +42,7 @@
                                     <div class="form-group">
                                         <label for="mobile" class="control-label">Mobile <span class='text-danger text-sm'>*</span></label>
                                         <div class="col-md-12">
-                                            <input type="text" maxlength="16" oninput="validateNumberInput(this)" class="form-control" name="mobile" id="mobile" value="<?= (isset($fetched_data[0]['mobile'])) ?  $fetched_data[0]['mobile'] : ' ' ?>">
+                                            <input type="number" class="form-control" name="mobile" id="mobile" value="<?= (isset($fetched_data[0]['mobile'])) ?  $fetched_data[0]['mobile'] : ' ' ?>">
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -74,18 +74,17 @@
                                         <div class="col-md-12">
                                             <select class="form-control system-user-role" name="role">
                                                 <option value=" ">---Select role---</option>
-                                                <?php
-                                                foreach ($user_roles as $key => $value) { ?>
-                                                    <option value="<?= $key ?>" <?= (isset($fetched_data[0]['role']) &&  $fetched_data[0]['role'] == $key) ? "Selected" : "" ?>><?= ucwords(str_replace('_', ' ', $value)) ?></option>
-                                                <?php
-                                                } ?>
+                                                <option value="0" <?= (isset($fetched_data[0]['role']) && $fetched_data[0]['role'] == '0') ?  'selected' : ' ' ?>>Super Admin</option>
+                                                <option value="1" <?= (isset($fetched_data[0]['role']) && $fetched_data[0]['role'] == '1') ?  'selected' : ' ' ?>>Admin</option>
+                                                <option value="2" <?= (isset($fetched_data[0]['role']) && $fetched_data[0]['role'] == '2') ?  'selected' : ' ' ?>>Editor</option>
+                                                <option value="3" <?= (isset($fetched_data[0]['role']) && $fetched_data[0]['role'] == '3') ?  'selected' : ' ' ?>>Supporter</option>
                                             </select>
                                         </div>
                                     </div>
                                     <?php if (!isset($fetched_data[0]['id'])) { ?>
                                         <div class="d-flex justify-content-center">
-                                            <!-- <div class="form-group" id="error_box">
-                                            </div> -->
+                                            <div class="form-group" id="error_box">
+                                            </div>
                                         </div>
                                         <div class="form-group">
                                             <button type="reset" class="btn btn-warning">Reset</button>
@@ -157,8 +156,8 @@
 
                                     <?php if (isset($fetched_data[0]['id'])) { ?>
                                         <div class="d-flex justify-content-center">
-                                            <!-- <div class="form-group" id="error_box">
-                                            </div> -->
+                                            <div class="form-group" id="error_box">
+                                            </div>
                                         </div>
                                         <div class="form-group">
                                             <button type="submit" class="btn btn-success" id="submit_btn">Update User</button>

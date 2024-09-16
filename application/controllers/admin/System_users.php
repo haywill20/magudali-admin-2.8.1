@@ -53,8 +53,6 @@ class System_users extends CI_Controller
 
             $this->data['about_us'] = get_settings('about_us');
             $this->data['system_modules'] = $this->config->item('system_modules');
-            $this->data['user_roles'] = $this->config->item('system_user_roles');
-
             $this->load->view('admin/template', $this->data);
         } else {
             redirect('admin/login', 'refresh');
@@ -77,7 +75,7 @@ class System_users extends CI_Controller
             $edit_id = $this->input->post('edit_system_user', true);
 
             $this->form_validation->set_rules('username', 'Username', 'trim|required|xss_clean');
-            $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|xss_clean|numeric|max_length[16]');
+            $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required|xss_clean|numeric');
             $this->form_validation->set_rules('email', 'Email', 'trim|required|xss_clean');
             $this->form_validation->set_rules('role', 'role', 'trim|required|xss_clean');
 

@@ -37,20 +37,18 @@
                                     <input type="text" class="form-control" id="pro_input_text" placeholder="Product Name" name="pro_input_name" value="<?= (isset($product_details[0]['name'])) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $product_details[0]['name'])) : "" ?>">
                                 </div>
                                 <div class="row col-md-12">
-                                    <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                                    <div class="form-group col-md-6">
                                         <label for="seller" class="col-form-label">Seller <span class='text-danger text-sm'>*</span></label>
-                                        <select id="seller-select" name="seller_id" class="form-control">
-                                            <option value="">Select a seller</option>
-                                            <?php
-                                            if (isset($product_details[0]['seller_id']) && $product_details[0]['seller_id'] != '') {
-                                            ?>
-                                                <option value="<?= $seller[0]['seller_id'] ?>" <?= (isset($product_details[0]['seller_id']) && $product_details[0]['seller_id'] == $seller[0]['seller_id']) ? 'selected' : "" ?>><?= $seller[0]['seller_name'] . ' ' . '-' . ' ' . $seller[0]['store_name'] . ' ' . '(store)' ?></option>
+                                        <select class='form-control' name='seller_id' id="seller_id">
+                                            <option value="">Select Seller </option>
+                                            <?php foreach ($sellers as $seller) { ?>
+                                                <option value="<?= $seller['seller_id'] ?>" <?= (isset($product_details[0]['seller_id']) && $product_details[0]['seller_id'] == $seller['seller_id']) ? 'selected' : "" ?>><?= $seller['seller_name'] . ' ' . '-' . ' ' . $seller['store_name'] . ' ' . '(store)' ?></option>
                                             <?php } ?>
                                         </select>
                                     </div>
                                     <?php if (empty($product_details[0]['id'])) { ?>
                                         <div class="form-group col-md-6">
-                                            <label for="product_type_menu" class="col-form-label">Product Type </label>
+                                            <label for="seller" class="col-form-label">Product Type </label>
                                             <select class='form-control' name='product_type_menu' id="product_type_menu">
                                                 <option value="physical_product"> Physical Product </option>
                                                 <option value="digital_product"> Digital Product </option>
@@ -140,82 +138,34 @@
                                                 <label for="guarantee_period" class="col-form-label">Guarantee Period</label>
                                                 <input type="text" class="col-md-12 form-control" name="guarantee_period" value="<?= (isset($product_details[0]['guarantee_period'])) ? $product_details[0]['guarantee_period'] : "" ?>" placeholder='Guarantee Period if any'>
                                             </div>
-
-                                            <div class="form-group col-md-6 mt-3 deliverable_type">
-                                                <div class=" <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
-
-                                                    <?php if ((isset($system_settings['pincode_wise_deliverability']) && $system_settings['pincode_wise_deliverability'] == 1) || (isset($shipping_method['local_shipping_method']) && isset($shipping_method['shiprocket_shipping_method']) && $shipping_method['local_shipping_method'] == 1 && $shipping_method['shiprocket_shipping_method'] == 1)) { ?>
-
-                                                        <div class="row">
-                                                            <div class="form-group col-md-6">
-                                                                <label for="deliverable_type" class="col-form-label">Deliverable Type</label>
-                                                                <select class="form-control" name="deliverable_type" id="deliverable_type">
-                                                                    <option value="<?= NONE ?>" <?= (isset($product_details[0]['deliverable_type']) && $product_details[0]['deliverable_type'] == NONE) ? 'selected' : ''; ?>>None</option>
-                                                                    <?php if (!isset($product_details)) { ?>
-                                                                        <option value="<?= ALL ?>" selected>All</option>
-                                                                    <?php } else { ?>
-                                                                        <option value="<?= ALL ?>" <?= (isset($product_details[0]['deliverable_type']) && $product_details[0]['deliverable_type'] == ALL) ? 'selected' : ''; ?>>All</option>
-                                                                    <?php } ?>
-                                                                    <option value="<?= INCLUDED ?>" <?= (isset($product_details[0]['deliverable_type']) && $product_details[0]['deliverable_type'] == INCLUDED) ? 'selected' : ''; ?>>Included</option>
-                                                                    <option value="<?= EXCLUDED ?>" <?= (isset($product_details[0]['deliverable_type']) && $product_details[0]['deliverable_type'] == EXCLUDED) ? 'selected' : ''; ?>>Excluded</option>
-                                                                </select>
-                                                            </div>
-
-                                                            <div class="form-group col-md-6">
-                                                                <label for="deliverable_zipcodes" class="col-form-label">Deliverable Zipcodes</label>
-                                                                <?php
-                                                                $zipcodes = (isset($product_details[0]['deliverable_zipcodes']) &&  $product_details[0]['deliverable_zipcodes'] != NULL) ? explode(",", $product_details[0]['deliverable_zipcodes']) : "";
-                                                                // echo "<pre>";
-                                                                // $zipcodes_name = fetch_details('zipcodes', "", 'zipcode,id', "", "", "", "", "id", $zipcodes);
-                                                                // print_r($zipcodes_name);
-                                                                // print_r($zipcodes);
-
-                                                                ?>
-                                                                <select name="deliverable_zipcodes[]" class="search_zipcode form-control w-100" multiple onload="multiselect()" id="deliverable_zipcodes" <?= (isset($product_details[0]['deliverable_type']) && ($product_details[0]['deliverable_type'] == INCLUDED || $product_details[0]['deliverable_type'] == EXCLUDED)) ? "" : "disabled" ?>>
-                                                                    <?php if (isset($product_details[0]['deliverable_type']) && ($product_details[0]['deliverable_type'] == INCLUDED || $product_details[0]['deliverable_type'] == EXCLUDED)) {
-                                                                        $zipcodes_name = fetch_details('zipcodes', "", 'zipcode,id', "", "", "", "", "id", $zipcodes);
-                                                                        // print_r($zipcodes_name);
-                                                                        foreach ($zipcodes_name as $row) {
-                                                                    ?>
-                                                                            <option value="<?= $row['id'] ?>" <?= (in_array($row['id'], $zipcodes)) ? 'selected' : ''; ?>><?= $row['zipcode'] ?></option>
-                                                                    <?php }
-                                                                    } ?>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-
-                                                    <?php  }
-                                                    if (isset($system_settings['city_wise_deliverability']) && $system_settings['city_wise_deliverability'] == 1 && $shipping_method['shiprocket_shipping_method'] != 1) { ?>
-                                                        <div class="row">
-                                                            <div class="form-group col-md-6">
-                                                                <label for="" class="col-form-label">Deliverable City Type</label>
-                                                                <select class="form-control" name="deliverable_city_type" id="deliverable_city_type">
-                                                                    <option value="<?= NONE ?>" <?= (isset($product_details[0]['deliverable_city_type']) && $product_details[0]['deliverable_city_type'] == NONE) ? 'selected' : ''; ?>>None</option>
-                                                                    <?php if (!isset($product_details)) { ?>
-                                                                        <option value="<?= ALL ?>" selected>All</option>
-                                                                    <?php } else { ?>
-                                                                        <option value="<?= ALL ?>" <?= (isset($product_details[0]['deliverable_city_type']) && $product_details[0]['deliverable_city_type'] == ALL) ? 'selected' : ''; ?>>All</option>
-                                                                    <?php } ?>
-                                                                    <option value="<?= INCLUDED ?>" <?= (isset($product_details[0]['deliverable_city_type']) && $product_details[0]['deliverable_city_type'] == INCLUDED) ? 'selected' : ''; ?>>Included</option>
-                                                                    <option value="<?= EXCLUDED ?>" <?= (isset($product_details[0]['deliverable_city_type']) && $product_details[0]['deliverable_city_type'] == EXCLUDED) ? 'selected' : ''; ?>>Excluded</option>
-                                                                </select>
-                                                            </div>
-
-                                                            <div class="form-group col-md-6">
-                                                                <label for="cities" class="col-form-label">Deliverable Cities</label>
-                                                                <div class="">
-                                                                    <?php
-                                                                    $selected_city_ids = (isset($product_details[0]['deliverable_cities']) &&  $product_details[0]['deliverable_cities'] != NULL) ? explode(",", $product_details[0]['deliverable_cities']) : [];
-                                                                    ?>
-                                                                    <select class="form-control city_list" name="deliverable_cities[]" id="deliverable_cities" multiple <?= (isset($product_details[0]['deliverable_city_type']) && ($product_details[0]['deliverable_city_type'] == INCLUDED || $product_details[0]['deliverable_city_type'] == EXCLUDED)) ? "" : "disabled" ?>>
-                                                                        <?php foreach ($cities as $row) { ?>
-                                                                            <option value="<?= $row['id'] ?>" <?= (in_array($row['id'], $selected_city_ids)) ? 'selected' : ''; ?>><?= $row['name'] ?></option>
-                                                                        <?php }; ?>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    <?php } ?>
+                                            <div class="row col mt-3 deliverable_type <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
+                                                <div class="col-md-6">
+                                                    <label for="zipcode" class="col-form-label">Deliverable Type</label>
+                                                    <select class='form-control' name='deliverable_type' id="deliverable_type">
+                                                        <option value=<?= NONE ?> <?= (isset($product_details[0]['deliverable_type']) &&  $product_details[0]['deliverable_type'] == NONE) ? 'selected' : ''; ?>>None</option>
+                                                        <?php if (!isset($product_details)) { ?>
+                                                            <option value=<?= ALL ?> selected>All</option>
+                                                        <?php } else { ?>
+                                                            <option value=<?= ALL ?> <?= (isset($product_details[0]['deliverable_type']) &&  $product_details[0]['deliverable_type'] == ALL) ? 'selected' : ''; ?>>All</option>
+                                                        <?php } ?>
+                                                        <option value=<?= INCLUDED ?> <?= (isset($product_details[0]['deliverable_type']) &&  $product_details[0]['deliverable_type'] == INCLUDED) ? 'selected' : ''; ?>>Included</option>
+                                                        <option value=<?= EXCLUDED ?> <?= (isset($product_details[0]['deliverable_type']) &&  $product_details[0]['deliverable_type'] == EXCLUDED) ? 'selected' : ''; ?>>Excluded</option>
+                                                    </select>
+                                                </div>
+                                                <?php
+                                                $zipcodes = (isset($product_details[0]['deliverable_zipcodes']) &&  $product_details[0]['deliverable_zipcodes'] != NULL) ? explode(",", $product_details[0]['deliverable_zipcodes']) : "";
+                                                ?>
+                                                <div class="col-md-6">
+                                                    <label for="zipcodes" class="col-form-label">Deliverable Zipcodes</label>
+                                                    <select name="deliverable_zipcodes[]" class="search_zipcode form-control w-100" multiple onload="multiselect()" id="deliverable_zipcodes" <?= (isset($product_details[0]['deliverable_type']) &&  ($product_details[0]['deliverable_type'] == INCLUDED || $product_details[0]['deliverable_type'] == EXCLUDED))  ? "" : "disabled" ?>>
+                                                        <?php if (isset($product_details[0]['deliverable_type']) &&  ($product_details[0]['deliverable_type'] == INCLUDED || $product_details[0]['deliverable_type'] == EXCLUDED)) {
+                                                            $zipcodes_name =  fetch_details('zipcodes', "",  'zipcode,id', "", "", "", "", "id", $zipcodes);
+                                                            foreach ($zipcodes_name as $row) {
+                                                        ?>
+                                                                <option value=<?= $row['id'] ?> <?= (in_array($row['id'], $zipcodes)) ? 'selected' : ''; ?>> <?= $row['zipcode'] ?></option>
+                                                        <?php }
+                                                        } ?>
+                                                    </select>
                                                 </div>
                                             </div>
 
@@ -245,13 +195,10 @@
                                                 <label for="is_prices_inclusive_tax" class="col-form-label">Tax included in prices?</label>
                                                 <input type="checkbox" name="is_prices_inclusive_tax" <?= (isset($product_details[0]['is_prices_inclusive_tax']) && $product_details[0]['is_prices_inclusive_tax'] == '1') ? 'checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success" data-on-text="Yes" data-off-text="No">
                                             </div>
-                                            <?php if (isset($payment_method['cod_method']) && $payment_method['cod_method'] == 1) { ?>
-                                                <div class="col-md-2 col-xs-6 cod_allowed <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
-                                                    <label for="is_cod_allowed" class="col-form-label">Is COD allowed?</label>
-                                                    <input type="checkbox" name="cod_allowed" <?= (isset($product_details[0]['cod_allowed']) && $product_details[0]['cod_allowed'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                                                </div>
-                                            <?php }
-                                            ?>
+                                            <div class="col-md-2 col-xs-6 cod_allowed <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
+                                                <label for="is_cod_allowed" class="col-form-label">Is COD allowed?</label>
+                                                <input type="checkbox" name="cod_allowed" <?= (isset($product_details[0]['cod_allowed']) && $product_details[0]['cod_allowed'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
+                                            </div>
                                             <div class="col-md-2 col-xs-6 is_returnable <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
                                                 <label for="is_returnable" class="col-form-label">IS Returnable ?</label>
                                                 <input type="checkbox" name="is_returnable" <?= (isset($product_details[0]['is_returnable']) && $product_details[0]['is_returnable'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success">
@@ -270,12 +217,10 @@
                                             </div>
                                         </div>
 
-                                        <div class="row col mt-3 is_attachment_required <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
+                                        <div class="row col mt-3">
                                             <div class="col-md-4  is_attachment_required d-flex justify-content-between<?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
                                                 <label for="is_attachment_required" class="col-form-label is_attachment_required">Is Attachment Required ?</label>
-                                                <a class=" form-switch  mr-1 mb-1" title="Deactivate" href="javascript:void(0)">
-                                                    <input type="checkbox" class="form-check-input " role="switch" name="is_attachment_required" <?= (isset($product_details[0]['is_attachment_required']) && $product_details[0]['is_attachment_required'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success" />
-                                                </a>
+                                                <a class=" form-switch  mr-1 mb-1" title="Deactivate" href="javascript:void(0)"> <input type="checkbox" class="form-check-input " role="switch" name="is_attachment_required" <?= (isset($product_details[0]['is_attachment_required']) && $product_details[0]['is_attachment_required'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success" /></a>
                                             </div>
                                         </div>
 
@@ -441,7 +386,7 @@
                                                                     <div class="form-group">
                                                                         <label for="type" class="col-md-2">Special Price:</label>
                                                                         <div class="col-md-12">
-                                                                            <input type="number" name="simple_special_price" class="form-control  discounted_price" value="<?= $product_variants[0]['special_price'] ?>" min='1' step="0.01">
+                                                                            <input type="number" name="simple_special_price" class="form-control  discounted_price" value="<?= $product_variants[0]['special_price'] ?>" min='0' step="0.01">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group row mt-3 <?= $product_details[0]['type'] == "digital_product" ? 'd-none' : '' ?>" id="product-dimensions">
@@ -665,7 +610,7 @@
                                                                             <div class="form-group">
                                                                                 <label for="type" class="col-md-2">Special Price:</label>
                                                                                 <div class="col-md-12">
-                                                                                    <input type="number" name="simple_special_price" class="form-control discounted_price" min='1' step="0.01">
+                                                                                    <input type="number" name="simple_special_price" class="form-control discounted_price" min='0' step="0.01">
                                                                                 </div>
                                                                             </div>
                                                                             <div class="form-group row mt-3" id="product-dimensions">
@@ -799,8 +744,8 @@
                                                                             <input type="checkbox" checked="checked" class="ml-3 my-auto custom-checkbox" disabled> <span class="ml-3">check if the attribute is to be used for variation </span>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-12">
-                                                                        <a href="javascript:void(0);" id="add_attributes" class="btn btn-block btn-outline-primary col-md-2 float-right m-2 btn-sm">Add Attributes</a>
+                                                                    <div class="col-md-12"> 
+                                                                        <a href="javascript:void(0);" id="add_attributes" class="btn btn-block btn-outline-primary col-md-2 float-right m-2 btn-sm">Add Attributes</a> 
                                                                         <a href="javascript:void(0);" id="save_attributes" class="btn btn-block btn-outline-primary col-md-2 float-right m-2 btn-sm d-none">Save Attributes</a>
                                                                     </div>
                                                                     <div class="clearfix"></div>
@@ -834,12 +779,12 @@
                                             </div>
                                             <label for="pro_input_description">Extra Description </label>
                                             <div class="mb-3">
-                                                <textarea name="extra_input_description" class="textarea addr_editor" placeholder="Place some text here"><?= (isset($product_details[0]['extra_description']) && !empty($product_details[0]['extra_description'])) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $product_details[0]['extra_description'])) : ''; ?></textarea>
+                                                <textarea name="extra_input_description" class="textarea addr_editor" placeholder="Place some text here"><?= (isset($product_details[0]['id'])) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $product_details[0]['extra_description'])) : ''; ?></textarea>
                                             </div>
-                                            <!-- <div class="d-flex justify-content-center">
+                                            <div class="d-flex justify-content-center">
                                                 <div class="form-group" id="error_box">
                                                 </div>
-                                            </div> -->
+                                            </div>
                                             <div class="form-group">
                                                 <button type="reset" class="btn btn-warning">Reset</button>
                                                 <button type="submit" class="btn btn-success" id="submit_btn"><?= (isset($product_details[0]['id'])) ? 'Update Product' : 'Add Product' ?></button>
