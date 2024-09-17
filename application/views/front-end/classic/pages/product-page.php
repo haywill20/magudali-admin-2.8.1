@@ -1,6 +1,6 @@
 <?php $total_images = 0; ?>
 <!-- breadcrumb -->
-<section class="breadcrumb-title-bar colored-breadcrumb">
+<section class="breadcrumb-title-bar colored-breadcrumb deeplink_wrapper">
     <div class="main-content responsive-breadcrumb">
         <h2><?= $product['product'][0]['name'] ?></h2>
         <nav aria-label="breadcrumb">
@@ -10,16 +10,42 @@
                 </li>
                 <?php
                 $cat_names = array();
+                $cat_slugs = array();
+                $new_array = array();
                 $result = check_for_parent_id($product['product'][0]['category_id']);
                 array_push($cat_names, $result[0]['name']);
+                array_push($cat_slugs, $result[0]['slug']);
                 while (!empty($result[0]['parent_id'])) {
                     $result = check_for_parent_id($result[0]['parent_id']);
                     array_push($cat_names, $result[0]['name']);
+                    array_push($cat_slugs, $result[0]['slug']);
                 }
                 $cat_names = array_reverse($cat_names, true);
-                foreach ($cat_names as $row) { ?>
+                $cat_slugs = array_reverse($cat_slugs, true);
+
+                foreach ($cat_names as $key => $name) {
+                    $new_array[] = array(
+                        'name' => $name,
+                        'slug' => $cat_slugs[$key]
+                    );
+                }
+
+                // echo "<pre>";
+                // print_r($new_array);
+                // foreach ($new_array as $item) {
+                //     echo "Name: " . $item['name'] . ", Slug: " . $item['slug'] . "<br>";
+                // }
+
+                // print_r($cat_slugs);
+                // print_r($cat_names);
+                foreach ($new_array as $row) {
+                ?>
                 <li class="breadcrumb-item active" aria-current="page">
-                    <?= strip_tags(output_escaping(str_replace('\r\n', '&#13;&#10;', $row))) ?></li>
+                    <a href="<?= base_url('products/category/' . $row['slug']) ?>">
+                        <?= strip_tags(output_escaping(str_replace('\r\n', '&#13;&#10;', $row['name']))) ?>
+                    </a>
+
+                </li>
                 <?php } ?>
             </ol>
         </nav>
@@ -47,10 +73,11 @@
                         </div>
 
                         <?php
+                        $variant_relative_path = array_column($product['product'][0]['variants'], 'variant_relative_path');
 
-                        $variant_images_md = array_column($product['product'][0]['variants'], 'images_md');
-                        if (!empty($variant_images_md)) {
-                            foreach ($variant_images_md as $variant_images) {
+                        // $variant_images_md = array_column($product['product'][0]['variants'], 'images_md');
+                        if (!empty($variant_relative_path)) {
+                            foreach ($variant_relative_path as $variant_images) {
                                 if (!empty($variant_images)) {
                                     foreach ($variant_images as $image) {
                         ?>
@@ -58,7 +85,8 @@
                             <div class='product-view-grid'>
                                 <div class='product-view-image'>
                                     <div class='product-view-image-container'>
-                                        <img src="<?= $image ?>" data-zoom-image="">
+                                        <img src="<?= base_url('media/image?path=' . $image . '&width=75&quality=80') ?>"
+                                            data-zoom-image="">
                                     </div>
                                 </div>
                             </div>
@@ -68,15 +96,16 @@
                             }
                         } ?>
                         <?php
-                        if (!empty($product['product'][0]['other_images']) && isset($product['product'][0]['other_images'])) {
-                            foreach ($product['product'][0]['other_images'] as $other_image) {
+                        if (!empty($product['product'][0]['other_images_relative_path']) && isset($product['product'][0]['other_images_relative_path'])) {
+                            foreach ($product['product'][0]['other_images_relative_path'] as $other_image) {
                                 $total_images++;
                         ?>
                         <div class="swiper-slide">
                             <div class='product-view-grid'>
                                 <div class='product-view-image'>
                                     <div class='product-view-image-container'>
-                                        <img src="<?= $other_image ?>" id="img_01" data-zoom-image="">
+                                        <img src="<?= base_url('media/image?path=' . $other_image . '&width=620&quality=80') ?>"
+                                            id="img_01" data-zoom-image="">
                                     </div>
                                 </div>
                             </div>
@@ -107,6 +136,10 @@
                                                     } else if (strpos($product['product'][0]['video'], "youtu.be/") !== false) {
                                                         $url = explode("/", $product['product'][0]['video']);
                                                         $url = "https://www.youtube.com/embed/" . end($url);
+                                                    } else if (strpos($product['product'][0]['video'], "shorts/") !== false) {
+                                                        $url = str_replace("shorts/", "embed/", $product['product'][0]['video']);
+                                                    } else {
+                                                        $url = $product['product'][0]['video'];
                                                     }
                                                 } else {
                                                     $url = $product['product'][0]['video'];
@@ -132,14 +165,17 @@
                             <div class='product-view-grid'>
                                 <div class='product-view-image'>
                                     <div class='product-view-image-container'>
-                                        <img src="<?= $product['product'][0]['image'] ?>">
+                                        <img
+                                            src="<?= base_url('media/image?path=' . $product['product'][0]['relative_path'] . '&width=175&quality=80') ?>">
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <?php if (!empty($variant_images_md)) {
-                            foreach ($variant_images_md as $variant_images) {
+                        <?php
+
+                        if (!empty($variant_relative_path)) {
+                            foreach ($variant_relative_path as $variant_images) {
                                 if (!empty($variant_images)) {
                                     foreach ($variant_images as $image) {
                         ?>
@@ -147,7 +183,8 @@
                             <div class='product-view-grid'>
                                 <div class='product-view-image'>
                                     <div class='product-view-image-container'>
-                                        <img src="<?= $image ?>" data-zoom-image="">
+                                        <img src="<?= base_url('media/image?path=' . $image . '&width=175&quality=80') ?>"
+                                            data-zoom-image="">
                                     </div>
                                 </div>
                             </div>
@@ -157,13 +194,14 @@
                             }
                         } ?>
                         <?php
-                        if (!empty($product['product'][0]['other_images']) && isset($product['product'][0]['other_images'])) {
-                            foreach ($product['product'][0]['other_images'] as $other_image) { ?>
+                        if (!empty($product['product'][0]['other_images_relative_path']) && isset($product['product'][0]['other_images_relative_path'])) {
+                            foreach ($product['product'][0]['other_images_relative_path'] as $other_image) { ?>
                         <div class="swiper-slide ml-0">
                             <div class='product-view-grid'>
                                 <div class='product-view-image'>
                                     <div class='product-view-image-container'>
-                                        <img src="<?= $other_image ?>">
+                                        <img
+                                            src="<?= base_url('media/image?path=' . $other_image . '&width=172&quality=80') ?>">
                                     </div>
                                 </div>
                             </div>
@@ -192,19 +230,26 @@
             <div class="col-12 col-md-6 product-preview-image-section-sm">
                 <div class=" swiper-container preview-image-swiper">
                     <div class="swiper-wrapper">
-                        <div class="swiper-slide text-center"><img src="<?= $product['product'][0]['image'] ?>"></div>
+                        <div class="swiper-slide text-center"><img
+                                src="<?= base_url('media/image?path=' . $product['product'][0]['relative_path'] . '&width=300&quality=80') ?>">
+                        </div>
                         <?php
-                        if (!empty($product['product'][0]['other_images']) && isset($product['product'][0]['other_images'])) {
-                            foreach ($product['product'][0]['other_images'] as $other_image) { ?>
-                        <div class="swiper-slide text-center"><img src="<?= $other_image ?>"></div>
+                        if (!empty($product['product'][0]['other_images_relative_path']) && isset($product['product'][0]['other_images_relative_path'])) {
+                            foreach ($product['product'][0]['other_images_relative_path'] as $other_image) { ?>
+                        <div class="swiper-slide text-center">
+                            <img src="<?= base_url('media/image?path=' . $other_image . '&width=300&quality=80') ?>">
+                        </div>
                         <?php }
                         } ?>
-                        <?php if (!empty($variant_images_md)) {
-                            foreach ($variant_images_md as $variant_images) {
+                        <?php if (!empty($variant_relative_path)) {
+                            foreach ($variant_relative_path as $variant_images) {
                                 if (!empty($variant_images)) {
                                     foreach ($variant_images as $image) {
                         ?>
-                        <div class="swiper-slide text-center"><img src="<?= $image ?>" data-zoom-image=""></div>
+                        <div class="swiper-slide text-center">
+                            <img src="<?= base_url('media/image?path=' . $image . '&width=300&quality=80') ?>"
+                                data-zoom-image="">
+                        </div>
 
                         <?php }
                                 }
@@ -223,9 +268,27 @@
                                             src="<?= $product['product'][0]['video'] ?>">
                                             <?= !empty($this->lang->line('no_video_tag_support')) ? $this->lang->line('no_video_tag_support') : 'Your browser does not support the video tag.' ?>
                                         </video>
-                                        <?php } else if ($product['product'][0]['video_type'] == 'youtube' || $product['product'][0]['video_type'] == 'vimeo') { ?>
-                                        <iframe width="560" height="315" src="<?= $product['product'][0]['video'] ?>"
-                                            title="YouTube video player" frameborder="0"
+                                        <?php } else if ($product['product'][0]['video_type'] == 'youtube' || $product['product'][0]['video_type'] == 'vimeo') {
+                                                if ($product['product'][0]['video_type'] == 'vimeo') {
+                                                    $url =  explode("/", $product['product'][0]['video']);
+                                                    $id = end($url);
+                                                    $url = 'https://player.vimeo.com/video/' . $id;
+                                                } else if ($product['product'][0]['video_type'] == 'youtube') {
+                                                    if (strpos($product['product'][0]['video'], 'watch?v=') !== false) {
+                                                        $url = str_replace("watch?v=", "embed/", $product['product'][0]['video']);
+                                                    } else if (strpos($product['product'][0]['video'], "youtu.be/") !== false) {
+                                                        $url = explode("/", $product['product'][0]['video']);
+                                                        $url = "https://www.youtube.com/embed/" . end($url);
+                                                    } else if (strpos($product['product'][0]['video'], "shorts/") !== false) {
+                                                        $url = str_replace("shorts/", "embed/", $product['product'][0]['video']);
+                                                    } else {
+                                                        $url = $product['product'][0]['video'];
+                                                    }
+                                                } else {
+                                                    $url = $product['product'][0]['video'];
+                                                } ?>
+                                        <iframe width="560" height="315" src="<?= $url ?>" title="YouTube video player"
+                                            frameborder="0"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowfullscreen></iframe>
                                         <?php } ?>
@@ -244,32 +307,64 @@
                 </h2>
                 <p><?= output_escaping(str_replace('\r\n', '&#13;&#10;', $product['product'][0]['short_description'])) ?>
                 </p>
+                <div class="slider text-primary">
+                    <?php if ($statistics['total_ordered'] > 0) { ?>
+                    <span>
+                        🛒<?php print_r($statistics['total_ordered']) ?>
+                        <?= !empty($this->lang->line('item(s)_sold_in_last_30_days')) ? $this->lang->line('item(s)_sold_in_last_30_days') : 'item(s) sold in last 30 days' ?>
+                    </span>
+                    <?php } ?>
+                    <?php if ($statistics['total_in_cart'] > 0) { ?>
+                    <span>
+                        🚀<?php print_r($statistics['total_in_cart']) ?>
+                        <?= !empty($this->lang->line('people_have_added_this_to_cart')) ? $this->lang->line('people_have_added_this_to_cart') : 'people have added this to cart' ?>
+                    </span>
+                    <?php } ?>
+                    <?php if ($statistics['total_favorites'] > 0) { ?>
+                    <span>
+                        ❤️<?php print_r($statistics['total_favorites']) ?>
+                        <?= !empty($this->lang->line('people_have_added_to_wishlist')) ? $this->lang->line('people_have_added_to_wishlist') : 'people have added to wishlist' ?>
+                    </span>
+                    <?php } ?>
+
+                </div>
                 <?php
                 $indicator = (isset($product['product'][0]['indicator']) && !empty($product['product'][0]['indicator']) ? $product['product'][0]['indicator'] : '');
                 if ($indicator == '1') { ?>
-                <span class="badge badge-success">Veg</span>
+                <span
+                    class="badge badge-success"><?= !empty($this->lang->line('veg')) ? $this->lang->line('veg') : 'Veg' ?></span>
                 <?php } elseif ($indicator == '2') { ?>
-                <span class="badge badge-danger">Non veg</span>
+                <span
+                    class="badge badge-danger"><?= !empty($this->lang->line('non_veg')) ? $this->lang->line('non_veg') : 'Non Veg' ?></span>
                 <?php } ?>
 
                 <hr>
                 <div class="col-md-12 mb-3 product-rating-small  pl-0">
                     <input type="text" class="kv-fa rating-loading" value="<?= $product['product'][0]['rating'] ?>"
                         data-size="sm" title="" readonly>
-                    <span class="my-auto ml-0"> ( <?= $product['product'][0]['no_of_ratings'] ?>
+                    <span class="my-auto ml-0"> (
+                        <?= ($product['product'][0]['no_of_ratings'] > 0) ? $product['product'][0]['no_of_ratings'] : "No" ?>
                         <?= !empty($this->lang->line('reviews')) ? $this->lang->line('reviews') : 'reviews' ?> ) </span>
                 </div>
                 <?php if ($product['product'][0]['type'] == "simple_product") { ?>
                 <p class="mb-0 mt-2 price" id="price">
-                    <?php $price = get_price_range_of_product($product['product'][0]['id']);
-
-                        echo $price['range'];
+                    <?php echo $settings['currency'] ?>
+                    <?php
+                        // echo "<pre>";
+                        // print_r($product['product'][0]['variants']);
+                        // $price = get_price_range_of_product($product['product'][0]['id']);
+                        $price = $product['product'][0]['variants'][0]['special_price'];
+                        echo format_price($price);
                         ?>
                     <sup><span
-                            class="special-price striped-price"><s><?= !empty($product['product'][0]['min_max_price']['special_price']) && $product['product'][0]['min_max_price']['special_price'] != NULL  ?   $settings['currency'] . '</i>' . number_format($product['product'][0]['min_max_price']['min_price']) : '' ?></s></span></sup>
+                            class="special-price striped-price"><s><?= !empty($product['product'][0]['min_max_price']['special_price']) && $product['product'][0]['min_max_price']['special_price'] != NULL  ?   $settings['currency'] . '</i>' . format_price($product['product'][0]['min_max_price']['min_price']) : '' ?></s></span></sup>
                 </p>
                 <p class="mb-0 mt-2 price d-none" id="price">
-                    <?php $price = get_price_range_of_product($product['product'][0]['id']); ?>
+                    <?php
+                        // $price = get_price_range_of_product($product['product'][0]['id']); 
+                        $price = $product['product'][0]['variants'][0]['price'];
+                        echo format_price($price);
+                        ?>
                 </p>
                 <?php } else { ?>
                 <?php if (($product['product'][0]['variants'][0]['special_price'] < $product['product'][0]['variants'][0]['price']) && ($product['product'][0]['variants'][0]['special_price'] != 0)) { ?>
@@ -278,7 +373,7 @@
                         <?php echo $settings['currency'] ?>
                         <?php
                                 $price = $product['product'][0]['variants'][0]['special_price'];
-                                echo number_format($price, 2);
+                                echo format_price($price);
                                 ?>
                     </span>
                     <sup>
@@ -286,7 +381,7 @@
                             <s id="striped-price">
                                 <?php echo $settings['currency'] ?>
                                 <?php $price = $product['product'][0]['variants'][0]['special_price'];
-                                        echo number_format($price, 2);
+                                        echo format_price($price);
                                         // echo $price;
                                         ?>
                             </s>
@@ -299,7 +394,7 @@
                         <?php echo $settings['currency'] ?>
                         <?php
                                 $price = $product['product'][0]['variants'][0]['price'];
-                                echo number_format($price, 2);
+                                echo format_price($price);
                                 ?>
                     </span>
                 </p>
@@ -307,32 +402,35 @@
                 <?php }
                 $color_code = $style = "";
                 $product['product'][0]['variant_attributes'] = array_values($product['product'][0]['variant_attributes']);
+                $attribute_order = explode(', ', $product['product'][0]['attribute_order']);
 
                 if (isset($product['product'][0]['variant_attributes']) && !empty($product['product'][0]['variant_attributes'])) { ?>
                 <?php
-                    foreach ($product['product'][0]['variant_attributes'] as $attribute) {
-                        $attribute_values = explode(',', $attribute['values']);
-                        $attribute_ids = explode(',', $attribute['ids']);
-                        $swatche_types = explode(',', $attribute['swatche_type']);
-                        $swatche_values = explode(',', $attribute['swatche_value']);
-                        for ($i = 0; $i < count($swatche_types); $i++) {
-                            if (!empty($swatche_types[$i]) && $swatche_values[$i] != "") {
-                                $style = '<style> .product-page-details .btn-group>.active { background-color: #ffffff; color: #000000; border: 1px solid black;}</style>';
-                            } else if ($swatche_types[$i] == 0 && $swatche_values[$i] == null) {
-                                $style1 = '<style> .product-page-details .btn-group>.active { background-color: var(--primary-color);color: white!important;}</style>';
-                            }
-                        }
-                    ?>
+                    if (!empty($attribute_order[0])) {
+                        for ($j = 0; $j < count($attribute_order); $j++) {
+                            foreach ($product['product'][0]['variant_attributes'] as $attribute) {
+                                if ($attribute_order[$j] == $attribute['attr_name']) {
+                                    $attribute_values = explode(',', $attribute['values']);
+                                    $attribute_ids = explode(',', $attribute['ids']);
+                                    $swatche_types = explode(',', $attribute['swatche_type']);
+                                    $swatche_values = explode(',', $attribute['swatche_value']);
+                                    for ($i = 0; $i < count($swatche_types); $i++) {
+                                        if (!empty($swatche_types[$i]) && $swatche_values[$i] != "") {
+                                            $style = '<style> .product-page-details .btn-group>.active { background-color: #ffffff; color: #000000; border: 1px solid black;}</style>';
+                                        } else if ($swatche_types[$i] == 0 && $swatche_values[$i] == null) {
+                                            $style1 = '<style> .product-page-details .btn-group>.active { background-color: var(--primary-color);color: white!important;}</style>';
+                                        }
+                                    } ?>
                 <h4 class="mt-2"><?= $attribute['attr_name'] ?></h4>
                 <div class="btn-group btn-group-toggle" data-toggle="buttons" id="<?= $attribute['attr_name'] ?>">
                     <?php foreach ($attribute_values as $key => $row) {
-                                // echo "<pre>";
-                                // print_r($attribute);
-                                // print_r($product['product'][0]['variant_attributes']);
-                                // die;
-                                if ($swatche_types[$key] == "1") {
-                                    echo '<style> .product-page-details .btn-group>.active { border: 1px solid black;}</style>';
-                                    $color_code = "style='background-color:" . $swatche_values[$key] . ";'";  ?>
+                                            // echo "<pre>";
+                                            // print_r($attribute);
+                                            // print_r($product['product'][0]['variant_attributes']);
+                                            // die;
+                                            if ($swatche_types[$key] == "1") {
+                                                echo '<style> .product-page-details .btn-group>.active { border: 1px solid black;}</style>';
+                                                $color_code = "style='background-color:" . $swatche_values[$key] . ";'";  ?>
                     <label class="btn text-center fullCircle " <?= $color_code ?>>
                         <input type="radio" name="<?= $attribute['attr_name'] ?>" value="<?= $attribute_ids[$key] ?>"
                             autocomplete="off" class="attributes">
@@ -357,12 +455,84 @@
                     <?php } ?>
                 </div>
                 <?php
+                                }
+                            }
+                        }
+                    } else {
+                        foreach ($product['product'][0]['variant_attributes'] as $attribute) {
+                            // print_r($attribute);
+                            // if ($attribute_order[$j] == $attribute['attr_name']) {
+                            # code...
+
+                            // echo "<pre>";
+                            $attribute_ids = explode(',', $attribute['ids']);
+                            $attribute_values = explode(',', $attribute['values']);
+                            $swatche_types = explode(',', $attribute['swatche_type']);
+                            $swatche_values = explode(',', $attribute['swatche_value']);
+                            $attribute_names = explode(',', $attribute['attr_name']);
+                            // echo "<pre>";
+                            for ($i = 0; $i < count($swatche_types); $i++) {
+                                if (!empty($swatche_types[$i]) && $swatche_values[$i] != "") {
+                                    $style = '<style> .product-page-details .btn-group>.active { background-color: #ffffff; color: #000000; border: 1px solid black;}</style>';
+                                } else if ($swatche_types[$i] == 0 && $swatche_values[$i] == null) {
+                                    $style1 = '<style> .product-page-details .btn-group>.active { background-color: var(--primary-color);color: white!important;}</style>';
+                                }
+                            }  ?>
+                <h6 class="m-0 mt-2"><?= $attribute['attr_name'] ?></h6>
+                <div class="btn-group btn-group-toggle gap-1 d-flex flex-wrap" data-toggle="buttons"
+                    id="<?= $attribute['attr_name'] ?>">
+                    <?php
+                                foreach ($attribute_values as $key => $row) {
+                                    if ($swatche_types[$key] == "1") {
+                                        echo '<style> .product-page-details .btn-group>.active { border: 1px solid black;}</style>';
+                                        $color_code = "style='background-color:" . $swatche_values[$key] . ";'";  ?>
+                    <!-- <ul class="p-0 mb-0" style="height:31px;"> -->
+                    <!-- <li class="list-unstyled"> -->
+                    <label class="btn text-center fullCircle rounded-circle p-3" <?= $color_code ?>>
+                        <input type="radio" name="<?= $attribute['attr_name'] ?>" value="<?= $attribute_ids[$key] ?>"
+                            autocomplete="off" class="attributes filter-input">
+                    </label>
+                    <!-- </li> -->
+
+                    <!-- </ul> -->
+                    <?php } else if ($swatche_types[$key] == "2") { ?>
+                    <?= $style ?>
+                    <!-- <ul class="p-0 mb-0">
+                                            <li class="list-unstyled"> -->
+                    <label class="btn text-center ">
+                        <img class="swatche-image lazy category-image-container"
+                            src="<?= base_url('assets/front_end/modern/img/product-placeholder.jpg') ?>"
+                            data-src="<?= $swatche_values[$key] ?>">
+                        <input type="radio" name="<?= $attribute['attr_name'] ?>" value="<?= $attribute_ids[$key] ?>"
+                            autocomplete="off" class="attributes">
+                        <br>
+                    </label>
+                    <!-- </li>
+                                        </ul> -->
+
+                    <?php } else { ?>
+                    <?= '<style> .product-page-details .btn-group>.active { background-color: var(--primary-color);color: white!important;}</style>'; ?>
+                    <!-- <ul class="p-0 mb-0">
+                                            <li class="list-unstyled"> -->
+                    <label class="btn btn-aqua btn-default btn-xs mb-0 rounded-2 text-center w-11">
+                        <?= $row ?>
+                        <input type="radio" name="<?= $attribute['attr_name'] ?>" value="<?= $attribute_ids[$key] ?>"
+                            autocomplete="off" class="attributes">
+                        <br>
+                    </label>
+                    <!-- </li>
+                                        </ul> -->
+                    <?php } ?>
+                    <?php } ?>
+                </div>
+                <?php
+                        }
                     }
                 }
                 if (!empty($product['product'][0]['variants']) && isset($product['product'][0]['variants'])) {
                     $total_images = 1;
                     foreach ($product['product'][0]['variants'] as $variant) {
-                    ?>
+                        ?>
                 <input type="hidden" class="variants" name="variants_ids" data-image-index="<?= $total_images ?>"
                     data-name="" value="<?= $variant['variant_ids'] ?>" data-id="<?= $variant['id'] ?>"
                     data-price="<?= $variant['price'] ?>" data-special_price="<?= $variant['special_price'] ?>" />
@@ -373,27 +543,51 @@
                 ?>
 
                 <?php if ($product['product'][0]['type'] != 'digital_product') { ?>
+                <?php
+                    $shiprocket_settings = get_settings('shipping_method', true);
+                    if ((isset($settings['pincode_wise_deliverability']) && $settings['pincode_wise_deliverability'] == 1) || (isset($shiprocket_settings['local_shipping_method']) && isset($shiprocket_settings['shiprocket_shipping_method']) && $shiprocket_settings['local_shipping_method'] == 1 && $shiprocket_settings['shiprocket_shipping_method'] == 1)) {
+                    ?>
                 <form class="mt-2" id="validate-zipcode-form" method="POST">
                     <div class="form-row">
-                        <div class="col-md-4">
+                        <div class=" col-md-6">
                             <input type="hidden" name="product_id" value="<?= $product['product'][0]['id'] ?>">
-                            <input type="text" class="form-control my-1" id="zipcode" placeholder="Zipcode"
-                                name="zipcode" autocomplete="off" required
-                                value="<?= $product['product'][0]['zipcode']; ?>">
+                            <input type="text" class="form-control" id="zipcode" placeholder="Zipcode" name="zipcode"
+                                autocomplete="off" required value="<?= $product['product'][0]['zipcode']; ?>">
                         </div>
-                        <button type="submit"
-                            class="button button-sm ml-0 button-primary-outline check-availability mt-1"
+                        <button type="submit" class="button button-primary-outline"
                             id="validate_zipcode"><?= !empty($this->lang->line('check_availability')) ? $this->lang->line('check_availability') : 'Check Availability' ?></button>
                     </div>
                     <div class="mt-2" id="error_box">
                         <?php if (!empty($product['product'][0]['zipcode'])) { ?>
                         <b class="text-<?= ($product['product'][0]['is_deliverable']) ? "success" : "danger" ?>"><?= !empty($this->lang->line('product_is')) ? $this->lang->line('product_is') : 'Product is' ?>
                             <?= ($product['product'][0]['is_deliverable']) ? "" : "not" ?>
-                            <?= !empty($this->lang->line('delivarable_on')) ? $this->lang->line('delivarable_on') : 'delivarable on' ?>
+                            <?= !empty($this->lang->line('delivarable_on')) ? $this->lang->line('delivarable_on') : 'Delivarable on' ?>
                             &quot; <?= $product['product'][0]['zipcode']; ?> &quot; </b>
                         <?php } ?>
                     </div>
                 </form>
+                <?php }
+                    if (isset($settings['city_wise_deliverability']) && $settings['city_wise_deliverability'] == 1 && $shiprocket_settings['shiprocket_shipping_method'] != 1) { ?>
+                <form class="mt-2" id="validate-city-form" method="POST">
+                    <div class="form-row">
+                        <div class=" col-md-6">
+                            <input type="hidden" name="product_id" value="<?= $product['product'][0]['id'] ?>">
+                            <input type="text" class="form-control" id="zipcode" placeholder="City" name="city"
+                                autocomplete="off" required value="<?= $product['product'][0]['zipcode']; ?>">
+                        </div>
+                        <button type="submit" class="button button-primary-outline"
+                            id="validate_city"><?= !empty($this->lang->line('check_availability')) ? $this->lang->line('check_availability') : 'Check Availability' ?></button>
+                    </div>
+                    <div class="mt-2" id="error_box">
+                        <?php if (!empty($product['product'][0]['zipcode'])) { ?>
+                        <b class="text-<?= ($product['product'][0]['is_deliverable']) ? "success" : "danger" ?>"><?= !empty($this->lang->line('product_is')) ? $this->lang->line('product_is') : 'Product is' ?>
+                            <?= ($product['product'][0]['is_deliverable']) ? "" : "not" ?>
+                            <?= !empty($this->lang->line('delivarable_on')) ? $this->lang->line('delivarable_on') : 'Delivarable on' ?>
+                            &quot; <?= $product['product'][0]['zipcode']; ?> &quot; </b>
+                        <?php } ?>
+                    </div>
+                </form>
+                <?php } ?>
                 <?php } ?>
                 <!--end profile -->
                 <div class="num-block skin-2 py-4 mt-2">
@@ -426,6 +620,11 @@
                     } else {
                         $variant_id = "";
                     }
+                    if ($product['product'][0]['type'] == 'simple_product') {
+                        $product_stock = $product['product'][0]['stock'];
+                    }else{
+                        $product_stock = $product['product'][0]['total_stock'];
+                    }
                     ?>
                     <?php if ($product['product'][0]['variants'][0]['cart_count'] != 0) { ?>
                     <a class="buttons btn-6-6 extra-small m-0" href="<?= base_url('cart') ?>"><i
@@ -434,6 +633,7 @@
                     <?php } else { ?>
                     <button type="button" name="add_cart" class="buttons btn-6-3 extra-small m-0 add_to_cart mt-1"
                         id="add_cart" data-product-id="<?= $product['product'][0]['id'] ?>"
+                        data-product-stock="<?= $product_stock ?>"
                         data-product-title="<?= $product['product'][0]['name'] ?>"
                         data-product-image="<?= $product['product'][0]['image'] ?>"
                         data-product-price="<?= ($variant['special_price'] > 0 && $variant['special_price'] != '0' && $variant['special_price'] != '') ? $variant['special_price'] : $variant['price']; ?>"
@@ -446,23 +646,48 @@
                         <?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add to Cart' ?>
                     </button>
                     <?php } ?>
+                    <button type="button" name="buy_now" class="buttons btn-6-5 extra-small m-0 buy_now mt-1"
+                        id="buy_now" data-product-id="<?= $product['product'][0]['id'] ?>"
+                        data-product-title="<?= $product['product'][0]['name'] ?>"
+                        data-product-image="<?= $product['product'][0]['image'] ?>"
+                        data-product-price="<?= ($variant['special_price'] > 0 && $variant['special_price'] != '0' && $variant['special_price'] != '') ? $variant['special_price'] : $variant['price']; ?>"
+                        data-product-description="<?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($product['product'][0]['short_description'])))); ?>"
+                        data-step="<?= (isset($product['product'][0]['minimum_order_quantity']) && !empty($product['product'][0]['quantity_step_size'])) ? $product['product'][0]['quantity_step_size'] : 1 ?>"
+                        data-min="<?= (isset($product['product'][0]['minimum_order_quantity']) && !empty($product['product'][0]['minimum_order_quantity'])) ? $product['product'][0]['minimum_order_quantity'] : 1 ?>"
+                        data-max="<?= (isset($product['product'][0]['total_allowed_quantity']) && !empty($product['product'][0]['total_allowed_quantity'])) ? $product['product'][0]['total_allowed_quantity'] : '' ?>"
+                        data-product-variant-id="<?= $variant_id ?>">
+                        <i class="fas fa-bolt"></i>
+                        <?= !empty($this->lang->line('buy_now')) ? $this->lang->line('buy_now') : 'Buy Now' ?>
+                    </button>
                     <button type="button" name="compare" class="buttons btn-6-6 extra-small m-0 mt-1 compare"
                         id="compare" data-product-id="<?= $product['product'][0]['id'] ?>"
                         data-product-variant-id="<?= $variant_id ?>">
-                        <i class="fa fa-random"></i> Compare
+                        <i class="fa fa-random"></i>
+                        <?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>
                     </button>
                     <?php if ($product['product'][0]['is_favorite'] == 0) { ?>
                     <button class="buttons btn-6-1 extra-small m-0 add-fav mt-1" id="add_to_favorite_btn"
                         data-product-id="<?= $product['product'][0]['id'] ?>">
                         <i class="fas fa-heart mr-2"></i>
-                        <span><?= !empty($this->lang->line('add_to_favorite')) ? $this->lang->line('add_to_favorite') : 'Add to Favorite' ?></span>
+                        <span><?= !empty($this->lang->line('add_to_favorite')) ? $this->lang->line('add_to_favorite') : 'Favorite' ?></span>
                     </button>
                     <?php } else { ?>
                     <button class="buttons btn-6-1 extra-small m-0 mt-1 remove-fav" id="add_to_favorite_btn"
                         data-product-id="<?= $product['product'][0]['id'] ?>">
                         <i class="fas fa-heart mr-2"></i>
-                        <span><?= !empty($this->lang->line('remove_from_favorite')) ? $this->lang->line('remove_from_favorite') : 'Remove from Favorite' ?></span>
+                        <span><?= !empty($this->lang->line('remove_from_favorite')) ? $this->lang->line('remove_from_favorite') : 'Favorite' ?></span>
                     </button>
+                    <?php } ?>
+                    <?php
+                    // echo "<pre>";
+                    // print_r($settings);
+                    if (isset($settings['whatsapp_status']) && $settings['whatsapp_status'] == 1 && isset($settings['whatsapp_number'])) { ?>
+                    <a href="https://api.whatsapp.com/send?phone= <?= ($settings['whatsapp_number'] != '' && isset($settings['whatsapp_number'])) ? $settings['whatsapp_number'] : ((!defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 0)  ? str_repeat("X", strlen($settings['whatsapp_number']) - 3) . substr($settings['whatsapp_number'], -3) : $settings['whatsapp_number'])   ?> &amp;text=Hello, I Seen This <?= $product['product'][0]['name'] ?> In Your Website And I Want to Buy This <?= base_url('products/details/' . $product['product'][0]['slug']) ?>"
+                        target="_blank" title="Order From Whatsapp"
+                        class="buttons btn-primary btn-6-4 extra-small m-0 mt-1">
+                        <i class="fab fa-whatsapp"></i>
+                        <span><?= !empty($this->lang->line('order_from_whatsapp')) ? $this->lang->line('order_from_whatsapp') : 'Order From Whatsapp' ?></span>
+                    </a>
                     <?php } ?>
                 </div>
                 <div class="mt-2"><?= !empty($this->lang->line('seller')) ? $this->lang->line('seller') : 'Seller' ?>
@@ -501,7 +726,7 @@
                                 <img src="<?= base_url('assets/front_end/classic/images/cod_logo.png') ?>">
                             </div>
                             <div class="product-permission-text">
-                                COD
+                                <?= !empty($this->lang->line('cod')) ? $this->lang->line('cod') : 'COD' ?>
                             </div>
                         </div>
                         <?php } ?>
@@ -511,14 +736,14 @@
                                 <img src="<?= base_url('assets/front_end/classic/images/cancelable.png') ?>">
                             </div>
                             <div class="product-permission-text">
-                                Cancelable <br> till<?= ' ' . $product['product'][0]['cancelable_till'] ?>
+                                <?= !empty($this->lang->line('cancelable_till')) ? $this->lang->line('cancelable_till') : 'Cancelable till' ?><?= ' ' . $product['product'][0]['cancelable_till'] ?>
                             </div>
                             <?php } else { ?>
                             <div class="product-permission" class="ml-4">
                                 <img src="<?= base_url('assets/front_end/classic/images/notcancelable.png') ?>">
                             </div>
                             <div class="product-permission-text">
-                                No Cancelable
+                                <?= !empty($this->lang->line('no_cancellation')) ? $this->lang->line('no_cancellation') : 'No Cancellation' ?>
                             </div>
                             <?php  } ?>
                         </div>
@@ -528,14 +753,15 @@
                                 <img src="<?= base_url('assets/front_end/classic/images/returnable.png') ?>">
                             </div>
                             <div class="product-permission-text">
-                                <?= $settings['max_product_return_days'] ?> Days <br> Returnable
+                                <?= $settings['max_product_return_days'] ?>
+                                <?= !empty($this->lang->line('days_returnable')) ? $this->lang->line('days_returnable') : 'Days Returnable' ?>
                             </div>
                             <?php } else { ?>
                             <div class="product-permission" class="ml-4">
                                 <img src="<?= base_url('assets/front_end/classic/images/notreturnable.png') ?>">
                             </div>
                             <div class="product-permission-text">
-                                No Returnable
+                                <?= !empty($this->lang->line('no_returnable')) ? $this->lang->line('no_returnable') : 'No Returnable' ?>
                             </div>
                             <?php  } ?>
                         </div>
@@ -545,7 +771,8 @@
                                 <img src="<?= base_url('assets/front_end/classic/images/guarantee.png') ?>">
                             </div>
                             <div class="product-permission-text">
-                                <?= $product['product'][0]['guarantee_period'] ?> <br> Guarantee
+                                <?= $product['product'][0]['guarantee_period'] ?>
+                                <?= !empty($this->lang->line('guarantee')) ? $this->lang->line('guarantee') : 'Guarantee' ?>
                             </div>
                         </div>
                         <?php } ?>
@@ -555,7 +782,8 @@
                                 <img src="<?= base_url('assets/front_end/classic/images/warranty.png') ?>">
                             </div>
                             <div class="product-permission-text">
-                                <?= $product['product'][0]['warranty_period'] ?> <br> Warranty
+                                <?= $product['product'][0]['warranty_period'] ?>
+                                <?= !empty($this->lang->line('warranty')) ? $this->lang->line('warranty') : 'Warranty' ?>
                             </div>
                         </div>
                         <?php } ?>
@@ -563,7 +791,9 @@
 
 
                     <div class="mt-3">
-                        <span class="product-details-title"> Product Details: </span>
+                        <span
+                            class="product-details-title"><?= !empty($this->lang->line('product_details')) ? $this->lang->line('product_details') : 'Product Details : ' ?>
+                        </span>
                         <hr>
                         <table class="product-detail-tab">
                             <?php if (isset($product['product'][0]['attributes']) && !empty($product['product'][0]['attributes']) && $product['product'][0]['attributes'] != []) { ?>
@@ -576,16 +806,21 @@
                             }
                             if (isset($product['product'][0]['made_in']) && !empty($product['product'][0]['made_in']) && $product['product'][0]['made_in'] != '') { ?>
                             <tr>
-                                <td class="col-sm-2">Made In :</td>
+                                <td class="col-sm-2">
+                                    <?= !empty($this->lang->line('made_in')) ? $this->lang->line('made_in') : 'Made In : ' ?>
+                                </td>
                                 <td><?= ucfirst($product['product'][0]['made_in']) ?></td>
                             </tr>
                             <?php }
                             if (isset($product['product'][0]['brand']) && !empty($product['product'][0]['brand']) && $product['product'][0]['brand'] != '') {
 
                                 $brand_img = fetch_details('brands', ['name' => $product['product'][0]['brand']]);
-                            ?>
+                                if (isset($brand_img) && !empty($brand_img)) {
+                                ?>
                             <tr>
-                                <td class="col-sm-2">Brand :</td>
+                                <td class="col-sm-2">
+                                    <?= !empty($this->lang->line('brand')) ? $this->lang->line('brand') : 'Brand : ' ?>
+                                </td>
                                 <td>
                                     <a href="<?= base_url('products?brand=' . html_escape($brand_img[0]['slug'])) ?>"
                                         class="text-decoration-none">
@@ -594,7 +829,8 @@
                                     </a>
                                 </td>
                             </tr>
-                            <?php } ?>
+                            <?php }
+                            } ?>
                         </table>
                     </div>
                     <div class="mt-3" id="share"></div>
@@ -606,7 +842,9 @@
                         <div class="modal-content">
                             <!-- Modal Header -->
                             <div class="modal-header">
-                                <h5 class="modal-title">Add Faq</h5>
+                                <h5 class="modal-title">
+                                    <?= !empty($this->lang->line('add_faq')) ? $this->lang->line('add_faq') : 'Add FAQ' ?>
+                                </h5>
                                 <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">x
                                 </button>
                             </div>
@@ -623,10 +861,11 @@
                                         <input type="hidden" name="product_id"
                                             value="<?= $product['product'][0]['id']  ?>">
                                         <input type="text" class="form-control" id="question"
-                                            placeholder="Enter Your Question Here" name="question">
+                                            placeholder="<?= !empty($this->lang->line('enter_your_question_here')) ? $this->lang->line('enter_your_question_here') : 'Enter Your Question Here' ?>"
+                                            name="question">
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-sm" id="add-faqs" name="add-faqs"
-                                        value="Save">Add FAQ</button>
+                                        value="Save"><?= !empty($this->lang->line('add_faq')) ? $this->lang->line('add_faq') : 'Add FAQ' ?></button>
                                     <div class="mt-3">
                                         <div id="add_faqs_result"></div>
                                     </div>
@@ -647,10 +886,11 @@
                             href="#product-review" role="tab" aria-controls="product-review"
                             aria-selected="false"><?= !empty($this->lang->line('reviews')) ? $this->lang->line('reviews') : 'Reviews' ?></a>
                         <a class="nav-item nav-link product-nav-tab " id="product-seller-tab" data-toggle="tab"
-                            href="#product-seller" role="tab" aria-controls="product-seller" aria-selected="false">Sold
-                            By</a>
+                            href="#product-seller" role="tab" aria-controls="product-seller"
+                            aria-selected="false"><?= !empty($this->lang->line('sold_by')) ? $this->lang->line('sold_by') : 'Sold by' ?></a>
                         <a class="nav-item nav-link product-nav-tab" id="product-faq-tab" data-toggle="tab"
-                            href="#product-faq" role="tab" aria-controls="product-faq" aria-selected="true">FAQ</a>
+                            href="#product-faq" role="tab" aria-controls="product-faq"
+                            aria-selected="true"><?= !empty($this->lang->line('faq')) ? $this->lang->line('faq') : 'FAQ' ?></a>
                     </div>
                 </nav>
                 <div class="tab-content p-3 w-100" id="nav-tabContent">
@@ -682,7 +922,9 @@
                                     <div class="accordion mt-3" id="accordionExample">
 
                                         <?php if ((!isset($faq['data']) && empty($faq['data'])) || $faq['data'] == []) { ?>
-                                        <div class="col-md-12 d-flex justify-content-center h5">No FAQs Found</div>
+                                        <div class="col-md-12 d-flex justify-content-center h5">
+                                            <?= !empty($this->lang->line('no_faqs_found')) ? $this->lang->line('no_faqs_found') : 'No FAQs Found' ?>
+                                        </div>
                                         <?php } else { ?>
                                         <?php foreach ($faq['data'] as $row) {
                                             ?>
@@ -703,7 +945,9 @@
                                                 aria-labelledby="<?= "h-" . $row['id'] ?>"
                                                 data-parent="#accordionExample">
                                                 <div class="card-body"><?= html_escape($row['answer']) ?></div>
-                                                <div class="card-body">Answer by :
+                                                <div class="card-body">
+                                                    <?= !empty($this->lang->line('answer_by')) ? $this->lang->line('answer_by') : 'Answer by' ?>
+                                                    :
                                                     <?= isset($product_data[0]['username']) && !empty($product_data[0]['username']) ? html_escape($product_data[0]['username']) : "" ?>
                                                 </div>
                                             </div>
@@ -720,7 +964,8 @@
                         <?php
                         if (!empty($review_images['total_images'])) {
                             if ($review_images['total_images'] > 0) { ?>
-                        <h3 class="review-title"> User Review Images
+                        <h3 class="review-title">
+                            <?= !empty($this->lang->line('user_review_images')) ? $this->lang->line('user_review_images') : 'User Review Images' ?>
                             (<span><?= $review_images['total_images'] ?></span>)</h3>
                         <?php
                             }
@@ -788,8 +1033,9 @@
                         <div class="row mt-2">
                             <div class="col-xl-7">
                                 <h3 class="review-title"> <span
-                                        id="no_ratings"><?= $product['product'][0]['no_of_ratings'] ?></span> Reviews
-                                    For this Product</h3>
+                                        id="no_ratings"><?= $product['product'][0]['no_of_ratings'] ?></span>
+                                    <?= !empty($this->lang->line('reviews_for_this_product')) ? $this->lang->line('reviews_for_this_product') : 'Reviews For this Product' ?>
+                                </h3>
                                 <ol class="review-list" id="review-list">
                                     <?php if (isset($my_rating) && !empty($my_rating)) {
                                         foreach ($my_rating['product_rating'] as $row) { ?>
@@ -882,7 +1128,9 @@
                                 $form_link = (!empty($my_rating)) ? base_url('products/save-rating') : base_url('products/save-rating');  ?>
                             <div class="col-xl-5 " id="rating-box">
                                 <div class="add-review">
-                                    <h3 class="review-title">Edit Your Review</h3>
+                                    <h3 class="review-title">
+                                        <?= !empty($this->lang->line('edit_your_review')) ? $this->lang->line('edit_your_review') : 'Edit Your Review' ?>
+                                    </h3>
                                     <form action="<?= $form_link ?>" id="product-rating-form" method="POST">
                                         <?php if (!empty($my_rating)) { ?>
                                         <input type="hidden" name="rating_id"
@@ -891,18 +1139,21 @@
                                         <input type="hidden" name="product_id"
                                             value="<?= $product['product'][0]['id'] ?>">
                                         <div class="rating-form">
-                                            <label for="rating">Your rating</label>
+                                            <label
+                                                for="rating"><?= !empty($this->lang->line('your_rating')) ? $this->lang->line('your_rating') : 'Your rating' ?></label>
                                             <input type="text" class="kv-fa rating-loading" data-step="1" name="rating"
                                                 value="<?= isset($my_rating['product_rating'][0]['rating']) ? $my_rating['product_rating'][0]['rating'] : '0' ?>"
                                                 data-size="sm" title="">
                                         </div>
                                         <div class="form-group">
-                                            <label for="exampleFormControlTextarea1">Your Review</label>
+                                            <label
+                                                for="exampleFormControlTextarea1"><?= !empty($this->lang->line('your_review')) ? $this->lang->line('your_review') : 'Your Review' ?></label>
                                             <textarea class="form-control" name="comment"
                                                 rows="3"><?= isset($my_rating['product_rating'][0]['comment']) ? $my_rating['product_rating'][0]['comment'] : '' ?></textarea>
                                         </div>
                                         <div class="form-group">
-                                            <label for="exampleFormControlTextarea1">Images</label>
+                                            <label
+                                                for="exampleFormControlTextarea1"><?= !empty($this->lang->line('images')) ? $this->lang->line('images') : 'Images' ?></label>
                                             <input type="file" name="images[]" accept="image/x-png,image/gif,image/jpeg"
                                                 multiple />
                                         </div>
@@ -935,7 +1186,8 @@
                                                 data-size="sm" title="">
                                         </div>
                                         <div class="form-group">
-                                            <label for="exampleFormControlTextarea1">Your Review</label>
+                                            <label
+                                                for="exampleFormControlTextarea1"><?= !empty($this->lang->line('your_review')) ? $this->lang->line('your_review') : 'Your Review' ?></label>
                                             <textarea class="form-control" name="comment"
                                                 rows="3"><?= isset($my_rating['product_rating'][0]['comment']) ? $my_rating['product_rating'][0]['comment'] : '' ?></textarea>
                                         </div>
@@ -1001,7 +1253,15 @@
         <div class="col-12 product-style-default pb-4 mt-2 mb-2">
             <div class="swiper-container product-image-swiper">
                 <div <?= ($is_rtl == true) ? "dir='rtl'" : ""; ?> class="swiper-wrapper">
-                    <?php foreach ($related_products['product'] as $row) { ?>
+                    <?php foreach ($related_products['product'] as $row) { 
+                        // echo "<pre>";
+                        // print_r($row);
+                        if ($row['type'] == 'simple_product') {
+                            $product_stock = $row['stock'];
+                        }else{
+                            $product_stock = $row['total_stock'];
+                        }
+                        ?>
                     <div class="swiper-slide">
                         <div class="product-grid">
                             <aside class="add-fav">
@@ -1012,12 +1272,14 @@
                             <div class="product-image">
                                 <div class="product-image-container">
                                     <a href="<?= base_url('products/details/' . $row['slug']) ?>">
-                                        <img class="pic-1" src="<?= $row['image_sm'] ?>">
+                                        <img class="pic-1"
+                                            src="<?= base_url('media/image?path=' . $row['relative_path'] . '&width=225&quality=80') ?>">
                                     </a>
                                 </div>
                                 <ul class="social">
                                     <li>
-                                        <a href="#" class="quick-view-btn" data-tip="Quick View"
+                                        <a href="#" class="quick-view-btn"
+                                            data-tip="<?= !empty($this->lang->line('quick_view')) ? $this->lang->line('quick_view') : 'Quick View' ?>"
                                             data-product-id="<?= $row['id'] ?>"
                                             data-product-variant-id="<?= $row['variants'][0]['id'] ?>"
                                             data-izimodal-open="#quick-view">
@@ -1039,8 +1301,10 @@
                                             $data_step = (isset($row['minimum_order_quantity']) && !empty($row['quantity_step_size'])) ? $row['quantity_step_size'] : 1;
                                             $data_max = (isset($row['total_allowed_quantity']) && !empty($row['total_allowed_quantity'])) ? $row['total_allowed_quantity'] : 0;
                                             ?>
-                                        <a href="" data-tip="Add to Cart" class="add_to_cart"
-                                            data-product-id="<?= $row['id'] ?>"
+                                        <a href=""
+                                            data-tip="<?= !empty($this->lang->line('add_to_cart')) ? $this->lang->line('add_to_cart') : 'Add To Cart' ?>"
+                                            class="add_to_cart" data-product-id="<?= $row['id'] ?>"
+                                            data-product-stock="<?= $product_stock ?>"
                                             data-product-variant-id="<?= $variant_id ?>"
                                             data-product-title="<?= $row['name'] ?>"
                                             data-product-image="<?= $row['image'] ?>"
@@ -1054,7 +1318,8 @@
                                     <li>
                                         <?php $variant_id = (count($row['variants']) <= 1) ? $row['variants'][0]['id'] : ""; ?>
 
-                                        <a href="#" class="compare" data-tip="Compare"
+                                        <a href="#" class="compare"
+                                            data-tip="<?= !empty($this->lang->line('compare')) ? $this->lang->line('compare') : 'Compare' ?>"
                                             data-product-id="<?= $row['id'] ?>"
                                             data-product-variant-id="<?= $variant_id ?>">
                                             <i class="fa fa-random"></i>
@@ -1063,15 +1328,15 @@
                                 </ul>
                                 <?php if (isset($row['min_max_price']['special_price']) && $row['min_max_price']['special_price'] != '' && $row['min_max_price']['special_price'] != 0 && $row['min_max_price']['special_price'] < $row['min_max_price']['min_price']) { ?>
                                 <span
-                                    class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?></span>
-                                <span
-                                    class="product-discount-label"><?= $row['min_max_price']['discount_in_percentage'] ?>%</span>
-                                <?php } ?>
+                                    class="product-new-label"><?= !empty($this->lang->line('sale')) ? $this->lang->line('sale') : 'Sale' ?>
+                                    <?= $row['min_max_price']['discount_in_percentage'] ?>%<< /span>
+                                        <!-- <span class="product-discount-label"><?//= $row['min_max_price']['discount_in_percentage'] ?>%</span> -->
+                                        <?php } ?>
                             </div>
                             <div class="product-content">
-                                <h3 class="title" title="<?= $row['name'] ?>">
+                                <h3 class="title title_wrap" title="<?= $row['name'] ?>">
                                     <a
-                                        href="<?= base_url('products/details/' . $row['slug']) ?>"><?= short_description_word_limit(output_escaping(str_replace('\r\n', '&#13;&#10;', strip_tags($row['name'])))); ?></a>
+                                        href="<?= base_url('products/details/' . $row['slug']) ?>"><?= str_replace('\r\n', '&#13;&#10;', strip_tags($row['name'])) ?></a>
                                 </h3>
                                 <?php if (($row['variants'][0]['special_price'] < $row['variants'][0]['price']) && ($row['variants'][0]['special_price'] != 0)) { ?>
                                 <p class="mb-0 mt-2 ">
@@ -1079,7 +1344,7 @@
                                         <?php echo $settings['currency'] ?>
                                         <?php
                                                 $price = $row['variants'][0]['special_price'];
-                                                echo number_format($price, 2);
+                                                echo format_price($price);
                                                 ?>
                                     </span>
                                     <sup>
@@ -1088,7 +1353,7 @@
                                             <s id="striped-price">
                                                 <?php echo $settings['currency'] ?>
                                                 <?php $price = $row['variants'][0]['price'];
-                                                        echo number_format($price, 2);
+                                                        echo format_price($price);
                                                         // echo $price;
                                                         ?>
                                             </s>
@@ -1101,7 +1366,7 @@
                                         <?php echo $settings['currency'] ?>
                                         <?php
                                                 $price = $row['variants'][0]['price'];
-                                                echo number_format($price, 2);
+                                                echo format_price($price);
                                                 ?>
                                     </span>
                                 </p>

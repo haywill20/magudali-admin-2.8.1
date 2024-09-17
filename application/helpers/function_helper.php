@@ -1034,38 +1034,197 @@ function update_wallet_balance($operation, $user_id, $amount, $message = "Balanc
     return $response;
 }
 
-function send_notification($fcmMsg, $registrationIDs_chunks)
+function get_token()
 {
+    $file_name = get_settings("service_account_file");
+
+    // $file_path = FCPATH . $file_name;
+    $privateKeyFile = FCPATH . $file_name;
+    $scope = 'https://www.googleapis.com/auth/firebase.messaging';
+
+    // Read the private key file
+    $privateKey = file_get_contents($privateKeyFile);
+    $privateKeyData = json_decode($privateKey, true);
+
+    // Get the private key and client email from the JSON data
+    $privateKeyPem = $privateKeyData['private_key'];
+    $clientEmail = $privateKeyData['client_email'];
+
+    // Create a JSON Web Token (JWT)
+    $header = [
+        'alg' => 'RS256',
+        'typ' => 'JWT'
+    ];
+    $payload = [
+        'iss' => $clientEmail,
+        'scope' => $scope,
+        'aud' => 'https://oauth2.googleapis.com/token',
+        'exp' => time() + 3600,
+        'iat' => time()
+    ];
+
+    $headerEncoded = base64_encode(json_encode($header));
+    $payloadEncoded = base64_encode(json_encode($payload));
+
+    $dataEncoded = $headerEncoded . '.' . $payloadEncoded;
+
+    // Sign the JWT with the private key
+    openssl_sign($dataEncoded, $signature, $privateKeyPem, 'SHA256');
+    $signatureEncoded = base64_encode($signature);
+
+    $jwtEncoded = $dataEncoded . '.' . $signatureEncoded;
+
+    // Exchange the JWT for an access token
+    $postData = http_build_query([
+        'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        'assertion' => $jwtEncoded
+    ]);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, 'https://oauth2.googleapis.com/token');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $responseData = json_decode($response, true);
+    $accessToken = $responseData['access_token'];
+
+    return $accessToken;
+}
+
+function getAccessToken()
+{
+    $file_name = get_settings("service_account_file");
+
+    $file_path = FCPATH . $file_name;
+    // Initialize the Google Client
+    $client = new Client();
+    $client->setAuthConfig($file_path);
+    $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
+    // Fetch the access token
+    $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
+    return $accessToken;
+}
+
+function send_notification($fcmMsg, $registrationIDs_chunks, $customBodyFields = [], $title = "test title", $message = "test message", $type = "test type")
+{
+    // print_R($customBodyFields);
+    // print_R($registrationIDs_chunks);
+
+    $project_id = get_settings("firebase_project_id");
+
+    $url = 'https://fcm.googleapis.com/v1/projects/' . $project_id . '/messages:send';
+    // $access_token = getAccessToken();
+    $access_token = get_token();
 
     $fcmFields = [];
+
+    // $registrationIDs_chunks = array_chunk($registrationIDs, 1000);=
     foreach ($registrationIDs_chunks as $registrationIDs) {
-        $fcmFields = array(
-            'priority' => 'high',
-            'notification' => $fcmMsg,
-            'data' => $fcmMsg,
-        );
-        if (is_array($registrationIDs)) {
-            $fcmFields['registration_ids'] = $registrationIDs;  // expects an array of ids
-        } else {
-            $fcmFields['to'] = $registrationIDs;  // expects an array of ids
+        foreach ($registrationIDs as $registrationID) {
+            // print_R($customBodyFields);
+            // print_R($registrationIDs_chunks);
+            // print_r($registrationID);
+            if ($registrationID == "BLACKLISTED") {
+                continue;
+            }
+            if ($registrationID == "") {
+                continue;
+            }
+
+            $data = [
+                "message" => [
+                    "token"        => $registrationID,
+                    "notification" => [
+                        "title" =>  $customBodyFields['title'],
+                        "body"  => $customBodyFields['body'],
+                    ],
+                    "data" => $customBodyFields,
+                    // "data" => [
+                    //     "title" => $customBodyFields['title'],
+                    //     "body" => $customBodyFields['body'],
+                    //     "type" => $customBodyFields['type'],
+                    //     "type_id" => $customBodyFields['type_id'],
+                    //     "image"  => $customBodyFields['image'],
+                    //     "link"  => $customBodyFields['link'],
+                    // ],
+                    "android"      => [
+                        "notification" => [
+                            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                        ],
+                        "data"         => [
+                            "title" => $title,
+                            "body"  => $message,
+                            "type"  => $customBodyFields['type'],
+                        ]
+                        // "data"         => $customBodyFields
+                    ],
+                    "apns" => [
+                        "headers" => [
+                            "apns-priority" => "10"
+                        ],
+                        "payload" => [
+                            "aps" => [
+                                "alert" => [
+                                    "title" =>  $customBodyFields['title'],
+                                    "body"  => $customBodyFields['body'],
+                                ],
+                                "data" => $customBodyFields,
+                                // "title" => $customBodyFields['title'],
+                                // "body" => $customBodyFields['body'],
+                                // "type" => $customBodyFields['type'],
+                                // "type_id" => $customBodyFields['type_id'],
+                                // "image"  => $customBodyFields['image'],
+                                // "link"  => $customBodyFields['link'],
+                            ]
+                        ]
+                    ]
+                    // "apns"         => [
+                    //     "headers" => [
+                    //         "apns-priority" => "10" // Set APNs priority to 10 (high) for immediate delivery
+                    //     ],
+                    //     "payload" => [
+                    //         "aps" => [
+                    //             "alert" => $customBodyFields
+                    //         ]
+                    //     ]
+                    // ]
+                ]
+            ];
+            // print_R($data);
+            $encodedData = json_encode($data);
+            // print_r($encodedData);
+            $headers = [
+                'Authorization: Bearer ' . $access_token,
+                'Content-Type: application/json',
+            ];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+
+            // Disabling SSL Certificate support temporarily
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
+
+            // Execute post
+            $result = curl_exec($ch);
+
+            if ($result == FALSE) {
+                die('Curl failed: ' . curl_error($ch));
+            }
+            // Close connection
+            curl_close($ch);
         }
-        // print_r($fcmFields);
-
-        $headers = array(
-            'Authorization: key=' . get_settings('fcm_server_key'),
-            'Content-Type: application/json'
-        );
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fcmFields));
-        $result = curl_exec($ch);
-        curl_close($ch);
     }
+    // print_r($result);
     return $fcmFields;
 }
 
