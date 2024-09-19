@@ -270,6 +270,8 @@ class Order_model extends CI_Model
                 }
             }
             $delivery_charge = isset($data['delivery_charge']) && !empty($data['delivery_charge']) ? $data['delivery_charge'] : 0;
+            // print_r($delivery_charge);
+            // die;
             $discount = isset($data['discount']) && !empty($data['discount']) ? $data['discount'] : 0;
             $gross_total = 0;
             $cart_data = [];
@@ -310,7 +312,7 @@ class Order_model extends CI_Model
             /* Calculating Promo Discount */
             if (isset($data['promo_code']) && !empty($data['promo_code'])) {
 
-                $promo_code = validate_promo_code($data['promo_code'], $data['user_id'], $data['total']);
+                $promo_code = validate_promo_code($data['promo_code'], $data['user_id'], $data['temp_total']);
 
                 if ($promo_code['error'] == false) {
 
@@ -338,6 +340,8 @@ class Order_model extends CI_Model
                 $product_variant[$i]['qty'] =  $quantity[$i];
             }
             foreach ($product_variant as $product) {
+                // print_r($product);
+                // die;
                 $prctg = (isset($product['tax_percentage']) && intval($product['tax_percentage']) > 0 && $product['tax_percentage'] != null) ? $product['tax_percentage'] : '0';
                 if ((isset($product['is_prices_inclusive_tax']) && $product['is_prices_inclusive_tax'] == 0) || (!isset($product['is_prices_inclusive_tax'])) && $prctg > 0) {
                     $price_tax_amount = $product['price'] * ($prctg / 100);
@@ -416,6 +420,9 @@ class Order_model extends CI_Model
                 'email' => isset($data['email']) ? $data['email'] : ' ',
                 'is_pos_order' => isset($data['is_pos_order']) ? $data['is_pos_order'] : 0
             ];
+            if ($data['payment_method'] == "phonepe") {
+                $order_data['status'] = $status;
+            }
             if (isset($data['address_id']) && !empty($data['address_id'])) {
                 $order_data['address_id'] = (isset($data['address_id']) ? $data['address_id'] : '');
             }
@@ -450,7 +457,34 @@ class Order_model extends CI_Model
 
             $this->db->insert('orders', $order_data);
             $last_order_id = $this->db->insert_id();
+            if (isset($data['is_pos_order']) && $data['is_pos_order'] == 1) {
+                // $status = json_encode(array(array($status, date("d-m-Y h:i:sa"))));
+                // Define the input array
+                $statuses = [
+                    ["received", date("d-m-Y h:i:sa")],
+                    ["processed", date("d-m-Y h:i:sa")],
+                    ["shipped", date("d-m-Y h:i:sa")],
+                    ["delivered", date("d-m-Y h:i:sa")]
+                ];
+                
+                $output = [];
+                
+                // Loop through each status and time pair
+                foreach ($statuses as $all_status) {
+                    // Add the formatted status and time to the output array
+                    $output[] = [$all_status[0], $all_status[1]];
+                }
+                
+                // Convert the output array to a JSON string
+                $jsonOutput = json_encode($output);
+                // print_r($output);
+                // print_r($jsonOutput);
+                // die;
 
+                // // Print the JSON string
+                // echo $jsonOutput;
+                // die;
+            }
 
             for ($i = 0; $i < count($product_variant); $i++) {
 
@@ -466,7 +500,7 @@ class Order_model extends CI_Model
                     'tax_percent' => $tax_percentage[$i],
                     'tax_amount' => $tax_amount[$i],
                     'sub_total' => $subtotal[$i],
-                    'status' =>  json_encode(array(array($status, date("d-m-Y h:i:sa")))),
+                    'status' =>  (isset($data['is_pos_order']) && $data['is_pos_order'] == 1) ? (json_encode($output)) : json_encode(array(array($status, date("d-m-Y h:i:sa")))),
                     'active_status' => $status,
                     'otp' => 0,
                 ];
@@ -483,9 +517,14 @@ class Order_model extends CI_Model
             $discount_percentage = 0.00;
             foreach ($parcels as $seller_id => $parcel) {
                 $discount_percentage = ($parcel['total'] * 100) / $parcel_sub_total;
+                // print_r("total parcel :" . $parcel['total']);
+                // print_r("discount persantage : ".$discount_percentage);
                 $seller_promocode_discount =  ($promo_code_discount * $discount_percentage) / 100;
+                // print_r("seller promocode discount : ".$seller_promocode_discount);
                 $seller_delivery_charge = ($delivery_charge * $discount_percentage) / 100;
+                // print_r("seller delivery charge : ".$seller_delivery_charge);
                 $otp = mt_rand(100000, 999999);
+                // die;
                 $order_item_ids = '';
                 $varient_ids = explode(',', trim($parcel['variant_id'], ','));
                 $parcel_total = $parcel['total'] + intval($parcel['delivery_charge']) - $seller_promocode_discount;
@@ -538,22 +577,35 @@ class Order_model extends CI_Model
             //send custom notifications
             $custom_notification = fetch_details('custom_notifications', ['type' => "place_order"], '');
             $hashtag_order_id = '< order_id >';
-            $string = json_encode($custom_notification[0]['title'], JSON_UNESCAPED_UNICODE);
-            $hashtag = html_entity_decode($string);
-            $data1 = str_replace($hashtag_order_id, $last_order_id, $hashtag);
-            $title = output_escaping(trim($data1, '"'));
+            // $string = json_encode($custom_notification[0]['title'], JSON_UNESCAPED_UNICODE);
+            // $hashtag = html_entity_decode($string);
+            // $data1 = str_replace($hashtag_order_id, $last_order_id, $hashtag);
+            // $title = output_escaping(trim($data1, '"'));
+            $title = 'place_order';
             $hashtag_application_name = '< application_name >';
+            // $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
+            // $hashtag = html_entity_decode($string);
+            // $data2 = str_replace($hashtag_application_name, $system_settings['app_name'], $hashtag);
+            // $message = output_escaping(trim($data2, '"'));
+
             $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
             $hashtag = html_entity_decode($string);
-            $data2 = str_replace($hashtag_application_name, $system_settings['app_name'], $hashtag);
-            $message = output_escaping(trim($data2, '"'));
+            $data1 = str_replace(array($hashtag_order_id, $hashtag_application_name), array($last_order_id, $system_settings['app_name']), $hashtag);
+            $message = output_escaping(trim($data1, '"'));
 
+            // Definición de mensajes para comercio
             $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'Tienes un nuevo pedido ID #' . $last_order_id;
-            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'Hola ' . $system_settings['app_name'] . ' porfavor procesa el nuevo pedido con ID #' . $last_order_id;
+            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'Hola ' . $system_settings['app_name'] . "\nTienes un nuevo pedido,\n¡por favor procésalo! 🫰🤑";
+
+            // Definición de mensajes para el cliente
+            $fcm_customer_subject = 'Tu pedido ha sido recibido ID #' . $last_order_id;
+            $fcm_customer_msg = 'Gracias por tu pedido en ' . $system_settings['app_name'] . "!\nTu pedido ID es #" . $last_order_id . ".\n¡Pronto recibirás una actualización! 😉";
+
 
             if (trim(strtolower($data['payment_method'])) != 'paypal' || trim(strtolower($data['payment_method'])) != 'stripe') {
                 $overall_order_data = array(
                     'rows' => $cart_data,
+                    'order_id' => $last_order_id,
                     'order_data' => $overall_total,
                     'subject' => $fcm_admin_subject,
                     'user_data' => $user[0],
@@ -561,43 +613,64 @@ class Order_model extends CI_Model
                     'user_msg' => $fcm_admin_msg,
                     'otp_msg' => 'Here is your OTP. Please, give it to delivery boy only while getting your order.',
                 );
+
                 $system_settings = get_settings('system_settings', true);
                 $sellerEmail = [];
                 $sellerPhone = [];
+                
                 if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 1) {
                     if (isset($system_settings['support_email']) && !empty($system_settings['support_email'])) {
                         send_mail($system_settings['support_email'], $fcm_admin_subject, $fcm_admin_msg);
                     }
+
                     for ($i = 0; $i < count($seller_ids); $i++) {
                         $seller_email = fetch_details('users', ['id' => $seller_ids[$i]]);
                         $sellerPhone[] = $seller_email[0]['mobile'];
                         $sellerEmail[] = $seller_email[0]['email'];
-                        $seller_store_name = fetch_details('seller_data', ['user_id' => $seller_ids[$i]], 'store_name');
                         if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
                             send_mail($seller_email[0]['email'], $fcm_admin_subject, $fcm_admin_msg);
                         }
                     }
                 }
+
                 $user_fcm = fetch_details('users', ['id' => $data['user_id']], 'fcm_id');
                 $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
                 foreach ($parcels as $seller_id => $parcel) {
                     $seller_fcm = fetch_details('users', ['id' => $seller_id], 'fcm_id');
                     $seller_fcm_id[0] = $seller_fcm[0]['fcm_id'];
                 }
-                $registrationIDs_chunks = array_chunk($seller_fcm_id, 1000);
 
-                if (!empty($seller_fcm_id)) {
+                $registrationIDs_chunks = array_chunk($seller_fcm_id, 1000);
+                $registrationIDs_chunks_user = array_chunk($user_fcm_id[0], 1000);
+
+                if (!empty($registrationIDs_chunks) || !empty($registrationIDs_chunks_user)) {
+                    // Mensaje para el comercio
                     $fcmMsg = array(
                         'title' => $fcm_admin_subject,
                         'body' => $fcm_admin_msg,
                         'type' => "place_order",
-                        'content_available' => true,
-                        'channel_id' => 'channel_id_test_8'
+                        'order_id' => (string)$last_order_id,
                     );
-                    if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
-                        send_notification($fcmMsg, $registrationIDs_chunks);
+
+                    // Mensaje para el cliente
+                    $fcmMsgCustomer = array(
+                        'title' => $fcm_customer_subject,
+                        'body' => $fcm_customer_msg,
+                        'type' => "order_confirmation",
+                        'order_id' => (string)$last_order_id,
+                    );
+
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
+
+                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                        if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
+                            send_notification($fcmMsg, $registrationIDs_chunks, $fcmMsg);
+                            send_notification($fcmMsgCustomer, $registrationIDs_chunks_user, $fcmMsgCustomer);
+                        }
                     }
                 }
+
                 $admin_notifi = array(
                     'title' => $fcm_admin_subject,
                     'message' => $fcm_admin_msg,
@@ -605,24 +678,21 @@ class Order_model extends CI_Model
                     'type_id' => $last_order_id
                 );
                 insert_details($admin_notifi, 'system_notification');
+
                 if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
-                    // send_mail($user[0]['email'], 'Order received successfully', $this->load->view('admin/pages/view/email-template.php', $overall_order_data, TRUE));
+                    for ($i = 0; $i < count($seller_ids); $i++) {
+                        $sellers = fetch_details('users', ['id' => $seller_ids[$i]], ['email', 'mobile']);
+                        (notify_event(
+                            "place_order",
+                            ["customer" => [$user[0]['email']], "seller" => [$sellers[0]['email']]], 
+                            ["customer" => [$user[0]['mobile']],  "seller" => [$sellers[0]['mobile']]], 
+                            ["orders.id" => $last_order_id]
+                        ));
+                    }
                 }
             }
 
-            for ($i = 0; $i < count($seller_ids); $i++) {
-                // $seller_email = fetch_details('users', ['id' => $seller_ids[$i]]);
-                $sellers = fetch_details('users', ['id' => $seller_ids[$i]], ['email', 'mobile']);
-                // print_r($sellers);
-                (notify_event(
-                    "place_order",
-                    ["customer" => [$user[0]['email']], "seller" => [$sellers[0]['email']]],
-                    ["customer" => [$user[0]['mobile']],  "seller" => [$sellers[0]['mobile']]],
-                    ["orders.id" => $last_order_id]
-                ));
-            }
-
-            // $this->cart_model->remove_from_cart($data);
+            $this->cart_model->remove_from_cart($data);
             $user_balance = fetch_details('users', ['id' => $data['user_id']], 'balance');
 
             $response['error'] = false;
