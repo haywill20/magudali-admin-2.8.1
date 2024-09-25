@@ -390,6 +390,8 @@ class Seller_model extends CI_Model
                 foreach ($seller_ids as $seller) {
                     //custom message
                     $settings = get_settings('system_settings', true);
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
                     $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                     $user_res = fetch_details('users', ['id' => $seller], 'username,fcm_id,email,mobile');
                     $custom_notification = fetch_details('custom_notifications', ['type' => "settle_seller_commission"], '');
@@ -409,14 +411,14 @@ class Seller_model extends CI_Model
                         ["users.mobile" => $user_res[0]['mobile']]
                     ));
                     $fcm_ids = array();
-                    if (!empty($user_res[0]['fcm_id'])) {
+                    if (!empty($user_res[0]['fcm_id']) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                         $fcmMsg = array(
                             'title' => $customer_title,
                             'body' => $customer_msg,
                             'type' => "commission",
                         );
                         $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                        send_notification($fcmMsg, $fcm_ids);
+                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                     }
                 }
             } else {

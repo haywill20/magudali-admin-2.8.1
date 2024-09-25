@@ -1169,7 +1169,11 @@ class Cart extends CI_Controller
 
     public function send_bank_receipt()
     {
+        // print_r($_FILES);
+        // die;
         $this->form_validation->set_rules('order_id', 'Order Id', 'trim|required|numeric|xss_clean');
+        // $this->form_validation->set_rules('attachments[]', 'Bank Transfer Receipt', 'trim|required|xss_clean');
+        // $this->form_validation->set_rules('attachments', 'Bank Transfer Receipt', 'trim|required|xss_clean', array('required' => 'Bank Transfer Receipt is required'));
 
         if (!$this->form_validation->run()) {
             $this->response['error'] = true;
@@ -1242,6 +1246,12 @@ class Cart extends CI_Controller
                         }
                     }
                 }
+            } else {
+                $this->response['error'] = true;
+                $this->response['message'] = "Please Upload Bank transfer receipt.";
+                $this->response['data'] = [];
+                print_r(json_encode($this->response));
+                return true;
             }
             if ($images_info_error != NULL) {
                 $this->response['error'] = true;
@@ -1256,7 +1266,7 @@ class Cart extends CI_Controller
             if ($this->Order_model->add_bank_transfer_proof($data)) {
 
                 /* Send notification */
-                $settings = get_settings('system_settings', true);
+                $settings = $this->data['settings'];
                 $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                 $user_roles = fetch_details("user_permissions", "", '*', '',  '', '', '');
                 foreach ($user_roles as $user) {
@@ -1270,15 +1280,14 @@ class Cart extends CI_Controller
                 // print_R($admin_email[0]);
                 // print_R($admin_mobile[0]);
                 // print_R($order_id);
-                if (!empty($admin_email) && !empty($admin_mobile)) {
-                    // print_r("in event ");
-                     notify_event(
-                        "bank_transfer_proof",
-                        ["admin" => [$admin_email]],
-                        ["admin" => [$admin_mobile]],
-                        ["orders.id" => $order_id]
-                    );
-                }
+                // if (!empty($admin_email) && !empty($admin_mobile)) {
+                //     notify_event(
+                //         "bank_transfer_proof",
+                //         ["admin" => [$admin_email]],
+                //         ["admin" => [$admin_mobile]],
+                //         ["orders.id" => $order_id]
+                //     );
+                // }
                 //custom message
                 if (!empty($fcm_ids)) {
                     $custom_notification = fetch_details('custom_notifications', ['type' => "bank_transfer_proof"], '');
@@ -1294,7 +1303,12 @@ class Cart extends CI_Controller
                         'body' =>   $customer_msg,
                         'type' => "bank_transfer_proof",
                     );
-                    send_notification($fcmMsg, $fcm_ids);
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
+                    // print_r($registrationIDs_chunks_user); 
+                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                    }
                 }
                 $this->response['error'] = false;
                 $this->response['message'] =  'Bank Payment Receipt Added Successfully!';

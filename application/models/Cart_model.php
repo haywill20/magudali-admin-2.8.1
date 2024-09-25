@@ -139,4 +139,49 @@ class Cart_model extends CI_Model
         }
         return $res;
     }
+
+    function cart_item_remainder()
+    {
+        $firebase_project_id = get_settings('firebase_project_id');
+        $service_account_file = get_settings('service_account_file');
+
+        $time = date('Y-m-d H:i:s');
+        $currentTime = strtotime($time);
+        
+        $this->db->select('*');
+        $this->db->from('cart');
+        $this->db->where('notification_sended', '0');
+        $this->db->where('is_saved_for_later', '0');
+        $this->db->group_by('user_id');
+        $data = $this->db->get()->result_array();
+
+        foreach ($data as $cart_item) {
+            $fcm_ids = [];
+
+            $timeDifference = $currentTime - $cart_item['added_timestamp'];
+
+            if ($timeDifference >= 1*3600) {
+            // if ($timeDifference >= 20) {
+                $user_data = fetch_details('users', ['id' => $cart_item['user_id']], 'fcm_id');
+                foreach ($user_data as $user_fcm) {
+                    $fcm_ids[] = $user_fcm['fcm_id'];
+                }
+            }
+            $registrationIDs_chunks[0] = $fcm_ids;
+            $fcmMsg = array(
+                'title' => "👋 Your Cart Misses You!",
+                'body' => "Come back and complete your purchase. Great deals await! 🎉",
+                'type' => "cart",
+            );
+            // print_r($fcmMsg);
+            if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                $fcmFields = send_notification('', $registrationIDs_chunks, $fcmMsg);
+                // die;
+                $this->db->set('notification_sended', 1);
+                $this->db->where('user_id',  $cart_item['user_id']);
+                $this->db->update('cart');
+            }
+        }
+        return $fcmFields;
+    }
 }

@@ -163,6 +163,13 @@ class Order_model extends CI_Model
 
     public function update_order_item($id, $status, $return_request = 0, $fromapp = false)
     {
+        // print_r("id : " .$id);
+        // print_r("status : " .$status);
+        // print_r("return request  : " .$return_request);
+        // print_r("frm app : " . $fromapp);
+        // die;
+        $firebase_project_id = $this->data['firebase_project_id'];
+        $service_account_file = $this->data['service_account_file'];
         if ($return_request == 0) {
             $res = validate_order_status($id, $status, 'order_items', '', true);
 
@@ -191,7 +198,7 @@ class Order_model extends CI_Model
             $order_counter = $order_items_details[$key]['order_counter'];
             $order_cancel_counter = $order_items_details[$key]['order_cancel_counter'];
             $order_return_counter = $order_items_details[$key]['order_return_counter'];
-            $user_res = fetch_details('users', ['id' => $order_item_details[0]['seller_id']], 'fcm_id,username');
+            $user_res = fetch_details('users', ['id' => $order_item_details[0]['seller_id']], 'fcm_id,username,mobile,email');
 
             $fcm_ids = array();
             if (!empty($user_res[0]['fcm_id'])) {
@@ -202,19 +209,27 @@ class Order_model extends CI_Model
 
             if ($this->update_order(['status' => $status], ['id' => $id], true, 'order_items')) {
                 $this->order_model->update_order(['active_status' => $status], ['id' => $id], false, 'order_items');
+                $firebase_project_id = get_settings('firebase_project_id');
+                $service_account_file = get_settings('service_account_file');
 
                 //send notification while order cancelled
                 if ($status == 'cancelled') {
                     $fcm_admin_subject = 'Order cancelled';
                     $fcm_admin_msg = 'Hello ' . $user_res[0]['username'] . 'order of order item id ' . $id . ' is cancelled.';
-                    if (!empty($fcm_ids)) {
+                    if (!empty($fcm_ids) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                         $fcmMsg = array(
                             'title' => $fcm_admin_subject,
                             'body' => $fcm_admin_msg,
                             'type' => "place_order",
                             'content_available' => true
                         );
-                        send_notification($fcmMsg, $registrationIDs_chunks);
+                        send_notification($fcmMsg, $registrationIDs_chunks, $fcmMsg);
+                        (notify_event(
+                            "place_order",
+                            ["seller" => [$user_res[0]['email']]],
+                            ["seller" => [$user_res[0]['mobile']]],
+                            ["orders.id" => $id]
+                        ));
                     }
                     if (isset($order_tracking_data) && !empty($order_tracking_data) && $order_tracking_data != null) {
                         cancel_shiprocket_order($order_tracking_data[0]['shiprocket_order_id']);
@@ -600,7 +615,8 @@ class Order_model extends CI_Model
             // Definición de mensajes para el cliente
             $fcm_customer_subject = 'Tu pedido ha sido recibido ID #' . $last_order_id;
             $fcm_customer_msg = 'Gracias por tu pedido en ' . $system_settings['app_name'] . "!\nTu pedido ID es #" . $last_order_id . ".\n¡Pronto recibirás una actualización! 😉";
-
+            $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'New order placed ID #' . $last_order_id;
+            $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
 
             if (trim(strtolower($data['payment_method'])) != 'paypal' || trim(strtolower($data['payment_method'])) != 'stripe') {
                 $overall_order_data = array(
@@ -613,36 +629,32 @@ class Order_model extends CI_Model
                     'user_msg' => $fcm_admin_msg,
                     'otp_msg' => 'Here is your OTP. Please, give it to delivery boy only while getting your order.',
                 );
-
                 $system_settings = get_settings('system_settings', true);
                 $sellerEmail = [];
                 $sellerPhone = [];
-                
                 if (defined('ALLOW_MODIFICATION') && ALLOW_MODIFICATION == 1) {
                     if (isset($system_settings['support_email']) && !empty($system_settings['support_email'])) {
                         send_mail($system_settings['support_email'], $fcm_admin_subject, $fcm_admin_msg);
                     }
-
                     for ($i = 0; $i < count($seller_ids); $i++) {
                         $seller_email = fetch_details('users', ['id' => $seller_ids[$i]]);
                         $sellerPhone[] = $seller_email[0]['mobile'];
                         $sellerEmail[] = $seller_email[0]['email'];
+                        $seller_store_name = fetch_details('seller_data', ['user_id' => $seller_ids[$i]], 'store_name');
                         if (isset($_POST['active_status']) && $_POST['active_status'] != 'awaiting') {
                             send_mail($seller_email[0]['email'], $fcm_admin_subject, $fcm_admin_msg);
                         }
                     }
                 }
-
                 $user_fcm = fetch_details('users', ['id' => $data['user_id']], 'fcm_id');
                 $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
                 foreach ($parcels as $seller_id => $parcel) {
                     $seller_fcm = fetch_details('users', ['id' => $seller_id], 'fcm_id');
                     $seller_fcm_id[0] = $seller_fcm[0]['fcm_id'];
                 }
-
                 $registrationIDs_chunks = array_chunk($seller_fcm_id, 1000);
                 $registrationIDs_chunks_user = array_chunk($user_fcm_id[0], 1000);
-
+                // print_r($seller_fcm_id);
                 if (!empty($registrationIDs_chunks) || !empty($registrationIDs_chunks_user)) {
                     // Mensaje para el comercio
                     $fcmMsg = array(
