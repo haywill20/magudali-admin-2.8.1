@@ -1136,64 +1136,39 @@ function send_notification($fcmMsg, $registrationIDs_chunks, $customBodyFields =
             }
 
             $data = [
-                "message" => [
-                    "token"        => $registrationID,
-                    "notification" => [
-                        "title" =>  $customBodyFields['title'],
+    "message" => [
+        "token"        => $registrationID,
+        "notification" => [
+            "title" => $customBodyFields['title'],
+            "body"  => $customBodyFields['body'],
+            "image" => $customBodyFields['image']
+            // Aquí puedes incluir más campos si lo necesitas
+        ],
+        "android" => [
+            "notification" => [
+                'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                "title" => $customBodyFields['title'], // Puedes agregar título aquí si es necesario
+                "body"  => $customBodyFields['body'],  // Mensaje de la notificación
+                "image" => $customBodyFields['image'], // Asegúrate de agregar la URL de la imagen aquí
+            ],
+        ],
+        "apns" => [
+            "headers" => [
+                "apns-priority" => "10" // Prioridad alta en iOS
+            ],
+            "payload" => [
+                "aps" => [
+                    "alert" => [
+                        "title" => $customBodyFields['title'],
                         "body"  => $customBodyFields['body'],
                     ],
-                    "data" => $customBodyFields,
-                    // "data" => [
-                    //     "title" => $customBodyFields['title'],
-                    //     "body" => $customBodyFields['body'],
-                    //     "type" => $customBodyFields['type'],
-                    //     "type_id" => $customBodyFields['type_id'],
-                    //     "image"  => $customBodyFields['image'],
-                    //     "link"  => $customBodyFields['link'],
-                    // ],
-                    "android"      => [
-                        "notification" => [
-                            'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                        ],
-                        "data"         => [
-                            "title" => $title,
-                            "body"  => $message,
-                            "type"  => $customBodyFields['type'],
-                        ]
-                        // "data"         => $customBodyFields
-                    ],
-                    "apns" => [
-                        "headers" => [
-                            "apns-priority" => "10"
-                        ],
-                        "payload" => [
-                            "aps" => [
-                                "alert" => [
-                                    "title" =>  $customBodyFields['title'],
-                                    "body"  => $customBodyFields['body'],
-                                ],
-                                "data" => $customBodyFields,
-                                // "title" => $customBodyFields['title'],
-                                // "body" => $customBodyFields['body'],
-                                // "type" => $customBodyFields['type'],
-                                // "type_id" => $customBodyFields['type_id'],
-                                // "image"  => $customBodyFields['image'],
-                                // "link"  => $customBodyFields['link'],
-                            ]
-                        ]
-                    ]
-                    // "apns"         => [
-                    //     "headers" => [
-                    //         "apns-priority" => "10" // Set APNs priority to 10 (high) for immediate delivery
-                    //     ],
-                    //     "payload" => [
-                    //         "aps" => [
-                    //             "alert" => $customBodyFields
-                    //         ]
-                    //     ]
-                    // ]
+                    // No incluyas el campo data aquí
                 ]
-            ];
+            ]
+        ]
+    ]
+];
+
             // print_R($data);
             $encodedData = json_encode($data);
             // print_r($encodedData);
