@@ -13,10 +13,35 @@ $lang['login_remember_me'] = "Recordar";
 $lang['login_already_have_account'] = "¿Ya tienes cuenta de usuario en";
 $lang['login_no_account'] = "¿No tienes ninguna cuenta?";
 
-
-
-
-
+// Seller include-idebar
+$lang['menu_home_seller']                = 'Inicio';
+$lang['menu_orders_seller']              = 'Pedidos';
+$lang['menu_orders_tracking_seller']     = 'Ratreo de pedidos';
+$lang['menu_categories_seller']          = 'Categorías';
+$lang['menu_point_of_sale_seller']       = 'Punto de Venta';
+$lang['menu_manage_stock_seller']        = 'Administrar Stock';
+$lang['menu_chat_seller']                = 'Chat';
+$lang['menu_products_seller']            = 'Productos';
+$lang['menu_attribute_sets_seller']      = 'Conjunto de Atributos';
+$lang['menu_attributes_seller']          = 'Atributos';
+$lang['menu_attributes_values_seller']   = 'Valores de Atributos';
+$lang['menu_tax_seller']                 = 'Impuestos';
+$lang['menu_add_products_seller']        = 'Agregar Productos';
+$lang['menu_bulk_upload_seller']         = 'Carga Masiva';
+$lang['menu_manage_products_seller']     = 'Administrar Productos';
+$lang['menu_products_faqs_seller']       = 'Productos FAQS';
+$lang['menu_media_seller']               = 'Medios';
+$lang['menu_wallet_transactions_seller'] = 'Billetera';
+$lang['menu_withdrawal_requests_seller'] = 'Solicitudes de Retiro';
+$lang['menu_pickup_location_seller']     = 'Ubicación de Recogida';
+$lang['menu_location_seller']            = 'Ubicación';
+$lang['menu_zipcodes_seller']            = 'Codigos Postales';
+$lang['menu_city_seller']                = 'Ciudad';
+$lang['menu_areas_seller']               = 'Areas';
+$lang['menu_countries_seller']           = 'Paises';
+$lang['menu_reports_seller']             = 'Reportes';
+$lang['menu_sales_report_seller']        = 'Informe de Ventas';
+$lang['menu_sales_inventory_reports_seller'] = 'Informe de Inventario';
 
 $lang['language_id'] = "8";
 $lang['menu'] = "Menu";
