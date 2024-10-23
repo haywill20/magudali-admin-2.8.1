@@ -11,7 +11,7 @@
                                         <i class="ion-ios-cart-outline display-4"></i>
                                     </div>
                                     <div class="media-body text-right">
-                                        <h5 class="text-muted text-bold-500">Orders</h5>
+                                        <h5 class="text-muted text-bold-500"><?= !empty($this->lang->line('home_orders')) ? $this->lang->line('home_orders') : 'Null' ?></h5>
                                         <h3 class="text-bold-600"><?= $order_counter ?></h3>
                                     </div>
                                 </div>
@@ -28,7 +28,7 @@
                                         <i class="ion-ios-albums-outline display-4 display-4"></i>
                                     </div>
                                     <div class="media-body text-right">
-                                        <h5 class="text-muted text-bold-500">Products</h5>
+                                        <h5 class="text-muted text-bold-500"><?= !empty($this->lang->line('home_products')) ? $this->lang->line('home_products') : 'Null' ?></h5>
                                         <h3 class="text-bold-600"><?= $products ?></h3>
                                     </div>
                                 </div>
@@ -45,7 +45,7 @@
                                         <i class="ion-ios-star-outline display-4 display-4"></i>
                                     </div>
                                     <div class="media-body text-right">
-                                        <h5 class="text-muted text-bold-500">Rating</h5>
+                                        <h5 class="text-muted text-bold-500"><?= !empty($this->lang->line('home_rating')) ? $this->lang->line('home_rating') : 'Null' ?></h5>
                                         <h3 class="text-bold-600">
                                             <?= intval($ratings[0]['rating']) . "/" . $ratings[0]['no_of_ratings']; ?>
                                         </h3>
@@ -64,7 +64,7 @@
                                         <i class="ion-cash display-4"></i>
                                     </div>
                                     <div class="media-body text-right">
-                                        <h5 class="text-muted text-bold-500">Balance (<?= $curreny ?>)</h5>
+                                        <h5 class="text-muted text-bold-500"><?= !empty($this->lang->line('home_balance')) ? $this->lang->line('home_balance') : 'Null' ?> (<?= $curreny ?>)</h5>
                                         <h3 class="text-bold-600"><?= number_format($balance, 2) ?></h3>
                                     </div>
                                 </div>
@@ -74,16 +74,16 @@
                 </div>
                 <div class="col-xl-6 col-12" id="ecommerceChartView">
                     <div class="card card-shadow chart-height">
-                        <div class="m-3">Product Sales</div>
+                        <div class="m-3"><?= !empty($this->lang->line('home_product_sales')) ? $this->lang->line('home_product_sales') : 'Null' ?></div>
                         <div class="card-header card-header-transparent py-20 border-0">
                             <ul class="nav nav-pills nav-pills-rounded chart-action float-right btn-group sales-tab"
                                 role="group">
                                 <li class="nav-item"><a class="nav-link active" data-toggle="tab"
-                                        href="#scoreLineToDay">Day</a></li>
+                                        href="#scoreLineToDay"><?= !empty($this->lang->line('home_day')) ? $this->lang->line('home_day') : 'Null' ?></a></li>
                                 <li class="nav-item"><a class="nav-link" data-toggle="tab"
-                                        href="#scoreLineToWeek">Week</a></li>
+                                        href="#scoreLineToWeek"><?= !empty($this->lang->line('home_week')) ? $this->lang->line('home_week') : 'Null' ?></a></li>
                                 <li class="nav-item"><a class="nav-link" data-toggle="tab"
-                                        href="#scoreLineToMonth">Month</a></li>
+                                        href="#scoreLineToMonth"><?= !empty($this->lang->line('home_month')) ? $this->lang->line('home_month') : 'Null' ?></a></li>
                             </ul>
                         </div>
                         <div class="widget-content tab-content bg-white p-20">
@@ -96,7 +96,8 @@
                 <div class="col-md-6">
                     <!-- Category Wise Product's Sales -->
                     <div class="card ">
-                        <h3 class="card-title m-3">Category Wise Product's Count</h3>
+                        <h3 class="card-title m-3"><?= !empty($this->lang->line('home_category_wise_products_count')) ? $this->lang->line('home_category_wise_products_count') : 'Null' ?>
+                        </h3>
                         <div class="card-body">
                             <div id="piechart_3d" class='piechat_height'></div>
                         </div>
@@ -107,10 +108,10 @@
                 <div class="col-md-6 col-xs-12">
                     <div class="alert alert-danger alert-dismissible">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                        <h6><i class="icon fa fa-info"></i> <?= $count_products_availability_status ?> Product(s) sold
-                            out!</h6>
+                        <h6><i class="icon fa fa-info"></i> <?= $count_products_availability_status ?><?= !empty($this->lang->line('home_Products_sold _out')) ? $this->lang->line('home_Products_sold _out') : 'Null' ?>
+                        </h6>
                         <a href="<?= base_url('seller/product/?flag=sold') ?>"
-                            class="text-decoration-none small-box-footer">More info <i
+                            class="text-decoration-none small-box-footer"><?= !empty($this->lang->line('home_info')) ? $this->lang->line('home_info') : 'Null' ?> <i
                                 class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
@@ -118,22 +119,24 @@
                 <div class="col-md-6 col-xs-12">
                     <div class="alert alert-primary alert-dismissible">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                        <h6><i class="icon fa fa-info"></i> <?= $count_products_low_status ?> Product(s) low in
-                            stock!<small> (Low stock limit
+                        <h6><i class="icon fa fa-info"></i> <?= $count_products_low_status ?>
+                            <?= !empty($this->lang->line('home_Products_low_in_stock')) ? $this->lang->line('home_Products_low_in_stock') : 'Null' ?>
+                            <small>
+                                (<?= !empty($this->lang->line('home_low_stock_limit')) ? $this->lang->line('home_low_stock_limit') : 'Null' ?>
                                 <?= isset($settings['low_stock_limit']) ? $settings['low_stock_limit'] : '5' ?>)</small>
                         </h6>
                         <a href="<?= base_url('seller/product/?flag=low') ?>"
-                            class="text-decoration-none small-box-footer">More info <i
+                            class="text-decoration-none small-box-footer"><?= !empty($this->lang->line('home_info')) ? $this->lang->line('home_info') : 'Null' ?> <i
                                 class="fa fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
-                <h5 class="col">Order Outlines</h5>
+                <h5 class="col"><?= !empty($this->lang->line('home_Order_Outlines')) ? $this->lang->line('home_Order_Outlines') : 'Null' ?></h5>
                 <div class="row col-12 d-flex">
                     <div class="col-3">
                         <div class="small-box bg-primary">
                             <div class="inner">
                                 <h3><?= $status_counts['received'] ?></h3>
-                                <p>Received</p>
+                                <p><?= !empty($this->lang->line('home_recived')) ? $this->lang->line('home_recived') : 'Null' ?></p>
                             </div>
                             <div class="icon">
                                 <i class="fa fa-xs fa-level-down-alt"></i>
@@ -144,7 +147,7 @@
                         <div class="small-box bg-info">
                             <div class="inner">
                                 <h3><?= $status_counts['processed'] ?></h3>
-                                <p>Processed</p>
+                                <p><?= !empty($this->lang->line('home_processed')) ? $this->lang->line('home_processed') : 'Null' ?></p>
                             </div>
                             <div class="icon">
                                 <i class="fa fa-xs fa-people-carry"></i>
@@ -155,7 +158,7 @@
                         <div class="small-box details-box">
                             <div class="inner">
                                 <h3><?= $status_counts['shipped'] ?></h3>
-                                <p>Shipped</p>
+                                <p><?= !empty($this->lang->line('home_shipped')) ? $this->lang->line('home_shipped') : 'Null' ?></p>
                             </div>
                             <div class="icon">
                                 <i class="fa fa-xs fa-shipping-fast"></i>
@@ -166,7 +169,7 @@
                         <div class="small-box bg-success">
                             <div class="inner">
                                 <h3><?= $status_counts['delivered'] ?></h3>
-                                <p>Delivered</p>
+                                <p><?= !empty($this->lang->line('home_delivered')) ? $this->lang->line('home_delivered') : 'Null' ?></p>
                             </div>
                             <div class="icon">
                                 <i class="fa fa-xs fa-user-check"></i>
@@ -177,7 +180,7 @@
                         <div class="small-box bg-danger">
                             <div class="inner">
                                 <h3><?= $status_counts['cancelled'] ?></h3>
-                                <p>Cancelled</p>
+                                <p><?= !empty($this->lang->line('home_cancelled')) ? $this->lang->line('home_cancelled') : 'Null' ?></p>
                             </div>
                             <div class="icon">
                                 <i class="fa fa-xs fa-times-circle"></i>
@@ -188,7 +191,7 @@
                         <div class="small-box bg-secondary">
                             <div class="inner">
                                 <h3><?= $status_counts['returned'] ?></h3>
-                                <p>Returned</p>
+                                <p><?= !empty($this->lang->line('home_returned')) ? $this->lang->line('home_returned') : 'Null' ?></p>
                             </div>
                             <div class="icon">
                                 <i class="fa fa-xs fa-level-up-alt"></i>
@@ -202,7 +205,7 @@
                             <div class="gaps-1-5x row d-flex adjust-items-center">
                                 <div class="row col-md-12">
                                     <div class="form-group col-md-4">
-                                        <label>Date range:</label>
+                                        <label><?= !empty($this->lang->line('home_date_range')) ? $this->lang->line('home_date_range') : 'Null' ?></label>
                                         <div class="input-group col-md-12">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="far fa-clock"></i></span>
@@ -215,40 +218,62 @@
                                     </div>
                                     <div class="form-group col-md-4">
                                         <div>
-                                            <label>Filter By status</label>
+                                            <label><?= !empty($this->lang->line('home_filter_by_status')) ? $this->lang->line('home_filter_by_status') : 'Null' ?></label>
                                             <select id="order_status" name="order_status" placeholder="Select Status"
                                                 required="" class="form-control">
-                                                <option value="">All Orders</option>
-                                                <option value="received">Received</option>
-                                                <option value="processed">Processed</option>
-                                                <option value="shipped">Shipped</option>
-                                                <option value="delivered">Delivered</option>
-                                                <option value="cancelled">Cancelled</option>
-                                                <option value="returned">Returned</option>
+                                                <option value=""><?= !empty($this->lang->line('home_all_orders')) ? $this->lang->line('home_all_orders') : 'Null' ?>
+                                                </option>
+                                                <option value="received"><?= !empty($this->lang->line('home_recived')) ? $this->lang->line('home_recived') : 'Null' ?>
+                                                </option>
+                                                <option value="processed">
+                                                    <?= !empty($this->lang->line('home_processed')) ? $this->lang->line('home_processed') : 'Null' ?>
+                                                </option>
+                                                <option value="shipped"><?= !empty($this->lang->line('home_shipped')) ? $this->lang->line('home_shipped') : 'Null' ?>
+                                                </option>
+                                                <option value="delivered">
+                                                    <?= !empty($this->lang->line('home_delivered')) ? $this->lang->line('home_delivered') : 'Null' ?>
+                                                </option>
+                                                <option value="cancelled">
+                                                    <?= !empty($this->lang->line('home_cancelled')) ? $this->lang->line('home_cancelled') : 'Null' ?>d
+                                                </option>
+                                                <option value="returned"><?= !empty($this->lang->line('home_returned')) ? $this->lang->line('home_returned') : 'Null' ?>
+                                                </option>
                                             </select>
                                         </div>
                                     </div>
                                     <!-- Filter By payment  -->
                                     <div class="form-group col-md-3">
                                         <div>
-                                            <label>Filter By Payment Method</label>
+                                            <label><?= !empty($this->lang->line('home_filter_by_payment')) ? $this->lang->line('home_filter_by_payment') : 'Null' ?></label>
                                             <select id="payment_method" name="payment_method"
                                                 placeholder="Select Payment Method" required="" class="form-control">
-                                                <option value="">All Payment Methods</option>
-                                                <option value="COD">Cash On Delivery</option>
-                                                <option value="Paypal">Paypal</option>
-                                                <option value="RazorPay">RazorPay</option>
-                                                <option value="Paystack">Paystack</option>
-                                                <option value="Flutterwave">Flutterwave</option>`
-                                                <option value="Paytm">Paytm</option>
-                                                <option value="Stripe">Stripe</option>
-                                                <option value="bank_transfer">Direct Bank Transfers</option>
+                                                <option value=""><?= !empty($this->lang->line('home_all_payment_methods')) ? $this->lang->line('home_all_payment_methods') : 'Null' ?>
+                                                </option>
+                                                <option value="COD">
+                                                    <?= !empty($this->lang->line('home_Cash_on_delivery')) ? $this->lang->line('home_Cash_on_delivery') : 'Null' ?>
+                                                </option>
+                                                <option value="Paypal"><?= !empty($this->lang->line('home_paypal')) ? $this->lang->line('home_paypal') : 'Null' ?>
+                                                </option>
+                                                <option value="RazorPay">
+                                                    <?= !empty($this->lang->line('home_razor_pay')) ? $this->lang->line('home_razor_pay') : 'Null' ?>
+                                                </option>
+                                                <option value="Paystack"><?= !empty($this->lang->line('home_paystack')) ? $this->lang->line('home_paystack') : 'Null' ?>
+                                                </option>
+                                                <option value="Flutterwave">
+                                                    <?= !empty($this->lang->line('home_flutterwave')) ? $this->lang->line('home_flutterwave') : 'Null' ?>
+                                                </option>`
+                                                <option value="Paytm"><?= !empty($this->lang->line('home_paytm')) ? $this->lang->line('home_paytm') : 'Null' ?></option>
+                                                <option value="Stripe"><?= !empty($this->lang->line('home_stripe')) ? $this->lang->line('home_stripe') : 'Null' ?>
+                                                </option>
+                                                <option value="bank_transfer">
+                                                    <?= !empty($this->lang->line('home_Direct_bank_transfers')) ? $this->lang->line('home_Direct_bank_transfers') : 'Null' ?>
+                                                </option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="form-group col-md-1 d-flex align-items-center pt-4">
                                         <button type="button" class="btn btn-outline-primary btn-sm"
-                                            onclick="status_date_wise_search()">Filter</button>
+                                            onclick="status_date_wise_search()"><?= !empty($this->lang->line('home_filter')) ? $this->lang->line('home_filter') : 'Null' ?></button>
                                     </div>
                                 </div>
                             </div>
@@ -265,39 +290,61 @@
                                 <thead>
                                     <tr>
                                         <th data-field="id" data-sortable='true' data-footer-formatter="totalFormatter">
-                                            ID</th>
-                                        <th data-field="order_item_id" data-sortable='true'>Order Item ID</th>
-                                        <th data-field="order_id" data-sortable='true'>Order ID</th>
-                                        <th data-field="user_id" data-sortable='true' data-visible="false">User ID</th>
-                                        <th data-field="seller_id" data-sortable='true' data-visible="false">Seller ID
+                                        <?= !empty($this->lang->line('home_id')) ? $this->lang->line('home_id') : 'Null' ?></th>
+                                        <th data-field="order_item_id" data-sortable='true'>
+                                            <?= !empty($this->lang->line('home_order_item_id')) ? $this->lang->line('home_order_item_id') : 'Null' ?>
+                                        </th>
+                                        <th data-field="order_id" data-sortable='true'>
+                                            <?= !empty($this->lang->line('home_order_id')) ? $this->lang->line('home_order_id') : 'Null' ?>
+                                        </th>
+                                        <th data-field="user_id" data-sortable='true' data-visible="false">
+                                            <?= !empty($this->lang->line('home_user_id')) ? $this->lang->line('home_user_id') : 'Null' ?>
+                                        </th>
+                                        <th data-field="seller_id" data-sortable='true' data-visible="false">
+                                            <?= !empty($this->lang->line('home_seller_id')) ? $this->lang->line('home_seller_id') : 'Null' ?>
                                         </th>
                                         <th data-field="is_credited" data-sortable='true' data-visible="false">
-                                            Commission</th>
-                                        <th data-field="quantity" data-sortable='true' data-visible="false">Quantity
+                                        <?= !empty($this->lang->line('home_comission')) ? $this->lang->line('home_comission') : 'Null' ?></th>
+                                        <th data-field="quantity" data-sortable='true' data-visible="false">
+                                            <?= !empty($this->lang->line('home_quanty')) ? $this->lang->line('home_quanty') : 'Null' ?>
                                         </th>
-                                        <th data-field="username" data-sortable='true'>User Name</th>
-                                        <th data-field="seller_name" data-sortable='true'>Seller Name</th>
-                                        <th data-field="product_name" data-sortable='true'>Product Name</th>
-                                        <th data-field="mobile" data-sortable='true'>Mobile</th>
+                                        <th data-field="username" data-sortable='true'><?= !empty($this->lang->line('home_user_name')) ? $this->lang->line('home_user_name') : 'Null' ?></th>
+                                        <th data-field="seller_name" data-sortable='true'>
+                                            <?= !empty($this->lang->line('home_seller_name')) ? $this->lang->line('home_seller_name') : 'Null' ?>
+                                        </th>
+                                        <th data-field="product_name" data-sortable='true'>
+                                            <?= !empty($this->lang->line('home_product_name')) ? $this->lang->line('home_product_name') : 'Null' ?>
+                                        </th>
+                                        <th data-field="mobile" data-sortable='true'>
+                                            <?= !empty($this->lang->line('home_mobile')) ? $this->lang->line('home_mobile') : 'Null' ?>
+                                        </th>
                                         <th data-field="sub_total" data-sortable='true' data-visible="true">
                                             Total(<?= $curreny ?>)</th>
                                         <th data-field="payment_method" data-sortable='true' data-visible='false'>
-                                            Payment Method</th>
-                                        <th data-field="delivery_boy" data-sortable='true' data-visible='false'>Deliver
-                                            By</th>
+                                        <?= !empty($this->lang->line('home_all_payment_methods')) ? $this->lang->line('home_all_payment_methods') : 'Null' ?>
+                                        </th>
+                                        <th data-field="delivery_boy" data-sortable='true' data-visible='false'>
+                                            <?= !empty($this->lang->line('home_delivery')) ? $this->lang->line('home_delivery') : 'Null' ?>
+                                        </th>
                                         <th data-field="delivery_boy_id" data-sortable='true' data-visible='false'>
-                                            Delivery Boy Id</th>
+                                        <?= !empty($this->lang->line('home_delivery_boy_id')) ? $this->lang->line('home_delivery_boy_id') : 'Null' ?></th>
                                         <th data-field="product_variant_id" data-sortable='true' data-visible='false'>
-                                            Product Variant Id</th>
+                                        <?= !empty($this->lang->line('home_Product_Variant_Id')) ? $this->lang->line('home_Product_Variant_Id') : 'Null' ?></th>
                                         <th data-field="delivery_date" data-sortable='true' data-visible='false'>
-                                            Delivery Date</th>
+                                        <?= !empty($this->lang->line('home_delivery_date')) ? $this->lang->line('home_delivery_date') : 'Null' ?></th>
                                         <th data-field="delivery_time" data-sortable='true' data-visible='false'>
-                                            Delivery Time</th>
-                                        <th data-field="status" data-sortable='true' data-visible='false'>Status</th>
-                                        <th data-field="active_status" data-sortable='true' data-visible='true'>Active
-                                            Status</th>
-                                        <th data-field="date_added" data-sortable='true'>Order Date</th>
-                                        <th data-field="operate">Action</th>
+                                        <?= !empty($this->lang->line('home_delivery_time')) ? $this->lang->line('home_delivery_time') : 'Null' ?></th>
+                                        <th data-field="status" data-sortable='true' data-visible='false'>
+                                            <?= !empty($this->lang->line('home_status')) ? $this->lang->line('home_status') : 'Null' ?>
+                                        </th>
+                                        <th data-field="active_status" data-sortable='true' data-visible='true'>
+                                            <?= !empty($this->lang->line('home_active_status')) ? $this->lang->line('home_active_status') : 'Null' ?>
+                                        </th>
+                                        <th data-field="date_added" data-sortable='true'>
+                                            <?= !empty($this->lang->line('home_order_date')) ? $this->lang->line('home_order_date') : 'Null' ?>
+                                        </th>
+                                        <th data-field="operate"><?= !empty($this->lang->line('home_action')) ? $this->lang->line('home_action') : 'Null' ?>
+                                        </th>
                                     </tr>
                                 </thead>
                             </table>
@@ -312,7 +359,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="user_name">Order Tracking</h5>
+                    <h5 class="modal-title" id="user_name"><?= !empty($this->lang->line('home_order_tracking')) ? $this->lang->line('home_order_tracking') : 'Null' ?></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -322,30 +369,30 @@
                         <div class="col-md-12">
                             <div class="card card-info">
                                 <!-- form start -->
-                                <form class="form-horizontal " id="order_tracking_form"
+                                <form class="form-horizontal" id="order_tracking_form"
                                     action="<?= base_url('seller/orders/update-order-tracking/'); ?>" method="POST"
                                     enctype="multipart/form-data">
                                     <input type="hidden" name="order_id" id="order_id">
                                     <input type="hidden" name="order_item_id" id="order_item_id">
                                     <div class="card-body pad">
                                         <div class="form-group ">
-                                            <label for="courier_agency">Courier Agency</label>
+                                            <label for="courier_agency"><?= !empty($this->lang->line('home_courier_agency')) ? $this->lang->line('home_courier_agency') : 'Null' ?></label>
                                             <input type="text" class="form-control" name="courier_agency"
-                                                id="courier_agency" placeholder="Courier Agency" />
+                                                id="courier_agency" placeholder="<?= !empty($this->lang->line('home_courier_agency')) ? $this->lang->line('home_courier_agency') : 'Null' ?>" />
                                         </div>
                                         <div class="form-group ">
-                                            <label for="tracking_id">Tracking Id</label>
+                                            <label for="tracking_id"><?= !empty($this->lang->line('home_tracking_id')) ? $this->lang->line('home_tracking_id') : 'Null' ?></label>
                                             <input type="text" class="form-control" name="tracking_id" id="tracking_id"
-                                                placeholder="Tracking Id" />
+                                                placeholder="<?= !empty($this->lang->line('home_tracking_id')) ? $this->lang->line('home_tracking_id') : 'Null' ?>" />
                                         </div>
                                         <div class="form-group ">
-                                            <label for="url">URL</label>
+                                            <label for="url"><?= !empty($this->lang->line('home_url')) ? $this->lang->line('home_url') : 'Null' ?></label>
                                             <input type="text" class="form-control" name="url" id="url"
-                                                placeholder="URL" />
+                                                placeholder="<?= !empty($this->lang->line('home_url')) ? $this->lang->line('home_url') : 'Null' ?>" />
                                         </div>
                                         <div class="form-group">
-                                            <button type="reset" class="btn btn-warning">Reset</button>
-                                            <button type="submit" class="btn btn-success" id="submit_btn">Save</button>
+                                            <button type="reset" class="btn btn-warning"><?= !empty($this->lang->line('home_reset')) ? $this->lang->line('home_reset') : 'Null' ?></button>
+                                            <button type="submit" class="btn btn-success" id="submit_btn"><?= !empty($this->lang->line('home_save')) ? $this->lang->line('home_save') : 'Null' ?></button>
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-center">
