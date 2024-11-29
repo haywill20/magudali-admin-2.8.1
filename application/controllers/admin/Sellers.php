@@ -12,6 +12,8 @@ class Sellers extends CI_Controller
         $this->load->library(['ion_auth', 'form_validation', 'upload']);
         $this->load->helper(['url', 'language', 'file']);
         $this->load->model('Seller_model');
+        $this->data['firebase_project_id'] = get_settings('firebase_project_id');
+        $this->data['service_account_file'] = get_settings('service_account_file');
         if (!has_permissions('read', 'seller')) {
             $this->session->set_flashdata('authorize_flag', PERMISSION_ERROR_MSG);
             redirect('admin/home', 'refresh');
@@ -583,22 +585,26 @@ class Sellers extends CI_Controller
                         $seller_fcm = fetch_details('users', ['id' => $this->input->post('edit_seller')], 'fcm_id,email,username');
                         $seller_fcm_id[0] = $seller_fcm[0]['fcm_id'];
 
-                        $registrationIDs_chunks = array_chunk($seller_fcm_id, 1000);
 
-                        if (!empty($seller_fcm_id)) {
+                        $registrationIDs_chunks = array_chunk($seller_fcm_id, 1000);
+                        $firebase_project_id = $this->data['firebase_project_id'];
+                        $service_account_file = $this->data['service_account_file'];
+                        if (!empty($seller_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                             $fcmMsg = array(
                                 'title' => $title,
                                 'body' => $fcm_admin_msg,
                                 'type' => "seller_account_update",
                                 'content_available' => true
                             );
-                            send_notification($fcmMsg, $registrationIDs_chunks);
+                            send_notification($fcmMsg, $registrationIDs_chunks,$fcmMsg);
                         }
                         $email_message = array(
                             'username' => 'Hello, Dear <b>' . ucfirst($seller_fcm[0]['username']) . '</b>, ',
                             'subject' => $title,
+                            'email' => $seller_fcm[0]['email'],
                             'message' => $mail_admin_msg
                         );
+                        send_mail($seller_fcm[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
                         // send_mail($seller_fcm[0]['email'],  $title, $this->load->view('admin/pages/view/contact-email-template', $email_message, TRUE));
                     }
                     $seller_data = array(

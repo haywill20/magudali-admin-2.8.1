@@ -2,21 +2,124 @@
 
 
 //Login web seller tags
-$lang['login'] = "Iniciar Sesión";
-$lang['login_details'] = "Ingrese los datos de su cuenta";
-$lang['login_mobile_label'] = "Teléfono";
-$lang['login_mobile_placeholder'] = "Ingrese su número de teléfono";
-$lang['login_password_label'] = "Contraseña";
-$lang['login_password_placeholder'] = "Ingrese su contraseña";
-$lang['login_forgot_password'] = "Olvidé Mi Contraseña";
-$lang['login_remember_me'] = "Recordar";
-$lang['login_already_have_account'] = "¿Ya tienes cuenta de usuario en";
-$lang['login_no_account'] = "¿No tienes ninguna cuenta?";
+$lang['login']                          = "Iniciar Sesión";
+$lang['login_details']                  = "Ingrese los datos de su cuenta";
+$lang['login_mobile_label']             = "Teléfono";
+$lang['login_mobile_placeholder']       = "Ingrese su número de teléfono";
+$lang['login_password_label']           = "Contraseña";
+$lang['login_password_placeholder']     = "Ingrese su contraseña";
+$lang['login_forgot_password']          = "Olvidé Mi Contraseña";
+$lang['login_remember_me']              = "Recordar";
+$lang['login_already_have_account']     = "¿Ya tienes cuenta de usuario en";
+$lang['login_no_account']               = "¿No tienes ninguna cuenta?";
+
+// Seller include-sidebar
+$lang['sidebar_home']                       = 'Inicio';
+$lang['sidebar_orders']                     = 'Pedidos';
+$lang['sidebar_orders_tracking']            = 'Ratreo de pedidos';
+$lang['sidebar_categories']                 = 'Categorías';
+$lang['sidebar_point_of_sale']              = 'Punto de Venta';
+$lang['sidebar_manage_stock']               = 'Administrar Stock';
+$lang['sidebar_chat']                       = 'Chat';
+$lang['sidebar_products']                   = 'Productos';
+$lang['sidebar_attribute_sets']             = 'Conjunto de Atributos';
+$lang['sidebar_attributes']                 = 'Atributos';
+$lang['sidebar_attributes_values']          = 'Valores de Atributos';
+$lang['sidebar_tax']                        = 'Impuestos';
+$lang['sidebar_add_products']               = 'Agregar Productos';
+$lang['sidebar_bulk_upload']                = 'Carga Masiva';
+$lang['sidebar_manage_products']            = 'Administrar Productos';
+$lang['sidebar_products_faqs']              = 'Productos FAQS';
+$lang['sidebar_media']                      = 'Medios';
+$lang['sidebar_wallet_transactions']        = 'Billetera';
+$lang['sidebar_withdrawal_requests']        = 'Solicitudes de Retiro';
+$lang['sidebar_pickup_location']            = 'Ubicación de Recogida';
+$lang['sidebar_location']                   = 'Ubicación';
+$lang['sidebar_zipcodes']                   = 'Codigos Postales';
+$lang['sidebar_city']                       = 'Ciudad';
+$lang['sidebar_areas']                      = 'Areas';
+$lang['sidebar_countries']                  = 'Paises';
+$lang['sidebar_reports']                    = 'Reportes';
+$lang['sidebar_sales_report']               = 'Informe de Ventas';
+$lang['sidebar_sales_inventory_reports']    = 'Informe de Inventario';
+
+//home
+$lang['home_orders']                        = 'Pedidos';
+$lang['home_products']                      = 'Productos';
+$lang['home_rating']                        = 'Calificación';
+$lang['home_balance']                       = 'Ingresos';
+$lang['home_product_sales']                 = 'Venta de Productos';
+$lang['home_day']                           = 'Dia';
+$lang['home_week']                          = 'Semana';
+$lang['home_month']                         = 'Mes';
+$lang['home_category_wise_products_count']  = 'Recuento de productos por categoría';
+$lang['home_Products_sold _out']            = ' Productos agotados';
+$lang['home_info']                          = 'Más información ';
+$lang['home_Products_low_in_stock']         = 'Productos con poca exitencias';
+$lang['home_low_stock_limit']               = 'Limite Bajo:';
+$lang['home_Order_Outlines']                = 'Esquemas de pedidos';
+
+//List of payment methods
+$lang['cash_on_delivery']                   = 'Pago en Entrega';
+$lang['paypal']                             = 'Paypal';
+$lang['razor_pay']                          = 'RazorPay';
+$lang['paystack']                           = 'PayStack';
+$lang['flutterwave']                        = 'Flutterwave';
+$lang['paytm']                              = 'Paytm';
+$lang['stripe']                             = 'Stripe';
+$lang['direct_bank_transfers']              = 'Transferencia Bancaria';
+
+//buttons
+$lang['reset']                              = 'Reiniciar';
+$lang['save']                               = 'Guardar';
+
+//order tracking
+$lang['order_tracking']                     = 'Seguimiento de Pedidos';
+$lang['courier_agency']                     = 'Agencia de mensajería';
+$lang['tracking_id']                        = 'ID de seguimiento';
+$lang['url']                                = 'URL';
 
 
+//filters
+$lang['date_range']                         = 'Rango de Fechas:';
+$lang['filter_by_status']                   = 'Filtrar por estado:';
+$lang['filter_by_payment']                  = 'Filtrar por metodo de pago';
+$lang['all_payment_methods']                = 'Todos los Metodo de Pago';
+$lang['button_filter']                      = 'Filtrar';
 
+//List states
+$lang['all_orders']                         = 'Todos los Estados';
+$lang['recived']                            = 'Recibido';
+$lang['processed']                          = 'Procesado';
+$lang['shipped']                            = 'Enviado';
+$lang['delivered']                          = 'Entregado';
+$lang['cancelled']                          = 'Cancelado';
+$lang['returned']                           = 'Devuelto';
 
-
+//tables
+$lang['id']                                 = 'ID';
+$lang['order_item_id']                      = 'ID Artículo Pedido';
+$lang['order_id']                           = 'ID Pedido';
+$lang['user_id']                            = 'ID Usuario';
+$lang['seller_id']                          = 'ID Vendedor';
+$lang['comission']                          = 'Comisión';
+$lang['quanty']                             = 'Cantidad';
+$lang['user_name']                          = 'Nombre de Usuario';
+$lang['seller_name']                        = 'Nombre del Vendedor';
+$lang['quanty']                             = 'Cantidad';
+$lang['product_name']                       = 'Nombre del Producto';
+$lang['mobile']                             = 'Telefono';
+$lang['total']                              = 'Total';
+$lang['payment_methods']                    = "Método De Pago";
+$lang['delivered_by']                       = "Entregado por";
+$lang['delivery_boy_id']                    = 'ID Repartidor';
+$lang['product_Variant_Id']                 = 'ID Variante del Producto';
+$lang['delivery_date']                      = 'Fecha de la entrega';
+$lang['delivery_time']                      = 'Tiempo de la entrega';
+$lang['status']                             = 'Estado';
+$lang['active_status']                      = 'Estado activo';
+$lang['order_date']                         = 'Fecha del pedido';
+$lang['action']                             = 'Acción';
 
 $lang['language_id'] = "8";
 $lang['menu'] = "Menu";

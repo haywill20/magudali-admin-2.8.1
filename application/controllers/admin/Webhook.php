@@ -4,6 +4,8 @@ class Webhook extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->data['firebase_project_id'] = get_settings('firebase_project_id');
+        $this->data['service_account_file'] = get_settings('service_account_file');
     }
 
     public function razorpay()
@@ -183,14 +185,16 @@ class Webhook extends CI_Controller
                             $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
                             $user_fcm = fetch_details('users', ['id' => $user_id], 'fcm_id,mobile,email');
                             $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
-                            if (!empty($user_fcm_id)) {
+                            $firebase_project_id = $this->data['firebase_project_id'];
+                            $service_account_file = $this->data['service_account_file'];
+                            if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                                 $fcmMsg = array(
                                     'title' => $fcm_admin_subject,
                                     'body' => $fcm_admin_msg,
                                     'type' => "place_order",
                                     'content_available' => true
                                 );
-                                send_notification($fcmMsg, $user_fcm_id);
+                                send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
                             }
                             notify_event(
                                 'place_order',
@@ -503,16 +507,18 @@ class Webhook extends CI_Controller
 
                                 $fcm_admin_subject = (!empty($custom_notification)) ? $title : 'New order placed ID #' . $order_id;
                                 $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
-                                $user_fcm = fetch_details('users', ['id' => $user_id], 'fcm_id.mobile,email');
+                                $user_fcm = fetch_details('users', ['id' => $user_id], 'fcm_id,mobile,email');
                                 $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
-                                if (!empty($user_fcm_id)) {
+                                $firebase_project_id = $this->data['firebase_project_id'];
+                                $service_account_file = $this->data['service_account_file'];
+                                if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                                     $fcmMsg = array(
                                         'title' => $fcm_admin_subject,
                                         'body' => $fcm_admin_msg,
                                         'type' => "place_order",
                                         'content_available' => true,
                                     );
-                                    send_notification($fcmMsg, $user_fcm_id);
+                                    send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
                                 }
                                 notify_event(
                                     'place_order',
@@ -837,14 +843,16 @@ class Webhook extends CI_Controller
                         $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
                         $user_fcm = fetch_details('users', ['id' => $user_id], 'fcm_id,mobile,email');
                         $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
-                        if (!empty($user_fcm_id)) {
+                        $firebase_project_id = $this->data['firebase_project_id'];
+                        $service_account_file = $this->data['service_account_file'];
+                        if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                             $fcmMsg = array(
                                 'title' => $fcm_admin_subject,
                                 'body' => $fcm_admin_msg,
                                 'type' => "place_order",
                                 'content_available' => true
                             );
-                            send_notification($fcmMsg, $user_fcm_id);
+                            send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
                         }
                         notify_event(
                             'place_order',

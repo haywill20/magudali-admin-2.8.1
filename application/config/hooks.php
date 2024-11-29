@@ -64,6 +64,18 @@ $hook['post_controller_constructor'][] = array(
     'filename' => 'MyConfig.php',
     'filepath' => 'hooks'
 );
+$hook['post_controller_constructor'][] = array(
+    'class'    => 'MyConfig',
+    'function' => 'verify_web_doctor_brown',
+    'filename' => 'MyConfig.php',
+    'filepath' => 'hooks'
+);
+$hook['post_controller_constructor'][] = array(
+    'class'    => 'MyConfig',
+    'function' => 'maintenance_mode_web',
+    'filename' => 'MyConfig.php',
+    'filepath' => 'hooks'
+);
 
 $hook['post_controller_constructor'][] = array(
     'class'    => 'MyConfig',

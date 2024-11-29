@@ -496,7 +496,6 @@ Defined Methods:-
 
     public function send_msg()
     {
-
         /*
             type : person {person / group}
             from_id : 1 // current user id
@@ -512,8 +511,7 @@ Defined Methods:-
         $this->form_validation->set_rules('type', 'Type', 'trim|required|xss_clean');
         $this->form_validation->set_rules('from_id', 'From Id', 'trim|numeric|required|xss_clean');
         $this->form_validation->set_rules('to_id', 'To Id', 'trim|numeric|required|xss_clean');
-        $this->form_validation->set_rules('message', 'Message', 'trim|xss_clean');
-        $this->form_validation->set_rules('message', 'Message', 'trim|xss_clean');
+        $this->form_validation->set_rules('message', 'Message', 'trim|required|xss_clean');
         $this->form_validation->set_rules('documents', 'documents', 'trim|xss_clean');
 
 
@@ -632,10 +630,17 @@ Defined Methods:-
                 foreach ($messages as $row) {
                     $message[$i] = $row;
                     $media_files = $this->chat_model->get_media($row['id']);
+                    // if (isset($media_files) && !empty($media_files)) {
+                    //     $file_extention = explode('.', $media_files[0]['original_file_name']);
+                    //     $media_files[0]['file_extension'] = end($file_extention);
+                    //     $media_files[0]['file_url'] = base_url('uploads/chat_media/' . $media_files[0]['original_file_name']);
+                    // }
                     if (isset($media_files) && !empty($media_files)) {
-                        $file_extention = explode('.', $media_files[0]['original_file_name']);
-                        $media_files[0]['file_extension'] = end($file_extention);
-                        $media_files[0]['file_url'] = base_url('uploads/chat_media/' . $media_files[0]['original_file_name']);
+                        for ($j = 0; $j < count($media_files); $j++) {
+                            $file_extention = explode('.', $media_files[$j]['original_file_name']);
+                            $media_files[$j]['file_extension'] = end($file_extention);
+                            $media_files[$j]['file_url'] = base_url('uploads/chat_media/' . $media_files[$j]['original_file_name']);
+                        }
                     }
                     $message[$i]['media_files'] = !empty($media_files) ? $media_files : [];
                     $message[$i]['text'] = $row['message'];
@@ -647,6 +652,8 @@ Defined Methods:-
 
                     $to_id = $to_id;
                     $from_id = $from_id;
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
 
                     // if ($to_id == $from_id && $this->input->post('chat_type') == 'person') {
                     //     return false;
@@ -708,12 +715,16 @@ Defined Methods:-
                             'title' => $fcm_admin_subject,
                             'body' => $this->input->post('message'),
                             'type' => "chat",
-                            'message' => ($new_msg),
-                            'content_available' => true
+                            'message' => json_encode($new_msg),
+                            'content_available' => 'true'
                         );
+                        // print_r($_POST);
+                        // print_r($this->input->post('message'));
+                        // print_r($fcmMsg);
                         $registrationIDs_chunks = array_chunk($registrationIDs, 1000);
-                        $fcmFields = send_notification($fcmMsg, $registrationIDs);
-
+                        if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                            $fcmFields = send_notification($fcmMsg, $registrationIDs, $fcmMsg);
+                        }
                         $ch = curl_init();
                         $fcm_key = get_settings('fcm_server_key');
 
@@ -734,89 +745,6 @@ Defined Methods:-
                         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
                         $result['error'] = false;
-                        $result['response'] = curl_exec($ch);
-                        if (curl_errno($ch))
-                            echo 'Error:' . curl_error($ch);
-
-                        curl_close($ch);
-                    } else {
-
-                        // group user msg
-                        $group_id = $to_id;
-
-                        $users = $this->chat_model->get_group_members($group_id);
-                        foreach ($users as $user) {
-                            // $userdata = $this->users_model->get_user_by_id($user['user_id']);
-                            $userdata = fetch_details('users', ['active' => 1, 'id' => $user['user_id']]);
-
-                            if ($user['user_id'] != $from_id) {
-                                $fcm_ids[][] = $userdata[0]['fcm_id'];
-                            }
-                        }
-
-                        $registrationIDs = $fcm_ids;
-
-
-                        // this is the user who going to send FCM msg
-                        // $senders_info = $this->users_model->get_user_by_id($this->session->userdata('user_id'));
-                        $senders_info = fetch_details('users', ['active' => 1, 'id' => $from_id]);
-
-                        $data = $notification = array();
-                        $notification['title'] = '#' . $users[0]['title'] . ' - ' . $senders_info[0]['username'];
-                        // $notification['picture'] = mb_substr($senders_info[0]['first_name'], 0, 1) . '' . mb_substr($senders_info[0]['last_name'], 0, 1);
-
-                        // $notification['profile'] = !empty($senders_info[0]['profile']) ? $senders_info[0]['profile'] : '';
-
-                        $notification['senders_name'] = $senders_info[0]['username'];
-                        $notification['type'] = 'message';
-                        $notification['message_type'] = 'group';
-                        $notification['from_id'] = $from_id;
-                        $notification['to_id'] = $group_id;
-                        $notification['msg_id'] = $msg_id;
-                        $notification['registrationIDs'] = $registrationIDs;
-                        $notification['new_msg'] = json_encode($new_msg);
-                        $notification['body'] = $this->input->post('chat-input-textarea');
-                        // $notification['icon'] = 'assets/icons/' . (!empty(get_half_logo()) ? get_half_logo() : 'logo-half.png');
-                        $notification['base_url'] = base_url('chat');
-                        $data['data']['data'] = $notification;
-                        $data['data']['webpush']['fcm_options']['link'] = base_url('chat');
-                        $data['registration_ids'] = $registrationIDs;
-
-                        //send notification to members
-
-                        $fcm_admin_subject = 'New Message from' . $senders_info[0]['username'];
-                        $fcmMsg = array(
-                            'title' => $fcm_admin_subject,
-                            'body' => $this->input->post('message'),
-                            'type' => "chat",
-                            'message' => json_encode($new_msg),
-                            'content_available' => true
-                        );
-                        $fcmFields = send_notification($fcmMsg, $registrationIDs);
-
-                        $ch = curl_init();
-                        $fcm_key = get_settings('firebase_settings');
-
-                        $fcm_key = !empty($fcm_key) ? json_decode($fcm_key) : '';
-
-                        $fcm_key = !empty($fcm_key->fcm_server_key) ? $fcm_key->fcm_server_key : '';
-
-                        curl_setopt($ch, CURLOPT_POST, 1);
-                        $headers = array();
-                        $headers[] = "Authorization: key = " . $fcm_key;
-
-                        $headers[] = "Content-Type: application/json";
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-                        curl_setopt($ch, CURLOPT_URL, "https://fcm.googleapis.com/fcm/send");
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-                        $result['error'] = false;
-
-                        $this->chat_model->set_group_msg_as_unread($group_id, $from_id);
-
                         $result['response'] = curl_exec($ch);
                         if (curl_errno($ch))
                             echo 'Error:' . curl_error($ch);

@@ -432,7 +432,7 @@ Defined Methods:-
                         );
 
                         $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                        send_notification($fcmMsg, $fcm_ids);
+                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                     }
                     notify_event(
                         $type['type'],
@@ -569,7 +569,7 @@ Defined Methods:-
                 $this->response['data'] = array();
             }
         }
-        print_r(json_encode("$this->response"));
+        print_r(json_encode($this->response));
     }
 
     // 6.get_customers
@@ -1188,7 +1188,7 @@ Defined Methods:-
                             'chat' => json_encode($result['data']),
                             'content_available' => true
                         );
-                        send_notification($fcmMsg, $fcm_ids);
+                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                     }
                 }
                 $this->response['error'] = false;
@@ -1291,7 +1291,7 @@ Defined Methods:-
                             'type' => "ticket_status",
                             'type_id' => $ticket_id
                         );
-                        send_notification($fcmMsg, $fcm_ids);
+                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                     }
                 }
                 $this->response['error'] = false;
@@ -1690,7 +1690,7 @@ Defined Methods:-
                     ["customer" => [$user[0]['email']]],
                     ["customer" => [$user[0]['mobile']]],
                     ["orders.id" => $order_id]
-                    
+
                 );
                 $fcm_ids[0][] = $user[0]['fcm_id'];
                 if (!empty($fcm_ids)) {
@@ -1699,10 +1699,10 @@ Defined Methods:-
                         'body' =>  $customer_msg,
                         'type' => "order"
                     );
-                    send_notification($fcmMsg, $fcm_ids);
+                    send_notification($fcmMsg, $fcm_ids, $fcmMsg);
                 }
                 $this->response['error'] = false;
-                $this->response['message'] = 'Updtated Successfully';
+                $this->response['message'] = 'Updated Successfully';
             } else {
                 $this->response['error'] = true;
                 $this->response['message'] = 'Something went wrong';

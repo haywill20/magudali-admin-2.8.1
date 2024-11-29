@@ -1918,8 +1918,7 @@ Defined Methods:-
                 return;
             }
 
-            if ($auth_settings['
-            '] == "firebase") {
+            if ($auth_settings['authentication_method'] == "firebase") {
                 $this->response['error'] = false;
                 $this->response['message'] = 'Ready to sent OTP request from firebase!';
                 $this->response['data'] = array();
@@ -3142,6 +3141,8 @@ Defined Methods:-
                     /* IPN for normal Order  */
                     // Insert the transaction data in the database
                     $userData = explode('|', $paypalInfo['custom']);
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
 
                     $data['transaction_type'] = 'Transaction';
                     $data['user_id'] = $userData[0];
@@ -3209,21 +3210,21 @@ Defined Methods:-
                         $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
                         $user_fcm = fetch_details('users', ['id' => $data['user_id']], 'fcm_id');
                         $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
-                        if (!empty($user_fcm_id)) {
+                        if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                             $fcmMsg = array(
                                 'title' => $fcm_admin_subject,
                                 'body' => $fcm_admin_msg,
                                 'type' => "place_order",
                                 'content_available' => true
                             );
-                            send_notification($fcmMsg, $user_fcm_id);
+                            send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
                         }
-                        notify_event(
-                            $type['type'],
-                            ["customer" => [$user_res[0]['email']]],
-                            ["customer" => [$user_res[0]['mobile']]],
-                            ["orders.id" => $order_id]
-                        );
+                        // notify_event(
+                        //     'place_order',
+                        //     ["customer" => [$user_res[0]['email']]],
+                        //     ["customer" => [$user_res[0]['mobile']]],
+                        //     ["orders.id" => $order_id]
+                        // );
                     } else if (
                         $paypalInfo["payment_status"] == 'Expired' || $paypalInfo["payment_status"] == 'Failed'
                         || $paypalInfo["payment_status"] == 'Refunded' || $paypalInfo["payment_status"] == 'Reversed'
@@ -3572,6 +3573,8 @@ Defined Methods:-
                     } else {
                         /* process the order and mark it as received */
                         $order = fetch_orders($order_id, false, false, false, false, false, false, false);
+                        $firebase_project_id = get_settings('firebase_project_id');
+                        $service_account_file = get_settings('service_account_file');
                         if (isset($order['order_data'][0]['user_id'])) {
                             $user = fetch_details('users', ['id' => $order['order_data'][0]['user_id']]);
                             $overall_total = array(
@@ -3640,17 +3643,17 @@ Defined Methods:-
                             $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
                             $user_fcm = fetch_details('users', ['id' => $user_id], 'fcm_id');
                             $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
-                            if (!empty($user_fcm_id)) {
+                            if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                                 $fcmMsg = array(
                                     'title' => $fcm_admin_subject,
                                     'body' => $fcm_admin_msg,
                                     'type' => "place_order",
                                     'content_available' => true
                                 );
-                                send_notification($fcmMsg, $user_fcm_id);
+                                send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
                             }
                             notify_event(
-                                $type['type'],
+                                'place_order',
                                 ["customer" => [$user[0]['email']]],
                                 ["customer" => [$user[0]['mobile']]],
                                 ["orders.id" => $order_id]
@@ -3750,6 +3753,7 @@ Defined Methods:-
             exit();
         }
     }
+
 
     public function transactions()
     {
@@ -4396,13 +4400,11 @@ Defined Methods:-
             message:test	
             attachments[]:files  {optional} {type allowed -> image,video,document,spreadsheet,archive}
         */
-
         if (!$this->verify_token()) {
             return false;
         }
 
         $this->form_validation->set_rules('user_type', 'User Type', 'trim|required|xss_clean');
-        $this->form_validation->set_rules('user_id', 'User id', 'trim|required|numeric|xss_clean');
         $this->form_validation->set_rules('ticket_id', 'Ticket id', 'trim|required|numeric|xss_clean');
 
         if (!$this->form_validation->run()) {
@@ -4411,7 +4413,7 @@ Defined Methods:-
             $this->response['data'] = array();
         } else {
             $user_type = $this->input->post('user_type', true);
-            $user_id = $this->input->post('user_id', true);
+            $user_id = isset($this->user_details['id']) && $this->user_details['id'] !== null ? $this->user_details['id'] : '';
             $ticket_id = $this->input->post('ticket_id', true);
             $message = (isset($_POST['message']) && !empty(trim($_POST['message']))) ? $this->input->post('message', true) : "";
 
@@ -4499,37 +4501,40 @@ Defined Methods:-
             }
             $insert_id = $this->ticket_model->add_ticket_message($data);
             $app_settings = get_settings('system_settings', true);
+            $firebase_project_id = get_settings('firebase_project_id');
+            $service_account_file = get_settings('service_account_file');
             if (!empty($insert_id)) {
                 $data1 = $this->config->item('type');
                 $result = $this->ticket_model->get_messages($ticket_id, $user_id, "", "", "1", "", "", $data1, $insert_id);
-                if (!empty($result)) {
-                    //custom message
-                    $settings = get_settings('system_settings', true);
-                    $user_roles = fetch_details("user_permissions", "", '*', '', '', '', '');
-                    foreach ($user_roles as $user) {
-                        $user_res = fetch_details('users', ['id' => $user['user_id']], 'fcm_id');
-                        $fcm_ids[0][] = $user_res[0]['fcm_id'];
-                    }
-                    $custom_notification = fetch_details('custom_notifications', ['type' => "ticket_message"], '');
-                    $hashtag_application_name = '< application_name >';
-                    $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
-                    $hashtag = html_entity_decode($string);
-                    $data = str_replace($hashtag_application_name, $app_settings['app_name'], $hashtag);
-                    $message = output_escaping(trim($data, '"'));
-                    $fcm_admin_subject = (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Attachments";
-                    $fcm_admin_msg = (!empty($custom_notification)) ? $message : "Ticket Message";
-                    if (!empty($fcm_ids)) {
-                        $fcmMsg = array(
-                            'title' => $fcm_admin_subject,
-                            'body' => $fcm_admin_msg,
-                            'type' => "ticket_message",
-                            'type_id' => $ticket_id,
-                            'chat' => json_encode($result['data']),
-                            'content_available' => true
-                        );
-                        send_notification($fcmMsg, $fcm_ids);
-                    }
-                }
+                // if (!empty($result)) {
+                //     //custom message
+                //     $settings = get_settings('system_settings', true);
+                //     $user_roles = fetch_details("user_permissions", "", '*', '', '', '', '');
+                //     foreach ($user_roles as $user) {
+                //         $user_res = fetch_details('users', ['id' => $user['user_id']], 'fcm_id');
+                //         $fcm_ids[0][] = $user_res[0]['fcm_id'];
+                //     }
+                //     $custom_notification = fetch_details('custom_notifications', ['type' => "ticket_message"], '');
+                //     $hashtag_application_name = '< application_name >';
+                //     $string = json_encode($custom_notification[0]['message'], JSON_UNESCAPED_UNICODE);
+                //     $hashtag = html_entity_decode($string);
+                //     $data = str_replace($hashtag_application_name, $app_settings['app_name'], $hashtag);
+                //     $message = output_escaping(trim($data, '"'));
+                //     $fcm_admin_subject = (!empty($custom_notification)) ? $custom_notification[0]['title'] : "Attachments";
+                //     $fcm_admin_msg = (!empty($custom_notification)) ? $message : "Ticket Message";
+                //     // print_r($fcm_ids);
+                //     if (!empty($fcm_ids) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                //         $fcmMsg = array(
+                //             'title' => $fcm_admin_subject,
+                //             'body' => $fcm_admin_msg,
+                //             'type' => "ticket_message",
+                //             'type_id' => $ticket_id,
+                //             // 'chat' => json_encode($result['data']),
+                //             'content_available' => 'true'
+                //         );
+                //         // send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                //     }
+                // }
                 $this->response['error'] = false;
                 $this->response['message'] = 'Ticket Message Added Successfully!';
                 $this->response['data'] = $result['data'][0];
@@ -4729,13 +4734,15 @@ Defined Methods:-
             if ($this->Order_model->add_bank_transfer_proof($data)) {
                 //custom message
                 $settings = get_settings('system_settings', true);
+                $firebase_project_id = get_settings('firebase_project_id');
+                $service_account_file = get_settings('service_account_file');
                 $app_name = isset($settings['app_name']) && !empty($settings['app_name']) ? $settings['app_name'] : '';
                 $user_roles = fetch_details("user_permissions", "", '*', '', '', '', '');
                 foreach ($user_roles as $user) {
-                    $user_res = fetch_details('users', ['id' => $user['user_id']], 'fcm_id.mobile,email');
-                        $user_mobile[0][] = $user_res[0]['mobile'];
-                        $user_email[0][] = $user_res[0]['email'];
-                    
+                    $user_res = fetch_details('users', ['id' => $user['user_id']], 'fcm_id,mobile,email');
+                    $user_mobile[0][] = $user_res[0]['mobile'];
+                    $user_email[0][] = $user_res[0]['email'];
+
                     if ($user_res[0]['fcm_id'] != '') {
                         $fcm_ids[0][] = $user_res[0]['fcm_id'];
                     }
@@ -4754,13 +4761,15 @@ Defined Methods:-
                         'body' => $customer_msg,
                         'type' => "bank_transfer_proof",
                     );
-                    send_notification($fcmMsg, $fcm_ids);
-                     notify_event(
-                                'bank_transfer_proof',
-                                ["customer" => [$user[0]['email']]],
-                                ["customer" => [$user[0]['mobile']]],
-                                ["orders.id" => $order_id]
-                            );
+                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                        send_notification($fcmMsg, $fcm_ids, $fcmMsg);
+                    }
+                    // notify_event(
+                    //     'bank_transfer_proof',
+                    //     ["customer" => [$user[0]['email']]],
+                    //     ["customer" => [$user[0]['mobile']]],
+                    //     ["orders.id" => $order_id]
+                    // );
                 }
                 $this->response['error'] = false;
                 $this->response['message'] = 'Bank Transfer Proof Added Successfully!';
@@ -5269,7 +5278,8 @@ Defined Methods:-
 
                     /* process the order and mark it as received */
                     $order = fetch_orders($order_id, false, false, false, false, false, false, false);
-
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
                     log_message('error', 'Paystack Webhook | order --> ' . var_export($order, true));
 
                     if (isset($order['order_data'][0]['user_id'])) {
@@ -5349,14 +5359,14 @@ Defined Methods:-
                         $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
                         $user_fcm = fetch_details('users', ['id' => $user_id], 'fcm_id');
                         $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
-                        if (!empty($user_fcm_id)) {
+                        if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                             $fcmMsg = array(
                                 'title' => $fcm_admin_subject,
                                 'body' => $fcm_admin_msg,
                                 'type' => "place_order",
                                 'content_available' => true
                             );
-                            send_notification($fcmMsg, $user_fcm_id);
+                            send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
                         }
 
                         log_message('error', 'Paystack Webhook inner Success --> ' . var_export($event, true));
@@ -5515,6 +5525,8 @@ Defined Methods:-
 
                     /* process the order and mark it as received */
                     $order = fetch_orders($order_id, false, false, false, false, false, false, false);
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
                     log_message('error', 'Flutterwave Webhook user id --> ' . var_export($order['order_data'][0]['user_id'], true));
 
                     if (isset($order['order_data'][0]['user_id'])) {
@@ -5577,14 +5589,14 @@ Defined Methods:-
                         $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
                         $user_fcm = fetch_details('users', ['id' => $user_id], 'fcm_id');
                         $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
-                        if (!empty($user_fcm_id)) {
+                        if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                             $fcmMsg = array(
                                 'title' => $fcm_admin_subject,
                                 'body' => $fcm_admin_msg,
                                 'type' => "place_order",
                                 'content_available' => true
                             );
-                            send_notification($fcmMsg, $user_fcm_id);
+                            send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
                         }
 
                         log_message('error', 'Flutterwave Webhook inner Success --> ' . var_export($event, true));
@@ -5911,6 +5923,8 @@ Defined Methods:-
 
                         //update order and mark it as receive
                         $order = fetch_orders($order_id, false, false, false, false, false, false, false);
+                        $firebase_project_id = get_settings('firebase_project_id');
+                        $service_account_file = get_settings('service_account_file');
                         if (isset($order['order_data'][0]['user_id'])) {
                             $user = fetch_details('users', ['id' => $order['order_data'][0]['user_id']]);
 
@@ -5982,14 +5996,14 @@ Defined Methods:-
                             $fcm_admin_msg = (!empty($custom_notification)) ? $message : 'New order received for  ' . $system_settings['app_name'] . ' please process it.';
                             $user_fcm = fetch_details('users', ['id' => $user_id], 'fcm_id');
                             $user_fcm_id[0][] = $user_fcm[0]['fcm_id'];
-                            if (!empty($user_fcm_id)) {
+                            if (!empty($user_fcm_id) && isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
                                 $fcmMsg = array(
                                     'title' => $fcm_admin_subject,
                                     'body' => $fcm_admin_msg,
                                     'type' => "place_order",
                                     'content_available' => true
                                 );
-                                send_notification($fcmMsg, $user_fcm_id);
+                                send_notification($fcmMsg, $user_fcm_id, $fcmMsg);
                             }
                         } else {
                             log_message('error', 'Order id not found');

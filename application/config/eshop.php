@@ -38,16 +38,21 @@ $config['system_modules'] = [
     'shipping_settings' => array('read', 'update'),
     'pickup_location' => array('create', 'read', 'update', 'delete'),
     'chat' => array('create', 'read', 'delete'),
+    'system_user' => array('create', 'read', 'update', 'delete'),
 ];
 
 $config['notification_modules'] = [ 
-    'place_order' => array('customer', 'seller', 'notification_via_sms','notification_via_mail'),
-    // 'update_order_status' => array('customer', 'admin', 'seller', 'delivery_boy','notification_via_sms','notification_via_mail'),
+    'otp' => array('customer', 'notification_via_sms','notification_via_mail'),
+    'place_order' => array('customer', 'notification_via_sms','notification_via_mail'),
+    // 'seller_place_order' => array('seller', 'notification_via_sms','notification_via_mail'),
+    'ticket_status' => array('customer','notification_via_sms','notification_via_mail'),
     'settle_cashback_discount' => array('customer', 'notification_via_sms','notification_via_mail'),
     'settle_seller_commission' => array('seller','notification_via_sms','notification_via_mail'),
-    'customer_order_received' => array('customer','delivery_boy','notification_via_sms','notification_via_mail'),
+    'customer_order_received' => array('customer','notification_via_sms','notification_via_mail'),
     'customer_order_processed' => array('customer','delivery_boy','notification_via_sms','notification_via_mail'),
-    'customer_order_shipped' => array('customer', 'delivery_boy','notification_via_sms','notification_via_mail'),
+    // 'delivery_boy_order_processed' => array('delivery_boy','notification_via_sms','notification_via_mail'),
+    'customer_order_shipped' => array('customer','notification_via_sms','notification_via_mail'),
+    // 'delivery_boy_order_shipped' => array('delivery_boy','notification_via_sms','notification_via_mail'),
     'customer_order_delivered' => array('customer', 'delivery_boy','notification_via_sms','notification_via_mail'),
     'customer_order_cancelled' => array('customer', 'delivery_boy','notification_via_sms','notification_via_mail'),
     'customer_order_returned' => array('customer', 'seller', 'delivery_boy','notification_via_sms','notification_via_mail'),
@@ -56,7 +61,7 @@ $config['notification_modules'] = [
     'delivery_boy_order_deliver' => array('customer', 'delivery_boy','notification_via_sms','notification_via_mail'),
     'wallet_transaction' => array('customer', 'admin', 'seller', 'delivery_boy','notification_via_sms','notification_via_mail'),
     'bank_transfer_receipt_status' => array('customer', 'notification_via_sms','notification_via_mail'),
-    'bank_transfer_proof' => array('customer', 'admin', 'seller', 'delivery_boy','notification_via_sms','notification_via_mail'),
+    'bank_transfer_proof' => array('customer', 'admin', 'seller','notification_via_sms','notification_via_mail'),
 ];
 
 
@@ -366,4 +371,5 @@ $config['supported_locales_list'] = [
 
 
 $config['decimal_point'] = array("0", "1", "2");
-$config['supported_payment_methods'] = array("paypal", "razorpay", "paystack", "stripe", "flutterwave", "paytm","midtrans",'instamojo');
+$config['supported_payment_methods'] = array("paypal", "razorpay", "paystack", "stripe", "flutterwave", "paytm","midtrans",'instamojo','phonepe');
+$config['system_user_roles'] = array("super_admin", "admin", "editor", "supporter");

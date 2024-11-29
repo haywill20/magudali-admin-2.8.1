@@ -22,19 +22,24 @@
                 <div class="col-md-12">
                     <div class="card card-info">
                         <!-- form start -->
-                        <form class="form-horizontal form-submit-event" action="<?= base_url('admin/Notification_settings/send_notifications'); ?>" method="POST" id="add_product_form" enctype="multipart/form-data">
+                        <form class="form-horizontal form-submit-event"
+                            action="<?= base_url('admin/Notification_settings/send_notifications'); ?>" method="POST"
+                            id="add_product_form" enctype="multipart/form-data">
                             <?php
                             if (isset($fetched_data[0]['id'])) {
                             ?>
-                                <input type="hidden" id="edit_area" name="edit_notification" value="<?= @$fetched_data[0]['id'] ?>">
-                                <input type="hidden" id="update_id" name="update_id" value="1">
+                            <input type="hidden" id="edit_area" name="edit_notification"
+                                value="<?= @$fetched_data[0]['id'] ?>">
+                            <input type="hidden" id="update_id" name="update_id" value="1">
                             <?php
                             }
                             ?>
                             <div class="card-body">
                                 <div class="form-group">
-                                    <label for="type" class="control-label">Send to <span class='text-danger text-sm'>*</span></label>
-                                    <select name="send_to" id="send_to" class="form-control type_event_trigger" required="">
+                                    <label for="type" class="control-label">Send to <span
+                                            class='text-danger text-sm'>*</span></label>
+                                    <select name="send_to" id="send_to" class="form-control type_event_trigger"
+                                        required="">
                                         <option value="all_users">All Users</option>
                                         <option value="specific_user">Specific User</option>
                                     </select>
@@ -42,17 +47,20 @@
                                 <!-- for users -->
                                 <?php $hiddenStatus = (isset($fetched_data[0]['id']) && $fetched_data[0]['type']  == 'users') ? '' : 'd-none' ?>
                                 <div class="form-group row notification-users <?= $hiddenStatus ?>">
-                                    <label for="user_id" class="control-label"> Users <span class='text-danger text-sm'>*</span></label>
+                                    <label for="user_id" class="control-label"> Users <span
+                                            class='text-danger text-sm'>*</span></label>
                                     <div class="col-md-12">
                                         <input type="hidden" name="user_id" id="noti_user_id" value="">
                                         </select>
-                                        <select name="select_user_id[]" class="search_user w-100" multiple data-placeholder=" Type to search and select users" onload="multiselect()">
+                                        <select name="select_user_id[]" class="search_user w-100" multiple
+                                            data-placeholder=" Type to search and select users" onload="multiselect()">
                                             <?php
                                             if (isset($fetched_data[0]['id']) && $fetched_data[0]['type']  == 'users') {
                                                 $user_details = fetch_details('users', ['id' => $row['type_id']], 'id,name');
                                                 if (!empty($user_details)) {
                                             ?>
-                                                    <option value="<?= $user_details[0]['id'] ?>" selected> <?= $user_details[0]['name'] ?></option>
+                                            <option value="<?= $user_details[0]['id'] ?>" selected>
+                                                <?= $user_details[0]['name'] ?></option>
                                             <?php
                                                 }
                                             }
@@ -62,14 +70,24 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="type" class="control-label">Type <span class='text-danger text-sm'>*</span></label>
+                                    <label for="type" class="control-label">Type <span
+                                            class='text-danger text-sm'>*</span></label>
                                     <div class="col-md-12">
-                                        <select name="type" id="type" class="form-control type_event_trigger" required="">
+                                        <select name="type" id="type" class="form-control type_event_trigger"
+                                            required="">
                                             <option value=" ">Select Type</option>
-                                            <option value="default" <?= (@$fetched_data[0]['type'] == "default") ? 'selected' : ' ' ?>>Default</option>
-                                            <option value="categories" <?= (@$fetched_data[0]['type'] == "categories") ? 'selected' : ' ' ?>>Category</option>
-                                            <option value="products" <?= (@$fetched_data[0]['type'] == "products") ? 'selected' : ' ' ?>>Product</option>
-                                            <option value="notification_url" <?= (@$fetched_data[0]['type'] == "notification_url") ? 'selected' : ' ' ?>>Notification URL</option>
+                                            <option value="default"
+                                                <?= (@$fetched_data[0]['type'] == "default") ? 'selected' : ' ' ?>>
+                                                Default</option>
+                                            <option value="categories"
+                                                <?= (@$fetched_data[0]['type'] == "categories") ? 'selected' : ' ' ?>>
+                                                Category</option>
+                                            <option value="products"
+                                                <?= (@$fetched_data[0]['type'] == "products") ? 'selected' : ' ' ?>>
+                                                Product</option>
+                                            <option value="notification_url"
+                                                <?= (@$fetched_data[0]['type'] == "notification_url") ? 'selected' : ' ' ?>>
+                                                Notification URL</option>
                                         </select>
                                     </div>
                                 </div>
@@ -78,7 +96,8 @@
                                     <!-- for category -->
                                     <?php $hiddenStatus = (isset($fetched_data[0]['id']) && $fetched_data[0]['type']  == 'categories') ? '' : 'd-none' ?>
                                     <div class="form-group notification-categories <?= $hiddenStatus ?> ">
-                                        <label for="category_id"> Categories <span class='text-danger text-sm'>*</span></label>
+                                        <label for="category_id"> Categories <span
+                                                class='text-danger text-sm'>*</span></label>
                                         <select name="category_id" class="form-control">
                                             <option value="">Select category </option>
                                             <?php
@@ -86,7 +105,8 @@
                                                 foreach ($categories as $row) {
                                                     $selected = ($row['id'] == $fetched_data[0]['type_id'] && strtolower($fetched_data[0]['type']) == 'categories') ? 'selected' : '';
                                             ?>
-                                                    <option value="<?= $row['id'] ?>" <?= $selected ?>> <?= $row['name'] ?></option>
+                                            <option value="<?= $row['id'] ?>" <?= $selected ?>> <?= $row['name'] ?>
+                                            </option>
                                             <?php
                                                 }
                                             }
@@ -97,21 +117,28 @@
                                     <?php $hiddenStatus = (isset($fetched_data[0]['id']) && $fetched_data[0]['type']  == 'notification_url') ? '' : 'd-none' ?>
                                     <div class="form-group notification-url <?= $hiddenStatus ?> ">
 
-                                        <label for="notification_url"> Link <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" placeholder="https://example.com" name="link" value="<?= isset($fetched_data[0]['link']) ? output_escaping($fetched_data[0]['link']) : "" ?>">
+                                        <label for="notification_url"> Link <span
+                                                class='text-danger text-sm'>*</span></label>
+                                        <input type="text" class="form-control" placeholder="https://example.com"
+                                            name="link"
+                                            value="<?= isset($fetched_data[0]['link']) ? output_escaping($fetched_data[0]['link']) : "" ?>">
                                     </div>
                                     <!-- for products -->
                                     <?php $hiddenStatus = (isset($fetched_data[0]['id']) && $fetched_data[0]['type']  == 'products') ? '' : 'd-none' ?>
                                     <div class="form-group row notification-products <?= $hiddenStatus ?>">
-                                        <label for="product_id" class="control-label">Products <span class='text-danger text-sm'>*</span></label>
+                                        <label for="product_id" class="control-label">Products <span
+                                                class='text-danger text-sm'>*</span></label>
                                         <div class="col-md-12">
-                                            <select name="product_id" class="search_admin_product w-100" data-placeholder=" Type to search and select products" onload="multiselect()">
+                                            <select name="product_id" class="search_admin_product w-100"
+                                                data-placeholder=" Type to search and select products"
+                                                onload="multiselect()">
                                                 <?php
                                                 if (isset($fetched_data[0]['id']) && $fetched_data[0]['type']  == 'products') {
                                                     $product_details = fetch_details('products', ['id' => $row['type_id']], 'id,name');
                                                     if (!empty($product_details)) {
                                                 ?>
-                                                        <option value="<?= $product_details[0]['id'] ?>" selected> <?= $product_details[0]['name'] ?></option>
+                                                <option value="<?= $product_details[0]['id'] ?>" selected>
+                                                    <?= $product_details[0]['name'] ?></option>
                                                 <?php
                                                     }
                                                 }
@@ -121,13 +148,16 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="title" class="control-label ">Title <span class='text-danger text-sm'>*</span></label>
+                                    <label for="title" class="control-label ">Title <span
+                                            class='text-danger text-sm'>*</span></label>
                                     <div class="col-md-12">
-                                        <input type="text" class="form-control" name="title" id="title" value="<?= (isset($fetched_data[0]['title']) ? $fetched_data[0]['title'] : '') ?>">
+                                        <input type="text" class="form-control" name="title" id="title"
+                                            value="<?= (isset($fetched_data[0]['title']) ? $fetched_data[0]['title'] : '') ?>">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="message" class="control-label">Message <span class='text-danger text-sm'>*</span></label>
+                                    <label for="message" class="control-label">Message <span
+                                            class='text-danger text-sm'>*</span></label>
                                     <div class="col-md-12">
                                         <textarea name='message' class="form-control"></textarea>
                                     </div>
@@ -138,31 +168,43 @@
                                         <span>Include Image</span>
                                     </div>
                                     <div class="col-md-12 d-none include_image">
-                                        <label for="message" class="control-label">Image <small>(Recommended Size : 80 x 80 pixels)</small></label>
+                                        <label for="message" class="control-label">Image <small>(Recommended Size : 80 x
+                                                80 pixels)</small></label>
                                         <div class="col-sm-10">
-                                            <div class='col-md-3'><a class="uploadFile img btn btn-primary text-white btn-sm" data-input='image' data-isremovable='1' data-is-multiple-uploads-allowed='0' data-toggle="modal" data-target="#media-upload-modal" value="Upload Photo"><i class='fa fa-upload'></i> Upload</a></div>
+                                            <div class='col-md-3'><a
+                                                    class="uploadFile img btn btn-primary text-white btn-sm"
+                                                    data-input='image' data-isremovable='1'
+                                                    data-is-multiple-uploads-allowed='0' data-toggle="modal"
+                                                    data-target="#media-upload-modal" value="Upload Photo"><i
+                                                        class='fa fa-upload'></i> Upload</a></div>
                                             <?php
                                             if (file_exists(FCPATH . @$fetched_data[0]['image']) && !empty(@$fetched_data[0]['image'])) {
                                             ?>
-                                                <div class="container-fluid row image-upload-section">
-                                                    <div class="col-md-3 col-sm-12 shadow p-3 mb-5 bg-white rounded m-4 text-center grow image">
-                                                        <div class='image-upload-div'><img class="img-fluid mb-2" src="<?= BASE_URL() . $fetched_data[0]['image'] ?>" alt="Image Not Found"></div>
-                                                        <input type="hidden" name="image" value='<?= $fetched_data[0]['image'] ?>'>
-                                                    </div>
+                                            <div class="container-fluid row image-upload-section">
+                                                <div
+                                                    class="col-md-3 col-sm-12 shadow p-3 mb-5 bg-white rounded m-4 text-center grow image">
+                                                    <div class='image-upload-div'><img class="img-fluid mb-2"
+                                                            src="<?= BASE_URL() . $fetched_data[0]['image'] ?>"
+                                                            alt="Image Not Found"></div>
+                                                    <input type="hidden" name="image"
+                                                        value='<?= $fetched_data[0]['image'] ?>'>
                                                 </div>
+                                            </div>
                                             <?php
                                             } else { ?>
-                                                <div class="container-fluid row image-upload-section">
-                                                    <div class="col-md-3 col-sm-12 shadow p-3 mb-5 bg-white rounded m-4 text-center grow image d-none">
-                                                    </div>
+                                            <div class="container-fluid row image-upload-section">
+                                                <div
+                                                    class="col-md-3 col-sm-12 shadow p-3 mb-5 bg-white rounded m-4 text-center grow image d-none">
                                                 </div>
+                                            </div>
                                             <?php } ?>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <button type="reset" class="btn btn-warning">Reset</button>
-                                    <button type="submit" class="btn btn-success" id="submit_btn">Send Notification</button>
+                                    <button type="submit" class="btn btn-success" id="submit_btn">Send
+                                        Notification</button>
                                 </div>
 
                                 <div class="d-flex justify-content-center">
@@ -180,7 +222,14 @@
                         </div>
                         <div class="card-innr">
                             <div class="gaps-1-5x"></div>
-                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/Notification_settings/get_notification_list') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="asc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="queryParams">
+                            <table class='table-striped' data-toggle="table"
+                                data-url="<?= base_url('admin/Notification_settings/get_notification_list') ?>"
+                                data-click-to-select="true" data-side-pagination="server" data-pagination="true"
+                                data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true"
+                                data-show-refresh="true" data-trim-on-search="false" data-sort-name="id"
+                                data-sort-order="asc" data-mobile-responsive="true" data-toolbar=""
+                                data-show-export="true" data-maintain-selected="true"
+                                data-export-types='["txt","excel"]' data-query-params="queryParams">
                                 <thead>
                                     <tr>
                                         <th data-field="id" data-sortable="true">ID</th>

@@ -112,8 +112,11 @@ class Chat extends CI_Controller
         if (!$this->ion_auth->logged_in()) {
             redirect('auth', 'refresh');
         } else {
-            $response = get_settings('firebase_settings');
-            echo json_encode($response);
+            $this->response['csrfName'] = $this->security->get_csrf_token_name();
+            $this->response['csrfHash'] = $this->security->get_csrf_hash();
+            $this->response['response'] = get_settings('firebase_settings');
+            $this->response['vap_id_key'] = get_settings('vap_id_key');
+            echo json_encode($this->response);
         }
     }
 
@@ -475,28 +478,15 @@ class Chat extends CI_Controller
                 $to_id = $this->input->post('opposite_user_id');
                 $from_id = $this->session->userdata('user_id');
 
-                // if ($to_id == $from_id && $this->input->post('chat_type') == 'person') {
-                //     return false;
-                // }
-
-                // single user msg
-                // if (($this->input->post('chat_type') == 'person') || ($this->input->post('chat_type') == 'supporter')) {
                 if (($this->input->post('chat_type') == 'person')) {
 
-                    // this is the user who going to recive FCM msg
-                    // $user = $this->users_model->get_user_by_id($to_id);
                     $user = fetch_details('users', ['active' => 1, 'id' => $to_id]);
 
-                    // this is the user who going to send FCM msg 
-                    // $senders_info = $this->users_model->get_user_by_id($this->session->userdata('user_id'));
                     $senders_info = fetch_details('users', ['active' => 1, 'id' => $this->session->userdata('user_id')]);
 
                     $data = $notification = array();
                     $notification['title'] = $senders_info[0]['username'];
-                    // $notification['picture'] = mb_substr($senders_info[0]['first_name'], 0, 1) . '' . mb_substr($senders_info[0]['last_name'], 0, 1);
-
-                    // $notification['profile'] = !empty($senders_info[0]['profile']) ? $senders_info[0]['profile'] : '';
-
+                    
                     $notification['senders_name'] = $senders_info[0]['username'];
 
                     $notification['type'] = 'message';
@@ -510,10 +500,7 @@ class Chat extends CI_Controller
                     $notification['base_url'] = base_url('chat');
                     $data['data']['data'] = $notification;
                     $data['data']['webpush']['fcm_options']['link'] = base_url('chat');
-                    $data['to'] = isset($user[0]['web_fcm'])? $user[0]['web_fcm'] : '';
-
-
-
+                    $data['to'] = isset($user[0]['web_fcm']) ? $user[0]['web_fcm'] : '';
                     //send notification in app
 
                     $results = fetch_details('users', null, 'fcm_id', 10000, 0, '', '', "id", $this->input->post('opposite_user_id'));
@@ -530,7 +517,7 @@ class Chat extends CI_Controller
                             $fcm_ids[] = $fcm_id['fcm_id'];
                         }
                     }
-                    $registrationIDs = $fcm_ids;
+                    $registrationIDs[] = $fcm_ids;
                     $fcmMsg = array(
                         'content_available' => true,
                         'title' => 'New Message from Admin',
@@ -539,8 +526,12 @@ class Chat extends CI_Controller
                         'message' => json_encode($new_msg),
                         'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                     );
-
-                    $fcmFields = send_notification($fcmMsg, $registrationIDs);
+                    $firebase_project_id = get_settings('firebase_project_id');
+                    $service_account_file = get_settings('service_account_file');
+                    // print_r($registrationIDs_chunks_user); 
+                    if (isset($firebase_project_id) && isset($service_account_file) && !empty($firebase_project_id) && !empty($service_account_file)) {
+                        $fcmFields = send_notification($fcmMsg, $registrationIDs, $fcmMsg);
+                    }
                     $ch = curl_init();
                     $fcm_key = get_settings('fcm_server_key');
 
@@ -566,87 +557,7 @@ class Chat extends CI_Controller
                         echo 'Error:' . curl_error($ch);
 
                     curl_close($ch);
-                } else {
-
-                    // group user msg
-                    $group_id = $this->input->post('opposite_user_id');
-
-                    $users = $this->chat_model->get_group_members($group_id);
-                    foreach ($users as $user) {
-                        // $userdata = $this->users_model->get_user_by_id($user['user_id']);
-                        $userdata = fetch_details('users', ['active' => 1, 'id' => $user['user_id']]);
-                        if ($user['user_id'] != $this->session->userdata('user_id')) {
-                            $fcm_ids[] = $userdata[0]['web_fcm'];
-                        }
-                    }
-
-                    $registrationIDs = $fcm_ids;
-
-                    // this is the user who going to send FCM msg
-                    // $senders_info = $this->users_model->get_user_by_id($this->session->userdata('user_id'));
-                    $senders_info = fetch_details('users', ['active' => 1, 'id' => $this->session->userdata('user_id')]);
-
-                    $data = $notification = array();
-                    $notification['title'] = '#' . $users[0]['title'] . ' - ' . $senders_info[0]['username'];
-                    // $notification['picture'] = mb_substr($senders_info[0]['first_name'], 0, 1) . '' . mb_substr($senders_info[0]['last_name'], 0, 1);
-
-                    // $notification['profile'] = !empty($senders_info[0]['profile']) ? $senders_info[0]['profile'] : '';
-
-                    $notification['senders_name'] = $senders_info[0]['username'];
-                    $notification['type'] = 'message';
-                    $notification['message_type'] = 'group';
-                    $notification['from_id'] = $from_id;
-                    $notification['to_id'] = $group_id;
-                    $notification['msg_id'] = $msg_id;
-                    $notification['registrationIDs'] = $registrationIDs;
-                    $notification['new_msg'] = json_encode($new_msg);
-                    $notification['body'] = $this->input->post('chat-input-textarea');
-                    // $notification['icon'] = 'assets/icons/' . (!empty(get_half_logo()) ? get_half_logo() : 'logo-half.png');
-                    $notification['base_url'] = base_url('chat');
-                    $data['data']['data'] = $notification;
-                    $data['data']['webpush']['fcm_options']['link'] = base_url('chat');
-                    $data['registration_ids'] = $registrationIDs;
-
-                    //send notification to members 
-
-                    $fcmMsg = array(
-                        'content_available' => true,
-                        'title' => $senders_info[0]['username'],
-                        'body' => $this->input->post('chat-input-textarea'),
-                        'type' => "group",
-                        'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                    );
-
-                    $fcmFields = send_notification($fcmMsg, $registrationIDs);
-
-                    $ch = curl_init();
-                    $fcm_key = get_settings('firebase_settings');
-
-                    $fcm_key = !empty($fcm_key) ? json_decode($fcm_key) : '';
-
-                    $fcm_key = !empty($fcm_key->fcm_server_key) ? $fcm_key->fcm_server_key : '';
-
-                    curl_setopt($ch, CURLOPT_POST, 1);
-                    $headers = array();
-                    $headers[] = "Authorization: key = " . $fcm_key;
-
-                    $headers[] = "Content-Type: application/json";
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-                    curl_setopt($ch, CURLOPT_URL, "https://fcm.googleapis.com/fcm/send");
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-                    $result['error'] = false;
-
-                    $this->chat_model->set_group_msg_as_unread($group_id, $this->session->userdata('user_id'));
-
-                    $result['response'] = curl_exec($ch);
-                    if (curl_errno($ch))
-                        echo 'Error:' . curl_error($ch);
-
-                    curl_close($ch);
+                
                 }
 
                 $response['error'] = false;
